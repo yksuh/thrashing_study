@@ -1,0 +1,5 @@
+2013-11-24 20:18:31,897 INFO  - Run Observer 
+2013-11-24 20:19:48,905 INFO  - SELECT SourceXML FROM AZDBLAB_EXPERIMENT WHERE ExperimentID=4 AND UserName='yksuh' AND NotebookName='XACT_TEST' AND ExperimentName='tps-sample' AND Scenario='tps' AND SourceFileName='/cs/projects/tau/live/yksuh/thesis/prelim/AZDBLAB_XACT/expspec_tps/non-primary-key/tps_sample.xml' AND CreateDate=to_date('Sun, Nov 24 2013 20:19:48', 'DY, MON DD YYYY HH24:MI:SS') 
+2013-11-24 20:19:49,041 INFO  - SELECT SourceXML FROM AZDBLAB_EXPERIMENTSPEC WHERE ExperimentSpecID=4 AND Name='ft' AND FileName='TestDataDef1M.xml' AND Kind='D' 
+2013-11-24 20:19:49,127 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_REFERSEXPERIMENTSPEC(ExperimentID, Kind, ExperimentSpecID) VALUES (4, 'D', 4) 
+2013-11-24 20:20:21,061 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXPERIMENTRUN(RunID, ExperimentID, DBMSName, StartTime, CurrentStage, Percentage, MachineName) VALUES (4, 4, 'pgsql', to_timestamp('Sun, Nov 24 2013 20:20:21:043', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Pending', 0.0, 'sodb12.cs.arizona.edu') 

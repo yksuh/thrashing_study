@@ -1,0 +1,16 @@
+<experiment name="ora-xact-buff-1G" scenario="buffsize" dbms="oracle">
+  <description>
+   	Test case for TPS
+  </description>
+  <expConfiguration href="config.xml" />		<!-- experiment configuration -->
+  <tableConfiguration href="TableData.xml" />		<!-- experiment/result table description -->
+  <dataDefinitionReference href="TestDataDef1M.xml"/>	<!-- test data with 1M rows -->
+  <tableConfiguration>
+    <fixedTableSet>
+      <table name="HT1" seed="1999">
+        <cardinality hypothetical="actual"/>
+      </table>
+    </fixedTableSet>
+  </tableConfiguration>
+  <transDefinitionReference href="XactData.xml" />	<!-- transaction data -->
+</experiment>

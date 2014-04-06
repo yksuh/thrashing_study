@@ -1,0 +1,14 @@
+#!/bin/sh
+if [ $# -ne 2 ]
+then
+  echo "Usage: runscript mode testid"
+  echo "mode: 0 - Warm cache; 1 - Cold cache"
+  echo "testid: 1 - CPU Bound Task;  2 - IO Bound Task"
+  exit
+fi
+echo '-------------------';
+date
+sync
+iostat
+timechecker $1 $2
+iostat

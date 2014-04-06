@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/ant.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/crimson.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/jakarta-ant-1.4.1-optional.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/jaxp.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/junit.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/log4j.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/log4j-core.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/mysql-connector-java-5.0.3-bin.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/ojdbc14.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/osat.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/salvo.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/xerces.jar"/>
+	<classpathentry kind="lib" path="E:/JAVA/libs/xmlParserAPIs.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>

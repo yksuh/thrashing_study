@@ -1,0 +1,102 @@
+<predefinedQueries name = "100_q_3" >
+<query sql="SELECT t0.id1, SUM(t0.id4)  FROM ft_HT1 t0  GROUP BY t0.id1  "/>
+<query sql="SELECT t0.id1, t1.id4, t1.id2, SUM(t0.id3)  FROM ft_HT3 t1, ft_HT1 t0  WHERE  (t1.id3=t0.id2)  GROUP BY t0.id1, t1.id4, t1.id2  "/>
+<query sql="SELECT t0.id2, t0.id3, t1.id2, SUM(t1.id1)  FROM ft_HT1 t0, ft_HT1 t1  WHERE  (t0.id2=t1.id2)  GROUP BY t0.id2, t0.id3, t1.id2  "/>
+<query sql="SELECT t2.id2, t1.id1, SUM(t1.id4)  FROM ft_HT2 t1, ft_HT1 t0, ft_HT3 t2  WHERE  (t1.id4=t0.id1 AND t0.id1=t2.id1)  GROUP BY t2.id2, t1.id1  "/>
+<query sql="SELECT t2.id2, t1.id3, SUM(t2.id1)  FROM ft_HT1 t1, ft_HT1 t0, ft_HT4 t2  WHERE  (t1.id2=t0.id3 AND t0.id3=t2.id2)  GROUP BY t2.id2, t1.id3  "/>
+<query sql="SELECT t0.id3, t2.id2, t1.id1, SUM(t0.id1)  FROM ft_HT1 t2, ft_HT1 t1, ft_HT1 t0  WHERE  (t2.id1=t1.id4 AND t1.id4=t0.id3)  GROUP BY t0.id3, t2.id2, t1.id1  "/>
+<query sql="SELECT t1.id4, SUM(t3.id4)  FROM ft_HT2 t1, ft_HT4 t2, ft_HT1 t0, ft_HT3 t3  WHERE  (t1.id2=t2.id2 AND t2.id2=t0.id1 AND t0.id1=t3.id4)  GROUP BY t1.id4  "/>
+<query sql="SELECT t2.id4, t1.id2, SUM(t2.id3)  FROM ft_HT1 t0, ft_HT2 t3, ft_HT1 t1, ft_HT3 t2  WHERE  (t0.id4=t3.id3 AND t3.id3=t1.id1 AND t1.id1=t2.id3)  GROUP BY t2.id4, t1.id2  "/>
+<query sql="SELECT t2.id4, t0.id4, t1.id2, SUM(t1.id3)  FROM ft_HT1 t1, ft_HT2 t3, ft_HT1 t0, ft_HT1 t2  WHERE  (t1.id4=t3.id4 AND t3.id4=t0.id1 AND t0.id1=t2.id1)  GROUP BY t2.id4, t0.id4, t1.id2  "/>
+<query sql="SELECT t2.id4, SUM(t2.id3)  FROM ft_HT1 t3, ft_HT1 t0, ft_HT1 t2, ft_HT1 t1  WHERE  (t3.id1=t0.id4 AND t0.id4=t2.id4 AND t2.id4=t1.id2)  GROUP BY t2.id4  "/>
+<query sql="SELECT t0.id1 FROM ft_HT1 t0  "/>
+<query sql="SELECT t0.id4 FROM ft_HT3 t1, ft_HT1 t0  WHERE  (t1.id4=t0.id4)  "/>
+<query sql="SELECT t0.id3 FROM ft_HT1 t0, ft_HT1 t1  WHERE  (t0.id4=t1.id3)  "/>
+<query sql="SELECT t0.id1, t0.id3 FROM ft_HT1 t0, ft_HT2 t1, ft_HT3 t2  WHERE  (t0.id3=t1.id2 AND t1.id2=t2.id1)  "/>
+<query sql="SELECT t1.id2, t2.id1 FROM ft_HT1 t0, ft_HT3 t2, ft_HT1 t1  WHERE  (t0.id3=t2.id1 AND t2.id1=t1.id2)  "/>
+<query sql="SELECT t0.id1, t1.id2, t1.id3, t1.id1 FROM ft_HT1 t0, ft_HT1 t1, ft_HT1 t2  WHERE  (t0.id2=t1.id1 AND t1.id1=t2.id1)  "/>
+<query sql="SELECT t3.id3, t0.id2, t1.id2, t2.id1 FROM ft_HT1 t0, ft_HT4 t3, ft_HT4 t2, ft_HT3 t1  WHERE  (t0.id2=t3.id1 AND t3.id1=t2.id4 AND t2.id4=t1.id2)  "/>
+<query sql="SELECT t2.id2, t2.id1 FROM ft_HT3 t3, ft_HT3 t2, ft_HT1 t1, ft_HT1 t0  WHERE  (t3.id3=t2.id2 AND t2.id2=t1.id1 AND t1.id1=t0.id1)  "/>
+<query sql="SELECT t0.id4 FROM ft_HT1 t2, ft_HT1 t0, ft_HT3 t3, ft_HT1 t1  WHERE  (t2.id2=t0.id3 AND t0.id3=t3.id3 AND t3.id3=t1.id3)  "/>
+<query sql="SELECT t0.id3, t1.id1 FROM ft_HT1 t0, ft_HT1 t3, ft_HT1 t1, ft_HT1 t2  WHERE  (t0.id2=t3.id1 AND t3.id1=t1.id4 AND t1.id4=t2.id3)  "/>
+<query sql="SELECT t0.id4, SUM(t0.id1)  FROM ft_HT1 t0  GROUP BY t0.id4  "/>
+<query sql="SELECT t1.id4, t0.id4, t1.id2, SUM(t0.id1)  FROM ft_HT3 t1, ft_HT1 t0  WHERE  (t1.id3=t0.id1)  GROUP BY t1.id4, t0.id4, t1.id2  "/>
+<query sql="SELECT t0.id2, SUM(t1.id4)  FROM ft_HT1 t0, ft_HT1 t1  WHERE  (t0.id3=t1.id2)  GROUP BY t0.id2  "/>
+<query sql="SELECT SUM(t1.id3)  FROM ft_HT1 t0, ft_HT3 t2, ft_HT3 t1  WHERE  (t0.id1=t2.id4 AND t2.id4=t1.id4)  "/>
+<query sql="SELECT t0.id3, t2.id2, SUM(t1.id1)  FROM ft_HT1 t0, ft_HT1 t1, ft_HT2 t2  WHERE  (t0.id2=t1.id1 AND t1.id1=t2.id2)  GROUP BY t0.id3, t2.id2  "/>
+<query sql="SELECT t1.id4, t2.id3, SUM(t2.id1)  FROM ft_HT1 t0, ft_HT1 t2, ft_HT1 t1  WHERE  (t0.id2=t2.id2 AND t2.id2=t1.id3)  GROUP BY t1.id4, t2.id3  "/>
+<query sql="SELECT SUM(t1.id2)  FROM ft_HT4 t1, ft_HT4 t3, ft_HT1 t0, ft_HT3 t2  WHERE  (t1.id2=t3.id1 AND t3.id1=t0.id3 AND t0.id3=t2.id2)  "/>
+<query sql="SELECT SUM(t2.id2)  FROM ft_HT2 t3, ft_HT1 t1, ft_HT3 t2, ft_HT1 t0  WHERE  (t3.id2=t1.id1 AND t1.id1=t2.id2 AND t2.id2=t0.id2)  "/>
+<query sql="SELECT t3.id4, t3.id1, SUM(t2.id2)  FROM ft_HT2 t3, ft_HT1 t0, ft_HT1 t2, ft_HT1 t1  WHERE  (t3.id2=t0.id1 AND t0.id1=t2.id4 AND t2.id4=t1.id4)  GROUP BY t3.id4, t3.id1  "/>
+<query sql="SELECT t1.id3, SUM(t3.id4)  FROM ft_HT1 t0, ft_HT1 t1, ft_HT1 t2, ft_HT1 t3  WHERE  (t0.id1=t1.id1 AND t1.id1=t2.id3 AND t2.id3=t3.id2)  GROUP BY t1.id3  "/>
+<query sql="SELECT t0.id2, t0.id3 FROM ft_HT1 t0  "/>
+<query sql="SELECT t0.id1, t0.id2, t1.id4, t1.id3 FROM ft_HT1 t0, ft_HT4 t1  WHERE  (t0.id4=t1.id1)  "/>
+<query sql="SELECT t0.id1, t1.id4, t0.id4, t1.id3 FROM ft_HT1 t1, ft_HT1 t0  WHERE  (t1.id1=t0.id2)  "/>
+<query sql="SELECT t2.id3, t1.id2, t1.id1 FROM ft_HT1 t0, ft_HT4 t1, ft_HT4 t2  WHERE  (t0.id3=t1.id1 AND t1.id1=t2.id1)  "/>
+<query sql="SELECT t2.id4, t2.id3 FROM ft_HT2 t2, ft_HT1 t0, ft_HT1 t1  WHERE  (t2.id2=t0.id1 AND t0.id1=t1.id2)  "/>
+<query sql="SELECT t1.id2 FROM ft_HT1 t1, ft_HT1 t0, ft_HT1 t2  WHERE  (t1.id3=t0.id3 AND t0.id3=t2.id1)  "/>
+<query sql="SELECT t3.id1 FROM ft_HT1 t0, ft_HT2 t1, ft_HT3 t3, ft_HT2 t2  WHERE  (t0.id4=t1.id2 AND t1.id2=t3.id4 AND t3.id4=t2.id1)  "/>
+<query sql="SELECT t0.id1, t0.id2, t3.id4, t2.id1 FROM ft_HT1 t0, ft_HT1 t1, ft_HT4 t2, ft_HT3 t3  WHERE  (t0.id2=t1.id2 AND t1.id2=t2.id4 AND t2.id4=t3.id4)  "/>
+<query sql="SELECT t3.id1 FROM ft_HT1 t1, ft_HT1 t0, ft_HT3 t3, ft_HT1 t2  WHERE  (t1.id1=t0.id2 AND t0.id2=t3.id1 AND t3.id1=t2.id2)  "/>
+<query sql="SELECT t2.id4, t3.id1 FROM ft_HT1 t0, ft_HT1 t3, ft_HT1 t1, ft_HT1 t2  WHERE  (t0.id4=t3.id1 AND t3.id1=t1.id4 AND t1.id4=t2.id2)  "/>
+<query sql="SELECT t0.id1, t0.id4, SUM(t0.id2)  FROM ft_HT1 t0  GROUP BY t0.id1, t0.id4  "/>
+<query sql="SELECT t0.id2, t0.id3, SUM(t1.id1)  FROM ft_HT1 t0, ft_HT3 t1  WHERE  (t0.id3=t1.id3)  GROUP BY t0.id2, t0.id3  "/>
+<query sql="SELECT t1.id4, t0.id3, t0.id4, SUM(t1.id3)  FROM ft_HT1 t1, ft_HT1 t0  WHERE  (t1.id4=t0.id1)  GROUP BY t1.id4, t0.id3, t0.id4  "/>
+<query sql="SELECT t2.id2, SUM(t0.id3)  FROM ft_HT1 t0, ft_HT4 t1, ft_HT4 t2  WHERE  (t0.id2=t1.id4 AND t1.id4=t2.id4)  GROUP BY t2.id2  "/>
+<query sql="SELECT t2.id4, t1.id3, t1.id1, SUM(t2.id1)  FROM ft_HT4 t2, ft_HT1 t0, ft_HT1 t1  WHERE  (t2.id2=t0.id2 AND t0.id2=t1.id3)  GROUP BY t2.id4, t1.id3, t1.id1  "/>
+<query sql="SELECT t1.id2, t1.id1, SUM(t1.id4)  FROM ft_HT1 t2, ft_HT1 t1, ft_HT1 t0  WHERE  (t2.id2=t1.id4 AND t1.id4=t0.id2)  GROUP BY t1.id2, t1.id1  "/>
+<query sql="SELECT t0.id3, t0.id4, SUM(t3.id4)  FROM ft_HT1 t0, ft_HT2 t3, ft_HT3 t1, ft_HT3 t2  WHERE  (t0.id2=t3.id4 AND t3.id4=t1.id3 AND t1.id3=t2.id3)  GROUP BY t0.id3, t0.id4  "/>
+<query sql="SELECT t1.id2, t3.id1, SUM(t3.id2)  FROM ft_HT1 t1, ft_HT3 t2, ft_HT3 t3, ft_HT1 t0  WHERE  (t1.id3=t2.id3 AND t2.id3=t3.id3 AND t3.id3=t0.id1)  GROUP BY t1.id2, t3.id1  "/>
+<query sql="SELECT SUM(t0.id3)  FROM ft_HT1 t0, ft_HT4 t3, ft_HT1 t1, ft_HT1 t2  WHERE  (t0.id4=t3.id1 AND t3.id1=t1.id4 AND t1.id4=t2.id2)  "/>
+<query sql="SELECT t3.id3, t0.id3, SUM(t0.id1)  FROM ft_HT1 t2, ft_HT1 t0, ft_HT1 t1, ft_HT1 t3  WHERE  (t2.id4=t0.id4 AND t0.id4=t1.id2 AND t1.id2=t3.id4)  GROUP BY t3.id3, t0.id3  "/>
+<query sql="SELECT t0.id1, t0.id2, t0.id3 FROM ft_HT1 t0  "/>
+<query sql="SELECT t0.id2, t1.id4, t1.id3, t1.id1 FROM ft_HT3 t1, ft_HT1 t0  WHERE  (t1.id3=t0.id1)  "/>
+<query sql="SELECT t0.id2 FROM ft_HT1 t1, ft_HT1 t0  WHERE  (t1.id3=t0.id1)  "/>
+<query sql="SELECT t1.id1 FROM ft_HT3 t2, ft_HT2 t1, ft_HT1 t0  WHERE  (t2.id1=t1.id3 AND t1.id3=t0.id4)  "/>
+<query sql="SELECT t1.id3 FROM ft_HT3 t2, ft_HT1 t0, ft_HT1 t1  WHERE  (t2.id2=t0.id2 AND t0.id2=t1.id4)  "/>
+<query sql="SELECT t0.id1 FROM ft_HT1 t0, ft_HT1 t1, ft_HT1 t2  WHERE  (t0.id1=t1.id1 AND t1.id1=t2.id3)  "/>
+<query sql="SELECT t0.id2, t0.id3 FROM ft_HT4 t1, ft_HT2 t3, ft_HT3 t2, ft_HT1 t0  WHERE  (t1.id3=t3.id3 AND t3.id3=t2.id4 AND t2.id4=t0.id1)  "/>
+<query sql="SELECT t3.id3, t2.id1 FROM ft_HT3 t2, ft_HT1 t1, ft_HT1 t0, ft_HT2 t3  WHERE  (t2.id2=t1.id1 AND t1.id1=t0.id1 AND t0.id1=t3.id4)  "/>
+<query sql="SELECT t0.id2, t2.id4, t2.id3 FROM ft_HT1 t1, ft_HT1 t0, ft_HT1 t2, ft_HT2 t3  WHERE  (t1.id1=t0.id2 AND t0.id2=t2.id4 AND t2.id4=t3.id1)  "/>
+<query sql="SELECT t3.id4, t2.id3 FROM ft_HT1 t2, ft_HT1 t0, ft_HT1 t1, ft_HT1 t3  WHERE  (t2.id2=t0.id1 AND t0.id1=t1.id4 AND t1.id4=t3.id4)  "/>
+<query sql="SELECT t0.id1, t0.id2, SUM(t0.id3)  FROM ft_HT1 t0  GROUP BY t0.id1, t0.id2  "/>
+<query sql="SELECT t1.id2, t1.id3, SUM(t0.id3)  FROM ft_HT2 t1, ft_HT1 t0  WHERE  (t1.id1=t0.id2)  GROUP BY t1.id2, t1.id3  "/>
+<query sql="SELECT t0.id2, t1.id1, SUM(t1.id2)  FROM ft_HT1 t0, ft_HT1 t1  WHERE  (t0.id3=t1.id3)  GROUP BY t0.id2, t1.id1  "/>
+<query sql="SELECT t0.id1, t2.id4, t0.id4, SUM(t2.id2)  FROM ft_HT2 t2, ft_HT1 t0, ft_HT4 t1  WHERE  (t2.id2=t0.id1 AND t0.id1=t1.id1)  GROUP BY t0.id1, t2.id4, t0.id4  "/>
+<query sql="SELECT t0.id4, t1.id3, t2.id1, SUM(t0.id2)  FROM ft_HT4 t2, ft_HT1 t1, ft_HT1 t0  WHERE  (t2.id4=t1.id2 AND t1.id2=t0.id4)  GROUP BY t0.id4, t1.id3, t2.id1  "/>
+<query sql="SELECT t1.id4, t0.id3, t2.id2, SUM(t0.id1)  FROM ft_HT1 t1, ft_HT1 t0, ft_HT1 t2  WHERE  (t1.id2=t0.id2 AND t0.id2=t2.id4)  GROUP BY t1.id4, t0.id3, t2.id2  "/>
+<query sql="SELECT t3.id3, t0.id3, SUM(t2.id2)  FROM ft_HT1 t0, ft_HT3 t2, ft_HT2 t3, ft_HT3 t1  WHERE  (t0.id4=t2.id3 AND t2.id3=t3.id3 AND t3.id3=t1.id1)  GROUP BY t3.id3, t0.id3  "/>
+<query sql="SELECT t0.id4, SUM(t0.id2)  FROM ft_HT4 t2, ft_HT4 t3, ft_HT1 t1, ft_HT1 t0  WHERE  (t2.id1=t3.id3 AND t3.id3=t1.id3 AND t1.id3=t0.id3)  GROUP BY t0.id4  "/>
+<query sql="SELECT t3.id4, SUM(t0.id4)  FROM ft_HT1 t0, ft_HT1 t2, ft_HT3 t3, ft_HT1 t1  WHERE  (t0.id1=t2.id4 AND t2.id4=t3.id2 AND t3.id2=t1.id2)  GROUP BY t3.id4  "/>
+<query sql="SELECT t0.id2, SUM(t1.id4)  FROM ft_HT1 t3, ft_HT1 t0, ft_HT1 t1, ft_HT1 t2  WHERE  (t3.id2=t0.id1 AND t0.id1=t1.id3 AND t1.id3=t2.id1)  GROUP BY t0.id2  "/>
+<query sql="SELECT t0.id2, t0.id3, t0.id4 FROM ft_HT1 t0  "/>
+<query sql="SELECT t0.id2 FROM ft_HT1 t0, ft_HT4 t1  WHERE  (t0.id1=t1.id1)  "/>
+<query sql="SELECT t0.id2, t1.id2 FROM ft_HT1 t1, ft_HT1 t0  WHERE  (t1.id2=t0.id3)  "/>
+<query sql="SELECT t1.id2 FROM ft_HT2 t2, ft_HT3 t1, ft_HT1 t0  WHERE  (t2.id1=t1.id4 AND t1.id4=t0.id3)  "/>
+<query sql="SELECT t2.id3, t1.id2 FROM ft_HT4 t2, ft_HT1 t0, ft_HT1 t1  WHERE  (t2.id2=t0.id2 AND t0.id2=t1.id1)  "/>
+<query sql="SELECT t0.id4, t2.id2, t1.id1 FROM ft_HT1 t0, ft_HT1 t1, ft_HT1 t2  WHERE  (t0.id3=t1.id1 AND t1.id1=t2.id3)  "/>
+<query sql="SELECT t0.id1, t3.id3, t2.id1 FROM ft_HT4 t3, ft_HT2 t2, ft_HT3 t1, ft_HT1 t0  WHERE  (t3.id2=t2.id4 AND t2.id4=t1.id1 AND t1.id1=t0.id1)  "/>
+<query sql="SELECT t3.id3, t2.id4, t1.id1 FROM ft_HT1 t0, ft_HT4 t2, ft_HT2 t3, ft_HT1 t1  WHERE  (t0.id1=t2.id4 AND t2.id4=t3.id2 AND t3.id2=t1.id3)  "/>
+<query sql="SELECT t2.id4, t2.id3 FROM ft_HT1 t1, ft_HT1 t2, ft_HT1 t0, ft_HT4 t3  WHERE  (t1.id1=t2.id4 AND t2.id4=t0.id1 AND t0.id1=t3.id2)  "/>
+<query sql="SELECT t0.id1, t2.id4 FROM ft_HT1 t1, ft_HT1 t3, ft_HT1 t0, ft_HT1 t2  WHERE  (t1.id3=t3.id1 AND t3.id1=t0.id4 AND t0.id4=t2.id4)  "/>
+<query sql="SELECT t0.id2, t0.id4, SUM(t0.id1)  FROM ft_HT1 t0  GROUP BY t0.id2, t0.id4  "/>
+<query sql="SELECT t0.id3, SUM(t1.id3)  FROM ft_HT2 t1, ft_HT1 t0  WHERE  (t1.id3=t0.id3)  GROUP BY t0.id3  "/>
+<query sql="SELECT t1.id4, t1.id1, SUM(t0.id2)  FROM ft_HT1 t0, ft_HT1 t1  WHERE  (t0.id2=t1.id4)  GROUP BY t1.id4, t1.id1  "/>
+<query sql="SELECT t0.id2, t2.id4, t0.id4, SUM(t0.id1)  FROM ft_HT1 t0, ft_HT2 t1, ft_HT2 t2  WHERE  (t0.id2=t1.id4 AND t1.id4=t2.id4)  GROUP BY t0.id2, t2.id4, t0.id4  "/>
+<query sql="SELECT t1.id3, t2.id1, SUM(t1.id1)  FROM ft_HT1 t0, ft_HT1 t1, ft_HT2 t2  WHERE  (t0.id3=t1.id3 AND t1.id3=t2.id2)  GROUP BY t1.id3, t2.id1  "/>
+<query sql="SELECT SUM(t1.id3)  FROM ft_HT1 t0, ft_HT1 t2, ft_HT1 t1  WHERE  (t0.id2=t2.id2 AND t2.id2=t1.id4)  "/>
+<query sql="SELECT t0.id2, t3.id3, t1.id2, SUM(t3.id2)  FROM ft_HT1 t0, ft_HT2 t1, ft_HT4 t3, ft_HT3 t2  WHERE  (t0.id2=t1.id2 AND t1.id2=t3.id3 AND t3.id3=t2.id4)  GROUP BY t0.id2, t3.id3, t1.id2  "/>
+<query sql="SELECT t0.id2, t2.id2, t3.id1, SUM(t1.id3)  FROM ft_HT4 t3, ft_HT1 t1, ft_HT4 t2, ft_HT1 t0  WHERE  (t3.id4=t1.id2 AND t1.id2=t2.id4 AND t2.id4=t0.id4)  GROUP BY t0.id2, t2.id2, t3.id1  "/>
+<query sql="SELECT t3.id2, t2.id3, t1.id1, SUM(t3.id4)  FROM ft_HT2 t3, ft_HT1 t1, ft_HT1 t2, ft_HT1 t0  WHERE  (t3.id3=t1.id2 AND t1.id2=t2.id2 AND t2.id2=t0.id4)  GROUP BY t3.id2, t2.id3, t1.id1  "/>
+<query sql="SELECT SUM(t2.id3)  FROM ft_HT1 t1, ft_HT1 t3, ft_HT1 t2, ft_HT1 t0  WHERE  (t1.id2=t3.id4 AND t3.id4=t2.id3 AND t2.id3=t0.id1)  "/>
+<query sql="SELECT t0.id2, t0.id3, t0.id4 FROM ft_HT1 t0  "/>
+<query sql="SELECT t1.id4, t0.id4, t1.id3 FROM ft_HT2 t1, ft_HT1 t0  WHERE  (t1.id4=t0.id4)  "/>
+<query sql="SELECT t0.id1, t0.id2, t1.id3 FROM ft_HT1 t0, ft_HT1 t1  WHERE  (t0.id1=t1.id4)  "/>
+<query sql="SELECT t1.id3, t2.id1 FROM ft_HT4 t2, ft_HT4 t1, ft_HT1 t0  WHERE  (t2.id2=t1.id3 AND t1.id3=t0.id3)  "/>
+<query sql="SELECT t0.id1, t2.id3, t1.id1 FROM ft_HT1 t1, ft_HT1 t0, ft_HT3 t2  WHERE  (t1.id2=t0.id2 AND t0.id2=t2.id4)  "/>
+<query sql="SELECT t2.id4, t1.id2, t2.id1 FROM ft_HT1 t0, ft_HT1 t2, ft_HT1 t1  WHERE  (t0.id1=t2.id3 AND t2.id3=t1.id1)  "/>
+<query sql="SELECT t0.id2, t1.id3, t1.id1 FROM ft_HT4 t2, ft_HT3 t1, ft_HT1 t0, ft_HT2 t3  WHERE  (t2.id1=t1.id3 AND t1.id3=t0.id1 AND t0.id1=t3.id3)  "/>
+<query sql="SELECT t0.id2 FROM ft_HT1 t0, ft_HT1 t1, ft_HT4 t3, ft_HT2 t2  WHERE  (t0.id3=t1.id4 AND t1.id4=t3.id4 AND t3.id4=t2.id3)  "/>
+<query sql="SELECT t0.id4, t2.id1 FROM ft_HT3 t3, ft_HT1 t2, ft_HT1 t1, ft_HT1 t0  WHERE  (t3.id2=t2.id2 AND t2.id2=t1.id3 AND t1.id3=t0.id2)  "/>
+<query sql="SELECT t0.id1, t1.id4, t2.id1 FROM ft_HT1 t2, ft_HT1 t3, ft_HT1 t1, ft_HT1 t0  WHERE  (t2.id3=t3.id1 AND t3.id1=t1.id1 AND t1.id1=t0.id2)  "/>
+</predefinedQueries>

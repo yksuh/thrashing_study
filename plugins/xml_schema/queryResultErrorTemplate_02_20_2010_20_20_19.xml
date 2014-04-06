@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<queryResult sql="THIS QUERY IS NOT COMPLETED RUNNED ">
+    <optimalPlan executionTime="0" phaseNumber="0" planNumber="0" units="milli seconds">
+        <table cardinality="0" name="ERR"/>
+    </optimalPlan>
+    <queryExecution executionTime="0" phaseNumber="0" planNumber="0" units="milli seconds">
+        <table cardinality="0" name="ERR"/>
+    </queryExecution>
+</queryResult>

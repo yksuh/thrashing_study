@@ -1,0 +1,5 @@
+#!/bin/sh
+echo '-------------------' >> ps_result.txt;
+date >> ps_result.txt;
+ps aux >> ps_result.txt;
+sync

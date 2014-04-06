@@ -1,0 +1,9 @@
+#!/bin/sh
+if [ $# -eq 0 ]
+then
+  echo "Usage: runjdbc monitor_option"
+  echo "monitor_option: 0 - ps aux; 1 - pidstat"
+fi
+export libpath=../JDBCTester/libs
+java -Xmx1024M -classpath $libpath/ojdbc14.jar:../JDBCTester JDBCTester $1
+

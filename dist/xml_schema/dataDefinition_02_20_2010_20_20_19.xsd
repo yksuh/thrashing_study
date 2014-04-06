@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+
+<!-- Schema for Configurations -->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	<xsd:element name="dataDefinition">
+
+		<xsd:complexType>
+
+			<xsd:sequence>
+
+				<xsd:element name="documentation" minOccurs="0" maxOccurs="1" type="xsd:string">
+
+				</xsd:element>
+
+				<xsd:element name="table" minOccurs="1" maxOccurs="unbounded">
+
+					<xsd:complexType>
+
+						<xsd:sequence>
+
+							<xsd:element name="column" minOccurs="1" maxOccurs="unbounded">
+
+								<xsd:complexType>
+
+									<xsd:attribute name="name" type="xsd:string" use="required"/>
+
+									<xsd:attribute name="dataType" use="required">
+
+										<xsd:simpleType>
+
+											<xsd:restriction base="xsd:string">
+
+												<xsd:enumeration value="number"/>
+
+												<xsd:enumeration value="varchar2"/>
+
+												<xsd:enumeration value="char"/>
+												
+												<xsd:enumeration value="timestamp"/>
+											</xsd:restriction>
+
+										</xsd:simpleType>
+
+									</xsd:attribute>
+
+									<xsd:attribute name="dataLength" type="xsd:nonNegativeInteger" use="required"/>
+									<xsd:attribute name="decimalpoint" type="xsd:nonNegativeInteger" use="optional"/>
+									
+									<xsd:attribute name="dataGenerationType" use="optional">
+
+										<xsd:simpleType>
+
+											<xsd:restriction base="xsd:string">
+
+												<xsd:enumeration value="random"/>
+
+												<xsd:enumeration value="sequential"/>
+
+											</xsd:restriction>
+
+										</xsd:simpleType>
+
+									</xsd:attribute>
+
+									<xsd:attribute name="distributionMinimum" type="xsd:nonNegativeInteger"/>
+									<xsd:attribute name="distributionMaximum" type="xsd:nonNegativeInteger"/>
+
+									<xsd:attribute name="inIndex" type="xsd:boolean" use="optional" default="false"/>
+									<xsd:attribute name="inPrimaryKey" type="xsd:boolean" default="false"/>
+								</xsd:complexType>
+
+							</xsd:element>
+							<!-- define which column the table should sorted on-->
+							<!--<xsd:element name="sortedon" minOccurs="0" maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="column" minOccurs="1" maxOccurs="unbounded">
+											<xsd:complexType>
+												<xsd:attribute name="name" type="xsd:string" use="required"/>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>-->
+							<!-- define which column should have its index -->
+							<xsd:element name="index" minOccurs="0" maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:sequence>
+										<!-- column name -->
+										<xsd:element name="column" minOccurs="1" maxOccurs="unbounded">
+											<xsd:complexType>
+												<xsd:attribute name="name" type="xsd:string" use="required"/>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+									<!-- define index type: hash or btree -->
+									<xsd:attribute name="type" use="required">
+										<xsd:simpleType>
+											<xsd:restriction base="xsd:string">
+												<xsd:enumeration value="hash"/>
+												<xsd:enumeration value="btree"/>
+											</xsd:restriction>
+										</xsd:simpleType>
+									</xsd:attribute>
+								</xsd:complexType>
+							</xsd:element>
+							<!-- define unique constraints of columns -->
+							<!--<xsd:element name="unique" minOccurs="0" maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="column" minOccurs="1" maxOccurs="unbounded">
+											<xsd:complexType>
+												<xsd:attribute name="name" type="xsd:string" use="required"/>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>							
+							</xsd:element>-->
+							<xsd:element name="referentialIntegrity" minOccurs="0" maxOccurs="unbounded">
+
+								<xsd:complexType>
+
+									<xsd:sequence>
+
+										<xsd:element name="column" minOccurs="1" maxOccurs="unbounded">
+
+											<xsd:complexType>
+
+												<xsd:attribute name="name" type="xsd:string" use="required"/>
+
+												<xsd:attribute name="references" type="xsd:string" use="required"/>
+
+											</xsd:complexType>
+
+										</xsd:element>
+
+									</xsd:sequence>
+
+									<xsd:attribute name="tableName" type="xsd:string" use="required"/>
+
+								</xsd:complexType>
+
+							</xsd:element>
+
+						</xsd:sequence>
+
+						<xsd:attribute name="name" type="xsd:string" use="required"/>
+						
+						<xsd:attribute name="cardinality" type="xsd:positiveInteger" use="required"/>
+
+					</xsd:complexType>
+
+				</xsd:element>
+
+			</xsd:sequence>
+
+			<xsd:attribute name="name" type="xsd:string" use="required"/>
+
+		</xsd:complexType>
+
+	</xsd:element>
+
+</xsd:schema>

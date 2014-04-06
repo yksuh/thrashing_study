@@ -1,0 +1,2 @@
+#!/bin/bash
+java -Xms1024M -Xmx4096M -jar azdblab.jar -verbose -executor experimentsubject_oracle.xml oracle $1

@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<!-- Schema for Configurations -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="transactionExperiment">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="description" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+				<xsd:choice minOccurs="1" maxOccurs="1">
+					<xsd:element name="dataDefinitionReference">
+						<xsd:complexType>
+              				<xsd:attribute name="href" type="xsd:string" use="required"/>
+            			</xsd:complexType>
+          			</xsd:element>
+          			<xsd:element name="dataDefinition"></xsd:element>
+        		</xsd:choice>
+        		<xsd:element name="dbmsConfiguration">
+		        	<xsd:complexType>
+		        		<xsd:sequence>
+						<!-- unless step is specified, default to 256MB-->
+		        			<xsd:element name="bufferSize" minOccurs="1" maxOccurs="1">
+		        				<xsd:complexType>
+		        					<xsd:attribute name="min" type="xsd:nonNegativeInteger" use="required"/>
+		              				<xsd:attribute name="max" type="xsd:nonNegativeInteger" use="required"/>
+		              				<xsd:attribute name="step" type="xsd:positiveInteger" use="optional"/>
+		            			</xsd:complexType>
+		        			</xsd:element>  
+		          			<xsd:element name="numOfConnections" minOccurs="1" maxOccurs="1">
+		                		<xsd:complexType>
+		              				<xsd:attribute name="min" type="xsd:positiveInteger" use="required"/>
+		              				<xsd:attribute name="max" type="xsd:positiveInteger" use="required"/>
+		              				<xsd:attribute name="step" type="xsd:positiveInteger" use="optional"/>
+		            			</xsd:complexType>
+		        			</xsd:element>  
+		        			<xsd:element name="numOfProcessors" minOccurs="1" maxOccurs="1">
+		                		<xsd:complexType>
+		              				<xsd:attribute name="min" type="xsd:positiveInteger" use="required"/>
+		              				<xsd:attribute name="max" type="xsd:positiveInteger" use="required"/>
+		              				<xsd:attribute name="step" type="xsd:positiveInteger" use="optional"/>
+		            			</xsd:complexType>
+		        			</xsd:element>  
+		        		</xsd:sequence>
+		        	</xsd:complexType>
+		        </xsd:element>
+		  		<xsd:choice minOccurs="1" maxOccurs="1">
+		  			<xsd:element name="batchDefinitionReference">
+		   				<xsd:complexType>
+		   					<xsd:attribute name="href" type="xsd:string" use="required"/>
+					      	<xsd:attribute name="numberBatches" type="xsd:positiveInteger" use="required"/>
+					      	<xsd:attribute name="javaClass" type="xsd:string"/>
+					      	<xsd:attribute name="schemaFileName" type="xsd:string"/>
+					      	<xsd:attribute name="type" use="required">
+					        	<xsd:simpleType>
+					          		<xsd:restriction base="xsd:string">
+					            		<xsd:enumeration value="grammar"/>
+					             		<xsd:enumeration value="predefinedBatches"/>
+					             		<xsd:enumeration value="tree"/>
+					           		</xsd:restriction>
+					         	</xsd:simpleType>
+					       	</xsd:attribute>
+					    </xsd:complexType>
+		  			</xsd:element>
+		   			<xsd:element name="batchDefinition">
+		   				<xsd:complexType>
+		   					<xsd:element name="transactionDefinition">
+		   						<xsd:complexType>
+		   							<xsd:element name="rwRatio">
+		   								<xsd:complexType>
+		   									<xsd:attribute name="min" type="xsd:positiveInteger" use="required"/>
+		              						<xsd:attribute name="max" type="xsd:positiveInteger" use="required"/>
+		              						<xsd:attribute name="step" type="xsd:positiveInteger" use="optional"/>
+		   								</xsd:complexType>
+		   							</xsd:element>
+		   							<xsd:element name="queryDistribution">
+		   								<xsd:complexType>
+		   									<xsd:attribute name="type" use="required">
+									        	<xsd:simpleType>
+									          		<xsd:restriction base="xsd:string">
+									            		<xsd:enumeration value="uniform"/>
+									             		<xsd:enumeration value="normal"/>
+									           		</xsd:restriction>
+									         	</xsd:simpleType>
+									       	</xsd:attribute>
+		              					</xsd:complexType>
+		   					</xsd:element>
+		   					<xsd:element name="numOfStatements">
+		   						<xsd:complexType>
+		   							<xsd:attribute name="min" type="xsd:positiveInteger" use="required"/>
+		              						<xsd:attribute name="max" type="xsd:positiveInteger" use="required"/>
+		              						<xsd:attribute name="step" type="xsd:positiveInteger" use="optional"/>
+		   								</xsd:complexType>
+		   							</xsd:element>
+		   						</xsd:complexType>
+		   					</xsd:element>
+		   					<xsd:attribute name="numOfTransactions" type="xsd:positiveInteger" use="required"/>
+		   					<xsd:attribute name="javaClass" type="xsd:string"/>
+		   					<xsd:attribute name="schemaFileName" type="xsd:string"/>
+		   				</xsd:complexType>
+		   			</xsd:element>
+		   		</xsd:choice>
+      		</xsd:sequence>
+	      	<xsd:attribute name="name" type="xsd:string" use="required"/>
+			<xsd:attribute name="scenario" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

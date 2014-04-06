@@ -1,0 +1,34 @@
+10
+
+dir
+1186
+svn+ssh://lec/cs/svn/tau/AZDBLAB/branches/young_xact/.metadata/.plugins/org.eclipse.core.resources
+svn+ssh://lec/cs/svn/tau/AZDBLAB
+
+
+
+2011-05-24T23:13:01.000000Z
+327
+ruizhang
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+e08e2e80-0740-4162-b9f5-a77b3bff3e4b
+
+.root
+dir
+
+.safetable
+dir
+

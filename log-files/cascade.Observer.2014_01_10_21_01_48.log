@@ -1,0 +1,15 @@
+2014-01-10 21:01:48,498 INFO  - Run Observer 
+2014-01-10 21:02:37,119 INFO  - SELECT SourceXML FROM AZDBLAB_EXPERIMENT WHERE ExperimentID=53 AND UserName='yksuh' AND NotebookName='XACT_TEST' AND ExperimentName='tps-30K' AND Scenario='tps' AND SourceFileName='/cs/projects/tau/live/yksuh/thesis/prelim/AZDBLAB_XACT/expspec_tps/non-primary-key/tps_30K.xml' AND CreateDate=to_date('Fri, Jan 10 2014 21:02:37', 'DY, MON DD YYYY HH24:MI:SS') 
+2014-01-10 21:02:37,248 INFO  - SELECT SourceXML FROM AZDBLAB_EXPERIMENTSPEC WHERE ExperimentSpecID=105 AND Name='ft' AND FileName='TestDataDef30K.xml' AND Kind='D' 
+2014-01-10 21:02:37,317 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_REFERSEXPERIMENTSPEC(ExperimentID, Kind, ExperimentSpecID) VALUES (53, 'D', 105) 
+2014-01-10 21:02:48,896 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXPERIMENTRUN(RunID, ExperimentID, DBMSName, StartTime, CurrentStage, Percentage, MachineName) VALUES (11, 53, 'oracle', to_timestamp('Fri, Jan 10 2014 21:02:48:869', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Pending', 0.0, 'sodb12.cs.arizona.edu') 
+2014-01-11 12:12:38,520 INFO  - Exponential backoff is performed for : 2000 (ms) 
+2014-01-11 12:12:40,523 INFO  - Exponential backoff is performed for : 4000 (ms) 
+2014-01-11 12:12:44,526 INFO  - Exponential backoff is performed for : 8000 (ms) 
+2014-01-11 12:12:52,529 INFO  - Exponential backoff is performed for : 16000 (ms) 
+2014-01-11 12:13:08,532 INFO  - Exponential backoff is performed for : 32000 (ms) 
+2014-01-11 12:13:40,535 INFO  - Exponential backoff is performed for : 64000 (ms) 
+2014-01-11 12:14:44,538 INFO  - Exponential backoff is performed for : 128000 (ms) 
+2014-01-11 12:16:52,541 INFO  - Exponential backoff is performed for : 256000 (ms) 
+2014-01-11 12:21:08,545 INFO  - Exponential backoff is performed for : 512000 (ms) 
+2014-01-11 12:29:40,548 INFO  - Exponential backoff is performed for : 1024000 (ms) 

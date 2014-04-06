@@ -1,0 +1,5 @@
+2014-01-10 04:16:33,173 INFO  - Run Observer 
+2014-01-10 04:16:46,599 ERROR - Get ExperimentSpecID err. 
+2014-01-10 04:16:47,640 ERROR - Get ExperimentSpecID err. 
+2014-01-10 04:17:40,515 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXPERIMENTRUN(RunID, ExperimentID, DBMSName, StartTime, CurrentStage, Percentage, MachineName) VALUES (8, 49, 'oracle', to_timestamp('Fri, Jan 10 2014 04:17:40:418', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Pending', 0.0, 'sodb12.cs.arizona.edu') 
+2014-01-10 04:17:58,017 INFO  - SELECT distinct exp.UserName, exp.NotebookName, exp.ExperimentName, exp.Scenario, exr.DBMSName, exr.StartTime, exr.CurrentStage, exr.Percentage, exr.MachineName, exe.CurrentStatus, exr.RunID FROM AZDBLAB_EXPERIMENT exp, AZDBLAB_EXPERIMENTRUN exr, AZDBLAB_EXECUTOR exe WHERE exp.ExperimentID = exr.ExperimentID and exp.userName = 'yksuh' and exp.notebookName = 'XACT_TEST' and exp.experimentName = 'tps-30K' AND ((exr.MachineName = exe.MachineName AND exr.DBMSName = exe.CurrentDBMSName) OR exr.CurrentStage = 'Pending') 

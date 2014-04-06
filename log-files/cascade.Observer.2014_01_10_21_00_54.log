@@ -1,0 +1,11 @@
+2014-01-10 21:00:54,395 INFO  - Run Observer 
+2014-01-11 12:12:40,412 INFO  - Exponential backoff is performed for : 2000 (ms) 
+2014-01-11 12:12:42,416 INFO  - Exponential backoff is performed for : 4000 (ms) 
+2014-01-11 12:12:46,419 INFO  - Exponential backoff is performed for : 8000 (ms) 
+2014-01-11 12:12:54,422 INFO  - Exponential backoff is performed for : 16000 (ms) 
+2014-01-11 12:13:10,425 INFO  - Exponential backoff is performed for : 32000 (ms) 
+2014-01-11 12:13:42,428 INFO  - Exponential backoff is performed for : 64000 (ms) 
+2014-01-11 12:14:46,431 INFO  - Exponential backoff is performed for : 128000 (ms) 
+2014-01-11 12:16:54,434 INFO  - Exponential backoff is performed for : 256000 (ms) 
+2014-01-11 12:21:10,437 INFO  - Exponential backoff is performed for : 512000 (ms) 
+2014-01-11 12:29:42,441 INFO  - Exponential backoff is performed for : 1024000 (ms) 

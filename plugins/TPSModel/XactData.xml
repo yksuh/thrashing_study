@@ -1,0 +1,16 @@
+<transDefinitionReference expname = "buffSize">
+	<description>
+		Test case for TPS prediction model.
+	</description>
+	<!-- 10 transactions having 10 statements and keeping .5 RW ratio per Xact  -->
+	<transaction xactID = "0" numRead = "5" numWrite = "5" />
+	<transaction xactID = "1" numRead = "5" numWrite = "5" />
+	<transaction xactID = "2" numRead = "5" numWrite = "5" />
+	<transaction xactID = "3" numRead = "5" numWrite = "5" />
+	<transaction xactID = "4" numRead = "5" numWrite = "5" />
+	<transaction xactID = "5" numRead = "5" numWrite = "5" />
+	<transaction xactID = "6" numRead = "5" numWrite = "5" />
+	<transaction xactID = "7" numRead = "5" numWrite = "5" />
+	<transaction xactID = "8" numRead = "5" numWrite = "5" />
+	<transaction xactID = "9" numRead = "5" numWrite = "5" />
+</transDefinitionReference>

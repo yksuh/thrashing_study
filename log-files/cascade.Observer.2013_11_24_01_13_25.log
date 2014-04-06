@@ -1,0 +1,10 @@
+2013-11-24 01:13:25,865 INFO  - Run Observer 
+2013-11-24 01:13:37,202 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_USER(UserName, CreateDate) VALUES ('yksuh', to_date('Sun, Nov 24 2013 01:13:37', 'DY, MON DD YYYY HH24:MI:SS')) 
+2013-11-24 01:13:39,302 ERROR - Failed to fetch a result from AZDBLAB due to network failure 
+2013-11-24 01:13:45,043 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_NOTEBOOK(UserName, NotebookName, CreateDate) VALUES ('yksuh', 'XACT_TEST', to_date('Sun, Nov 24 2013 01:13:45', 'DY, MON DD YYYY HH24:MI:SS')) 
+2013-11-24 01:13:47,163 ERROR - Failed to fetch a result from AZDBLAB due to network failure 
+2013-11-24 01:13:47,455 ERROR - Failed to fetch a result from AZDBLAB due to network failure 
+2013-11-24 01:13:47,606 ERROR - Failed to fetch a result from AZDBLAB due to network failure 
+2013-11-24 01:24:43,279 INFO  - Exponential backoff is performed for : 2000 (ms) 
+2013-11-24 01:24:45,281 INFO  - Exponential backoff is performed for : 4000 (ms) 
+2013-11-24 01:24:49,284 INFO  - Exponential backoff is performed for : 8000 (ms) 

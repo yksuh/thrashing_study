@@ -1,0 +1,94 @@
+#!/bin/sh
+LOGFILE="makephaseI.log"
+#sudo /sbin/service isdn stop
+PROBLEM_SERVICES=""
+echo "Performing Phase I..."
+sudo /sbin/service bluetooth stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service bluetooth status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" bluetooth"
+fi
+
+sudo /sbin/service pcscd stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service pcscd status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" pcscd"
+fi
+
+sudo /sbin/service ip6tables stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service ip6tables status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" ip6tables"
+fi
+
+sudo /sbin/service iptables stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service ip6tables status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" iptables"
+fi
+
+sudo /sbin/service hplip stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service hplip status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" hplip"
+fi
+
+sudo /sbin/service cups stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service cups status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" cups"
+fi
+
+sudo /sbin/service sendmail stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service sendmail status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" sendmail"
+fi
+
+sudo /sbin/service gpm stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service gpm status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" gpm"
+fi
+
+sudo /sbin/service xfs stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service xfs status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" xfs"
+fi
+
+sudo /sbin/service libvirtd stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service libvirtd status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" libvirtd"
+fi
+
+sudo /sbin/service avahi-daemon stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service avahi-daemon status | grep "not running" | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" avahi-daemon"
+fi
+
+sudo /sbin/service haldaemon stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service haldaemon status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" haldaemon"
+fi
+
+sudo /sbin/service atd stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service atd status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" atd"
+fi
+
+sudo /sbin/service crond stop >> $LOGFILE 2>&1
+RETCODE=`sudo /sbin/service crond status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" crond"
+fi
+
+if [ "$PROBLEM_SERVICES" = "" ]; then
+  echo "Phase I Successful!"
+else
+  echo "Phase I Not Successful When Stopping Service(s) "$PROBLEM_SERVICES" Failed"
+fi

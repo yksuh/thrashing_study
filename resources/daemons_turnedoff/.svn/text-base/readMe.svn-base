@@ -1,0 +1,6 @@
+
+- MakePhaseI for fedora
+- MakePhase_ubuntu for ubuntu
+- MakePhaseIII for resuming turned-off daemons
+
+- If libvirtd is installed on a machine, then please uncomment the script associated with the libvirtd

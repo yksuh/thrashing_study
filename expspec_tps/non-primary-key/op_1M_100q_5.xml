@@ -1,0 +1,26 @@
+<experiment name="op-1M-100q-5" scenario="onepass">
+  <description>
+    The baseline test of onepass scenario, with 100 predefined queries. 
+    Four experiment tables, each with 1M rows. One variable table is used.
+  </description>
+  <dataDefinitionReference href="TestDataDef1M.xml"/>
+  <tableConfiguration>
+    <variableTableSet searchMethod="linear" searchGranularity="10000">
+      <table name="HT1" seed="1999">
+        <cardinality hypotheticalMinimum="10000" hypotheticalMaximum="2000000"/>
+      </table>
+    </variableTableSet>
+    <fixedTableSet>
+      <table name="HT2" seed="2999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT3" seed="3999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT4" seed="4999">
+        <cardinality hypothetical="actual"/>
+      </table>
+    </fixedTableSet>
+  </tableConfiguration>
+  <queryDefinitionReference numberQueries="100" type="predefinedQueries" href="100_q_5.xml"/>
+</experiment>

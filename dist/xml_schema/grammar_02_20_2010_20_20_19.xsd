@@ -1,0 +1,122 @@
+<!-- 
+rule contains-
+	-terminal/nonTerminal/optional/choice/repeating
+
+optional contains-
+	-terminal/nonTerminal/optional/choice/repeating
+
+choice contains-
+	-groups
+	
+group contains-
+	-terminal/nonTerminal/optional/choice/repeating
+
+repeating contains-
+	-terminal/nonTerminal/optional/choice/repeating
+
+-->
+
+<grammar>
+
+	<rule name="Simple SQL">
+
+		<nonTerminal name="Select Clause"/>
+
+		<nonTerminal name ="From Clause"/>
+
+		<optional usePercentage="25">
+
+			<nonTerminal name = "Where Clause"/>
+
+		</optional>
+		<!-- NEW JUNK
+		<relation "select" dependsOn "from">
+		<relation "where dependsOn from>
+		<simple sql depends on select>
+		-->
+
+	</rule>
+
+	<rule name="Select Clause">
+
+		<terminal symbol="SELECT"/>
+
+		<choice>
+
+			<group usePercentage="75">
+
+				<column/>
+
+				<repeating minimum="0" maximum="5" distinct="true">
+
+					<terminal symbol=", "/>
+
+					<column/>
+
+				</repeating>
+
+			</group>
+
+			<group usePercentage="25">
+
+				<terminal symbol="*"/>
+
+			</group>
+
+		</choice>
+
+	</rule>
+
+	<rule name="From Clause">
+
+		<terminal symbol="FROM"/>
+
+		<table/>
+
+		<repeating minimum="0" maximum="unbounded" distinct="false">
+
+			<terminal symbol=", "/>
+
+			<table/>
+
+		</repeating>
+
+	</rule>
+
+	<rule name="Complex Predicate">
+
+		<choice>
+
+			<group usePercentage="30">
+
+				<nonTerminal name="Predicate"/>
+
+				<nonTerminal name="Logical Binary Operator"/>
+
+				<nonTerminal name="Predicate"/>
+
+			</group>
+
+			<group usePercentage="40">
+
+				<terminal symbol="NOT"/>
+
+				<nonTerminal name="Predicate"/>
+
+			</group>
+
+			<group usePercentage="30">
+
+				<terminal symbol="("/>
+
+				<nonTerminal name="Complex Predicate"/>
+
+				<terminal symbol=")"/>
+
+			</group>
+
+		</choice>
+
+	</rule>
+
+</grammar>

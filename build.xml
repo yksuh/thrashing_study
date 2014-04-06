@@ -1,0 +1,481 @@
+<project name="AZDBLAB">
+	<target name="compile">
+		<echo>Compiling AZDBLAB classes </echo>
+		<mkdir dir="dist" />
+		<javac srcdir="src" includeantruntime="false" executable="/javac" destdir="dist" compiler="javac1.6">
+			<classpath>
+				<pathelement location="dist" />
+				<pathelement location="libs/**" />
+			</classpath>
+		</javac>
+		<javac srcdir="plugins" includeantruntime="false" executable="/javac" destdir="dist" compiler="javac1.6" excludes="plugins/unit_testing/*.* plugins/expired/*.*">
+			<classpath>
+				<pathelement location="dist" />
+				<pathelement location="libs/**" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="createExecDir" depends="compile" if="exec_dir">
+		<!--  -->
+		<echo>Creating ${exec_dir} </echo>
+		<!--<delete dir="${exec_dir}"/>-->
+		<mkdir dir="${exec_dir}" />
+		<property name="plugins.dir" value="${exec_dir}/plugins" />
+		<mkdir dir="${exec_dir}/log-files" />
+		<copy todir="${exec_dir}/experiments/">
+			<fileset dir="/cs/projects/tau/installations/azdblab/dirs_to_copy/experiments">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+		<copy todir="${exec_dir}/plugins/">
+			<fileset dir="/cs/projects/tau/installations/azdblab/dirs_to_copy/labshelves">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+		<copy todir="${exec_dir}/plugins/">
+			<fileset dir="/cs/projects/tau/installations/azdblab/dirs_to_copy/experimentsubjects">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+		<copy todir="${exec_dir}/libs">
+			<fileset dir="libs" />
+		</copy>
+		<copy todir="${exec_dir}/">
+			<fileset dir="/cs/projects/tau/installations/azdblab/dirs_to_copy/resources">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+		
+		<loadfile srcfile="src/azdblab/Constants.java" property="Version">
+		<filterchain>
+			<linecontains>
+				<contains value="public static final String AZDBLAB_VERSION"/>
+			</linecontains>
+			<tokenfilter>
+				<replacestring from="public static final String AZDBLAB_VERSION = " to=""/>
+				<replacestring from="&quot;" to=""/>
+				<replacestring from=";" to=""/>
+				<deletecharacters chars="\t"/>
+				<deletecharacters chars=" "/>
+			</tokenfilter>
+			</filterchain>
+		</loadfile>
+		<tstamp>
+			<format property="current.date" pattern="MM/dd/yyyy" />
+		</tstamp>
+		<echo file="${exec_dir}/readMe.txt">
+			Creation  Date : ${current.date}
+			AZDBLAB Version: ${Version}
+			AZDBLAB Plugin Version: ${Version}
+		</echo> 
+		<chmod file = "${exec_dir}/**" perm="774" type="both" />
+	</target>
+		
+	<target name="useCurrDir" depends="compile" unless="exec_dir">
+		<echo>Using current working directory</echo>
+		<property name="exec_dir" value="." />
+		<property name="plugins.dir" value="plugins" />
+	</target>
+	
+	<!-- Plugins -->
+	<!--<property name="${plugins.dir}" value="${exec_dir}/plugins" />-->
+	<!-- Experiment Subject Plugins -->
+	<property name="db2.jarfilename" value="DB2Subject_09_14_2009_16_16_16.jar" />
+	<property name="mysql.jarfilename" value="MySQLSubject_10_13_2009_16_29_40.jar" />
+	<property name="mysql2.jarfilename" value="MySQL2Subject_10_13_2009_16_29_40.jar" />
+	<property name="javadb.jarfilename" value="JavaDBSubject_09_14_2009_16_16_16.jar" />
+	<property name="oracle.jarfilename" value="OracleSubject_06_12_2008_12_12_34.jar" />
+	<property name="pgsql.jarfilename" value="PgsqlSubject_10_13_2009_16_29_34.jar" />
+	<property name="sqlserver.jarfilename" value="SqlServerSubject_10_13_2009_16_33_34.jar" />
+	<property name="teradata.jarfilename" value="TeradataSubject_10_11_2011_12_12_34.jar" />
+	<!-- Scenario Plugins -->
+	<property name="cloneonem.jarfilename" value="CloneOneMScenario_07_15_2010_11_10_10.jar" />
+	<property name="doubletriple.jarfilename" value="DoubleTripleScenario_07_15_2010_11_10_10.jar" />
+	<property name="exhaustive.jarfilename" value="ExhaustiveScenario_07_15_2010_11_10_10.jar" />
+	<property name="exhaustivewithouttiming.jarfilename" value="ExhaustiveWithoutTimingScenario_05_17_2012_11_10_10.jar" />
+	<property name="onepass.jarfilename" value="OnePassScenario_07_15_2010_11_10_10.jar" />
+	<property name="tps.jarfilename" value="TPSScenario_11_22_2013_18_10_30.jar" />
+	<property name="onepasswithouttiming.jarfilename" value="OnePassWithoutTimingScenario_07_15_2010_11_10_10.jar" />
+	<property name="uniqueplan.jarfilename" value="UniquePlanScenario_07_15_2010_11_10_10.jar" />
+	<property name="hwc.jarfilename" value="HelloWorldCardScenario_12_27_2011_14_00_00.jar" />
+	<property name="hwq.jarfilename" value="HelloWorldQueryScenario_12_27_2011_14_00_00.jar" />
+	<!-- Evaluation Plugins -->
+	<property name="processinfoevaluation.jarfilename" value="ProcessInfoEvaluation_07_15_2010_11_10_10.jar" />
+	<property name="queryparamevaluation.jarfilename" value="QueryParamEvaluation_07_15_2010_11_10_10.jar" />
+	<property name="querystatevaluation.jarfilename" value="QueryStatEvaluation_07_15_2010_11_10_10.jar" />
+	<property name="sanitycheckevaluation.jarfilename" value="SanityCheckEvaluation_07_15_2010_11_10_10.jar" />
+	<property name="discontinuityevaluation.jarfilename" value="DiscontinuityEvaluation_07_15_2010_11_10_10.jar" />
+	<property name="sqlstyleaspect.jarfilename" value="SQLStyleAspect_07_15_2010_11_10_10.jar" />
+	
+		
+	<!-- TPS schema copy -->
+	<target name="tpssch" depends="compile">
+		<copy todir="${plugins.dir}/xml_schema/">
+			<fileset file="./plugins/xml_schema/transaction*" />
+		</copy>
+	</target>
+	
+	<!-- DB2 Experiment Subject Plugin -->
+	<target name="db2plugin" depends="compile">
+		<jar destfile="${db2.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="DB2*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${db2.jarfilename}" />
+		</copy>
+		<delete file="./${db2.jarfilename}" />
+	</target>
+
+	<!-- MySQL Experiment Subject Plugin -->
+	<target name="mysqlplugin" depends="compile">
+		<jar destfile="${mysql.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="MySQL*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${mysql.jarfilename}" />
+		</copy>
+		<delete file="./${mysql.jarfilename}" />
+	</target>
+	
+	<!-- MySQL2 Experiment Subject Plugin -->
+	<target name="mysql2plugin" depends="compile">
+		<jar destfile="${mysql2.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="MySQL2*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${mysql2.jarfilename}" />
+		</copy>
+		<delete file="./${mysql2.jarfilename}" />
+	</target>
+
+	<!-- JavaDB Experiment Subject Plugin -->
+	<target name="javadbplugin" depends="compile">
+		<jar destfile="${javadb.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="JavaDB*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${javadb.jarfilename}" />
+		</copy>
+		<delete file="./${javadb.jarfilename}" />
+	</target>
+
+	<!-- Oracle Experiment Subject Plugin -->
+	<target name="oraplugin" depends="compile">
+		<jar destfile="${oracle.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="Oracle*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${oracle.jarfilename}" />
+		</copy>
+		<delete file="./${oracle.jarfilename}" />
+	</target>
+
+	<!-- Postgres SQL Experiment Subject Plugin -->
+	<target name="pgsqlplugin" depends="compile">
+		<jar destfile="${pgsql.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="Pgsql*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${pgsql.jarfilename}" />
+		</copy>
+		<delete file="./${pgsql.jarfilename}" />
+	</target>
+
+	<!-- SQL Server Experiment Subject Plugin -->
+	<target name="sqlserverplugin" depends="compile">
+		<jar destfile="${sqlserver.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="SqlServer*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${sqlserver.jarfilename}" />
+		</copy>
+		<delete file="./${sqlserver.jarfilename}" />
+	</target>
+
+	<!-- Teradata Experiment Subject Plugin -->
+	<target name="tdplugin" depends="compile">
+		<jar destfile="${teradata.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="Teradata*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${teradata.jarfilename}" />
+		</copy>
+		<delete file="./${teradata.jarfilename}" />
+	</target>
+
+	<!-- CloneOneM Scenario Plugin -->
+	<target name="cloneonemplugin" depends="compile">
+		<jar destfile="${cloneonem.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="CloneOneM*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>	
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${cloneonem.jarfilename}" />
+		</copy>
+		<delete file="./${cloneonem.jarfilename}" />
+	</target>
+
+	<!-- DoubleTriple Scenario Plugin -->
+	<target name="doubletripleplugin" depends="compile">
+		<jar destfile="${doubletriple.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="DoubleTriple*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${doubletriple.jarfilename}" />
+		</copy>
+		<delete file="./${doubletriple.jarfilename}" />
+	</target>
+
+	<!-- Exhaustive Scenario Plugin -->
+	<target name="exhaustiveplugin" depends="compile">
+		<jar destfile="${exhaustive.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="Exhaustive*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${exhaustive.jarfilename}" />
+		</copy>
+		<delete file="./${exhaustive.jarfilename}" />
+	</target>
+	
+	<!-- ExhaustiveWithoutTiming Scenario Plugin -->
+	<target name="exhaustivewithouttimingplugin" depends="compile">
+		<jar destfile="${exhaustivewithouttiming.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="ExhaustiveWithoutTiming*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${exhaustivewithouttiming.jarfilename}" />
+		</copy>
+		<delete file="./${exhaustivewithouttiming.jarfilename}" />
+	</target>
+		
+	<!-- TPS Scenario Plugin -->
+	<target name="tpsplugin" depends="compile">
+		<jar destfile="${tps.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="TPS*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${tps.jarfilename}" />
+		</copy>
+		<delete file="./${tps.jarfilename}" />
+	</target>
+	
+	<!-- OnePass Scenario Plugin -->
+	<target name="onepassplugin" depends="compile">
+		<jar destfile="${onepass.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="OnePass*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${onepass.jarfilename}" />
+		</copy>
+		<delete file="./${onepass.jarfilename}" />
+	</target>
+
+	<!-- OnePassWithoutTiming Scenario Plugin -->
+	<target name="onepasswithouttimingplugin" depends="compile">
+		<jar destfile="${onepasswithouttiming.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="OnePassWithoutTiming*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${onepasswithouttiming.jarfilename}" />
+		</copy>
+		<delete file="./${onepasswithouttiming.jarfilename}" />
+	</target>
+	
+	<!-- UniquePlan Scenario Plugin -->
+	<target name="uniqueplanplugin" depends="compile">
+		<jar destfile="${uniqueplan.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="UniquePlan*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${uniqueplan.jarfilename}" />
+		</copy>
+		<delete file="./${uniqueplan.jarfilename}" />
+
+	</target>
+
+	<!-- ProcessInfoEvaluation Plugin -->
+	<target name="processinfoevaluationplugin" depends="compile">
+		<jar destfile="${processinfoevaluation.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="ProcessInfo*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${processinfoevaluation.jarfilename}" />
+		</copy>
+		<delete file="./${processinfoevaluation.jarfilename}" />
+	</target>
+	
+	<!-- QueryParamEvaluation Plugin -->
+	<target name="queryparamevaluationplugin" depends="compile">
+		<jar destfile="${queryparamevaluation.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="QueryParam*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${queryparamevaluation.jarfilename}" />
+		</copy>
+		<delete file="./${queryparamevaluation.jarfilename}" />
+	</target>
+	
+	<!-- QueryStatEvaluation Plugin -->
+	<target name="querystatevaluationplugin" depends="compile">
+		<jar destfile="${querystatevaluation.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="QueryStat*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${querystatevaluation.jarfilename}" />
+		</copy>
+		<delete file="./${querystatevaluation.jarfilename}" />
+	</target>
+	
+	<!-- SanityCheckEvaluation Plugin -->
+	<target name="sanitycheckevaluationplugin" depends="compile">
+		<jar destfile="${sanitycheckevaluation.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="SanityCheck*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${sanitycheckevaluation.jarfilename}" />
+		</copy>
+		<delete file="./${sanitycheckevaluation.jarfilename}" />
+	</target>
+	
+	<!-- DiscontinuityEvaluation Plugin -->
+	<target name="discontinuityevaluationplugin" depends="compile">
+		<jar destfile="${discontinuityevaluation.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="Discontinuity*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${discontinuityevaluation.jarfilename}" />
+		</copy>
+		<delete file="./${discontinuityevaluation.jarfilename}" />
+	</target>
+	
+	<!-- SQLStyleAspect Plugin -->
+	<target name="sqlstyleaspectplugin" depends="compile">
+		<jar destfile="${sqlstyleaspect.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="SQLStyleAspect*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${sqlstyleaspect.jarfilename}" />
+		</copy>
+		<delete file="./${sqlstyleaspect.jarfilename}" />
+	</target>
+	
+	<!-- Hello World Cardinality Scenario Plugin -->
+	<target name="helloworldcardplugin" depends="compile">
+		<jar destfile="${hwc.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="HelloWorldCard*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${hwc.jarfilename}" />
+		</copy>
+		<delete file="./${hwc.jarfilename}" />
+	</target>
+	
+	<!-- Hello World Query Scenario Plugin -->
+	<target name="helloworldqueryplugin" depends="compile">
+		<jar destfile="${hwq.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="HelloWorldQuery*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${hwq.jarfilename}" />
+		</copy>
+		<delete file="./${hwq.jarfilename}" />
+	</target>
+	
+	<!-- AZDBLab.jar -->
+	<target name="AZDBLAB" depends="compile">
+		<jar destfile="src/azdblab.jar">
+			<!-- src -->
+			<zipfileset dir="dist" prefix="" excludes="**/META-INF/**/*">
+				<include name="azdblab/**/*.class" />
+				<include name="azdblab/**/*.txt" />
+				<include name="component/**/*.*" />
+			</zipfileset>
+			<!-- plugins -->
+			<!--<zipfileset dir="dist" prefix="" excludes="**/META-INF/**/*">
+				<include name="plugins/*.class" />
+				<include name="plugins/utility/*.*" />
+			</zipfileset>-->
+			<!-- libs -->
+			<zipgroupfileset dir="libs" includes="*.jar" />
+			<manifest>
+				<attribute name="Main-Class" value="azdblab.executable.Main" />
+			</manifest>
+		</jar>
+		<copy todir="${exec_dir}">
+			<fileset file="src/azdblab.jar" />
+		</copy>
+		<delete file="src/azdblab.jar" />
+	</target>			
+</project>

@@ -1,0 +1,95 @@
+#!/bin/sh
+LOGFILE="makephaseI.log"
+SERVICE=service
+#$SERVICE isdn stop
+PROBLEM_SERVICES=""
+echo "Performing Phase I..."
+$SERVICE bluetooth stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE bluetooth status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" bluetooth"
+fi
+
+$SERVICE pcscd stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE pcscd status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" pcscd"
+fi
+
+$SERVICE ip6tables stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE ip6tables status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" ip6tables"
+fi
+
+$SERVICE iptables stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE ip6tables status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" iptables"
+fi
+
+$SERVICE hplip stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE hplip status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" hplip"
+fi
+
+$SERVICE cups stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE cups status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" cups"
+fi
+
+$SERVICE sendmail stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE sendmail status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" sendmail"
+fi
+
+$SERVICE gpm stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE gpm status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" gpm"
+fi
+
+$SERVICE xfs stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE xfs status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" xfs"
+fi
+
+$SERVICE libvirtd stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE libvirtd status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" libvirtd"
+fi
+
+$SERVICE avahi-daemon stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE avahi-daemon status | grep "not running" | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" avahi-daemon"
+fi
+
+$SERVICE haldaemon stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE haldaemon status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" haldaemon"
+fi
+
+$SERVICE atd stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE atd status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" atd"
+fi
+
+$SERVICE crond stop >> $LOGFILE 2>&1
+RETCODE=`$SERVICE crond status | grep stop | wc -l`
+if [ "$RETCODE" = 0 ] ; then
+  PROBLEM_SERVICES=$PROBLEM_SERVICES$NAME" crond"
+fi
+
+if [ "$PROBLEM_SERVICES" = "" ]; then
+  echo "Phase I Successful!"
+else
+  echo "Phase I Not Successful When Stopping Service(s) "$PROBLEM_SERVICES" Failed"
+fi

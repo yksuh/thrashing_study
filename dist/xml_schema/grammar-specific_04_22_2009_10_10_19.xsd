@@ -1,0 +1,221 @@
+<?xml version="1.0"?>
+
+<!-- Schema for Configurations -->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	<xsd:element name="grammar">
+	
+		<xsd:complexType>
+		
+			<xsd:sequence>
+			
+				<xsd:element name="select" minOccurs="1" maxOccurs="1">
+
+					<xsd:complexType>
+
+						<xsd:attribute name="maxColumns" use="required">
+
+							<xsd:simpleType>
+
+								<xsd:union>
+
+									<xsd:simpleType>
+
+										<xsd:restriction base="xsd:string">
+
+											<xsd:enumeration value="all"/>
+
+										</xsd:restriction>
+
+									</xsd:simpleType>
+
+									<xsd:simpleType>
+
+										<xsd:restriction base="xsd:positiveInteger"/>
+
+									</xsd:simpleType>
+
+								</xsd:union>
+
+							</xsd:simpleType>
+						
+						</xsd:attribute>
+
+					</xsd:complexType>	
+
+				</xsd:element>
+		
+				<xsd:element name="from" minOccurs="1" maxOccurs="1">
+
+					<xsd:complexType>
+
+						<xsd:attribute name="maxNumCorrelationNames" use="required">
+
+							<xsd:simpleType>
+
+								<xsd:union>
+
+									<xsd:simpleType>
+
+										<xsd:restriction base="xsd:string">
+
+											<xsd:enumeration value="actual"/>
+
+										</xsd:restriction>
+
+									</xsd:simpleType>
+
+									<xsd:simpleType>
+
+										<xsd:restriction base="xsd:positiveInteger"/>
+
+									</xsd:simpleType>
+
+								</xsd:union>
+
+							</xsd:simpleType>
+						
+						</xsd:attribute>
+						
+						<xsd:attribute name="useDuplicates" type="xsd:boolean" use="required"/>
+
+					</xsd:complexType>	
+
+				</xsd:element>
+
+				<xsd:element name="where" minOccurs="1" maxOccurs="1">
+
+					<xsd:complexType>
+
+						<xsd:sequence>
+						
+							<xsd:element name="binaryOperators" minOccurs="1" maxOccurs="1">
+							
+								<xsd:complexType>
+								
+									<xsd:sequence>
+									
+										<xsd:element name="operator" minOccurs="1" maxOccurs="unbounded">
+										
+											<xsd:complexType>
+											
+												<xsd:attribute name="symbol" type="xsd:string" use="required"/>
+												
+											</xsd:complexType>
+										
+										</xsd:element>
+									
+									</xsd:sequence>
+								
+								</xsd:complexType>
+							
+							</xsd:element>
+						
+							<xsd:element name="binaryLogicalOperators" minOccurs="1" maxOccurs="1">
+							
+								<xsd:complexType>
+								
+									<xsd:sequence>
+									
+										<xsd:element name="operator" minOccurs="1" maxOccurs="unbounded">
+										
+											<xsd:complexType>
+											
+												<xsd:attribute name="symbol" type="xsd:string" use="required"/>
+											
+											</xsd:complexType>
+										
+										</xsd:element>
+									
+									</xsd:sequence>
+								
+								</xsd:complexType>
+							
+							</xsd:element>
+
+							<xsd:element name="unaryLogicalOperators" minOccurs="1" maxOccurs="1">
+							
+								<xsd:complexType>
+								
+									<xsd:sequence>
+									
+										<xsd:element name="operator" minOccurs="1" maxOccurs="1">
+										
+											<xsd:complexType>
+											
+												<xsd:attribute name="symbol" use="required">
+
+													<xsd:simpleType>
+
+														<xsd:restriction base="xsd:string">
+
+															<xsd:enumeration value="NOT"/>
+
+														</xsd:restriction>
+
+													</xsd:simpleType>
+												
+												</xsd:attribute>
+											
+												<xsd:attribute name="usePercentage" use="required">
+
+													<xsd:simpleType>
+
+														<xsd:restriction base="xsd:integer">
+
+															<xsd:minInclusive value='0'/>
+
+															<xsd:maxInclusive value='100'/>
+
+														</xsd:restriction>
+
+													</xsd:simpleType>
+												
+												</xsd:attribute>
+
+											</xsd:complexType>
+										
+										</xsd:element>
+									
+									</xsd:sequence>
+								
+								</xsd:complexType>
+							
+							</xsd:element>
+
+						</xsd:sequence>
+
+						<xsd:attribute name="maxIsAbsolute" type="xsd:boolean" use="required"/>
+
+						<xsd:attribute name="cartesianPossible" type="xsd:boolean" use="required"/>
+
+						<xsd:attribute name="maxPredicates" type="xsd:nonNegativeInteger" use="required"/>
+						
+						<xsd:attribute name="complexUsePercentage" use="required">
+						
+							<xsd:simpleType>
+						
+								<xsd:restriction base="xsd:integer">
+						
+									<xsd:minInclusive value='0'/>
+						
+									<xsd:maxInclusive value='100'/>
+						
+								</xsd:restriction>
+						
+							</xsd:simpleType>
+
+						</xsd:attribute>
+
+					</xsd:complexType>	
+
+				</xsd:element>
+
+			</xsd:sequence>
+		
+		</xsd:complexType>
+			
+	</xsd:element>
+	
+</xsd:schema>

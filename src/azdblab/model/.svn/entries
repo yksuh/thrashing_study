@@ -1,0 +1,52 @@
+10
+
+dir
+1186
+svn+ssh://lec/cs/svn/tau/AZDBLAB/branches/young_xact/src/azdblab/model
+svn+ssh://lec/cs/svn/tau/AZDBLAB
+
+
+
+2013-08-08T23:53:27.383493Z
+1081
+yksuh
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+e08e2e80-0740-4162-b9f5-a77b3bff3e4b
+
+analyzer
+dir
+
+dataDefinition
+dir
+
+dataGenerator
+dir
+
+experiment
+dir
+
+query
+dir
+
+queryAnalyzer
+dir
+
+queryGenerator
+dir
+
+transactionGenerator
+dir
+

@@ -1,0 +1,71 @@
+10
+
+dir
+1186
+svn+ssh://lec/cs/svn/tau/AZDBLAB/branches/young_xact/tucson_protocol/programs
+svn+ssh://lec/cs/svn/tau/AZDBLAB
+
+
+
+2013-07-31T01:06:00.199651Z
+1049
+yksuh
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+e08e2e80-0740-4162-b9f5-a77b3bff3e4b
+
+JDBCTester
+dir
+
+Makefile
+file
+
+
+
+
+2013-11-17T22:40:03.000000Z
+6073892d718e64fa79c9d794b55fd026
+2009-07-17T19:06:20.000000Z
+95
+ruizhang
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1083
+
+TimeChecker
+dir
+
+scripts
+dir
+

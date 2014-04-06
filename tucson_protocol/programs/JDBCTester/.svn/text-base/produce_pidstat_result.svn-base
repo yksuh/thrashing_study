@@ -1,0 +1,5 @@
+#!/bin/sh
+echo '-------------------' >> pidstat_result.txt;
+date >> pidstat_result.txt;
+pidstat -t >> pidstat_result.txt;
+sync

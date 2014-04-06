@@ -1,0 +1,5 @@
+2014-01-10 04:18:32,082 INFO  - Run Observer 
+2014-01-10 04:18:43,208 ERROR - Get ExperimentSpecID err. 
+2014-01-10 04:18:44,178 ERROR - Get ExperimentSpecID err. 
+2014-01-10 04:18:46,059 ERROR - Get ExperimentSpecID err. 
+2014-01-10 04:18:49,924 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXPERIMENTRUN(RunID, ExperimentID, DBMSName, StartTime, CurrentStage, Percentage, MachineName) VALUES (9, 49, 'oracle', to_timestamp('Fri, Jan 10 2014 04:18:49:846', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Pending', 0.0, 'sodb12.cs.arizona.edu') 

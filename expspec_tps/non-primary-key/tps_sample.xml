@@ -1,0 +1,27 @@
+<transactionExperiment name="tps-sample" scenario="tps">
+  <description>
+    The baseline test of tps scenario, with some transactions.
+  </description>
+  <dataDefinitionReference href="TestDataDef1M.xml"/>
+  <tableConfiguration>
+    <tableSet>
+      <table name="HT1" seed="1999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT2" seed="2999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT3" seed="3999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT4" seed="4999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT5" seed="5999">
+        <cardinality hypothetical="actual"/>
+      </table>
+    </tableSet>
+  </tableConfiguration>
+  <terminalConfiguration numberTerminals="100"/>
+  <!-- <queryDefinitionReference numberQueries="100" type="predefinedQueries" href="100_q_1.xml"/> -->
+</transactionExperiment>

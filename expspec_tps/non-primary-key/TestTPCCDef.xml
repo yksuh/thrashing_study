@@ -1,0 +1,121 @@
+<dataDefinition name="TPCC">
+
+	<documentation>
+		Create TPCC tables.
+	</documentation>
+
+	<table name="customer" cardinality="3000">
+		<column name="c_w_id" dataType="number" dataLength="20" inIndex="true" inPrimaryKey="false"/>
+		<column name="c_d_id" dataType="number" dataLength="20" inIndex="true" inPrimaryKey="false"/>
+		<column name="c_id" dataType="number" dataLength="20" inPrimaryKey="false"/>
+		<column name="c_discount" dataType="number" dataLength="8" decimalpoint="4" inPrimaryKey="false"/>
+		<column name="c_credit" dataType="char" dataLength="2" inPrimaryKey="false"/>
+		<column name="c_last" dataType="varchar2" dataLength="16" inIndex="true" inPrimaryKey="false"/>
+		<column name="c_first" dataType="varchar2" dataLength="16" inIndex="true" inPrimaryKey="false"/>
+		<column name="c_credit_lim" dataType="number" dataLength="14" decimalpoint="2" inPrimaryKey="false"/>
+		<column name="c_balance" dataType="number" dataLength="14" decimalpoint="2" inPrimaryKey="false"/>
+		<column name="c_ytd_payment" dataType="number" dataLength="20" inPrimaryKey="false"/>
+		<column name="c_payment_cnt" dataType="number" dataLength="20" inPrimaryKey="false"/>
+		<column name="c_delivery_cnt" dataType="number" dataLength="10" inPrimaryKey="false"/>
+		<column name="c_street_1" dataType="varchar2" dataLength="20" inPrimaryKey="false"/>
+		<column name="c_street_2" dataType="varchar2" dataLength="20" inPrimaryKey="false"/>
+		<column name="c_city" dataType="varchar2" dataLength="20" inPrimaryKey="false"/>
+		<column name="c_state" dataType="char" dataLength="2" inPrimaryKey="false"/>
+		<column name="c_zip" dataType="char" dataLength="9" inPrimaryKey="false"/>
+		<column name="c_phone" dataType="char" dataLength="16" inPrimaryKey="false"/>
+		<column name="c_since" dataType="timestamp" inPrimaryKey="false"/>
+		<column name="c_middle" dataType="char" dataLength="2" inPrimaryKey="false"/>
+		<column name="c_data" dataType="varchar" dataLength="500" inPrimaryKey="false"/>
+	</table>
+
+	<table name="district" cardinality="10">
+
+		<column name="d_w_id" dataType="number" dataLength="20" inPrimaryKey="true"/>
+		<column name="d_id" dataType="number" dataLength="20" inPrimaryKey="true"/>
+		<column name="d_ytd" dataType="number" dataLength="14" decimalpoint="2" inPrimaryKey="false"/>
+		<column name="d_tax" dataType="number" dataLength="8" decimalpoint="4" inPrimaryKey="false"/>
+		<column name="d_next_o_id" dataType="number" dataLength="10" inPrimaryKey="false"/>
+		<column name="d_name" dataType="varchar2" dataLength="10" inPrimaryKey="false"/>
+		<column name="d_street_1" dataType="varchar2" dataLength="20" inPrimaryKey="false"/>
+		<column name="d_street_2" dataType="varchar2" dataLength="20" inPrimaryKey="false"/>
+		<column name="d_city" dataType="varchar2" dataLength="20" inPrimaryKey="false"/>
+		<column name="d_state" dataType="char" dataLength="2" inPrimaryKey="false"/>
+		<column name="d_zip" dataType="char" dataLength="9" inPrimaryKey="false"/>
+	</table>
+
+	<table name="history" cardinality="0">
+		<column name="h_c_id" dataType="number" dataLength="20" inPrimaryKey="false"/>
+		<column name="h_c_d_id" dataType="number" dataLength="20" inPrimaryKey="false"/>
+		<column name="h_c_w_id" dataType="number" dataLength="20" inPrimaryKey="false"/>
+		<column name="h_d_id" dataType="number" dataLength="20" inPrimaryKey="false"/>
+		<column name="h_w_id" dataType="number" dataLength="20" inPrimaryKey="false"/>
+		<column name="h_date" dataType="timestamp" inPrimaryKey="false"/>
+		<column name="h_amount" dataType="number" dataLength="8" decimalPoint = "2" inPrimaryKey="false"/>
+		<column name="h_data" dataType="varchar2" dataLength="24" inPrimaryKey="false"/>
+	</table>
+
+	<table name="item" cardinality="100000">
+		<column name="i_id" dataType="number" dataLength="20" inPrimaryKey="true"/>
+		<column name="i_name" dataType="varchar2" dataLength="24" inPrimaryKey="false"/>
+		<column name="i_price" dataType="number" dataLength="7" decimalPoint = "2" inPrimaryKey="false"/>
+		<column name="i_data" dataType="varchar2" dataLength="50" inPrimaryKey="false"/>
+		<column name="i_im_id" dataType="number" dataLength="20" inPrimaryKey="false"/>
+	</table>
+
+	<table name="oorder" cardinality="0">
+                <column name="o_w_id" dataType="number" dataLength="20" inPrimaryKey="true" inUnique="true"/>
+                <column name="o_d_id" dataType="number" dataLength="20" inPrimaryKey="true" inUnique="true"/>
+                <column name="o_id" dataType="number" dataLength="20" inPrimaryKey="true" inUnique="true"/>
+                <column name="o_c_id" dataType="number" dataLength="20" inPrimaryKey="false" inUnique="true"/>
+                <column name="o_carrier_id" dataType="number" dataLength="20" inPrimaryKey="false"/>
+                <column name="o_ol_cnt" dataType="number" dataLength="2" decimalPoint = "0" inPrimaryKey="false"/>
+                <column name="o_all_local" dataType="number" dataLength="1" decimalPoint = "0" inPrimaryKey="false"/>
+                <column name="o_entry_d" dataType="timestamp" inPrimaryKey="false"/>
+        </table>
+	
+
+	<table name="order_line" cardinality="0">
+                <column name="ol_w_id" dataType="number" dataLength="20" inPrimaryKey="true" />
+                <column name="ol_d_id" dataType="number" dataLength="20" inPrimaryKey="true" />
+                <column name="ol_o_id" dataType="number" dataLength="20" inPrimaryKey="true" />
+                <column name="ol_number" dataType="number" dataLength="20" inPrimaryKey="true" />
+                <column name="ol_i_id" dataType="number" dataLength="20" inPrimaryKey="false"/>
+                <column name="ol_delivery_d" dataType="timestamp" inPrimaryKey="false"/>
+                <column name="ol_amount" dataType="number" dataLength="8" decimalPoint = "2" inPrimaryKey="false"/>
+                <column name="ol_supply_w_id" dataType="timestamp" inPrimaryKey="false"/>
+                <column name="ol_quantity" dataType="number" dataLength="2" decimalPoint = "0" inPrimaryKey="false"/>
+                <column name="ol_dist_info" dataType="char" dataLength="24" inPrimaryKey="false"/>
+        </table>
+
+	<table name="stock" cardinality="100000">
+                <column name="s_w_id" dataType="number" dataLength="20" inPrimaryKey="true" />
+                <column name="s_i_id" dataType="number" dataLength="20" inPrimaryKey="true" />
+                <column name="s_quantity" dataType="number" dataLength="4" decimalPoint = "0" inPrimaryKey="false" />
+                <column name="s_ytd" dataType="number" dataLength="10" decimalPoint = "2" inPrimaryKey="false" />
+                <column name="s_order_cnt" dataType="number" dataLength="20" inPrimaryKey="false"/>
+                <column name="s_remote_cnt" dataType="number" dataLength="20" inPrimaryKey="false"/>
+                <column name="s_data" dataType="varchar" dataLength="50" inPrimaryKey="false"/>
+                <column name="s_dist_01" dataType="char" dataLength="24" inPrimaryKey="false"/>
+                <column name="s_dist_02" dataType="char" dataLength="24" inPrimaryKey="false"/>
+                <column name="s_dist_03" dataType="char" dataLength="24" inPrimaryKey="false"/>
+                <column name="s_dist_04" dataType="char" dataLength="24" inPrimaryKey="false"/>
+                <column name="s_dist_05" dataType="char" dataLength="24" inPrimaryKey="false"/>
+                <column name="s_dist_06" dataType="char" dataLength="24" inPrimaryKey="false"/>
+                <column name="s_dist_07" dataType="char" dataLength="24" inPrimaryKey="false"/>
+                <column name="s_dist_08" dataType="char" dataLength="24" inPrimaryKey="false"/>
+                <column name="s_dist_09" dataType="char" dataLength="24" inPrimaryKey="false"/>
+                <column name="s_dist_10" dataType="char" dataLength="24" inPrimaryKey="false"/>
+        </table>
+
+	<table name="warehouse" cardinality="1">
+                <column name="w_id" dataType="number" dataLength="20" inPrimaryKey="true" />
+                <column name="w_ytd" dataType="number" dataLength="12" decimalPoint = "2" inPrimaryKey="false" />
+                <column name="w_tax" dataType="number" dataLength="8" decimalPoint = "4" inPrimaryKey="false" />
+                <column name="w_name" dataType="varchar" dataLength="10" inPrimaryKey="false" />
+                <column name="w_street_1" dataType="varchar2" dataLength="20" inPrimaryKey="false"/>
+                <column name="w_street_2" dataType="varchar2" dataLength="20" inPrimaryKey="false"/>
+                <column name="w_city" dataType="varchar2" dataLength="20" inPrimaryKey="false"/>
+                <column name="w_state" dataType="char" dataLength="2" inPrimaryKey="false"/>
+                <column name="w_zip" dataType="char" dataLength="9" inPrimaryKey="false"/>
+        </table>
+</dataDefinition>

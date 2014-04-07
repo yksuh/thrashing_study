@@ -6,16 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimerTask;
-import java.util.Vector;
-
 import azdblab.Constants;
 import azdblab.executable.Main;
-import azdblab.labShelf.GeneralDBMS;
-import azdblab.labShelf.InternalTable;
 import azdblab.labShelf.RepeatableRandom;
-import azdblab.labShelf.TableDefinition;
-import azdblab.labShelf.dataModel.LabShelfManager;
-import azdblab.model.dataDefinition.ForeignKey;
 import azdblab.model.experiment.Column;
 import azdblab.model.experiment.ExperimentRun;
 import azdblab.model.experiment.Table;
@@ -29,7 +22,7 @@ import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
  * Default Setting: read committed, a single core, MPL=100
  */
 
-public class TPSScenario extends ScenarioBasedOnTransaction {
+public class OldTPSScenario extends ScenarioBasedOnTransaction {
 //	protected class TimeoutTerminals extends TimerTask{
 //		ArrayList<Client> clients = null; 
 //	    public TimeoutTerminals(ArrayList<Client> cls) { 
@@ -47,83 +40,12 @@ public class TPSScenario extends ScenarioBasedOnTransaction {
 //	    }
 //	  }
 	
-	public static final boolean refreshTable = false;
 	
-	public TPSScenario(ExperimentRun expRun) {
+	public OldTPSScenario(ExperimentRun expRun) {
 		super(expRun);
 		// TODO Auto-generated constructor stub
-		installTables();
 	}
 
-	public Vector<InternalTable> getTables() {
-		if (refreshTable) {
-//			LabShelfManager.getShelf()
-//					.dropTable(QUERYSTATEVALUATION.TableName);
-//			LabShelfManager.getShelf().dropTable(RUNHASASPECT.TableName);
-//			LabShelfManager.getShelf().dropTable(QUERYEXECUTIONPROCS.TableName);
-		}
-
-		Vector<InternalTable> toRet = new Vector<InternalTable>();
-//		toRet.add(QUERYSTATEVALUATION);
-//		toRet.add(RUNHASASPECT);
-		return toRet;
-	}
-	
-	/***
-	 * Creates sequence
-	 * @param seqName	sequence name
-	 */
-	private void createSequence(String seqName, int startNum) {
-		String createSequence = "CREATE SEQUENCE " + seqName + " START WITH "+ startNum +" NOMAXVALUE";
-		LabShelfManager.getShelf().executeUpdateSQL(createSequence);
-		System.out.println(seqName + " Created");
-	}
-	
-	private void installTables() {
-		Vector<InternalTable> lstInternalTables = getTables();
-		if (lstInternalTables == null) {
-			return;
-		}
-//		TableDefinition.vecPluginTables.addAll(lstInternalTables);
-		for (int i = 0; i < lstInternalTables.size(); i++) {
-			InternalTable tmp = lstInternalTables.get(i);
-			if (!LabShelfManager.getShelf().tableExists(tmp.TableName)) {
-				LabShelfManager.getShelf().createTable(tmp.TableName,
-						tmp.columns, tmp.columnDataTypes,
-						tmp.columnDataTypeLengths, tmp.primaryKey,
-						tmp.foreignKey);
-//				if(tmp.TableName.equalsIgnoreCase(QueryParamEvaluation.PKQUERYPARAM.TableName)){
-//					String alterTblSQL = "alter table " + QueryParamEvaluation.PKQUERYPARAM + " MODIFY value NUMBER(10, 3)";
-//					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
-//				}
-				if (tmp.strSequenceName != null) {
-					createSequence(tmp.strSequenceName, 1);
-				}
-			}
-		}
-	}
-
-//	/***
-//	 * Installs all internal tables
-//	 * @throws Exception
-//	 */
-//	private void installAll() throws Exception {
-//		for (int i = 0; i < INTERNAL_TABLES.length; i++) {
-//System.out.println(INTERNAL_TABLES[i].TableName + " Creating...");
-//			createTable(INTERNAL_TABLES[i].TableName,
-//					INTERNAL_TABLES[i].columns,
-//					INTERNAL_TABLES[i].columnDataTypes,
-//					INTERNAL_TABLES[i].columnDataTypeLengths,
-//					INTERNAL_TABLES[i].columnNullable,
-//					INTERNAL_TABLES[i].uniqueConstraintColumns,
-//					INTERNAL_TABLES[i].primaryKey,
-//					INTERNAL_TABLES[i].foreignKey);
-//System.out.println(INTERNAL_TABLES[i].TableName + " Created");
-//			if (INTERNAL_TABLES[i].strSequenceName != null) {
-//				createSequence(INTERNAL_TABLES[i].strSequenceName);
-//			}
-//		}
-	
 	public Client[] clients;
 	protected boolean timeOut = false;
 	static class TransactionGenerator{
@@ -581,256 +503,5 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 //			Main._logger.outputLog("Client #" + cc.currClient.getID() + " is waiting to die ...");
 //			cc.start();
 //		}
-//	}
-	
-//	/**
-//	 * The definition of the data definition internal table.
-//	 * 
-//	 * @see InternalTable
-//	 */
-//	public static final InternalTable EXPERIMENTSPEC = new InternalTable(
-//			Constants.TABLE_PREFIX + Constants.TABLE_EXPERIMENTSPEC,
-//			new String[] { "ExperimentSpecID", "Name", "Kind", "FileName",
-//					"SourceXML" }, new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//					GeneralDBMS.I_DATA_TYPE_CLOB }, new int[] { 10, 100, 1,
-//					100, -1 }, new int[] { 0, 0, 0, 0, 0 }, null,
-//			new String[] { "ExperimentSpecID" }, null,
-//			Constants.SEQUENCE_EXPERIMENTSPEC);
-//	
-	public static InternalTable RUNHASASPECT = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_RUNHASASPECT,
-			new String[] { "AspectName", "RunID" }, new int[] {
-					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-					GeneralDBMS.I_DATA_TYPE_NUMBER }, new int[] { 100, 10 },
-			new int[] { 0, 0 }, null, new String[] { "AspectName", "RunID" },
-			new ForeignKey[] { new ForeignKey(new String[] { "RunID" },
-					Constants.TABLE_PREFIX + Constants.TABLE_EXPERIMENTRUN,
-					new String[] { "RunID" }, " ON DELETE CASCADE") }, null);
-//	
-//	public static InternalTable QUERYSTATEVALUATION = new InternalTable(
-//			Constants.TABLE_PREFIX + Constants.TABLE_QUERYSTATEVALUATION,
-//			new String[] { "QueryExecutionID", "TotalOtherTime",
-//					"NumPhantomsPresent", "TotalFaults", "StoppedProcesses",
-//					"TotalDBMSTime", "NumStartedProcesses",
-//					"NumExecutedProcesses", "userModeTicks",
-//					"lowPriorityUserModeTicks", "systemModeTicks",
-//					"idleTaskTicks", "ioWait", "irq", "softirq",
-//					"stealStolenTicks", "NumBadProcs", "dbmsIOWait", "otherIOWait" },
-//			new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_NUMBER},
-//			new int[] { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-//					10, 10, 10, 10, 10 },
-//			new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-//			null,
-//			new String[] { "QueryExecutionID" },
-//			new ForeignKey[] { new ForeignKey(
-//					new String[] { "QueryExecutionID" }, Constants.TABLE_PREFIX
-//							+ Constants.TABLE_QUERYEXECUTION,
-//					new String[] { "QueryExecutionID" }, " ON DELETE CASCADE") },
-//			null);
-//	
-
-//	
-//	private void saveAllProcesses(int runID) {
-//		try {
-//			LabShelfManager.getShelf().insertTuple( 
-//				Constants.TABLE_PREFIX
-//					+ Constants.TABLE_QUERYEXECUTIONPROCS,
-//				QUERYEXECUTIONPROCS.columns,
-//				new String[] {
-//					String.valueOf(queryExecutionID),
-//					String.valueOf(curProc.processID),
-//					curProc.vm?"1":"0",
-//					String.valueOf(curProc.processName.trim()),
-//					String.valueOf(curProc.uTick),
-//					String.valueOf(curProc.sTick),
-//					String.valueOf(curProc.uTick+curProc.sTick),
-//					String.valueOf(curProc.min_flt),
-//					String.valueOf(curProc.maj_flt),
-//                	String.valueOf(curProc.blockio_count),
-//                	String.valueOf(curProc.blockio_delay),
-//                	String.valueOf(curProc.btime),
-//                    String.valueOf(curProc.cpu_count),
-//                    String.valueOf(curProc.cpu_delay),
-//                    String.valueOf(curProc.cpu_run_real_total),
-//	                String.valueOf(curProc.cpu_run_virtual_total),
-//        	        String.valueOf(curProc.cpu_scaled_run_real_total),
-//                	String.valueOf(curProc.etime),
-//                    String.valueOf(curProc.freepgs_count),
-//                    String.valueOf(curProc.freepgs_delay),
-//                    String.valueOf(curProc.nivcsw),
-//	                String.valueOf(curProc.nvcsw),
-//        	        String.valueOf(curProc.read_bytes),
-//                	String.valueOf(curProc.read_char),
-//                    String.valueOf(curProc.read_syscalls),
-//                    String.valueOf(curProc.sTickScaled),
-//                    String.valueOf(curProc.swapin_count),
-//	                String.valueOf(curProc.swapin_delay),
-//        	        String.valueOf(curProc.uTickScaled),
-//                	String.valueOf(curProc.write_bytes),
-//                    String.valueOf(curProc.write_char),
-//                    String.valueOf(curProc.write_syscalls) },
-//				QUERYEXECUTIONPROCS.columnDataTypes);
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			String updateSQL = "Update " + Constants.TABLE_PREFIX
-//					+ Constants.TABLE_QUERYEXECUTIONPROCS
-//					+ " set ProcessName = '" + toSave.get(i).processName.trim()+"',"
-//			        + " UTicks = " + toSave.get(i).uTick + ","
-//					+ " STicks = " + toSave.get(i).sTick + " , " 
-//					+ " min_flt = " + toSave.get(i).min_flt+ ", " 
-//					+ " maj_flt = " + toSave.get(i).maj_flt+ ", "
-//					+ " blkio_count = " + toSave.get(i).blockio_count+ ", "
-//					+ " blockio_delay = " + toSave.get(i).blockio_delay+ ", "
-//					+ " btime = " + toSave.get(i).btime+ ", "
-//					+ " cpu_count = " + toSave.get(i).cpu_count+ ", "
-//					+ " cpu_delay = " + toSave.get(i).cpu_delay+ ", "
-//					+ " cpu_run_real_total = " + toSave.get(i).cpu_run_real_total+ ", "
-//					+ " cpu_run_virtual_total = " + toSave.get(i).cpu_run_virtual_total+ ", "
-//					+ " cpu_scaled_run_real_total = " + toSave.get(i).cpu_scaled_run_real_total+ ", "
-//					+ " etime = " + toSave.get(i).etime+ ", "
-//					+ " freepgs_count = " + toSave.get(i).freepgs_count+ ", "
-//					+ " freepgs_delay = " + toSave.get(i).freepgs_delay+ ", "
-//					+ " nivcsw = " + toSave.get(i).nivcsw+ ", "
-//					+ " nvcsw = " + toSave.get(i).nvcsw+ ", "
-//					+ " ProcessID = " + toSave.get(i).processID+ ", "
-//					+ " read_bytes = " + toSave.get(i).read_bytes+ ", "
-//					+ " read_char = " + toSave.get(i).read_char+ ", "
-//					+ " read_syscalls = " + toSave.get(i).read_syscalls+ ", "
-//					+ " sTickScaled = " + toSave.get(i).sTickScaled+ ", "
-//					+ " swapin_count = " + toSave.get(i).swapin_count+ ", "
-//					+ " swapin_delay = " + toSave.get(i).swapin_delay+ ", "
-//					+ " uTickScaled = " + toSave.get(i).uTickScaled+ ", "
-//					+ " write_bytes = " + toSave.get(i).write_bytes+ ", "
-//					+ " write_char = " + toSave.get(i).write_char+ ", "
-//					+ " write_syscalls = " + toSave.get(i).write_syscalls
-//					+ " where QueryExecutionID = " + queryExecutionID
-//					+ " and processID = " + toSave.get(i).processID;
-//			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
-//		}
-//		LabShelfManager.getShelf().commit();
-//	}
-//	
-//	/**
-//	 * The definition of the experiment internal table.
-//	 * 
-//	 * @see InternalTable
-//	 */
-//	public static final InternalTable EXPERIMENT = new InternalTable(
-//			Constants.TABLE_PREFIX + Constants.TABLE_EXPERIMENT, new String[] {
-//					"ExperimentID", "UserName", "NotebookName",
-//					"ExperimentName", "Scenario", "SourceFileName",
-//					"CreateDate", "SourceXML" }, new int[] {
-//					GeneralDBMS.I_DATA_TYPE_NUMBER,
-//					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//					GeneralDBMS.I_DATA_TYPE_DATE,
-//					GeneralDBMS.I_DATA_TYPE_CLOB }, new int[] { 10, 100, 100,
-//					100, 100, 500, -1, -1 }, new int[] { 0, 0, 0, 0, 0, 0, 0,
-//					0 }, new String[] { "UserName", "NotebookName",
-//					"ExperimentName" }, new String[] { "ExperimentID" },
-//			new ForeignKey[] { new ForeignKey(new String[] { "UserName",
-//					"NotebookName" }, Constants.TABLE_PREFIX
-//					+ Constants.TABLE_NOTEBOOK, new String[] { "UserName",
-//					"NotebookName" }, " ON DELETE CASCADE") },
-//			Constants.SEQUENCE_EXPERIMENT);
-//	/***
-//	 * Creates sequence
-//	 * @param seqName	sequence name
-//	 */
-//	private void createSequence(String seqName) {
-//		String createSequence = "CREATE SEQUENCE " + seqName + " START WITH 1 NOMAXVALUE";
-//		try {
-//			stmt.execute(createSequence);
-//			System.out.println(seqName + " Created");
-//		} catch (SQLException e) {
-//			System.out.println(seqName + " already Exists");
-//		}
-//	}
-//	/***
-//	 * Installs all internal tables
-//	 * @throws Exception
-//	 */
-//	private void installAll() throws Exception {
-//		for (int i = 0; i < INTERNAL_TABLES.length; i++) {
-//System.out.println(INTERNAL_TABLES[i].TableName + " Creating...");
-//			createTable(INTERNAL_TABLES[i].TableName,
-//					INTERNAL_TABLES[i].columns,
-//					INTERNAL_TABLES[i].columnDataTypes,
-//					INTERNAL_TABLES[i].columnDataTypeLengths,
-//					INTERNAL_TABLES[i].columnNullable,
-//					INTERNAL_TABLES[i].uniqueConstraintColumns,
-//					INTERNAL_TABLES[i].primaryKey,
-//					INTERNAL_TABLES[i].foreignKey);
-//System.out.println(INTERNAL_TABLES[i].TableName + " Created");
-//			if (INTERNAL_TABLES[i].strSequenceName != null) {
-//				createSequence(INTERNAL_TABLES[i].strSequenceName);
-//			}
-//		}
-	
-//	/**
-//	 * 
-//	 * @param userName
-//	 * @param notebookName
-//	 * @param experimentName
-//	 * @param dbms
-//	 * @param startTime
-//	 * @param currentStage
-//	 * @param percentage
-//	 * @throws SQLException
-//	 */
-//	public void insertExperimentRun(String dbms, String startTime,
-//			String currentStage, double percentage) throws SQLException {
-//		int expID = getExperimentID(userName, notebookName, experimentName);
-//		//Main._logger.outputLog("getting experiment id .... done! ");
-//		if (expID == -1) {
-//			Main._logger.reportError("Insert ExperimentRun Err.");
-//			return;
-//		}
-//
-//		int runID = LabShelfManager.getShelf().getSequencialID("SEQ_RUNID");
-//		//Main._logger.outputLog("getting run id .... done! ");
-//
-//		String[] columns = new String[] { "RunID", "ExperimentID", "DBMSName",
-//				"StartTime", "CurrentStage", "Percentage" };
-//		String[] columnValues = new String[] { String.valueOf(runID),
-//				String.valueOf(expID), dbms, startTime, currentStage,
-//				String.valueOf(percentage) };
-//		int[] dataTypes = new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
-//				GeneralDBMS.I_DATA_TYPE_NUMBER,
-//				GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//				GeneralDBMS.I_DATA_TYPE_TIMESTAMP,
-//				GeneralDBMS.I_DATA_TYPE_VARCHAR, GeneralDBMS.I_DATA_TYPE_NUMBER };
-//
-//		// Inserts a test into the DBMS with no test result.
-//		LabShelfManager.getShelf().insertTupleToNotebook(
-//				EXPERIMENTRUN.TableName, columns, columnValues, dataTypes);
-//		//Main._logger.outputLog("getting experiment run inserted .... done! ");
-//
-//		LabShelfManager.getShelf().commitlabshelf();
 //	}
 }

@@ -611,7 +611,7 @@ public class Constants {
 	/**
 	 * The name of the batch internal table.
 	 */
-	public static final String TABLE_BATCH = "BATCH";
+//	public static final String TABLE_BATCH = "BATCH";
 
 	/**
 	 * The name of the batch result internal table.
@@ -621,22 +621,22 @@ public class Constants {
 	/**
 	 * The name of the transaction internal table.
 	 */
-	public static final String TABLE_TRANSACTION = "TRANSACTION";
+//	public static final String TABLE_TRANSACTION = "TRANSACTION";
 
 	/**
 	 * The name of the statement internal table.
 	 */
-	public static final String TABLE_STATEMENT = "STATEMENT";
+//	public static final String TABLE_STATEMENT = "STATEMENT";
 
 	/**
 	 * The name of the batchhasparameter internal table.
 	 */
-	public static final String TABLE_BATCHHASPARAMETER = "BATCHHASPARAMETER";
+//	public static final String TABLE_BATCHHASPARAMETER = "BATCHHASPARAMETER";
 
 	/**
 	 * The name of the batchsatisfiesaspect internal table.
 	 */
-	public static final String TABLE_BATCHSATISFIESASPECT = "BATCHSATISFIESASPECT";
+//	public static final String TABLE_BATCHSATISFIESASPECT = "BATCHSATISFIESASPECT";
 	/**
 	 * The name of the ScenarioVersion table
 	 */
@@ -658,6 +658,24 @@ public class Constants {
 	public static final String SEQUENCE_EXPERIMENT = "SEQ_EXPERIMENTID";
 	public static final String SEQUENCE_EXPERIMENTSPEC = "SEQ_EXPERIMENTSPECID";
 	public static final String SEQUENCE_STUDY = "SEQ_STUDYID";
+	
+	/**
+	 * Tables for thrashing study
+	 */
+	public static final String TABLE_BATCHSET = "BATCHSET";
+	public static final String TABLE_BATCHSETHASPARAMETER = "BATCHSETHASPARAMETER";
+	public static final String TABLE_BATCH = "BATCH";
+	public static final String TABLE_BATCHSATISFIESASPECT = "BATCHSATISFIESASPECT";
+	public static final String TABLE_CLIENT = "CLIENT";
+	public static final String TABLE_TRANSACTION = "TRANSACTION";
+	public static final String TABLE_STATEMENT = "STATEMENT";
+	
+	public static final String SEQUENCE_BATCHSET = "SEQ_BATCHSET";
+	public static final String SEQUENCE_BATCH = "SEQ_BATCH";
+	public static final String SEQUENCE_CLIENT = "SEQ_PREDEFINEDQUERYID";
+	public static final String SEQUENCE_TRANSACTION = "SEQ_ANALYSISRUNID";
+		
+	
 	/**
 	 * The data generation type for a column that indicates randomly generated
 	 * values.

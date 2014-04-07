@@ -84,7 +84,7 @@ public class TableDefinition {
 					GeneralDBMS.I_DATA_TYPE_CLOB }, new int[] { 10, 100, 1,
 					100, -1 }, new int[] { 0, 0, 0, 0, 0 }, null,
 			new String[] { "ExperimentSpecID" }, null,
-			Constants.SEQUENCE_EXPERIMENTSPEC);
+			"SEQ_EXPERIMENTSPECID");
 
 	public static final InternalTable REFERSEXPERIMENTSPEC = new InternalTable(
 			Constants.TABLE_PREFIX + Constants.TABLE_REFERSEXPERIMENTSPEC,

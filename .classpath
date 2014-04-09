@@ -2,8 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="plugins"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="libs/ant.jar"/>
 	<classpathentry kind="lib" path="libs/db2jcc_license_cu.jar"/>
 	<classpathentry kind="lib" path="libs/db2jcc.jar"/>
 	<classpathentry kind="lib" path="libs/JavaPlot.jar"/>
@@ -36,5 +34,7 @@
 	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/postgresql-8.4-701.jdbc4.jar"/>
 	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/smtp.jar"/>
 	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/xml-apis.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Home"/>
+	<classpathentry kind="lib" path="libs/ant.jar"/>
 	<classpathentry kind="output" path="dist"/>
 </classpath>

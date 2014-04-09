@@ -655,6 +655,8 @@ public abstract class Scenario extends Plugin{
 					+ "a change point, alternatively stepping down by granularity (2M => left, 1.99M => right ...),\n"
 					+ "If we get different plans obtained on the left/right state table at their cardinalities, \n"
 					+ "then we make a query execution NUMQUERYEXECS times. ";
+		}else if (scenarioName.equalsIgnoreCase("xactthrashing")) {
+			return " We study transaction thrashing. ";
 		}
 
 		else {

@@ -514,6 +514,7 @@ public class ExperimentRun {
 			for (int j = 0; j < col_names.length; j++) {
 				String cname = col_names[j];
 				columns[j] = new Column(cname);
+				columns[j].mySize = myDataDef.getColumnDataLength(tname, cname);
 			}
 
 			// myFixedTables[i] = new Table(tname, myDataDef.getDataDefName() +

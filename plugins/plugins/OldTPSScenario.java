@@ -346,7 +346,7 @@ Main._logger.outputLog(_sql); // this should later be replaced by sql array
 	}
 	
 	@Override
-	protected void stepA(int numClients, double edbSz) throws Exception {
+	protected void stepA(int batchSetID, int numClients, double edbSz) throws Exception {
 //		recordRunProgress(0, "Beginning the initialization of a batch of terminals");
 //		ArrayList<Client> ret = new ArrayList<Client>();
 		// assume that numClients > 0

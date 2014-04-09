@@ -745,8 +745,8 @@ public class TableDefinition {
 	 * AZDBLAB_BATCHHASPARAMETER table
 	 * 
 	 */
-	public InternalTable BATCHHASPARAMETER = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASPARAMETER,
+	public InternalTable BATCHSETHASPARAMETER = new InternalTable(
+			Constants.TABLE_PREFIX + Constants.TABLE_BATCHSETHASPARAMETER,
 			new String[] { "BatchID", "ParamName", "Value" }, new int[] {
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_VARCHAR,

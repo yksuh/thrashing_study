@@ -664,17 +664,24 @@ public class Constants {
 	 */
 	public static final String TABLE_BATCHSET = "BATCHSET";
 	public static final String TABLE_BATCHSETHASPARAMETER = "BATCHSETHASPARAMETER";
+	public static final String TABLE_BSSATISFIESASPECT = "BSSATISFIESASPECT";	// batchsetsatisifiesaspect
 	public static final String TABLE_BATCH = "BATCH";
-	public static final String TABLE_BATCHSATISFIESASPECT = "BATCHSATISFIESASPECT";
+	public static final String TABLE_BATCHHASRESULT = "BATCHHASRESULT";
 	public static final String TABLE_CLIENT = "CLIENT";
+	public static final String TABLE_CLIENTHASRESULT = "CLIENTHASRESULT";
 	public static final String TABLE_TRANSACTION = "TRANSACTION";
 	public static final String TABLE_STATEMENT = "STATEMENT";
+	public static final String TABLE_COMPLETEDFGTASK = "COMPLETEDFGTASK"; // fine-grained task
 	
+	/***
+	 * Sequence for thrashing study 
+	 */
 	public static final String SEQUENCE_BATCHSET = "SEQ_BATCHSET";
 	public static final String SEQUENCE_BATCH = "SEQ_BATCH";
-	public static final String SEQUENCE_CLIENT = "SEQ_PREDEFINEDQUERYID";
-	public static final String SEQUENCE_TRANSACTION = "SEQ_ANALYSISRUNID";
-		
+	public static final String SEQUENCE_CLIENT = "SEQ_CLIENT";
+	public static final String SEQUENCE_TRANSACTION = "SEQ_TRANSACTION";
+	public static final String SEQUENCE_STATEMENT = "SEQ_STATEMENT";
+			
 	
 	/**
 	 * The data generation type for a column that indicates randomly generated
@@ -805,6 +812,8 @@ public class Constants {
 	 */
 	public static final String NAME_TPS_SCENARIO = "TPS";
 	public static final String VERSION_TPS_SCENARIO = AZDBLAB_VERSION;
+	private static String NAME_XACT_THRASHING_SCENARIO = "XACTTHRASHING";
+	private static String VERSION_XACT_THRASHING_SCENARIO = AZDBLAB_VERSION;
 
 	
 	//public static final String[] DBMSs = { "DB2", "MySQL", "MySQL2", "Oracle", "Pgsql", "Pgsql2", "SqlServer", "Teradata" };
@@ -832,7 +841,9 @@ public class Constants {
 	public static int MAX_ITERS = 3;
 	public static long THINK_TIME = 60000;
 	public static double BASE_SELECTIVITY = 0.01;
-
+	public static int NumIDs    = 5;
+	public static int NumValues = 2;
+	
 	public static final String TABLE_TPSRESULT_NAME = "AZDBLAB_XACTRUNSTAT";
 	public static final long MAX_EXECUTIONTIME = 9999999;
 	public static final String FIGURE_DIR = "work_docs/";
@@ -843,8 +854,6 @@ public class Constants {
 	
 	public static final String AZDBLAB_LABSHELF_SERVER = "jdbc:oracle:thin:@sodb7.cs.arizona.edu:1521:notebook";
 	
-
-
 	public static final String[][] SCENARIOVERSIONS = new String[][] {
 			new String[] { NAME_ADJACENT_SCENARIO, VERSION_ADJACENT_SCENARIO },
 			new String[] { NAME_BOUNCING_SCENARIO, VERSION_BOUNCING_SCENARIO },
@@ -866,6 +875,8 @@ public class Constants {
 					VERSION_UNIQUE_PLAN_SCENARIO },
 			new String[] { NAME_UPPER_BOUNCING_SCENARIO,
 					VERSION_UPPER_BOUNCING_SCENARIO },
+			new String[] { NAME_XACT_THRASHING_SCENARIO,
+					VERSION_XACT_THRASHING_SCENARIO },
 			new String[] { NAME_UPPER_SCENARIO, VERSION_UPPER_SCENARIO } };
 	
 }

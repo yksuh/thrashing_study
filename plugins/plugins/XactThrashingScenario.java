@@ -68,8 +68,9 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 	/***
 	 * Creates sequence for some tables
 	 * @param seqName	sequence name
+	 * @throws Exception 
 	 */
-	private void createSequence(String seqName, int startNum) {
+	private void createSequence(String seqName, int startNum) throws Exception {
 		String createSequence = "CREATE SEQUENCE " + seqName + " START WITH "+ startNum +" NOMAXVALUE";
 		Main._logger.outputLog(createSequence);
 		LabShelfManager.getShelf().executeUpdateSQL(createSequence);
@@ -103,7 +104,12 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 				}
 				if (tmp.strSequenceName != null) {
-					createSequence(tmp.strSequenceName, 1);
+					try {
+						createSequence(tmp.strSequenceName, 1);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -620,27 +626,102 @@ Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
 			} 
 		}
 		
+//		public void run(){
+////			long starttime = System.currentTimeMillis();
+//			while(true){
+//				if(timeOut) break;
+////			while(System.currentTimeMillis() - starttime < duration*1000){
+////			boolean localTimeOut = false;
+////			while(true){
+//				try {
+//					if(_conn == null){ 
+//						Class.forName(_driverName);
+//						_conn = DriverManager.getConnection(_connStr, _userName, _password);
+//					}
+//					// open a connection to an experiment subject
+//					_conn.setAutoCommit(false);
+//					_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
+//					if(experimentSubject.getDBMSName().toLowerCase().contains("teradata")){
+//						_stmt.executeUpdate("DATABASE azdblab_user;");
+//						_conn.commit();
+//					}
+//					// run transaction
+//					for(int i=0;i<_transaction.size();i++){
+//						_stmt.execute(_transaction.get(i));
+//					}
+//					_stmt.close();
+//					_conn.commit();
+//	//					synchronized(this){ // this variable could be accessed by multiple threads.
+//	//						localTimeOut = timeOut;
+//	//					}
+//	//					if(!localTimeOut)
+//					numTrans++;
+//	//					else{
+//	//						Main._logger.outputLog("time out >> Client #"+_id+"> # of total transactions: " + numTrans);
+//	//						return;
+//	//					}
+//	//					if(numTrans%10000==0){
+//	//						Main._logger.outputLog("Client #"+_id+"> # of current transactions: " + numTrans);
+//	//					}
+//				} catch (SQLException | ClassNotFoundException e) {
+//					//e.printStackTrace();
+////					String msg = e.getMessage().toLowerCase();
+//////					Main._logger.outputLog("Client #"+_id+"> : " + msg);
+////					// DB2: http://www-01.ibm.com/support/docview.wss?uid=swg21424265
+////					//DB2 SQL Error: SQLCODE=-952, SQLSTATE=57014 SQL0952N Processing was cancelled due to an interrupt SQLSTATE=57014
+////					if(msg.contains("cancel") // sqlserver 
+////					|| msg.contains("closed") // oracle
+////					||msg.contains("952") // db
+////					||msg.contains("interrupt") // mysql
+////					||msg.contains("i/o error") // for postgres
+////					||msg.contains("no current connection") // for javadb
+////					){  
+////						//Main._logger.outputLog(msg);
+//////						Main._logger.outputLog("Client #"+_id+"> # of total transactions: " + numTrans);
+////						return;
+////					}
+////					else{
+////						e.printStackTrace();
+////						Main._logger.reportError("An unknown error happened. Retrying ... ");
+////						if(!msg.contains("aborted") && !msg.contains("deadlock") && !msg.contains("row error")) 
+////							Main._logger.reportError(e.getMessage());
+////						break;
+////						if(experimentSubject.getDBMSName().toLowerCase().contains("pgsql")){
+////							if(msg.contains("aborted")){
+////								continue;
+////							}
+////						}
+//						continue;
+////						System.exit(-1);
+////					}
+////					e.printStackTrace();
+////					continue;
+//				}
+////				numTrans++;
+////				if(numTrans%30==0){
+////					Main._logger.outputLog("Client #"+_id+"> # of current transactions: " + numTrans);
+////				}
+//			}
+//			close();
+//			timeOut = false;
+//			return;
+//		}
+		
 		public void run(){
-//			long starttime = System.currentTimeMillis();
 			while(true){
 				if(timeOut) break;
-//			while(System.currentTimeMillis() - starttime < duration*1000){
-//			boolean localTimeOut = false;
-//			while(true){
 				try {
-					if(_conn == null){ 
-						Class.forName(_driverName);
-						_conn = DriverManager.getConnection(_connStr, _userName, _password);
+					// open a connection to an experiment subject
+					experimentSubject.open(false);
+					// run transaction
+					for(int i=0;i<_transaction.size();i++){
+						String sql = _transaction.get(i);
+						// select
+						experimentSubject.executeSQLStmt(sql);
+						Main._logger.outputLog("SQL: " + sql);
 					}
-					_conn.setAutoCommit(false);
-					_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
-					if(experimentSubject.getDBMSName().toLowerCase().contains("teradata")){
-						_stmt.executeUpdate("DATABASE azdblab_user;");
-						_conn.commit();
-					}
-					_stmt.execute(_sql);
-					_stmt.close();
-					_conn.commit();
+					experimentSubject.commit();
+					experimentSubject.close();
 	//					synchronized(this){ // this variable could be accessed by multiple threads.
 	//						localTimeOut = timeOut;
 	//					}
@@ -653,7 +734,7 @@ Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
 	//					if(numTrans%10000==0){
 	//						Main._logger.outputLog("Client #"+_id+"> # of current transactions: " + numTrans);
 	//					}
-				} catch (SQLException | ClassNotFoundException e) {
+				} catch (SQLException e) {
 					//e.printStackTrace();
 //					String msg = e.getMessage().toLowerCase();
 ////					Main._logger.outputLog("Client #"+_id+"> : " + msg);
@@ -702,59 +783,6 @@ Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
 			return numTrans;
 		}
 	}
-	
-	@Override
-	protected void stepA(int batchID,
-						 int numClients, 
-						 double edbSize) throws Exception {
-//		recordRunProgress(0, "Beginning the initialization of a batch of terminals");
-//		ArrayList<Client> ret = new ArrayList<Client>();
-		// assume that numClients > 0
-//		TransactionGenerator.setEffectiveDBSz(edbSz);
-		
-		double xactSz = 0.01;
-		double xLocks = 0.25;
-		double edbSz = 0.25;
-		
-		TransactionGenerator.setXactSize(edbSz);
-		TransactionGenerator.setXLocks(xLocks);
-		TransactionGenerator.setEffectiveDBSz(edbSz);
-		
-		clients = new Client[numClients];
-		for(int i=0;i<numClients;i++){
-			int clientNum = i+1;
-//			Thread thread1 = new Thread() {
-//				public void run() {
-//					try {
-//						String strDrvName = experimentSubject.getDBMSDriverClassName();
-//						String strConnStr = experimentSubject.getConnectionString();
-//						String strUserName = experimentSubject.getUserName();
-//						String strPassword = experimentSubject.getPassword();
-//						System.out.format("Client %d is being initialized... (login-details: %s, %s, %s, %s)\n", (i+1), strDrvName, strConnStr, strUserName, strPassword);
-//						clients[i] = new Client(i+1);
-//						clients[i].init(strDrvName,strConnStr,strUserName,strPassword);
-//						ret.add(clients[i]);
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//			};
-//			thread1.start();
-			String strDrvName = experimentSubject.getDBMSDriverClassName();
-			String strConnStr = experimentSubject.getConnectionString();
-			String strUserName = experimentSubject.getUserName();
-			String strPassword = experimentSubject.getPassword();
-Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
-			clients[i] = new Client(batchID, clientNum);
-			// set up client (i+1)
-			clients[i].init(strDrvName,strConnStr,strUserName,strPassword);
-//			ret.add(clients[i]);
-//			recordRunProgress((int) ((double) (i + 1) / (double) numClients* 100), "Initializing a batch of terminals");
-		}
-//		recordRunProgress(100, "Done with the initialization of a batch of terminals");
-//		return ret;
-	}
 
 	@Override
 	protected void setName() {
@@ -771,9 +799,105 @@ Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
 		return "7.X";
 	}
 
+	/*****
+	 * Analyze a batch set
+	 * @param batchSetID batch set ID
+	 * @param transactionSize transaction size
+	 * @param eXclusiveLocks exclusive locks
+	 * @param effectiveDBSize effective DB size
+	 * @param totalBatchSets number of batch sets
+	 * @throws Exception
+	 */
 	@Override
-	protected void stepB(int batchID) throws Exception {
+	protected void analyzeBatchSet(int batchSetID, 
+								   double transactionSize, 
+								   double eXclusiveLocks, 
+								   double effectiveDBSize,
+								   int totalBatchSets) throws Exception {
+		// run this batch set atomically
+		// run as many clients as specified in MPL
+		// have each client run its own transaction repeatedly
+		for(int MPL=mplMin;MPL<=mplMax;MPL+=mplIncr){
+			int batchID = -1;
+			// get existing batchID if this is the case
+			String sql = String.format("SELECT batchID FROM AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d", batchSetID, MPL);
+			ResultSet rs =  LabShelfManager.getShelf().executeQuerySQL(sql);
+			if(rs != null){
+				rs.next();
+				batchID = rs.getInt(1);
+			}
+			else{
+				batchID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_BATCH);
+			}
+			Main._logger.outputLog(String.format("::: MPL=%s (batchID:%d) Test :::", MPL, batchID));
+			
+			// insert batch set parameter
+			stepA(batchSetID, transactionSize, eXclusiveLocks, effectiveDBSize);
+			
+			// initialize this batch
+			stepB(batchID, MPL, transactionSize, eXclusiveLocks, effectiveDBSize);
+			
+			// create transactions for each terminal
+			stepC(batchID);
+			
+			Main._logger.outputLog(String.format(">> done", MPL, batchID));
+		}
+	}
+	
+	@Override
+	protected void stepA(int batchSetID, double transactionSize, double exclusiveLockRatio, double effectiveDBRatio){
+		// Now, let's insert parameter values into AZDBLab.
+		String[] paramVal = new String[BATCHSETHASPARAMETER.columns.length];
+		int i=0;
+		paramVal[i++] = String.format("%d",   batchSetID);
+		paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
+		paramVal[i++] = String.format("%d",   numCores);
+		paramVal[i++] = String.format("%d",   mplIncr);
+		paramVal[i++] = String.format("%d",   batchRunTime);
+		paramVal[i++] = String.format("%.4f", transactionSize);
+		paramVal[i++] = String.format("%.2f", exclusiveLockRatio);
+		paramVal[i++] = String.format("%.2f", effectiveDBRatio);
+		paramVal[i++] = String.format("%d", 0); // lock wait time
+		paramVal[i++] = String.format("%d", 0); // was thrashed
+		insertBatchSetParam(paramVal);
+	}
+	
+	@Override
+	protected void stepB(int batchID,
+						 int MPL, double transactionSize, double eXclusiveLcks, double effectiveDBSize) throws Exception {
+		recordRunProgress(0, "Beginning batch ("+ batchID + ") initialization (MPL=" + MPL + ")");
+		// number of clients
+		int numClients = MPL;
+		// set transaction size
+		TransactionGenerator.setXactSize(transactionSize);
+		// set exclusive locks
+		TransactionGenerator.setXLocks(eXclusiveLcks);
+		// set effective db size
+		TransactionGenerator.setEffectiveDBSz(effectiveDBSize);
 		
+		clients = new Client[numClients];
+		for(int i=0;i<numClients;i++){
+			// assign client number
+			int clientNum = i+1;
+			// ready for open connection
+			String strDrvName = experimentSubject.getDBMSDriverClassName();
+			String strConnStr = experimentSubject.getConnectionString();
+			String strUserName = experimentSubject.getUserName();
+			String strPassword = experimentSubject.getPassword();
+Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
+			clients[i] = new Client(batchID, clientNum);
+			// set up client (i+1)
+			clients[i].init(strDrvName,strConnStr,strUserName,strPassword);
+		}
+		recordRunProgress(100, "Done with batch ("+ batchID + ") initialization (MPL=" + MPL + ")");
+	}
+	
+	/***
+	 * Runs transactions per client in a batch
+	 * @throws Exception
+	 */
+	@Override
+	protected void stepC(int batchID) throws Exception {
 //		TimeoutTerminals terminalTimeOuter = new TimeoutTerminals(clients);
 //		Timer xactRunTimer = new Timer();
 //		xactRunTimer.scheduleAtFixedRate(terminalTimeOuter, duration*1000, duration*1000);
@@ -786,7 +910,7 @@ Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
 			int totalXacts = 0;
 			long elapsedTimeMillis = 0;
 			boolean runStarted = false;
-			while((elapsedTimeMillis=(System.currentTimeMillis() - startTime)) < duration*1000){// global timer
+			while((elapsedTimeMillis=(System.currentTimeMillis() - startTime)) < batchRunTime*1000){// global timer
 				if(runStarted) continue;
 				try{
 					for(Client c : clients){
@@ -804,28 +928,10 @@ Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
 				Main._logger.outputLog("Client #"+c.getClientID()+"> # of total transactions: " + numXacts);
 				totalXacts += numXacts;
 			}
-			
-			
-	//		CloseClient[] clist = new CloseClient[clients.size()];
-	//		for (int i = 0; i < clients.size(); i++) {
-	//			clist[i] = new CloseClient(clients.get(i));
-	//			clist[i].start();
-	//		}
-	//		for(Client c : clients){
-	////			c.close();
-	////			Main._logger.outputLog("Waiting for Client #"+c.getID()+" to die...");
-	////			c.join();
-	////			Main._logger.outputLog("Done..");
-	//		}
-	//		close(clients);
-	//		recordRunProgress(100, "Done with running the batch");
-	//		long elapsedTimeMillis = endTime - startTime;
 			long elapsedTimeInSec = elapsedTimeMillis / 1000;
-			if(elapsedTimeInSec != duration){ k--; continue; }
-//			recordTPSResult(MPL, totalXacts, elapsedTimeMillis, TransactionGenerator.getEffectiveDBRatio(), k, TransactionGenerator.getSelectivity());
+			if(elapsedTimeInSec != batchRunTime){ k--; continue; }
 			insertBatchResult(batchID, k, totalXacts, elapsedTimeMillis);
-			
-			// wait for three minutes to clean up any remaining transactions 
+			// wait for a minute to clean up any remaining transactions 
 			try{
 				Thread.sleep(Constants.THINK_TIME); 
 			}catch(Exception ex){
@@ -833,20 +939,27 @@ Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
 			}
 		}
 	}
-	
 	/*****
 	 * Insert tps results into labshelf
 	 * @param elapsedTimeMillis 
 	 * @param totalXacts 
-	 * 
 	 * @throws Exception
 	 */
-	protected void insertBatchResult(int batchID, int iterNum, int totalXacts, long elapsedTimeMillis) throws Exception {
+	
+	/******
+	 * Insert batch run result
+	 * @param batchID batch ID
+	 * @param iterNum iteration number
+	 * @param totalXacts total transactions executed
+	 * @param batchRunTimeMillis elapsed time milliseconds
+	 * @throws Exception
+	 */
+	protected void insertBatchResult(int batchID, int iterNum, int totalXacts, long batchRunTimeMillis) throws Exception {
 		Main._logger.outputLog("###<BEGIN>INSERT batch Result ################");
-		float elapsedTimeSec = elapsedTimeMillis / 1000F;
+		float elapsedTimeSec = batchRunTimeMillis / 1000F;
 		float tps = (float)totalXacts / elapsedTimeSec;
 		System.out.format("============== %d> TPS RESULTS =====================\n",iterNum);
-		Main._logger.outputLog("Time: "+ elapsedTimeMillis +" ms");
+		Main._logger.outputLog("Time: "+ batchRunTimeMillis +" ms");
 		Main._logger.outputLog("Total transactions: "+totalXacts);
 		Main._logger.outputLog("Transactions per second: "+String.format("%.2f", tps));
         Main._logger.outputLog("Inserting tps result : " + numTerminals + " for duration " + duration + " (secs)");
@@ -858,30 +971,27 @@ Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
 							String.valueOf(batchID),
 							String.valueOf(iterNum),
 							String.valueOf(totalXacts),
-							String.valueOf(elapsedTimeMillis)
+							String.valueOf(batchRunTimeMillis)
 					},
 					BATCHHASRESULT.columnDataTypes);
 		} catch (Exception e) {
 			e.printStackTrace();
 			String updateSQL 
 					= "Update " + Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASRESULT
-					+ " SET SUMEXECUTEDXACTS = " + totalXacts + ", elapsedTime = " + elapsedTimeMillis
+					+ " SET SUMEXECUTEDXACTS = " + totalXacts + ", elapsedTime = " + batchRunTimeMillis
 					+ " WHERE batchID = " + batchID + " and iterNum = " + iterNum;
 			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 		}
 		LabShelfManager.getShelf().commit();
 		Main._logger.outputLog("###<END>INSERT batch Result ###################");
 	}
-	
-	
-	
 	/****
 	 * Insert per-client result into AZDBLab
 	 * @param clientID client ID
 	 * @param iterNum iteration number
 	 * @param numXacts number of transactions executed in this iteration
 	 */
-	private void insertPerClientResult(int clientID, int iterNum, int numXacts) {
+	private void insertPerClientResult(int clientID, int iterNum, int numXacts) throws SQLException {
 		Main._logger.outputLog("###<BEGIN>INSERT client's transaction running result ################");
 		try{
 			LabShelfManager.getShelf().insertTuple( 
@@ -904,183 +1014,4 @@ Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
 		LabShelfManager.getShelf().commit();
 		Main._logger.outputLog("###<END>INSERT client's transaction running result ###################");
 	}
-
-	class CloseClient extends Thread{
-		public Client currClient = null;
-		public CloseClient(Client c) {
-			currClient = c;
-		}
-		
-		public void run() {
-			try {
-				currClient.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-	
-//	private void saveAllProcesses(int runID) {
-//		try {
-//			LabShelfManager.getShelf().insertTuple( 
-//				Constants.TABLE_PREFIX
-//					+ Constants.TABLE_QUERYEXECUTIONPROCS,
-//				QUERYEXECUTIONPROCS.columns,
-//				new String[] {
-//					String.valueOf(queryExecutionID),
-//					String.valueOf(curProc.processID),
-//					curProc.vm?"1":"0",
-//					String.valueOf(curProc.processName.trim()),
-//					String.valueOf(curProc.uTick),
-//					String.valueOf(curProc.sTick),
-//					String.valueOf(curProc.uTick+curProc.sTick),
-//					String.valueOf(curProc.min_flt),
-//					String.valueOf(curProc.maj_flt),
-//                	String.valueOf(curProc.blockio_count),
-//                	String.valueOf(curProc.blockio_delay),
-//                	String.valueOf(curProc.btime),
-//                    String.valueOf(curProc.cpu_count),
-//                    String.valueOf(curProc.cpu_delay),
-//                    String.valueOf(curProc.cpu_run_real_total),
-//	                String.valueOf(curProc.cpu_run_virtual_total),
-//        	        String.valueOf(curProc.cpu_scaled_run_real_total),
-//                	String.valueOf(curProc.etime),
-//                    String.valueOf(curProc.freepgs_count),
-//                    String.valueOf(curProc.freepgs_delay),
-//                    String.valueOf(curProc.nivcsw),
-//	                String.valueOf(curProc.nvcsw),
-//        	        String.valueOf(curProc.read_bytes),
-//                	String.valueOf(curProc.read_char),
-//                    String.valueOf(curProc.read_syscalls),
-//                    String.valueOf(curProc.sTickScaled),
-//                    String.valueOf(curProc.swapin_count),
-//	                String.valueOf(curProc.swapin_delay),
-//        	        String.valueOf(curProc.uTickScaled),
-//                	String.valueOf(curProc.write_bytes),
-//                    String.valueOf(curProc.write_char),
-//                    String.valueOf(curProc.write_syscalls) },
-//				QUERYEXECUTIONPROCS.columnDataTypes);
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			String updateSQL = "Update " + Constants.TABLE_PREFIX
-//					+ Constants.TABLE_QUERYEXECUTIONPROCS
-//					+ " set ProcessName = '" + toSave.get(i).processName.trim()+"',"
-//			        + " UTicks = " + toSave.get(i).uTick + ","
-//					+ " STicks = " + toSave.get(i).sTick + " , " 
-//					+ " min_flt = " + toSave.get(i).min_flt+ ", " 
-//					+ " maj_flt = " + toSave.get(i).maj_flt+ ", "
-//					+ " blkio_count = " + toSave.get(i).blockio_count+ ", "
-//					+ " blockio_delay = " + toSave.get(i).blockio_delay+ ", "
-//					+ " btime = " + toSave.get(i).btime+ ", "
-//					+ " cpu_count = " + toSave.get(i).cpu_count+ ", "
-//					+ " cpu_delay = " + toSave.get(i).cpu_delay+ ", "
-//					+ " cpu_run_real_total = " + toSave.get(i).cpu_run_real_total+ ", "
-//					+ " cpu_run_virtual_total = " + toSave.get(i).cpu_run_virtual_total+ ", "
-//					+ " cpu_scaled_run_real_total = " + toSave.get(i).cpu_scaled_run_real_total+ ", "
-//					+ " etime = " + toSave.get(i).etime+ ", "
-//					+ " freepgs_count = " + toSave.get(i).freepgs_count+ ", "
-//					+ " freepgs_delay = " + toSave.get(i).freepgs_delay+ ", "
-//					+ " nivcsw = " + toSave.get(i).nivcsw+ ", "
-//					+ " nvcsw = " + toSave.get(i).nvcsw+ ", "
-//					+ " ProcessID = " + toSave.get(i).processID+ ", "
-//					+ " read_bytes = " + toSave.get(i).read_bytes+ ", "
-//					+ " read_char = " + toSave.get(i).read_char+ ", "
-//					+ " read_syscalls = " + toSave.get(i).read_syscalls+ ", "
-//					+ " sTickScaled = " + toSave.get(i).sTickScaled+ ", "
-//					+ " swapin_count = " + toSave.get(i).swapin_count+ ", "
-//					+ " swapin_delay = " + toSave.get(i).swapin_delay+ ", "
-//					+ " uTickScaled = " + toSave.get(i).uTickScaled+ ", "
-//					+ " write_bytes = " + toSave.get(i).write_bytes+ ", "
-//					+ " write_char = " + toSave.get(i).write_char+ ", "
-//					+ " write_syscalls = " + toSave.get(i).write_syscalls
-//					+ " where QueryExecutionID = " + queryExecutionID
-//					+ " and processID = " + toSave.get(i).processID;
-//			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
-//		}
-//		LabShelfManager.getShelf().commit();
-//	}
-//	
-//	/**
-//	 * The definition of the experiment internal table.
-//	 * 
-//	 * @see InternalTable
-//	 */
-
-//	/***
-//	 * Creates sequence
-//	 * @param seqName	sequence name
-//	 */
-//	private void createSequence(String seqName) {
-//		String createSequence = "CREATE SEQUENCE " + seqName + " START WITH 1 NOMAXVALUE";
-//		try {
-//			stmt.execute(createSequence);
-//			System.out.println(seqName + " Created");
-//		} catch (SQLException e) {
-//			System.out.println(seqName + " already Exists");
-//		}
-//	}
-//	/***
-//	 * Installs all internal tables
-//	 * @throws Exception
-//	 */
-//	private void installAll() throws Exception {
-//		for (int i = 0; i < INTERNAL_TABLES.length; i++) {
-//System.out.println(INTERNAL_TABLES[i].TableName + " Creating...");
-//			createTable(INTERNAL_TABLES[i].TableName,
-//					INTERNAL_TABLES[i].columns,
-//					INTERNAL_TABLES[i].columnDataTypes,
-//					INTERNAL_TABLES[i].columnDataTypeLengths,
-//					INTERNAL_TABLES[i].columnNullable,
-//					INTERNAL_TABLES[i].uniqueConstraintColumns,
-//					INTERNAL_TABLES[i].primaryKey,
-//					INTERNAL_TABLES[i].foreignKey);
-//System.out.println(INTERNAL_TABLES[i].TableName + " Created");
-//			if (INTERNAL_TABLES[i].strSequenceName != null) {
-//				createSequence(INTERNAL_TABLES[i].strSequenceName);
-//			}
-//		}
-	
-//	/**
-//	 * 
-//	 * @param userName
-//	 * @param notebookName
-//	 * @param experimentName
-//	 * @param dbms
-//	 * @param startTime
-//	 * @param currentStage
-//	 * @param percentage
-//	 * @throws SQLException
-//	 */
-//	public void insertExperimentRun(String dbms, String startTime,
-//			String currentStage, double percentage) throws SQLException {
-//		int expID = getExperimentID(userName, notebookName, experimentName);
-//		//Main._logger.outputLog("getting experiment id .... done! ");
-//		if (expID == -1) {
-//			Main._logger.reportError("Insert ExperimentRun Err.");
-//			return;
-//		}
-//
-//		int runID = LabShelfManager.getShelf().getSequencialID("SEQ_RUNID");
-//		//Main._logger.outputLog("getting run id .... done! ");
-//
-//		String[] columns = new String[] { "RunID", "ExperimentID", "DBMSName",
-//				"StartTime", "CurrentStage", "Percentage" };
-//		String[] columnValues = new String[] { String.valueOf(runID),
-//				String.valueOf(expID), dbms, startTime, currentStage,
-//				String.valueOf(percentage) };
-//		int[] dataTypes = new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
-//				GeneralDBMS.I_DATA_TYPE_NUMBER,
-//				GeneralDBMS.I_DATA_TYPE_VARCHAR,
-//				GeneralDBMS.I_DATA_TYPE_TIMESTAMP,
-//				GeneralDBMS.I_DATA_TYPE_VARCHAR, GeneralDBMS.I_DATA_TYPE_NUMBER };
-//
-//		// Inserts a test into the DBMS with no test result.
-//		LabShelfManager.getShelf().insertTupleToNotebook(
-//				EXPERIMENTRUN.TableName, columns, columnValues, dataTypes);
-//		//Main._logger.outputLog("getting experiment run inserted .... done! ");
-//
-//		LabShelfManager.getShelf().commitlabshelf();
-//	}
 }

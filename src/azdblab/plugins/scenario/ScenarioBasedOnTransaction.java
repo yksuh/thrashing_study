@@ -58,25 +58,43 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 	public ScenarioBasedOnTransaction(ExperimentRun expRun) {
 		super(expRun);
 	}
-	
-	/**
-	 * number of queries
+	/***
+	 * Number of terminals (left for compatibility but not used)
 	 */
 	protected int numOfTerminals = 0;
+	
+	/**
+	 * transaction size minimum, maximum, increments
+	 */
 	private double xactSizeMin;
 	private double xactSizeMax;
 	private double xactSizeIncr;
+	/**
+	 * eXclusive lock minimum, maximum, increments
+	 */
 	private double xLocksMin;
 	private double xLocksMax;
 	private double xLocksIncr;
+	/**
+	 * effective database minimum, maximum, increments
+	 */
 	private double edbSizeMin;
 	private double edbSizeMax;
 	private double edbSizeIncr;
-	private int batchRunTime;
-	private double dbmsCacheBufferSize;
-	private int mplMin;
-	private int mplMax;
-	private int mplIncr;
+	/**
+	 * batch run time
+	 */
+	protected int batchRunTime;
+	/**
+	 * dbms buffer cache ratio
+	 */
+	protected double dbmsCacheBufferSize;
+	/**
+	 * MPL minimum, maximum, increments
+	 */
+	protected int mplMin;
+	protected int mplMax;
+	protected int mplIncr;
 	
 //	/**
 //	 * all cardinalities to be populated
@@ -408,66 +426,9 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 							" ON DELETE CASCADE")
 			},
 			Constants.SEQUENCE_STATEMENT);
-	
-	
-	
-	/***
-	 * Makes as many sessions to a DBMS as numTerminals specifies
-	 * @throws Exception
-	 */
-//	protected abstract void stepA(int numClients) throws Exception;
-//	protected abstract void stepA(int numClients, double edbSz) throws Exception;
-	protected abstract void stepA(int batchID, int numClients, double edbSz) throws Exception;
-	
-	/***
-	 * Runs transactions
-	 * @throws Exception
-	 */
-	protected abstract void stepB(int MPL) throws Exception;
-	
-//	/**
-//	 * Populates transaction tables
-//	 * @param curr_table
-//	 * @throws Exception 
-//	 */
-//	protected abstract Vector<Long> stepB() throws Exception;
 	/**
-	 * Setting up the necessary variables for experiment.
-	 * 
-	 * @throws Exception
-	 */
-	private void initializeNotebookContent() throws Exception {
-		myXactTables = experimentRun.getXactTables();
-	}
-
-	/**
-	 * Creating and populating experiment tables.
-	 * 
-	 * @throws Exception
-	 */
-	private void initializeExperimentTables() throws Exception {
-		/*if (myXactTables.length != 1) {
-			Main._logger.reportError("OneDimensionalExhaustiveAnalyzer: too many or too few variable "
-							+ "tables: " + myXactTables.length);
-			System.exit(1);
-		}*/
-
-		// boolean isVariable = false;
-		// Set up fixed tables
-		for (int i = 0; i < myXactTables.length; i++) {
-			Table curr_table = myXactTables[i];
-			populateXactTable(curr_table);
-			// (int)((double)(i + 1) / (double)myVariableTables.length * 100) =
-			// % completed
-			recordRunProgress((int) ((double) (i + 1)
-					/ (double) myXactTables.length * 100),
-					"Populating Transaction Tables");
-		}
-	}
-
-	/**
-	 * Initialize notebook content for storing all query execution results.
-	 * Populate fixed tables.
+	 * Initialize experiment tables for thrashing study
+	 * Populate database
 	 * @throws Exception
 	 */
 	protected void preStep() throws Exception {
@@ -476,41 +437,45 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 		initializeExperimentTables();
 	}
 	
-	/****
-	 * Set parameters specified in the spec
+	/*****
+	 * Analyze a batch set
+	 * @param batchSetID batch set ID
+	 * @param transactionSize transaction size
+	 * @param eXclusiveLocks exclusive locks
+	 * @param effectiveDBSize effective DB size
+	 * @param totalBatchSets number of batch sets
+	 * @throws Exception
 	 */
-	protected final void setParameters(double dbmsCacheBuffSz,
-									   int nCores,
-									   int duration,
-									   int bszMin,
-									   int bszMax,
-									   int bszIncr,
-									   double xactSzMin,
-									   double xactSzMax,
-									   double xactSzIncr,
-									   double xlcksMin,
-									   double xlcksMax,
-									   double xlcksIncr,
-									   double edbSzMin,
-									   double edbSzMax,
-									   double edbSzIncr){
-		dbmsCacheBufferSize = dbmsCacheBuffSz;
-		numCores = 	nCores;
-		batchRunTime = duration;
-		mplMin   = bszMin;
-		mplMax   = bszMax;
-		mplIncr  = bszIncr;
-		xactSizeMin   = xactSzMin;
-		xactSizeMax   = xactSzMax;
-		xactSizeIncr  = xactSzIncr;
-		xLocksMin   = xlcksMin;
-		xLocksMax   = xlcksMax;
-		xLocksIncr  = xlcksIncr;
-		edbSizeMin   = edbSzMin;
-		edbSizeMax   = edbSzMax;
-		edbSizeIncr  = edbSzIncr;
-	}
-	
+	protected abstract void analyzeBatchSet(int batchSetID, 
+											double transactionSize, 
+											double eXclusiveLocks, 
+											double effectiveDBSize,
+										    int totalBatchSets)  throws Exception;
+	/****
+	 * Store batch set parameters into AZDBLab
+	 * @param batchSetID current batch set
+	 * @param transactionSize transaction size
+	 * @param exclusiveLockRatio exclusive lock ratio
+	 * @param effectiveDBRatio effective DB ratio
+	 * @throws Exception
+	 */
+	protected abstract void stepA(int batchSetID, 
+						 double transactionSize, 
+						 double exclusiveLockRatio, 
+						 double effectiveDBRatio) throws Exception;
+	/***
+	 * Initialize as many clients as MPL for each batch in this batch set
+	 * @throws Exception
+	 */
+	protected abstract void stepB(int batchID, int MPL, 
+								  double transactionSize, 
+								  double eXclusiveLcks, 
+								  double effectiveDBSize) throws Exception;
+	/***
+	 * Runs transactions per client in a batch
+	 * @throws Exception
+	 */
+	protected abstract void stepC(int MPL) throws Exception;
 	/**
 	 * @see azdblab.plugins.scenario.Scenario#executeSpecificExperiment()
 	 */
@@ -531,9 +496,6 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 				for(double edbSz=edbSizeMin;edbSz<=edbSizeMax;edbSz+=edbSizeIncr){
 					// increment batch set
 					batchSetNum++;
-					
-					// initialize labshelf content + experiment tables 
-					preStep();
 					
 					// Check this batchset
 					int batchSetID = -1;
@@ -556,125 +518,46 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					if(batchSetNum <= maxTaskNum-1){
 						Main._logger.outputLog("    >>> studied already" );
 					}else{
+						int lastStageCnt = 1, lastStageWaitTime = Constants.WAIT_TIME;
+					
+						// initialize experiment tables 
+						preStep();
+						
 						// analyze this batch set
 						analyzeBatchSet(batchSetID,
-										runID,
-										batchSetNum, 
 										xactSz,
 										xlcks,
 										edbSz,
 										totalBatchSets);
+						
+						// insert a completed task associated with the query number
+						Main._logger.outputLog("before the insertion of the next task number");
+						while(lastStageCnt <= Constants.TRY_COUNTS){	
+							try {
+								// record progress
+								recordRunProgress(100, String.format("Done with BatchSet = %d(/%d)", batchSetNum, totalBatchSets));
+								// store next task number
+								putNextTaskNum(runID, batchSetNum+1);
+								break;
+							}catch(Exception ex){
+								ex.printStackTrace();
+								Main._logger.reportError(ex.getMessage());
+								lastStageCnt++;
+								lastStageWaitTime *= 2;
+								Main._logger.outputLog("Exponential backoff for last stage is performed for : " + lastStageWaitTime + " (ms)");
+								try {
+									Thread.sleep(lastStageWaitTime);
+								} catch (InterruptedException e) {}
+							}
+						}
+						// if we fail after 10 times, then an exception is eventually made.
+						if(lastStageCnt > Constants.TRY_COUNTS) throw new Exception("JDBC in the last stage is not stable.");
+						lastStageCnt = 1; lastStageWaitTime = Constants.WAIT_TIME;
+						Main._logger.outputLog("after the insertion  of the next task number");
 					}
 				}
 			}
 		}
-	}
-	
-	private void analyzeBatchSet(int batchSetID, 
-								 int runID, 
-								 int batchSetNum, 
-								 double xactSz, 
-								 double xlcks, 
-								 double edbSz,
-							     int totalBatchSets) throws Exception {
-		
-//		int lastStageCnt = 1, lastStageWaitTime = Constants.WAIT_TIME;		
-//		// run this batch set atomically
-//		// run as many transactions as numTerminals specifies 
-//		int maxTaskNum = -1; 
-//		for(int MPL=mplMin;MPL<=mplMax;MPL+=mplIncr){
-//			// get batch ID
-//			int batchID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_BATCH);
-//			if(MPL <= maxTaskNum-1){
-//				Main._logger.outputLog("MPL #" + MPL);
-//				Main._logger.outputLog("    >>> studied already" );
-//			}else{
-//				Main._logger.outputLog("::: MPL="+MPL+" Test :::");
-//				stepA(MPL, effectiveDBSz);
-//				//recordRunProgress(100, "Done with the initialization of a batch of terminals");
-//				
-//				// create transactions for each terminal
-//				stepB(batchID);
-//				
-//				
-//				// insert a completed task associated with the query number
-//				Main._logger.outputLog("before the insertion of the next task number");
-//				while(lastStageCnt <= Constants.TRY_COUNTS){	
-//					try {
-//						// record progress
-//						recordRunProgress(100, String.format("Done with BatchSet = %d(/%d)", batchSetNum, totalBatchSets));
-//						putNextFGTaskNum(batchSetID, MPL+mplIncr);
-//						break;
-//					}catch(Exception ex){
-//						ex.printStackTrace();
-//						Main._logger.reportError(ex.getMessage());
-//						lastStageCnt++;
-//						lastStageWaitTime *= 2;
-//						Main._logger.outputLog("Exponential backoff for last stage is performed for : " + lastStageWaitTime + " (ms)");
-//						try {
-//							Thread.sleep(lastStageWaitTime);
-//						} catch (InterruptedException e) {}
-//					}
-//				}
-//				// if we fail after 10 times, then an exception is eventually made.
-//				if(lastStageCnt > Constants.TRY_COUNTS) throw new Exception("JDBC in the last stage is not stable.");
-//				lastStageCnt = 1; lastStageWaitTime = Constants.WAIT_TIME;
-//				Main._logger.outputLog("after the insertion  of the next task number");
-//			}
-//		}
-		
-		int lastStageCnt = 1, lastStageWaitTime = Constants.WAIT_TIME;
-		
-		// run this batch set atomically
-		// run as many transactions as numTerminals specifies 
-		for(int MPL=mplMin;MPL<=mplMax;MPL+=mplIncr){
-			Main._logger.outputLog("::: MPL="+MPL+" Test :::");
-			
-			//stepA(MPL, effectiveDBSz);
-			//recordRunProgress(100, "Done with the initialization of a batch of terminals");
-			
-			// create transactions for each terminal
-			//stepB(batchID);
-		}
-		
-		// Now, let's insert parameter values into AZDBLab.
-		String[] paramVal = new String[BATCHSETHASPARAMETER.columns.length];
-		int i=0;
-		paramVal[i++] = String.format("%d",   batchSetID);
-		paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
-		paramVal[i++] = String.format("%d",   numCores);
-		paramVal[i++] = String.format("%d",   mplIncr);
-		paramVal[i++] = String.format("%d",   batchRunTime);
-		paramVal[i++] = String.format("%.4f", xactSz);
-		paramVal[i++] = String.format("%.2f", xlcks);
-		paramVal[i++] = String.format("%.2f", edbSz);
-		paramVal[i++] = String.format("%d", 0); // lock wait time
-		paramVal[i++] = String.format("%d", 0); // was thrashed
-		insertBatchSetParam(paramVal);
-		
-		// insert a completed task associated with the query number
-		Main._logger.outputLog("before the insertion of the next task number");
-		while(lastStageCnt <= Constants.TRY_COUNTS){	
-			try {
-				// record progress
-				recordRunProgress(100, String.format("Done with BatchSet = %d(/%d)", batchSetNum, totalBatchSets));
-				putNextTaskNum(runID, batchSetNum+1);
-				break;
-			}catch(Exception ex){
-				ex.printStackTrace();
-				Main._logger.reportError(ex.getMessage());
-				lastStageCnt++;
-				lastStageWaitTime *= 2;
-				Main._logger.outputLog("Exponential backoff for last stage is performed for : " + lastStageWaitTime + " (ms)");
-				try {
-					Thread.sleep(lastStageWaitTime);
-				} catch (InterruptedException e) {}
-			}
-		}
-		// if we fail after 10 times, then an exception is eventually made.
-		if(lastStageCnt > Constants.TRY_COUNTS) throw new Exception("JDBC in the last stage is not stable.");
-		lastStageCnt = 1; lastStageWaitTime = Constants.WAIT_TIME;
-		Main._logger.outputLog("after the insertion  of the next task number");
 	}
 
 	/****
@@ -744,7 +627,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 	 * @param batchSetID batch set ID
 	 * @param paramVal parameter key-value map
 	 */
-	private void insertBatchSetParam(String[] paramVal) {
+	protected void insertBatchSetParam(String[] paramVal) {
 		// insert a pair of key-value
 		try {
 			LabShelfManager.getShelf().insertTuple(
@@ -770,6 +653,76 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 		}
 	}
 
+	/**
+	 * Setting up the necessary variables for experiment.
+	 * 
+	 * @throws Exception
+	 */
+	private void initializeNotebookContent() throws Exception {
+		myXactTables = experimentRun.getXactTables();
+	}
+
+	/**
+	 * Creating and populating experiment tables.
+	 * 
+	 * @throws Exception
+	 */
+	private void initializeExperimentTables() throws Exception {
+		/*if (myXactTables.length != 1) {
+			Main._logger.reportError("OneDimensionalExhaustiveAnalyzer: too many or too few variable "
+							+ "tables: " + myXactTables.length);
+			System.exit(1);
+		}*/
+
+		// boolean isVariable = false;
+		// Set up fixed tables
+		for (int i = 0; i < myXactTables.length; i++) {
+			Table curr_table = myXactTables[i];
+			populateXactTable(curr_table);
+			// (int)((double)(i + 1) / (double)myVariableTables.length * 100) =
+			// % completed
+			recordRunProgress((int) ((double) (i + 1)
+					/ (double) myXactTables.length * 100),
+					"Populating Transaction Tables");
+		}
+	}
+	/****
+	 * Set parameters specified in the spec
+	 */
+	protected final void setParameters(double dbmsCacheBuffSz,
+									   int nCores,
+									   int duration,
+									   int bszMin,
+									   int bszMax,
+									   int bszIncr,
+									   double xactSzMin,
+									   double xactSzMax,
+									   double xactSzIncr,
+									   double xlcksMin,
+									   double xlcksMax,
+									   double xlcksIncr,
+									   double edbSzMin,
+									   double edbSzMax,
+									   double edbSzIncr){
+		dbmsCacheBufferSize = dbmsCacheBuffSz;
+		numCores = 	nCores;
+		batchRunTime = duration;
+		mplMin   = bszMin;
+		mplMax   = bszMax;
+		mplIncr  = bszIncr;
+		xactSizeMin   = xactSzMin;
+		xactSizeMax   = xactSzMax;
+		xactSizeIncr  = xactSzIncr;
+		xLocksMin   = xlcksMin;
+		xLocksMax   = xlcksMax;
+		xLocksIncr  = xlcksIncr;
+		edbSizeMin   = edbSzMin;
+		edbSizeMax   = edbSzMax;
+		edbSizeIncr  = edbSzIncr;
+	}
+	/****
+	 * Drop experiment tables for clean up
+	 */
 	protected void dropExperimentTables() throws Exception {
 		Main._logger.outputLog("## <EndOfExperiment> Purge Already installed tables ##################");
 		// 	find all tables in the experimentSubject

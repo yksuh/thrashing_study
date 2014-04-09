@@ -838,7 +838,7 @@ public class Constants {
 	}
 	
 	public static HashMap<String, String> hiddenDBMSes = new HashMap<String, String>();
-	public static int MAX_ITERS = 3;
+	public static int MAX_ITERS = 5;
 	public static long THINK_TIME = 60000;
 	public static double BASE_SELECTIVITY = 0.01;
 	public static int NumIDs    = 5;

@@ -614,13 +614,13 @@ public abstract class Scenario extends Plugin{
 	protected int lastPercentage = 0;
 	protected Run exp_run_;
 
+	/****
+	 * Used for preliminary thrashing studies
+	 */
 	protected int numTerminals = 0;
 	protected int duration = 0;
-
 	protected int numCores;
-
 	protected int numIncr = 0;
-
 	/**
 	 * effective db size
 	 */

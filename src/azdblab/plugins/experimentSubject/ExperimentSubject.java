@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.net.Socket;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -1080,6 +1081,26 @@ protected String getProcDiff(Socket procMonSock) throws ProcMonitorException {
 	public TransactionStat runTransactions() {
 		
 		return null;
+	}
+
+	/****
+	 * Execute sql statement 
+	 * @param sql a given SQL statement
+	 * @throws SQLException
+	 */
+	public void executeSQLStmt(String sql) throws SQLException {
+		if(_statement == null){
+			Main._logger.reportError("Statement is null...");
+			if(_connection == null){
+				Main._logger.reportError("Connection is null...");
+				_connection = DriverManager.getConnection(strConnectString,
+						strUserName, strPassword);
+			}
+			_statement = _connection
+					.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+							ResultSet.CONCUR_UPDATABLE);
+		}
+		_statement.execute(sql);	
 	}
   
   

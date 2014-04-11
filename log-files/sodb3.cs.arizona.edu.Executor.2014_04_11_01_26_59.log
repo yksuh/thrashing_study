@@ -1,0 +1,6 @@
+2014-04-11 01:26:59,569 INFO  - Run Executor 
+2014-04-11 01:27:00,405 INFO  - 1: AZDBLAB_XACT 
+2014-04-11 01:27:00,405 INFO  - 0: User Specify Connecting Parameters 
+2014-04-11 01:27:00,405 INFO  - Q: Quit 
+2014-04-11 01:27:00,405 INFO  - Please Select an Option: [1] 
+2014-04-11 01:27:06,062 ERROR - /home/yksuh/GitHub/thrashing_study/plugins/experimentsubject_javadb_localhost.xml (No such file or directory) 

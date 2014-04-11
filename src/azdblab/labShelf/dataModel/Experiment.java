@@ -1692,7 +1692,7 @@ public class Experiment extends TableDefinition {
 		}
 
 		try {
-			return Integer.parseInt(((Element) nlst.item(0))
+			return Double.parseDouble(((Element) nlst.item(0))
 					.getAttribute("increment"));
 		} catch (Exception e) {
 			e.printStackTrace();

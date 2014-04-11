@@ -1,0 +1,5 @@
+2014-04-11 01:46:33,094 INFO  - Run Observer 
+2014-04-11 01:47:12,823 INFO  - SELECT SourceXML FROM AZDBLAB_EXPERIMENT WHERE ExperimentID=173 AND UserName='yksuh' AND NotebookName='XACT_TEST' AND ExperimentName='xt-30K-200-100-1' AND Scenario='xactthrashing' AND SourceFileName='/home/yksuh/GitHub/thrashing_study/expspec_tps/non-primary-key/xt_30K_200_100_1.xml' AND CreateDate=to_date('Fri, Apr 11 2014 01:47:12', 'DY, MON DD YYYY HH24:MI:SS') 
+2014-04-11 01:47:13,390 INFO  - SELECT SourceXML FROM AZDBLAB_EXPERIMENTSPEC WHERE ExperimentSpecID=216 AND Name='ft' AND FileName='TestDataDef30K.xml' AND Kind='D' 
+2014-04-11 01:47:13,492 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_REFERSEXPERIMENTSPEC(ExperimentID, Kind, ExperimentSpecID) VALUES (173, 'D', 216) 
+2014-04-11 01:51:09,986 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXPERIMENTRUN(RunID, ExperimentID, DBMSName, StartTime, CurrentStage, Percentage, MachineName) VALUES (248, 173, 'javadb', to_timestamp('Fri, Apr 11 2014 01:51:09:758', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Pending', 0.0, 'sodb3.cs.arizona.edu') 

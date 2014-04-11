@@ -1,0 +1,47 @@
+2014-04-11 01:35:05,835 INFO  - Run Executor 
+2014-04-11 01:35:06,772 INFO  - 1: AZDBLAB_XACT 
+2014-04-11 01:35:06,773 INFO  - 0: User Specify Connecting Parameters 
+2014-04-11 01:35:06,773 INFO  - Q: Quit 
+2014-04-11 01:35:06,773 INFO  - Please Select an Option: [1] 
+2014-04-11 01:35:11,199 INFO  - Checking running executors for 'teradata' ... 
+2014-04-11 01:35:11,218 INFO  - Checking running other DBMSes except 'teradata' ... 
+2014-04-11 01:35:11,228 INFO  - Checking running executors for 'mysql' ... 
+2014-04-11 01:35:11,238 INFO  - Checking running other DBMSes except 'mysql' ... 
+2014-04-11 01:35:11,248 INFO  - Checking running executors for 'pgsql' ... 
+2014-04-11 01:35:11,261 INFO  - Checking running other DBMSes except 'pgsql' ... 
+2014-04-11 01:35:11,297 INFO  - Checking running executors for 'oracle' ... 
+2014-04-11 01:35:11,309 INFO  - Checking running other DBMSes except 'oracle' ... 
+2014-04-11 01:35:11,323 INFO  - Checking running executors for 'sqlserver' ... 
+2014-04-11 01:35:11,334 INFO  - Checking running other DBMSes except 'sqlserver' ... 
+2014-04-11 01:35:11,345 INFO  - Checking running executors for 'db2' ... 
+2014-04-11 01:35:11,357 INFO  - Checking running other DBMSes except 'db2' ... 
+2014-04-11 01:35:11,397 INFO  - Checking if 'derby' is running ...  
+2014-04-11 01:35:12,501 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXECUTORLOG(MachineName, DBMSName, TransactionTime, CurrentStatus, Command) VALUES ('sodb3.cs.arizona.edu', 'javadb', to_timestamp('Fri, Apr 11 2014 01:35:12:500', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Running', 'Run') 
+2014-04-11 01:35:12,769 INFO  - Beginning Log 
+2014-04-11 01:51:14,825 INFO  - Begining Experiment with startTime : Fri, Apr 11 2014 01:51:09:758 
+2014-04-11 01:51:14,826 INFO  - Experiment User : yksuh 
+2014-04-11 01:51:15,327 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXECUTORLOG(MachineName, DBMSName, TransactionTime, CurrentStatus, Command) VALUES ('sodb3.cs.arizona.edu', 'javadb', to_timestamp('Fri, Apr 11 2014 01:51:14:826', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Running', 'Run') 
+2014-04-11 01:51:15,363 INFO  - Running Experiment Started 
+2014-04-11 01:51:16,798 INFO  - ===================================================== 
+2014-04-11 01:51:16,799 INFO  - UserName: yksuh 
+2014-04-11 01:51:16,800 INFO  - notebookName: XACT_TEST 
+2014-04-11 01:51:16,800 INFO  - experimentName: xt-30K-200-100-1 
+2014-04-11 01:51:16,800 INFO  - DBMS: JAVADB 
+2014-04-11 01:51:16,800 INFO  - Scenario: xactthrashing 
+2014-04-11 01:51:16,800 INFO  - machineName: sodb3.cs.arizona.edu 
+2014-04-11 01:51:16,805 INFO  - DBMSBufferCacheSize: 1.00, 1.00, 1.00 
+2014-04-11 01:51:16,805 INFO  - Number of Cores: 1 
+2014-04-11 01:51:16,805 INFO  - Batch Run Time: 120 
+2014-04-11 01:51:16,807 INFO  - Transaction Size: 1.00, 10.00, 1.00 
+2014-04-11 01:51:16,808 INFO  - Exclusive Lock Pct: 0.00, 0.00, 1.00 
+2014-04-11 01:51:16,808 INFO  - Multiprogramming Level: 100, 100, 200 
+2014-04-11 01:51:16,808 INFO  - Effective DB: 0.50, 0.50, 1.00 
+2014-04-11 01:51:16,815 INFO  - connectString: jdbc:derby://localhost:1527/RESEARCH;create=true 
+2014-04-11 01:51:16,815 INFO  - logging time: [Fri, Apr 11 2014 01:51:16:797] 
+2014-04-11 01:51:16,815 INFO  - ===================================================== 
+2014-04-11 01:51:17,271 INFO  - login details: jdbc:derby://localhost:1527/RESEARCH;create=true, azdblab_user, azdblab_user 
+2014-04-11 01:51:19,278 INFO  - login details: jdbc:derby://localhost:1527/RESEARCH;create=true, azdblab_user, azdblab_user 
+2014-04-11 01:51:23,288 INFO  - login details: jdbc:derby://localhost:1527/RESEARCH;create=true, azdblab_user, azdblab_user 
+2014-04-11 01:51:31,296 INFO  - login details: jdbc:derby://localhost:1527/RESEARCH;create=true, azdblab_user, azdblab_user 
+2014-04-11 01:51:47,305 INFO  - login details: jdbc:derby://localhost:1527/RESEARCH;create=true, azdblab_user, azdblab_user 
+2014-04-11 01:52:19,313 INFO  - login details: jdbc:derby://localhost:1527/RESEARCH;create=true, azdblab_user, azdblab_user 

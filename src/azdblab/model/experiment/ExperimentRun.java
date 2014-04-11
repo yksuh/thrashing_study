@@ -136,7 +136,7 @@ public class ExperimentRun {
 		this.filedataDef = myDataDef.getXMLFile();
 		/** ****************************** THE FILE DESCRIPTOR *************** */
 
-		if(myExperimentName.contains("tps")){
+		if(myExperimentName.contains("tps")||myExperimentName.contains("xt")){
 			// extracting the fixed tables and their attributes.
 			Element fixed_tables = (Element) myRoot.getElementsByTagName(
 					"tableSet").item(0);

@@ -1567,14 +1567,14 @@ public class Experiment extends TableDefinition {
 	 * Return the increment of transaction size represented by selectivity
 	 * @return
 	 */
-	public int getExclusiveLockPctIncr() {
+	public double getExclusiveLockPctIncr() {
 		NodeList nlst = elementExpDescription
 				.getElementsByTagName("xLocks");
 		if (nlst == null) {
 			Main._logger.outputLog("no xLocks element!");
 		}
 		try {
-			return Integer.parseInt(((Element) nlst.item(0))
+			return Double.parseDouble(((Element) nlst.item(0))
 					.getAttribute("increment"));
 		} catch (Exception e) {
 			e.printStackTrace();

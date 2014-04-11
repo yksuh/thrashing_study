@@ -2,39 +2,42 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="plugins"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Home"/>
+	<classpathentry kind="lib" path="libs/ant.jar"/>
+	<classpathentry kind="lib" path="libs/crimson.jar"/>
 	<classpathentry kind="lib" path="libs/db2jcc_license_cu.jar"/>
 	<classpathentry kind="lib" path="libs/db2jcc.jar"/>
+	<classpathentry kind="lib" path="libs/derby.jar"/>
+	<classpathentry kind="lib" path="libs/derbyclient.jar"/>
+	<classpathentry kind="lib" path="libs/dsn.jar"/>
+	<classpathentry kind="lib" path="libs/gimap.jar"/>
+	<classpathentry kind="lib" path="libs/imap.jar"/>
+	<classpathentry kind="lib" path="libs/jakarta-ant-1.4.1-optional.jar"/>
 	<classpathentry kind="lib" path="libs/JavaPlot.jar"/>
 	<classpathentry kind="lib" path="libs/jaxen-1.1-beta-10.jar"/>
+	<classpathentry kind="lib" path="libs/jaxp.jar"/>
+	<classpathentry kind="lib" path="libs/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="libs/junit-4.10.jar"/>
 	<classpathentry kind="lib" path="libs/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="libs/mail.jar"/>
+	<classpathentry kind="lib" path="libs/mailapi.jar"/>
+	<classpathentry kind="lib" path="libs/mysql-connector-java-5.0.3-bin.jar"/>
+	<classpathentry kind="lib" path="libs/mysql-connector-java-5.1.25-bin.jar"/>
+	<classpathentry kind="lib" path="libs/ojdbc14.jar"/>
+	<classpathentry kind="lib" path="libs/ojdbc6.jar"/>
+	<classpathentry kind="lib" path="libs/pop3.jar"/>
+	<classpathentry kind="lib" path="libs/postgresql-8.4-701.jdbc4.jar"/>
 	<classpathentry kind="lib" path="libs/postgresql-9.2-1002.jdbc4.jar"/>
 	<classpathentry kind="lib" path="libs/salvo.jar"/>
 	<classpathentry kind="lib" path="libs/serializer.jar"/>
+	<classpathentry kind="lib" path="libs/smtp.jar"/>
 	<classpathentry kind="lib" path="libs/sqljdbc4.jar"/>
+	<classpathentry kind="lib" path="libs/tdgssconfig.jar"/>
+	<classpathentry kind="lib" path="libs/terajdbc4.jar"/>
 	<classpathentry kind="lib" path="libs/xalan.jar"/>
 	<classpathentry kind="lib" path="libs/xerces.jar"/>
 	<classpathentry kind="lib" path="libs/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="libs/xml-apis.jar"/>
 	<classpathentry kind="lib" path="libs/xmlParserAPIs.jar"/>
-	<classpathentry kind="lib" path="libs/junit-4.10.jar"/>
-	<classpathentry kind="lib" path="libs/terajdbc4.jar"/>
-	<classpathentry kind="lib" path="libs/tdgssconfig.jar"/>
-	<classpathentry kind="lib" path="libs/ojdbc6.jar"/>
-	<classpathentry kind="lib" path="libs/json-simple-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/mysql-connector-java-5.1.25-bin.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/crimson.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/dsn.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/gimap.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/imap.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/jakarta-ant-1.4.1-optional.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/jaxp.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/mail.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/mailapi.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/mysql-connector-java-5.0.3-bin.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/pop3.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/postgresql-8.4-701.jdbc4.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/smtp.jar"/>
-	<classpathentry kind="lib" path="/Users/yksuh/GitHub/thrashing_study/libs/xml-apis.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Home"/>
-	<classpathentry kind="lib" path="libs/ant.jar"/>
 	<classpathentry kind="output" path="dist"/>
 </classpath>

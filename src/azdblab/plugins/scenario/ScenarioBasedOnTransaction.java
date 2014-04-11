@@ -63,39 +63,6 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 	 */
 	protected int numOfTerminals = 0;
 	
-	/**
-	 * transaction size minimum, maximum, increments
-	 */
-	private double xactSizeMin;
-	private double xactSizeMax;
-	private double xactSizeIncr;
-	/**
-	 * eXclusive lock minimum, maximum, increments
-	 */
-	private double xLocksMin;
-	private double xLocksMax;
-	private double xLocksIncr;
-	/**
-	 * effective database minimum, maximum, increments
-	 */
-	private double edbSizeMin;
-	private double edbSizeMax;
-	private double edbSizeIncr;
-	/**
-	 * batch run time
-	 */
-	protected int batchRunTime;
-	/**
-	 * dbms buffer cache ratio
-	 */
-	protected double dbmsCacheBufferSize;
-	/**
-	 * MPL minimum, maximum, increments
-	 */
-	protected int mplMin;
-	protected int mplMax;
-	protected int mplIncr;
-	
 //	/**
 //	 * all cardinalities to be populated
 //	 */

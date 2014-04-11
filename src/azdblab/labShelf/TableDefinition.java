@@ -762,7 +762,7 @@ public class TableDefinition {
 	 * 
 	 */
 	public InternalTable BATCHSATISFIESASPECT = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_BATCHSATISFIESASPECT,
+			Constants.TABLE_PREFIX + Constants.TABLE_BSSATISFIESASPECT,
 			new String[] { "BatchID", "AspectID", "AspectValue", },
 			new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,

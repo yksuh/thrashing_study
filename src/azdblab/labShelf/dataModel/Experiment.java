@@ -1347,7 +1347,7 @@ public class Experiment extends TableDefinition {
 		}
 		return toret;
 	}
-
+	
 	/**
 	 * 
 	 * @return The number of Queries specified in the experimentSpec
@@ -1369,38 +1369,71 @@ public class Experiment extends TableDefinition {
 		return -1;
 	}
 
-	public int getNumTerminals() {
+	/**********************************************************************************
+	 * Parsing operationalization parameters
+	 */
+	/****
+	 * Return minimum DBMS buffer cache size
+	 * @return
+	 */
+	public double getDBMSBufferCacheMin() {
 		NodeList nlst = elementExpDescription
-				.getElementsByTagName("terminalConfiguration");
+				.getElementsByTagName("dbmsBufferCacheSize");
 		if (nlst == null) {
-			Main._logger.outputLog("no terminal configuration element!");
+			Main._logger.outputLog("no dbmsBufferCacheSize element!");
 		}
 
 		try {
-			return Integer.parseInt(((Element) nlst.item(0))
-					.getAttribute("numberTerminals"));
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("min"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return -1;
+		return 0;
 	}
-
-	public int getDuration() {
+	/****
+	 * Return maximum DBMS buffer cache size
+	 * @return
+	 */
+	public double getDBMSBufferCacheMax() {
 		NodeList nlst = elementExpDescription
-				.getElementsByTagName("duration");
+				.getElementsByTagName("dbmsBufferCacheSize");
 		if (nlst == null) {
-			Main._logger.outputLog("no terminal configuration element!");
+			Main._logger.outputLog("no dbmsBufferCacheSize element!");
 		}
 
 		try {
-			return Integer.parseInt(((Element) nlst.item(0))
-					.getAttribute("seconds"));
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("max"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return -1;
+		return 0;
+	}
+	/****
+	 * Return the increment of DBMS buffer cache size
+	 * @return
+	 */
+	public double getDBMSBufferCacheIncr() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("dbmsBufferCacheSize");
+		if (nlst == null) {
+			Main._logger.outputLog("no dbmsBufferCacheSize element!");
+		}
+
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("increment"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
+	/****
+	 * Checking how many cores should be enabled.
+	 * @return
+	 */
 	public int getNumCores() {
 		NodeList nlst = elementExpDescription
 				.getElementsByTagName("multiCoreConfiguration");
@@ -1415,6 +1448,276 @@ public class Experiment extends TableDefinition {
 			e.printStackTrace();
 		}
 		return 0;
+	}
+	
+	/*****
+	 * Batch run time
+	 * @return
+	 */
+	public int getBatchRunTime() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("duration");
+		if (nlst == null) {
+			Main._logger.outputLog("no batchRun time element!");
+		}
+
+		try {
+			return Integer.parseInt(((Element) nlst.item(0))
+					.getAttribute("seconds"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	/**** 
+	 * Return minimum transaction size represented by selectivity
+	 * @return
+	 */
+	public double getTransactionSizeMin() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("xactSize");
+		if (nlst == null) {
+			Main._logger.outputLog("no xactSize element!");
+		}
+
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("min"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	/****
+	 * Return maximum transaction size represented by selectivity
+	 * @return
+	 */
+	public double getTransactionSizeMax() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("dbmsBufferCacheSize");
+		if (nlst == null) {
+			Main._logger.outputLog("no dbmsBufferCacheSize element!");
+		}
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("max"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	/****
+	 * Return the increment of transaction size represented by selectivity
+	 * @return
+	 */
+	public int getTransactionSizeIncr() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("xactSize");
+		if (nlst == null) {
+			Main._logger.outputLog("no transaction size element!");
+		}
+		try {
+			return Integer.parseInt(((Element) nlst.item(0))
+					.getAttribute("increment"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	/**** 
+	 * Return minimum exclusive lock percentage
+	 * @return
+	 */
+	public double getExclusiveLockPctMin() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("xLocks");
+		if (nlst == null) {
+			Main._logger.outputLog("no xLocks element!");
+		}
+
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("min"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	/****
+	 * Return maximum transaction size represented by selectivity
+	 * @return
+	 */
+	public double getExclusiveLockPctMax() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("xLocks");
+		if (nlst == null) {
+			Main._logger.outputLog("no xLocks element!");
+		}
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("max"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	/****
+	 * Return the increment of transaction size represented by selectivity
+	 * @return
+	 */
+	public int getExclusiveLockPctIncr() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("xLocks");
+		if (nlst == null) {
+			Main._logger.outputLog("no xLocks element!");
+		}
+		try {
+			return Integer.parseInt(((Element) nlst.item(0))
+					.getAttribute("increment"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	
+	/****
+	 * Return minimum MPL
+	 * @return minimum MPL
+	 */
+	public int getMPLMin() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("multiProgrammingLevel");
+		if (nlst == null) {
+			Main._logger.outputLog("no multiProgrammingLevel element!");
+		}
+
+		try {
+			return Integer.parseInt(((Element) nlst.item(0))
+					.getAttribute("min"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	/****
+	 * Return maximum MPL
+	 * @return maximum MPL
+	 */
+	public int getMPLMax() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("multiProgrammingLevel");
+		if (nlst == null) {
+			Main._logger.outputLog("no multiProgrammingLevel element!");
+		}
+		try {
+			return Integer.parseInt(((Element) nlst.item(0))
+					.getAttribute("max"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	/****
+	 * Return the increment of MPL
+	 * @return the increment of MPL
+	 */
+	public int getMPLIncr() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("multiProgrammingLevel");
+		if (nlst == null) {
+			Main._logger.outputLog("no multiProgrammingLevel element!");
+		}
+
+		try {
+			return Integer.parseInt(((Element) nlst.item(0))
+					.getAttribute("increment"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	/****
+	 * Return minimum effective DB
+	 * @return minimum effective DB
+	 */
+	public double getEffectiveDBMin() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("effectiveDB");
+		if (nlst == null) {
+			Main._logger.outputLog("no effective DB element!");
+		}
+
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("min"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	/****
+	 * Return maximum effective DB
+	 * @return maximum effective DB
+	 */
+	public double getEffectiveDBMax() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("effectiveDB");
+		if (nlst == null) {
+			Main._logger.outputLog("no effectiveDB element!");
+		}
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("max"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	/****
+	 * Return the increment of effective DB
+	 * @return increment
+	 */
+	public double getEffectiveDBIncr() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("effectiveDB");
+		if (nlst == null) {
+			Main._logger.outputLog("no effectiveDB element!");
+		}
+
+		try {
+			return Integer.parseInt(((Element) nlst.item(0))
+					.getAttribute("increment"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	/*************************************************************/
+	
+	/************************************************************
+	 * For compatibility with the preliminary studies
+	 *************************************************************/
+	public int getNumTerminals() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("terminalConfiguration");
+		if (nlst == null) {
+			Main._logger.outputLog("no terminal configuration element!");
+		}
+
+		try {
+			return Integer.parseInt(((Element) nlst.item(0))
+					.getAttribute("numberTerminals"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	public int getNumIncr() {
@@ -1448,4 +1751,5 @@ public class Experiment extends TableDefinition {
 		}
 		return 0;
 	}
+	/*************************************************************/
 }

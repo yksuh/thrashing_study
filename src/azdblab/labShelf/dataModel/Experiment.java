@@ -561,7 +561,7 @@ public class Experiment extends TableDefinition {
 		// Main._logger.outputLog("schema: " + MetaData.CHOSEN_EXPERIMENT_SCHEMA
 		// + ", experimentName: " + experimentName);
 		//System.out.println(Constants.CHOSEN_EXPERIMENT_SCHEMA);
-		if(experimentName.contains("tps")){
+		if(experimentName.contains("tps") || experimentName.contains("xt")){
 			return XMLHelper.validate(new FileInputStream(new File(
 					Constants.CHOSEN_XACTEXPERIMENT_SCHEMA)), result);	
 		}else{

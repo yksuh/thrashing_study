@@ -235,7 +235,7 @@ public class ExperimentNode extends ObjectNode {
 		}
 		JTextPane detailPane = null;
 		
-		if(strExperimentName.contains("tps")){
+		if(strExperimentName.contains("tps") || strExperimentName.contains("xt")){
 			detailPane = createTextPaneFromXML(elementExpDescription, 
 					Constants.XACT_SOURCE_TRANSFORM_STYLE);
 		}else{
@@ -283,7 +283,7 @@ public class ExperimentNode extends ObjectNode {
 		if (myExperimentRun != null) {
 			if (myExperimentRun.getRoot() != null) {
 				JTextPane infoPane = null;
-				if(strExperimentName.contains("tps")){
+				if(strExperimentName.contains("tps") || strExperimentName.contains("xt")){
 					infoPane = createTextPaneFromXML(myExperimentRun.getRoot(), Constants.XACT_SOURCE_TRANSFORM_STYLE);
 				}else{
 					infoPane = createTextPaneFromXML(myExperimentRun.getRoot(), Constants.SOURCE_TRANSFORM_STYLE);

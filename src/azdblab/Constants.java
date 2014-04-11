@@ -812,8 +812,8 @@ public class Constants {
 	 */
 	public static final String NAME_TPS_SCENARIO = "TPS";
 	public static final String VERSION_TPS_SCENARIO = AZDBLAB_VERSION;
-	private static String NAME_XACT_THRASHING_SCENARIO = "XACTTHRASHING";
-	private static String VERSION_XACT_THRASHING_SCENARIO = AZDBLAB_VERSION;
+	public static String NAME_XACT_THRASHING_SCENARIO = "XACTTHRASHING";
+	public static String VERSION_XACT_THRASHING_SCENARIO = AZDBLAB_VERSION;
 
 	
 	//public static final String[] DBMSs = { "DB2", "MySQL", "MySQL2", "Oracle", "Pgsql", "Pgsql2", "SqlServer", "Teradata" };

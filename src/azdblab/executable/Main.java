@@ -601,12 +601,12 @@ _logger.outputLog(line);
 				lab_notebook_name).getExperiment(lab_experiment_name);
 
 		try {
-			if(!lab_experiment_name.contains("tps")){
-				myExperiment = new ExperimentNode(experiment.getExperimentSource(),
-						experiment.getUserName(), experiment.getNotebookName());
-			}else{
+			if(lab_experiment_name.contains("tps") || lab_experiment_name.contains("xt")){
 				myExperiment = new ExperimentNode(experiment.getXactExperimentSource(),
 						experiment.getUserName(), experiment.getNotebookName());
+			}else{
+				myExperiment = new ExperimentNode(experiment.getExperimentSource(),
+						experiment.getUserName(), experiment.getNotebookName());				
 			}
 			myExperiment.processXML();
 		} catch (FileNotFoundException e1) {

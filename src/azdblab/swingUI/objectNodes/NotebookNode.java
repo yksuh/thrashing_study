@@ -301,7 +301,7 @@ public class NotebookNode extends ObjectNode implements ResultOpenInterface {
 
 		try {
 			String schemaName = "";
-			if(strExpFileName.contains("tps")){
+			if(strExpFileName.contains("tps") || strExpFileName.contains("xt")){
 				schemaName = Constants.CHOSEN_XACTEXPERIMENT_SCHEMA;
 			}else{
 				schemaName = Constants.CHOSEN_EXPERIMENT_SCHEMA;
@@ -363,7 +363,7 @@ public class NotebookNode extends ObjectNode implements ResultOpenInterface {
 
 				}
 
-				if(!strExpFileName.contains("tps")){
+				if(!strExpFileName.contains("tps") || !strExpFileName.contains("xt")){
 					NodeList queryDefinitionList = experimentRoot
 							.getElementsByTagName("queryDefinition");
 					if (queryDefinitionList.getLength() == 0) {

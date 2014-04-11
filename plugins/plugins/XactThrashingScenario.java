@@ -786,12 +786,12 @@ Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
 
 	@Override
 	protected void setName() {
-		scenarioName = Constants.NAME_TPS_SCENARIO;
+		scenarioName = Constants.NAME_XACT_THRASHING_SCENARIO;
 	}
 
 	@Override
 	protected void setVersion() {
-		versionName = Constants.VERSION_TPS_SCENARIO;
+		versionName = Constants.VERSION_XACT_THRASHING_SCENARIO;
 	}
 
 	@Override

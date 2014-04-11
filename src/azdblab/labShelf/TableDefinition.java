@@ -663,123 +663,123 @@ public class TableDefinition {
 							new String[] { "AspectID" }, " ON DELETE CASCADE") },
 			null);
 
-	/****************************************************************************************
-	 * AZDBLAB BATCH Experiment tables
-	 **************************************************************************************/
-	/**
-	 * AZDBLAB_BATCH table
-	 * 
-	 */
-	public InternalTable BATCH = new InternalTable(Constants.TABLE_PREFIX
-			+ Constants.TABLE_BATCH, new String[] { "BatchID", "RunID",
-			"BatchSpecXML", "BatchNumber", "AbortRate", "BlockRate", "TPS",
-			"NumTransactions" }, new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
-			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_XML,
-			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
-			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
-			GeneralDBMS.I_DATA_TYPE_NUMBER }, new int[] { 10, 10, -1, 10, 10,
-			10, 10, 10 }, new int[] { 0, 0, 0, 0, 1, 1, 1, 0 }, new String[] {
-			"BatchNumber", "RunID" }, new String[] { "BatchID" },
-			new ForeignKey[] { new ForeignKey(new String[] { "RunID" },
-					Constants.TABLE_PREFIX + Constants.TABLE_EXPERIMENTRUN,
-					new String[] { "RunID" }, " ON DELETE CASCADE") }, null);
-
-	/**
-	 * AZDBLAB_BATCHRESULT table
-	 * 
-	 */
-	public InternalTable BATCHRESULT = new InternalTable(Constants.TABLE_PREFIX
-			+ Constants.TABLE_BATCHRESULT, new String[] { "BatchResultID",
-			"BatchID", "PhaseNumber" }, new int[] {
-			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
-			GeneralDBMS.I_DATA_TYPE_NUMBER }, new int[] { 10, 10, 10 },
-			new int[] { 0, 0, 0 }, new String[] { "BatchID", "PhaseNumber" },
-			new String[] { "BatchResultID" },
-			new ForeignKey[] { new ForeignKey(new String[] { "BatchID" },
-					Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
-					new String[] { "BatchID" }, " ON DELETE CASCADE") }, null);
-
-	/**
-	 * AZDBLAB_TRANSACTION table
-	 * 
-	 */
-	public InternalTable TRANSACTION = new InternalTable(Constants.TABLE_PREFIX
-			+ Constants.TABLE_TRANSACTION, new String[] { "BatchID",
-			"TransactionNumber", "TransactionSQL", "StartTime", "RunTime",
-			"NumStatements", "WasAborted" }, new int[] {
-			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
-			GeneralDBMS.I_DATA_TYPE_VARCHAR, GeneralDBMS.I_DATA_TYPE_TIMESTAMP,
-			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
-			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_VARCHAR },
-			new int[] { 10, 10, 2000, -1, 10, 10, 1 }, new int[] { 0, 0, 0, 0,
-					1, 0, 1 }, null, new String[] { "BatchID",
-					"TransactionNumber" }, new ForeignKey[] { new ForeignKey(
-					new String[] { "BatchID" }, Constants.TABLE_PREFIX
-							+ Constants.TABLE_BATCH,
-					new String[] { "BatchID" }, " ON DELETE CASCADE") }, null);
-
-	/**
-	 * AZDBLAB_STATEMENT table
-	 * 
-	 */
-	public InternalTable STATEMENT = new InternalTable(Constants.TABLE_PREFIX
-			+ Constants.TABLE_STATEMENT, new String[] { "BatchID",
-			"TransactionNumber", "StatementNumber", "StatementSQL" },
-			new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_VARCHAR }, new int[] { 10, 10, 10,
-					2000 }, new int[] { 0, 0, 0, 0 }, null, new String[] {
-					"BatchID", "TransactionNumber", "StatementNumber" },
-			new ForeignKey[] {
-					new ForeignKey(new String[] { "BatchID" },
-							Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
-							new String[] { "BatchID" }, " ON DELETE CASCADE"),
-					new ForeignKey(new String[] { "TransactionNumber" },
-							Constants.TABLE_PREFIX
-									+ Constants.TABLE_TRANSACTION,
-							new String[] { "TransactionNumber" },
-							" ON DELETE CASCADE") }, null);
-
-	/**
-	 * AZDBLAB_BATCHHASPARAMETER table
-	 * 
-	 */
-	public InternalTable BATCHSETHASPARAMETER = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_BATCHSETHASPARAMETER,
-			new String[] { "BatchID", "ParamName", "Value" }, new int[] {
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_VARCHAR,
-					GeneralDBMS.I_DATA_TYPE_NUMBER }, new int[] { 10, 30, 10 },
-			new int[] { 0, 0, 0 }, new String[] { "ParamName" }, new String[] {
-					"BatchID", "ParamName" },
-			new ForeignKey[] { new ForeignKey(new String[] { "BatchID" },
-					Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
-					new String[] { "BatchID" }, " ON DELETE CASCADE") }, null);
-
-	/**
-	 * AZDBLAB_BATCHSATISFIESASPECT table
-	 * 
-	 */
-	public InternalTable BATCHSATISFIESASPECT = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_BSSATISFIESASPECT,
-			new String[] { "BatchID", "AspectID", "AspectValue", },
-			new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER },
-			new int[] { 10, 10, 10 },
-			new int[] { 0, 0, 0 },
-			new String[] { "ParamName" },
-			new String[] { "BatchID", "ParamName" },
-			new ForeignKey[] {
-					new ForeignKey(new String[] { "BatchID" },
-							Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
-							new String[] { "BatchID" }, " ON DELETE CASCADE"),
-					new ForeignKey(new String[] { "AspectID" },
-							Constants.TABLE_PREFIX
-									+ Constants.TABLE_DEFINEDASPECT,
-							new String[] { "AspectID" }, " ON DELETE CASCADE") },
-			null);
+//	/****************************************************************************************
+//	 * AZDBLAB BATCH Experiment tables
+//	 **************************************************************************************/
+//	/**
+//	 * AZDBLAB_BATCH table
+//	 * 
+//	 */
+//	public InternalTable BATCH = new InternalTable(Constants.TABLE_PREFIX
+//			+ Constants.TABLE_BATCH, new String[] { "BatchID", "RunID",
+//			"BatchSpecXML", "BatchNumber", "AbortRate", "BlockRate", "TPS",
+//			"NumTransactions" }, new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
+//			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_XML,
+//			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
+//			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
+//			GeneralDBMS.I_DATA_TYPE_NUMBER }, new int[] { 10, 10, -1, 10, 10,
+//			10, 10, 10 }, new int[] { 0, 0, 0, 0, 1, 1, 1, 0 }, new String[] {
+//			"BatchNumber", "RunID" }, new String[] { "BatchID" },
+//			new ForeignKey[] { new ForeignKey(new String[] { "RunID" },
+//					Constants.TABLE_PREFIX + Constants.TABLE_EXPERIMENTRUN,
+//					new String[] { "RunID" }, " ON DELETE CASCADE") }, null);
+//
+//	/**
+//	 * AZDBLAB_BATCHRESULT table
+//	 * 
+//	 */
+//	public InternalTable BATCHRESULT = new InternalTable(Constants.TABLE_PREFIX
+//			+ Constants.TABLE_BATCHRESULT, new String[] { "BatchResultID",
+//			"BatchID", "PhaseNumber" }, new int[] {
+//			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
+//			GeneralDBMS.I_DATA_TYPE_NUMBER }, new int[] { 10, 10, 10 },
+//			new int[] { 0, 0, 0 }, new String[] { "BatchID", "PhaseNumber" },
+//			new String[] { "BatchResultID" },
+//			new ForeignKey[] { new ForeignKey(new String[] { "BatchID" },
+//					Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
+//					new String[] { "BatchID" }, " ON DELETE CASCADE") }, null);
+//
+//	/**
+//	 * AZDBLAB_TRANSACTION table
+//	 * 
+//	 */
+//	public InternalTable TRANSACTION = new InternalTable(Constants.TABLE_PREFIX
+//			+ Constants.TABLE_TRANSACTION, new String[] { "BatchID",
+//			"TransactionNumber", "TransactionSQL", "StartTime", "RunTime",
+//			"NumStatements", "WasAborted" }, new int[] {
+//			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
+//			GeneralDBMS.I_DATA_TYPE_VARCHAR, GeneralDBMS.I_DATA_TYPE_TIMESTAMP,
+//			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_NUMBER,
+//			GeneralDBMS.I_DATA_TYPE_NUMBER, GeneralDBMS.I_DATA_TYPE_VARCHAR },
+//			new int[] { 10, 10, 2000, -1, 10, 10, 1 }, new int[] { 0, 0, 0, 0,
+//					1, 0, 1 }, null, new String[] { "BatchID",
+//					"TransactionNumber" }, new ForeignKey[] { new ForeignKey(
+//					new String[] { "BatchID" }, Constants.TABLE_PREFIX
+//							+ Constants.TABLE_BATCH,
+//					new String[] { "BatchID" }, " ON DELETE CASCADE") }, null);
+//
+//	/**
+//	 * AZDBLAB_STATEMENT table
+//	 * 
+//	 */
+//	public InternalTable STATEMENT = new InternalTable(Constants.TABLE_PREFIX
+//			+ Constants.TABLE_STATEMENT, new String[] { "BatchID",
+//			"TransactionNumber", "StatementNumber", "StatementSQL" },
+//			new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_VARCHAR }, new int[] { 10, 10, 10,
+//					2000 }, new int[] { 0, 0, 0, 0 }, null, new String[] {
+//					"BatchID", "TransactionNumber", "StatementNumber" },
+//			new ForeignKey[] {
+//					new ForeignKey(new String[] { "BatchID" },
+//							Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
+//							new String[] { "BatchID" }, " ON DELETE CASCADE"),
+//					new ForeignKey(new String[] { "TransactionNumber" },
+//							Constants.TABLE_PREFIX
+//									+ Constants.TABLE_TRANSACTION,
+//							new String[] { "TransactionNumber" },
+//							" ON DELETE CASCADE") }, null);
+//
+//	/**
+//	 * AZDBLAB_BATCHHASPARAMETER table
+//	 * 
+//	 */
+//	public InternalTable BATCHSETHASPARAMETER = new InternalTable(
+//			Constants.TABLE_PREFIX + Constants.TABLE_BATCHSETHASPARAMETER,
+//			new String[] { "BatchID", "ParamName", "Value" }, new int[] {
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_VARCHAR,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER }, new int[] { 10, 30, 10 },
+//			new int[] { 0, 0, 0 }, new String[] { "ParamName" }, new String[] {
+//					"BatchID", "ParamName" },
+//			new ForeignKey[] { new ForeignKey(new String[] { "BatchID" },
+//					Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
+//					new String[] { "BatchID" }, " ON DELETE CASCADE") }, null);
+//
+//	/**
+//	 * AZDBLAB_BATCHSATISFIESASPECT table
+//	 * 
+//	 */
+//	public InternalTable BATCHSATISFIESASPECT = new InternalTable(
+//			Constants.TABLE_PREFIX + Constants.TABLE_BSSATISFIESASPECT,
+//			new String[] { "BatchID", "AspectID", "AspectValue", },
+//			new int[] { GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER },
+//			new int[] { 10, 10, 10 },
+//			new int[] { 0, 0, 0 },
+//			new String[] { "ParamName" },
+//			new String[] { "BatchID", "ParamName" },
+//			new ForeignKey[] {
+//					new ForeignKey(new String[] { "BatchID" },
+//							Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
+//							new String[] { "BatchID" }, " ON DELETE CASCADE"),
+//					new ForeignKey(new String[] { "AspectID" },
+//							Constants.TABLE_PREFIX
+//									+ Constants.TABLE_DEFINEDASPECT,
+//							new String[] { "AspectID" }, " ON DELETE CASCADE") },
+//			null);
 
 	/**
 	 * AZDBLAB_COMMENTS table

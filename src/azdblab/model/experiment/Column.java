@@ -27,6 +27,10 @@ public class Column {
 		myName = name;
 	}
 	/**
+	 * The column size
+	 */
+	public long mySize;
+	/**
 	 * The average column length
 	 */
 	public long myAverageColumnLen;

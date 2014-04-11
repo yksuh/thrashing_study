@@ -345,8 +345,8 @@ Main._logger.outputLog(_sql); // this should later be replaced by sql array
 		}
 	}
 	
-	@Override
-	protected void stepA(int numClients, double edbSz) throws Exception {
+	//@Override
+	protected void stepA(int batchSetID, int numClients, double edbSz) throws Exception {
 //		recordRunProgress(0, "Beginning the initialization of a batch of terminals");
 //		ArrayList<Client> ret = new ArrayList<Client>();
 		// assume that numClients > 0
@@ -400,7 +400,7 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 		return "7.X";
 	}
 
-	@Override
+	//@Override
 	protected void stepB(int MPL) throws Exception {
 		
 //		TimeoutTerminals terminalTimeOuter = new TimeoutTerminals(clients);
@@ -504,4 +504,33 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 //			cc.start();
 //		}
 //	}
+
+	@Override
+	protected void analyzeBatchSet(int batchSetID, double transactionSize,
+			double eXclusiveLocks, double effectiveDBSize, int totalBatchSets)
+			throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void stepA(int batchSetID, double transactionSize,
+			double exclusiveLockRatio, double effectiveDBRatio)
+			throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void stepB(int batchID, int MPL, double transactionSize,
+			double eXclusiveLcks, double effectiveDBSize) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void stepC(int MPL) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
 }

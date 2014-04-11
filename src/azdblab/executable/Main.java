@@ -572,10 +572,50 @@ _logger.outputLog(line);
 		String userName = null;
 		String notebookName = null;
 		String scenarioName = null;
+//		int numCores = 0;
+//		int numTerminals = 0;
+//		int numIncr = 0;
+//		int duration = 0;
+		
+		/***
+		 * DBMS Buffer Cache Size
+		 */
+		double dbmsBuffCacheSizeMin = 0;
+		double dbmsBuffCacheSizeMax = 0;
+		double dbmsBuffCacheSizeIncr = 0;
+		/***
+		 * Number of Cores
+		 */
 		int numCores = 0;
-		int numTerminals = 0;
-		int numIncr = 0;
-		int duration = 0;
+		/***
+		 * BatchRunTime
+		 */
+		int batchRunTime = 0;
+		/***
+		 * Transaction Size
+		 */
+		double xactSizeMin = 0;
+		double xactSizeMax = 0;
+		double xactSizeIncr = 0;
+		/***
+		 * Exclusive Locks
+		 */
+		double eXclusiveLockPctMin = 0;
+		double eXclusiveLockPctMax = 0;
+		double eXclusiveLockPctIncr = 0;
+		/***
+		 * Terminal configuration
+		 */
+		int MPLMin = 0;
+		int MPLMax = 0;
+		int MPLIncr = 0;
+		/***
+		 * Effective DB size
+		 */
+		double EffDBMin = 0;
+		double EffDBMax = 0;
+		double EffDBIncr = 0;
+		
 		// LabShelf.getShelf().printTableSchema();
 		Experiment experiment = User.getUser(lab_user_name).getNotebook(
 				lab_notebook_name).getExperiment(lab_experiment_name);
@@ -597,12 +637,29 @@ _logger.outputLog(line);
 		userName = experiment.getUserName();
 		notebookName = experiment.getNotebookName();
 		scenarioName = experiment.getScenario();
-		numCores = experiment.getNumCores();
-		numTerminals = experiment.getNumTerminals();
-		numIncr = experiment.getNumIncr();
-		double effDBSz = experiment.getEffectiveDBSize();
-		duration = experiment.getDuration();
+//		numCores = experiment.getNumCores();
+//		numTerminals = experiment.getNumTerminals();
+//		numIncr = experiment.getNumIncr();
+//		double effDBSz = experiment.getEffectiveDBSize();
+//		duration = experiment.getDuration();
 
+		dbmsBuffCacheSizeMin = experiment.getDBMSBufferCacheMin();
+		dbmsBuffCacheSizeMax = experiment.getDBMSBufferCacheMax();
+		dbmsBuffCacheSizeIncr = experiment.getDBMSBufferCacheIncr();
+		numCores = experiment.getNumCores();
+		batchRunTime = experiment.getBatchRunTime();
+		xactSizeMin = experiment.getTransactionSizeMin();
+		xactSizeMax = experiment.getTransactionSizeMax();
+		xactSizeIncr = experiment.getTransactionSizeIncr();
+		eXclusiveLockPctMin = experiment.getExclusiveLockPctMin();
+		eXclusiveLockPctMax = experiment.getExclusiveLockPctMax();
+		eXclusiveLockPctIncr  = experiment.getExclusiveLockPctIncr();
+		MPLMin = experiment.getMPLMin();
+		MPLMax = experiment.getMPLMax();
+		MPLIncr  = experiment.getMPLIncr();
+		EffDBMin = experiment.getEffectiveDBMin();
+		EffDBMax = experiment.getEffectiveDBMax();
+		EffDBIncr  = experiment.getEffectiveDBIncr();	
 		/*
 		 * Logging information containing user name, notebook name, experiment
 		 * name, scenario, logging time
@@ -618,11 +675,32 @@ _logger.outputLog(line);
 		_logger.outputLog("DBMS: " + dbms.toUpperCase());
 		_logger.outputLog("Scenario: " + scenarioName);
 		_logger.outputLog("machineName: " + machine_name);
-		_logger.outputLog("numCores = " + numCores);
-		_logger.outputLog("duration = " + duration);
-		_logger.outputLog("numTerminals = " + numTerminals);
-		_logger.outputLog("numIncrs = " + numIncr);
-		_logger.outputLog("effective db size = " + String.format("%.2f", effDBSz));
+//		_logger.outputLog("numCores = " + numCores);
+//		_logger.outputLog("duration = " + duration);
+//		_logger.outputLog("numTerminals = " + numTerminals);
+//		_logger.outputLog("numIncrs = " + numIncr);
+//		_logger.outputLog("effective db size = " + String.format("%.2f", effDBSz));
+		
+		String str = String.format("DBMSBufferCacheSize: %.2f, %.2f, %.2f", dbmsBuffCacheSizeMin, dbmsBuffCacheSizeIncr, dbmsBuffCacheSizeMax);
+		_logger.outputLog(str);
+		str = String.format("Number of Cores: %d", numCores);
+		_logger.outputLog(str);
+		str = String.format("Batch Run Time: %d", batchRunTime);
+		_logger.outputLog(str);
+		str = String.format("Transaction Size: %.2f, %.2f, %.2f", xactSizeMin, xactSizeIncr, xactSizeMax);
+		_logger.outputLog(str);
+		str = String.format("Exclusive Lock Pct: %.2f, %.2f, %.2f", eXclusiveLockPctMin, eXclusiveLockPctIncr, eXclusiveLockPctMax);
+		_logger.outputLog(str);
+		str = String.format("Multiprogramming Level: %d, %d, %d", MPLMin, MPLIncr, MPLMax);
+		_logger.outputLog(str);
+		str = String.format("Effective DB: %.2f, %.2f, %.2f", EffDBMin, EffDBMin, EffDBMax);
+		_logger.outputLog(str);
+		MPLMin = experiment.getMPLMin();
+		MPLMax = experiment.getMPLMax();
+		MPLIncr  = experiment.getMPLIncr();
+		EffDBMin = experiment.getEffectiveDBMin();
+		EffDBMax = experiment.getEffectiveDBMax();
+		EffDBIncr  = experiment.getEffectiveDBIncr();
 		_logger.outputLog("connectString: " + connectString);
 		_logger.outputLog("logging time: [" + transactionTime2 + "]");
 		_logger
@@ -797,12 +875,20 @@ _logger.outputLog(line);
 				_logger.outputLog("Please check '/boot/grub/grub.conf' or any other grub file, to see if 'maxcpus="+numCores+"' is given in the kernel entry.");
 				System.exit(-1);
 			}
-			scen.setCores(numCores);
-			scen.setDuration(duration);
-			scen.setTerminals(numTerminals);
-			scen.setIncrements(numIncr);
-			scen.setEffectiveDBSz(effDBSz);
+//			scen.setCores(numCores);
+//			scen.setDuration(duration);
+//			scen.setTerminals(numTerminals);
+//			scen.setIncrements(numIncr);
+//			scen.setEffectiveDBSz(effDBSz);
 			scen.executeExperiment();
+			scen.setConfigParamters(dbmsBuffCacheSizeMin, dbmsBuffCacheSizeMax, dbmsBuffCacheSizeIncr, 
+									numCores, 
+									batchRunTime, 
+									xactSizeMin, xactSizeMax, xactSizeIncr,
+									eXclusiveLockPctMin,  eXclusiveLockPctMax, eXclusiveLockPctIncr,
+									MPLMin, MPLMax, MPLIncr,
+									EffDBMin, EffDBMax, EffDBMin);
+			
 		} catch (InvalidExperimentRunException e) {
 			System.err
 					.println("Error on Experiment: "

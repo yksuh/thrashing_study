@@ -1696,5 +1696,4 @@ public class OracleSubject extends LabShelfManager {
 	public String getSupportedShelfs() {
 		return "7.X";
 	}
-
 }

@@ -1818,9 +1818,9 @@ public class TeradataSubject extends ExperimentSubject {
 	}
 
 	@Override
-	public ResultSet executeQuerySQL(String sql) {
+	public ResultSet executeQuerySQL(String sql){
 		// TODO Auto-generated method stub
-		return null;//getTableCard
+		return null;
 	}
 
 	@Override
@@ -1841,8 +1841,7 @@ public class TeradataSubject extends ExperimentSubject {
 	}
 
 	@Override
-	public void executeUpdateSQL(String sql) {
-		// TODO Auto-generated method stub
+	public void executeUpdateSQL(String sql){
 	}
 
 	@Override

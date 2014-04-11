@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+
+<!-- Schema for Configurations -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<!-- define grammar for query generation -->
+	<xsd:element name="grammar">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- specify how select clause should be constructed -->
+				<xsd:element name="select" minOccurs="1" maxOccurs="1">
+					<xsd:complexType>
+						<!-- number of maximum columns in select -->
+						<xsd:attribute name="maxColumns" use="required">
+							<xsd:simpleType>
+								<xsd:union>
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<!-- specify wild card -->
+											<xsd:enumeration value="all"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:positiveInteger"/>
+									</xsd:simpleType>
+								</xsd:union>
+							</xsd:simpleType>
+						</xsd:attribute>
+					</xsd:complexType>	
+				</xsd:element>
+				<!-- specify from clause condition -->
+				<xsd:element name="from" minOccurs="1" maxOccurs="1">
+					<xsd:complexType>
+						<!-- minimum correlation names (if not specified, default to 1) -->
+						<xsd:attribute name="minNumCorrelationNames" use="optional">
+							<xsd:simpleType>
+								<xsd:union>
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:enumeration value="actual"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:positiveInteger"/>
+									</xsd:simpleType>
+								</xsd:union>
+							</xsd:simpleType>
+						</xsd:attribute>
+						<!-- maximum correlation names -->
+						<xsd:attribute name="maxNumCorrelationNames" use="required">
+							<xsd:simpleType>
+								<xsd:union>
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:enumeration value="actual"/>
+										</xsd:restriction>
+									</xsd:simpleType>
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:positiveInteger"/>
+									</xsd:simpleType>
+								</xsd:union>
+							</xsd:simpleType>
+						</xsd:attribute>
+						<!-- Are duplicates allowed ? - true or false -->
+						<xsd:attribute name="useDuplicates" type="xsd:boolean" use="required"/>
+					</xsd:complexType>	
+				</xsd:element>
+				
+				<!-- specify how where clause should be constructed -->
+				<xsd:element name="where" minOccurs="1" maxOccurs="1">
+					<xsd:complexType>
+						<xsd:sequence>
+							<!-- list binary operators --> 
+							<xsd:element name="binaryOperators" minOccurs="1" maxOccurs="1">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="operator" minOccurs="1" maxOccurs="unbounded">
+											<xsd:complexType>
+												<!-- symbol: &lt;, &gt;, =, ... -->
+												<xsd:attribute name="symbol" type="xsd:string" use="required"/>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>								
+								</xsd:complexType>
+							</xsd:element>
+							<!-- list binary logical operators --> 
+							<xsd:element name="binaryLogicalOperators" minOccurs="1" maxOccurs="1">
+								<xsd:complexType>
+									<xsd:sequence>
+										<!-- operator symbol: AND, OR, UNION, SET, ... -->
+										<xsd:element name="operator" minOccurs="1" maxOccurs="unbounded">
+											<xsd:complexType>
+												<xsd:attribute name="symbol" type="xsd:string" use="required"/>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<!-- list unary logical operators --> 
+							<xsd:element name="unaryLogicalOperators" minOccurs="1" maxOccurs="1">
+								<xsd:complexType>
+									<xsd:sequence>
+										<!-- typical operator symbol: NOT -->
+										<xsd:element name="operator" minOccurs="1" maxOccurs="1">
+											<xsd:complexType>
+												<xsd:attribute name="symbol" use="required">
+													<xsd:simpleType>
+														<xsd:restriction base="xsd:string">
+															<xsd:enumeration value="NOT"/>
+														</xsd:restriction>
+													</xsd:simpleType>
+												</xsd:attribute>
+												<!-- how much percent we want to use it (0-100) -->
+												<xsd:attribute name="usePercentage" use="required">
+													<xsd:simpleType>
+														<xsd:restriction base="xsd:integer">
+															<xsd:minInclusive value='0'/>
+															<xsd:maxInclusive value='100'/>
+														</xsd:restriction>
+													</xsd:simpleType>
+												</xsd:attribute>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+
+						<!-- minimum inequality predicates : default to 0 -->
+						<xsd:attribute name="minNumInequality" type="xsd:nonNegativeInteger" use="optional"/>
+						<!-- maximum inequality predicates : default to 0 -->
+						<xsd:attribute name="maxNumInequality" type="xsd:nonNegativeInteger" use="optional"/>
+						<!-- Is the max number of predicate absolute or relative ? -->
+						<xsd:attribute name="maxIsAbsolute" type="xsd:boolean" use="required"/>
+						<!-- Is cartesian product possible ? -->
+						<xsd:attribute name="cartesianPossible" type="xsd:boolean" use="required"/>
+						<!-- maximum simple predicates -->
+						<xsd:attribute name="maxPredicates" type="xsd:nonNegativeInteger" use="required"/>
+						<!-- complex predicate use percentage (0-100) -->
+						<xsd:attribute name="complexUsePercentage" use="required">
+							<xsd:simpleType>
+								<xsd:restriction base="xsd:integer">
+									<xsd:minInclusive value='0'/>
+									<xsd:maxInclusive value='100'/>
+								</xsd:restriction>
+							</xsd:simpleType>
+						</xsd:attribute>
+					</xsd:complexType>	
+				</xsd:element>
+				<!-- specify aggregates -->				
+				<xsd:element name="aggregate" minOccurs="0" maxOccurs="1">
+				  <xsd:complexType>	
+				  	<!-- aggregate function name: SUM, MIN, MAX, ... -->
+            		<xsd:attribute name="function_name" type="xsd:string" use="required"/>
+            		<!-- usage percentage -->
+            		<xsd:attribute name="percentage" type="xsd:string" use="optional"/>
+          		  </xsd:complexType>	
+			  </xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

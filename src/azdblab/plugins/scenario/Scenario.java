@@ -614,13 +614,13 @@ public abstract class Scenario extends Plugin{
 	protected int lastPercentage = 0;
 	protected Run exp_run_;
 
+	/****
+	 * Used for preliminary thrashing studies
+	 */
 	protected int numTerminals = 0;
 	protected int duration = 0;
-
 	protected int numCores;
-
 	protected int numIncr = 0;
-
 	/**
 	 * effective db size
 	 */
@@ -655,6 +655,8 @@ public abstract class Scenario extends Plugin{
 					+ "a change point, alternatively stepping down by granularity (2M => left, 1.99M => right ...),\n"
 					+ "If we get different plans obtained on the left/right state table at their cardinalities, \n"
 					+ "then we make a query execution NUMQUERYEXECS times. ";
+		}else if (scenarioName.equalsIgnoreCase("xactthrashing")) {
+			return " We study transaction thrashing. ";
 		}
 
 		else {
@@ -662,23 +664,120 @@ public abstract class Scenario extends Plugin{
 		}
 	}
 
-	public void setCores(int cores) {
-		numCores  = cores;
-	}
+//	public void setCores(int cores) {
+//		numCores  = cores;
+//	}
+//	
+//	public void setTerminals(int numClients) {
+//		numTerminals  = numClients;
+//	}
+//	
+//	public void setDuration(int seconds) {
+//		duration  = seconds;
+//	}
+//	
+//	public void setIncrements(int nIncr) {
+//		numIncr   = nIncr;
+//	}
+//
+//	public void setEffectiveDBSz(double effDBSz) {
+//		effectiveDBSz = effDBSz;
+//	}
 	
-	public void setTerminals(int numClients) {
-		numTerminals  = numClients;
-	}
+	/**
+	 * DBMS cache size minimum, maximum, increments
+	 */
+	protected double dbmsBuffCacheSizeMin;
+	protected double dbmsBuffCacheSizeMax;
+	protected double dbmsBuffCacheSizeIncr;
+	/**
+	 * transaction size minimum, maximum, increments
+	 */
+	protected double xactSizeMin;
+	protected double xactSizeMax;
+	protected double xactSizeIncr;
+	/**
+	 * eXclusive lock minimum, maximum, increments
+	 */
+	protected double xLocksMin;
+	protected double xLocksMax;
+	protected double xLocksIncr;
+	/**
+	 * effective database minimum, maximum, increments
+	 */
+	protected double edbSizeMin;
+	protected double edbSizeMax;
+	protected double edbSizeIncr;
+	/**
+	 * batch run time
+	 */
+	protected int batchRunTime;
+	/**
+	 * dbms buffer cache ratio
+	 */
+	protected double dbmsCacheBufferSize;
+	/**
+	 * MPL minimum, maximum, increments
+	 */
+	protected int mplMin;
+	protected int mplMax;
+	protected int mplIncr;
 	
-	public void setDuration(int seconds) {
-		duration  = seconds;
-	}
-	
-	public void setIncrements(int nIncr) {
-		numIncr   = nIncr;
-	}
-
-	public void setEffectiveDBSz(double effDBSz) {
-		effectiveDBSz = effDBSz;
+	public void setConfigParamters(
+		double dbcszMin,
+		double dbcszMax,
+		double dbcszIncr,
+		int nCores,
+		int btRT,
+		double xsMin,
+		double xsMax,
+		double xsIncr,
+		double xlcksMin,
+		double xlcksMax,
+		double xlcksIncr,
+		int mlMin,
+		int mlMax,
+		int mlIncr,
+		double edbMin,
+		double edbMax,
+		double edbIncr){
+		/***
+		 * DBMS Buffer Cache Size
+		 */
+		dbmsBuffCacheSizeMin = 0;
+		dbmsBuffCacheSizeMax = 0;
+		dbmsBuffCacheSizeIncr = 0;
+		/***
+		 * Number of Cores
+		 */
+		numCores = 0;
+		/***
+		 * Duration
+		 */
+		batchRunTime = 0;
+		/***
+		 * Transaction Size
+		 */
+		xactSizeMin = xsMin;
+		xactSizeMax = xsMax;
+		xactSizeIncr = xsIncr;
+		/***
+		 * Exclusive Locks
+		 */
+		xLocksMin = xlcksMin;
+		xLocksMax = xlcksMax;
+		xLocksIncr = xlcksIncr;
+		/***
+		 * Terminal configuration
+		 */
+		mplMin = mlMin;
+		mplMax = mlMax;
+		mplIncr = mlIncr;
+		/***
+		 * Effective DB size
+		 */
+		edbSizeMin = edbMin;
+		edbSizeMax = edbMax;
+		edbSizeIncr = edbIncr;
 	}
 }

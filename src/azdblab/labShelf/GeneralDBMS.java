@@ -712,7 +712,7 @@ public abstract class GeneralDBMS extends Plugin{
       insertSQL += ", ";
     }
     insertSQL += ")";
-//System.out.println(insertSQL);
+System.out.println(insertSQL);
     return insertSQL;
   }
      

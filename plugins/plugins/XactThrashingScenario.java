@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.TimerTask;
 import java.util.Vector;
 
@@ -49,7 +50,9 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			LabShelfManager.getShelf().dropTable(CLIENT.TableName);
 			LabShelfManager.getShelf().dropTable(CLIENTHASRESULT.TableName);
 			LabShelfManager.getShelf().dropTable(TRANSACTION.TableName);
+			LabShelfManager.getShelf().dropTable(TRANSACTIONHASRESULT.TableName);
 			LabShelfManager.getShelf().dropTable(STATEMENT.TableName);
+			LabShelfManager.getShelf().dropTable(STATEMENTHASRESULT.TableName);
 		}
 
 		Vector<InternalTable> toRet = new Vector<InternalTable>();
@@ -61,7 +64,9 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		toRet.add(CLIENT);
 		toRet.add(CLIENTHASRESULT);
 		toRet.add(TRANSACTION);
+		toRet.add(TRANSACTIONHASRESULT);
 		toRet.add(STATEMENT);		
+		toRet.add(STATEMENTHASRESULT);
 		return toRet;
 	}
 	
@@ -124,6 +129,16 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 	static class TransactionGenerator{
 		private static double effectiveDBSz = 0;
 		private static double selectivity = 0;
+		
+		/****
+		 * Transaction number to transaction ID map
+		 */
+		private static HashMap<Long, Long> xactNumToIDMap = new HashMap<Long, Long>();
+		/****
+		 * Statement number to transaction ID map
+		 */
+		private static HashMap<Long, Long> stmtNumToIDMap = new HashMap<Long, Long>();
+		
 		/***
 		 * Effective DB Size
 		 */
@@ -148,7 +163,21 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		/*** Generating values to be updated ***/
 		private static RepeatableRandom repRandForVal    = new RepeatableRandom();
 		
-		
+		/****
+		 * Get xact number to id map
+		 * @return xactNumToIDMap
+		 */
+		public static HashMap<Long, Long> getXactNumToIDMap(){ 
+			return xactNumToIDMap;
+		}
+		/****
+		 * Get statment number to id map
+		 * @return xactNumToIDMap
+		 */
+		public static HashMap<Long, Long> getStmtNumToIDMap(){ 
+			return stmtNumToIDMap;
+		}
+	
 		public static double getEffectiveDBRatio(){
 			return effectiveDBSz;
 		}
@@ -373,7 +402,7 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		 * @return a list of SQL statements
 		 */
 		public static Vector<String> buildTransaction(int clientNum) {
-			int xactNum = 1; // if we try another transaction for this client, then this number needs to be incremented.
+			int xactNum = 0; // if we try another transaction for this client, then this number needs to be incremented.
 			// vector for SQL statements for this transaction
 			Vector<String> transaction = new Vector<String>();
 			// randomly select a table
@@ -403,23 +432,20 @@ Main._logger.outputLog(strSQLStmt);
 Main._logger.outputLog(strSQLStmt2);
 				transaction.add(strSQLStmt2);
 			}
-			// Insert a transaction for this client
-			int xactID = insertTransaction(clientNum, xactNum, transaction);
-			// add transaction ID for this transaction
-			transaction.add(String.format("%d", xactID));
+			// Insert this client's transaction and its statements while setting number to ID maps
+			insertXactAndStmts(clientNum, xactNum, transaction);
 			// Reset keys
 			resetKeys();
 			return transaction;
 		}
 		
 		/****
-		 * Insert transaction 
+		 * Insert transaction and statements, while setting the maps of transaction/statement number to ID
 		 * @param clientID current client
 		 * @param xactNum transaction number
 		 * @param transaction transaction
-		 * @return xactID
 		 */
-		private static int insertTransaction(int clientID, int xactNum, Vector<String> transaction) {
+		private static void insertXactAndStmts(int clientID, int xactNum, Vector<String> transaction) {
 			// get transatin id
 			int	xactID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_TRANSACTION);
 			// add transaction
@@ -433,14 +459,15 @@ Main._logger.outputLog(strSQLStmt2);
 									String.valueOf(xactNum)
 							},
 							TRANSACTION.columnDataTypes);
+				LabShelfManager.getShelf().commitlabshelf();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 Main._logger.outputLog(String.format("Client %d's transaction(%d)", clientID, xactNum));
 			// add statement
-			for(int i=1;i<=transaction.size();i++){
-				String strSQLStmt = transaction.get(i);
+			for(int stmtNum=0;stmtNum<transaction.size();stmtNum++){
+				String strSQLStmt = transaction.get(stmtNum);
 Main._logger.outputLog(strSQLStmt);
 				// add statement
 				try {
@@ -451,16 +478,21 @@ Main._logger.outputLog(strSQLStmt);
 								new String[] {
 										String.valueOf(stmtID),    // statement ID
 										String.valueOf(xactID),    // transaction ID
-										String.valueOf(i),		   // statement number
+										String.valueOf(stmtNum),   // statement number
 										String.valueOf(strSQLStmt) // statement SQL
 								},
 								STATEMENT.columnDataTypes);
+					LabShelfManager.getShelf().commitlabshelf();
+					// build statement number to ID map
+					stmtNumToIDMap.put(new Long(stmtNum), new Long(stmtID));
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			return xactID;
+			// build transaction number to ID map
+			xactNumToIDMap.put(new Long(xactNum), new Long(xactID));
+			return;
 		}
 	}
 	
@@ -496,6 +528,8 @@ Main._logger.outputLog(strSQLStmt);
 		private int _batchID   = 0; // batch ID for database
 		private int _clientNum = 0; // this client's number
 		private int _clientID = 0;  // this client ID for database
+		private HashMap<Long, Long> _xactNumToIDMap = new HashMap<Long, Long>();
+		private HashMap<Long, Long> _stmtNumToIDMap = new HashMap<Long, Long>();
 		
 		public Client(int batchID, int clientNum){
 			_batchID = batchID;
@@ -619,6 +653,8 @@ Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
 				// insert this client record into database
 				_clientID  = insertClient();
 				_transaction  = TransactionGenerator.buildTransaction(_clientNum);
+				_xactNumToIDMap = TransactionGenerator.getXactNumToIDMap();
+				_stmtNumToIDMap = TransactionGenerator.getStmtNumToIDMap();
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
 //				sqlex.printStackTrace();
@@ -708,20 +744,31 @@ Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
 //		}
 		
 		public void run(){
+			Vector<Long> xactRunTimeVec = new Vector<Long>();
+			Vector<Vector<Long>> stmtRunTimeVec = new Vector<Vector<Long>>();
 			while(true){
 				if(timeOut) break;
 				try {
+					// run time vector for each statement
+					Vector<Long> stmtRunTimePerXactVec = new Vector<Long>();
 					// open a connection to an experiment subject
 					experimentSubject.open(false);
+					long xactStartTime = System.currentTimeMillis();
 					// run transaction
 					for(int i=0;i<_transaction.size();i++){
 						String sql = _transaction.get(i);
 						// select
+						long startTime = System.currentTimeMillis();
 						experimentSubject.executeSQLStmt(sql);
-						Main._logger.outputLog("SQL: " + sql);
+						long elapsedTime = System.currentTimeMillis()-startTime;
+						stmtRunTimePerXactVec.add(new Long(elapsedTime));
+Main._logger.outputLog("SQL: " + sql);
 					}
 					experimentSubject.commit();
 					experimentSubject.close();
+					long elapsedTime = System.currentTimeMillis()-xactStartTime;
+					stmtRunTimeVec.add(stmtRunTimePerXactVec);
+					xactRunTimeVec.add(new Long(elapsedTime));
 	//					synchronized(this){ // this variable could be accessed by multiple threads.
 	//						localTimeOut = timeOut;
 	//					}
@@ -775,8 +822,68 @@ Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
 			}
 			close();
 			timeOut = false;
-			return;
-		}
+			
+			// insert batch results;
+			for(int i=0;i<xactRunTimeVec.size();i++){
+				Long xactID = _xactNumToIDMap.get(i);
+				String[] colVals = new String[]{
+					String.valueOf(xactID), // xact ID
+					String.valueOf(i), 		// iterNum
+					String.valueOf(xactRunTimeVec.get(i)) // xactRunTime
+				};
+				try {
+					LabShelfManager.getShelf().insertTupleToNotebook(Constants.TABLE_PREFIX+Constants.TABLE_TRANSACTIONHASRESULT, 
+																	 TRANSACTIONHASRESULT.columns, 
+																	 colVals, 
+																	 TRANSACTIONHASRESULT.columnDataTypes);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+					Vector<Long> stmtRunTimePerXact = stmtRunTimeVec.get(i);
+					if(stmtRunTimePerXact != null){
+						for(int j=0;j<stmtRunTimePerXact.size();j++){
+							Long stmtID = _stmtNumToIDMap.get(j);
+							String[] stmtColVals = new String[]{
+								String.valueOf(stmtID), // statement ID
+								String.valueOf(i), 		// transactionIterNum
+								String.valueOf(j), 		// statmentIterNum
+								String.valueOf(xactRunTimeVec.get(i)), // statementRunTime
+								null				 	// statementLockWaitTime
+							};
+							try {
+								LabShelfManager.getShelf().insertTupleToNotebook(Constants.TABLE_PREFIX+Constants.TABLE_STATEMENTHASRESULT, 
+																				 STATEMENTHASRESULT.columns, 
+																				 stmtColVals, 
+																				 STATEMENTHASRESULT.columnDataTypes);
+							} catch (SQLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}
+
+//		private long getStatementID(int stmtNum) {
+//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL("select stmtID " +
+//					" from " + Constants.TABLE_PREFIX+Constants.TABLE_STATEMENT 
+//					+ " where xactID = " + _xactID + " and stmtNum = " + stmtNum);
+//			try {
+//				rs.next();
+//			} catch (SQLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			long stmtID = -1;
+//			try {
+//				stmtID = rs.getInt(1);
+//			} catch (SQLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			return stmtID;
+//		}
 		
 		public int getNumTransactions(){
 			timeOut = true;

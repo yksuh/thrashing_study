@@ -670,7 +670,9 @@ public class Constants {
 	public static final String TABLE_CLIENT = "CLIENT";
 	public static final String TABLE_CLIENTHASRESULT = "CLIENTHASRESULT";
 	public static final String TABLE_TRANSACTION = "TRANSACTION";
+	public static final String TABLE_TRANSACTIONHASRESULT = "TRANSACTIONHASRESULT";
 	public static final String TABLE_STATEMENT = "STATEMENT";
+	public static final String TABLE_STATEMENTHASRESULT = "STATEMENTHASRESULT";
 	public static final String TABLE_COMPLETEDFGTASK = "COMPLETEDFGTASK"; // fine-grained task
 	
 	/***
@@ -843,6 +845,7 @@ public class Constants {
 	public static double BASE_SELECTIVITY = 0.01;
 	public static int NumIDs    = 5;
 	public static int NumValues = 2;
+	
 	
 	public static final String TABLE_TPSRESULT_NAME = "AZDBLAB_XACTRUNSTAT";
 	public static final long MAX_EXECUTIONTIME = 9999999;

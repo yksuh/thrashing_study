@@ -364,6 +364,35 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 			Constants.SEQUENCE_TRANSACTION);	
 	
 	/**
+	 * The definition of the transactionhasresult internal table.
+	 * 
+	 * @see InternalTable
+	 */
+	public static final InternalTable TRANSACTIONHASRESULT = new InternalTable(
+			Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
+			new String[] { 
+					"XACTID",
+					"XACTITERNUM",
+					"RunTime"}, 
+			new int[] { 
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER
+			}, 
+			new int[] {10, 10, 10}, 
+			new int[] { 0, 0, 0}, 
+			null, // unique
+			new String[] { "XACTID", "XACTITERNUM"}, 	// primary key
+			new ForeignKey[] { 
+					new ForeignKey(
+							new String[] { "XACTID" }, 
+							Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTION, 
+							new String[] { "XACTID" }, 
+							" ON DELETE CASCADE") 
+			},
+			null);
+	
+	/**
 	 * The definition of the statement internal table.
 	 * 
 	 * @see InternalTable
@@ -393,6 +422,47 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 							" ON DELETE CASCADE")
 			},
 			Constants.SEQUENCE_STATEMENT);
+	
+	/**
+	 * The definition of the statementhasresult internal table.
+	 * 
+	 * @see InternalTable
+	 */
+	public static final InternalTable STATEMENTHASRESULT = new InternalTable(
+			Constants.TABLE_PREFIX + Constants.TABLE_STATEMENTHASRESULT,
+			new String[] { 
+					"XACTID",
+					"XACTITERNUM",
+					"STMTID",
+					"STMTITERNUM",
+					"RunTime",
+					"LockWaitTime"}, 
+			new int[] { 
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER
+			}, 
+			new int[] {10, 10, 10, 10, 10, 10}, 
+			new int[] { 0, 0, 0, 0, 0, 1}, 
+			null, // unique
+			new String[] { "XACTID", "XACTITERNUM", "STMTID", "STMTITERNUM"}, 	// primary key
+			new ForeignKey[] { 
+					new ForeignKey(
+							new String[] { "XACTID", "XACTITERNUM"}, 
+							Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
+							new String[] { "XACTID", "XACTITERNUM" }, 
+							" ON DELETE CASCADE"),
+					new ForeignKey(
+							new String[] { "STMTID" }, 
+							Constants.TABLE_PREFIX + Constants.TABLE_STATEMENT, 
+							new String[] { "STMTID" }, 
+							" ON DELETE CASCADE")
+			},
+			null);
+	
 	/**
 	 * Initialize experiment tables for thrashing study
 	 * Populate database

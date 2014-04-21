@@ -615,6 +615,22 @@ public abstract class GeneralDBMS extends Plugin{
     }
   }
       
+  public long getSequencialIDToLong(String seqName) {
+	    String  getSeqID  = "SELECT " + seqName + ".NEXTVAL FROM DUAL";
+	    try {
+	      ResultSet  rs  = _statement.executeQuery(getSeqID);
+	      long      id  = -1;
+	      if (rs.next()) {
+	        id = rs.getLong(1);
+	      }
+	      rs.close();
+	      return id;
+	    } catch (SQLException e) {
+	      e.printStackTrace();
+	      return -1;
+	    }
+	  }
+  
   /**
    * Used to determine whether a table exists in the DBMS.
    * @param tableName The name of the table that is tested for existence.

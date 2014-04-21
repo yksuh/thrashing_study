@@ -241,41 +241,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 							new String[] { "BATCHSETID" }, 
 							" ON DELETE CASCADE") 
 			},
-			Constants.SEQUENCE_BATCH);
-	
-
-	/**
-	 * The definition of the batch internal table.
-	 * 
-	 * @see InternalTable
-	 */
-	public static final InternalTable BATCHHASRESULT = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASRESULT,
-			new String[] { 
-					"BATCHID", 
-					"ITERNUM",
-					"SUMEXECUTEDXACTS",
-					"elapsedTime"}, 
-			new int[] { 
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER
-			}, 
-			new int[] {10, 10, 10,10}, 
-			new int[] { 0, 0, 0,0}, 
-			null, // unique
-			new String[] { "BATCHID", "ITERNUM"}, 	// primary key
-			new ForeignKey[] { 
-					new ForeignKey(
-							new String[] { "BATCHID" }, 
-							Constants.TABLE_PREFIX + Constants.TABLE_BATCH, 
-							new String[] { "BATCHID" }, 
-							" ON DELETE CASCADE") 
-			},
-			null);
-	
-	
+			Constants.SEQUENCE_BATCH);	
 	/**
 	 * The definition of the client internal table.
 	 * 
@@ -304,36 +270,6 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 							" ON DELETE CASCADE") 
 			},
 			Constants.SEQUENCE_CLIENT);
-	
-	/**
-	 * The definition of the clienthasresult internal table.
-	 * 
-	 * @see InternalTable
-	 */
-	public static final InternalTable CLIENTHASRESULT = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT,
-			new String[] { 
-					"CLIENTID",
-					"ITERNUM",
-					"NUMEXECUTEDXACTS"}, 
-			new int[] { 
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER
-			}, 
-			new int[] {10, 10, 10}, 
-			new int[] { 0, 0, 0}, 
-			null, // unique
-			new String[] { "CLIENTID"}, 	// primary key
-			new ForeignKey[] { 
-					new ForeignKey(
-							new String[] { "CLIENTID" }, 
-							Constants.TABLE_PREFIX + Constants.TABLE_CLIENT, 
-							new String[] { "CLIENTID" }, 
-							" ON DELETE CASCADE") 
-			},
-			null);
-	
 	/**
 	 * The definition of the transaction internal table.
 	 * 
@@ -362,36 +298,6 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 							" ON DELETE CASCADE") 
 			},
 			Constants.SEQUENCE_TRANSACTION);	
-	
-	/**
-	 * The definition of the transactionhasresult internal table.
-	 * 
-	 * @see InternalTable
-	 */
-	public static final InternalTable TRANSACTIONHASRESULT = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
-			new String[] { 
-					"XACTID",
-					"XACTITERNUM",
-					"RunTime"}, 
-			new int[] { 
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER
-			}, 
-			new int[] {10, 10, 10}, 
-			new int[] { 0, 0, 0}, 
-			null, // unique
-			new String[] { "XACTID", "XACTITERNUM"}, 	// primary key
-			new ForeignKey[] { 
-					new ForeignKey(
-							new String[] { "XACTID" }, 
-							Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTION, 
-							new String[] { "XACTID" }, 
-							" ON DELETE CASCADE") 
-			},
-			null);
-	
 	/**
 	 * The definition of the statement internal table.
 	 * 
@@ -422,7 +328,106 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 							" ON DELETE CASCADE")
 			},
 			Constants.SEQUENCE_STATEMENT);
+	/**
+	 * The definition of the batch internal table.
+	 * 
+	 * @see InternalTable
+	 */
+	public static final InternalTable BATCHHASRESULT = new InternalTable(
+			Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASRESULT,
+			new String[] { 
+					"BATCHID", 
+					"ITERNUM",
+					"SUMEXECUTEDXACTS",
+					"elapsedTime"}, 
+			new int[] { 
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER
+			}, 
+			new int[] {10, 10, 10,10}, 
+			new int[] { 0, 0, 0,0}, 
+			null, // unique
+			new String[] { "BATCHID", "ITERNUM"}, 	// primary key
+			new ForeignKey[] { 
+					new ForeignKey(
+							new String[] { "BATCHID" }, 
+							Constants.TABLE_PREFIX + Constants.TABLE_BATCH, 
+							new String[] { "BATCHID" }, 
+							" ON DELETE CASCADE") 
+			},
+			null);
+
+	/**
+	 * The definition of the clienthasresult internal table.
+	 * 
+	 * @see InternalTable
+	 */
+	public static final InternalTable CLIENTHASRESULT = new InternalTable(
+			Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT,
+			new String[] { 
+					"CLIENTRESID",
+					"CLIENTID",
+					"ITERNUM",
+					"NUMEXECUTEDXACTS"}, 
+			new int[] { 
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER
+			}, 
+			new int[] {10, 10, 10, 10}, 
+			new int[] { 0, 0, 0, 0}, 
+			new String[] { "CLIENTID", "ITERNUM"}, 	// primary key // unique
+			new String[] { "CLIENTRESID"}, 	// primary key
+			new ForeignKey[] { 
+					new ForeignKey(
+							new String[] { "CLIENTID" }, 
+							Constants.TABLE_PREFIX + Constants.TABLE_CLIENT, 
+							new String[] { "CLIENTID" }, 
+							" ON DELETE CASCADE") 
+			},
+			Constants.SEQUENCE_CLIENTHASRESULT);
 	
+
+	/**
+	 * The definition of the transactionhasresult internal table.
+	 * 
+	 * @see InternalTable
+	 */
+	public static final InternalTable TRANSACTIONHASRESULT = new InternalTable(
+			Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
+			new String[] { 
+					"XACTRESID",
+					"CLIRESID",
+					"XACTID",
+					"XACTITERNUM",
+					"RunTime"}, 
+			new int[] { 
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER
+			}, 
+			new int[] {10, 10, 10, 10, 10}, 
+			new int[] { 0, 0, 0, 0, 0}, 
+			new String[] { "CLIRESID", "XACTID", "XACTITERNUM"}, 	// unique
+			new String[] { "XACTRESID"}, 	// primary key
+			new ForeignKey[] { 
+					new ForeignKey(
+							new String[] { "CLIRESID" }, 
+							Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT, 
+							new String[] { "CLIRESID" }, 
+							" ON DELETE CASCADE"),
+					new ForeignKey(
+							new String[] { "XACTID" }, 
+							Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTION, 
+							new String[] { "XACTID" }, 
+							" ON DELETE CASCADE") 
+			},
+			Constants.SEQUENCE_TRANSACTIONHASRESULT);	
 	/**
 	 * The definition of the statementhasresult internal table.
 	 * 
@@ -431,8 +436,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 	public static final InternalTable STATEMENTHASRESULT = new InternalTable(
 			Constants.TABLE_PREFIX + Constants.TABLE_STATEMENTHASRESULT,
 			new String[] { 
-					"XACTID",
-					"XACTITERNUM",
+					"XACTRESID",
 					"STMTID",
 					"STMTITERNUM",
 					"RunTime",
@@ -442,18 +446,17 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER
 			}, 
-			new int[] {10, 10, 10, 10, 10, 10}, 
-			new int[] { 0, 0, 0, 0, 0, 1}, 
+			new int[] {10, 10, 10, 10, 10}, 
+			new int[] { 0, 0, 0, 0, 1}, 
 			null, // unique
-			new String[] { "XACTID", "XACTITERNUM", "STMTID", "STMTITERNUM"}, 	// primary key
+			new String[] { "XACTRESID", "STMTID", "STMTITERNUM"}, 	// primary key
 			new ForeignKey[] { 
 					new ForeignKey(
-							new String[] { "XACTID", "XACTITERNUM"}, 
+							new String[] { "XACTRESID"}, 
 							Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
-							new String[] { "XACTID", "XACTITERNUM" }, 
+							new String[] { "XACTRESID" }, 
 							" ON DELETE CASCADE"),
 					new ForeignKey(
 							new String[] { "STMTID" }, 

@@ -683,7 +683,8 @@ public class Constants {
 	public static final String SEQUENCE_CLIENT = "SEQ_CLIENT";
 	public static final String SEQUENCE_TRANSACTION = "SEQ_TRANSACTION";
 	public static final String SEQUENCE_STATEMENT = "SEQ_STATEMENT";
-			
+	public static final String SEQUENCE_CLIENTHASRESULT = "SEQ_CLIRESULT";
+	public static final String SEQUENCE_TRANSACTIONHASRESULT = "SEQ_XACTRESULT";	
 	
 	/**
 	 * The data generation type for a column that indicates randomly generated
@@ -845,7 +846,6 @@ public class Constants {
 	public static double BASE_SELECTIVITY = 0.01;
 	public static int NumIDs    = 5;
 	public static int NumValues = 2;
-	
 	
 	public static final String TABLE_TPSRESULT_NAME = "AZDBLAB_XACTRUNSTAT";
 	public static final long MAX_EXECUTIONTIME = 9999999;

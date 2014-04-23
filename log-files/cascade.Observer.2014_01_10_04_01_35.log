@@ -1,2 +1,0 @@
-2014-01-10 04:01:35,730 INFO  - Run Observer 
-2014-01-10 04:04:11,857 INFO  - SELECT SourceXML FROM AZDBLAB_EXPERIMENT WHERE ExperimentID=46 AND UserName='yksuh' AND NotebookName='XACT_TEST' AND ExperimentName='tps-30K' AND Scenario='tps' AND SourceFileName='/cs/projects/tau/live/yksuh/thesis/prelim/AZDBLAB_XACT/expspec_tps/non-primary-key/tps_30K.xml' AND CreateDate=to_date('Fri, Jan 10 2014 04:03:46', 'DY, MON DD YYYY HH24:MI:SS') 

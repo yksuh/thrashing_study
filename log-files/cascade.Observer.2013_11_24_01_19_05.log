@@ -1,9 +1,0 @@
-2013-11-24 01:19:05,165 INFO  - Run Observer 
-2013-11-24 01:19:17,485 ERROR - Failed to fetch a result from AZDBLAB due to network failure 
-2013-11-24 01:19:17,646 ERROR - Failed to fetch a result from AZDBLAB due to network failure 
-2013-11-24 01:19:20,071 ERROR - Failed to fetch a result from AZDBLAB due to network failure 
-2013-11-24 01:19:49,180 ERROR - Failed to fetch a result from AZDBLAB due to network failure 
-2013-11-24 01:19:49,738 ERROR - Failed to fetch a result from AZDBLAB due to network failure 
-2013-11-24 01:19:50,300 INFO  - Creating Table: AZDBLAB_SQLSTYLE 
-2013-11-24 01:19:50,301 INFO  - sql to create table: CREATE TABLE AZDBLAB_SQLSTYLE ( UserName VARCHAR2(50) NOT NULL, NotebookName VARCHAR2(50), AspectName VARCHAR2(100) NOT NULL, ExtraInfo VARCHAR2(1000), PRIMARY KEY(UserName, AspectName), FOREIGN KEY(UserName, AspectName) REFERENCES AZDBLAB_DEFINEDASPECT (UserName, AspectName) ON DELETE CASCADE) 
-2013-11-24 01:19:50,309 ERROR - CREATE TABLE AZDBLAB_SQLSTYLE ( UserName VARCHAR2(50) NOT NULL, NotebookName VARCHAR2(50), AspectName VARCHAR2(100) NOT NULL, ExtraInfo VARCHAR2(1000), PRIMARY KEY(UserName, AspectName), FOREIGN KEY(UserName, AspectName) REFERENCES AZDBLAB_DEFINEDASPECT (UserName, AspectName) ON DELETE CASCADE) 

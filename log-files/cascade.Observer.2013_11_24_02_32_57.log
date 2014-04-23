@@ -1,2 +1,0 @@
-2013-11-24 02:32:58,011 INFO  - Run Observer 
-2013-11-24 02:33:31,221 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXPERIMENTRUN(RunID, ExperimentID, DBMSName, StartTime, CurrentStage, Percentage, MachineName) VALUES (2, 1, 'pgsql', to_timestamp('Sun, Nov 24 2013 02:33:31:133', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Pending', 0.0, 'jdbc:postgresql://sodb12.cs.arizona.edu:5432/research') 

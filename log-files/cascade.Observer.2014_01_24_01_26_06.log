@@ -1,3 +1,0 @@
-2014-01-24 01:26:07,144 INFO  - Run Observer 
-2014-01-24 01:26:25,424 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXPERIMENTRUN(RunID, ExperimentID, DBMSName, StartTime, CurrentStage, Percentage, MachineName) VALUES (76, 54, 'javadb', to_timestamp('Fri, Jan 24 2014 01:26:25:293', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Pending', 0.0, 'sodb10.cs.arizona.edu') 
-2014-01-24 01:33:40,436 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_EXPERIMENTRUN(RunID, ExperimentID, DBMSName, StartTime, CurrentStage, Percentage, MachineName) VALUES (77, 54, 'javadb', to_timestamp('Fri, Jan 24 2014 01:33:40:246', 'DY, MON DD YYYY HH24:MI:SS:FF'), 'Pending', 0.0, 'sodb3.cs.arizona.edu') 

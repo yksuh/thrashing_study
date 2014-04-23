@@ -1,5 +1,0 @@
-2014-01-10 18:24:47,464 INFO  - Run Observer 
-2014-01-10 18:27:16,910 INFO  - SELECT SourceXML FROM AZDBLAB_EXPERIMENT WHERE ExperimentID=51 AND UserName='yksuh' AND NotebookName='XACT_TEST' AND ExperimentName='tps-30K' AND Scenario='tps' AND SourceFileName='/cs/projects/tau/live/yksuh/thesis/prelim/AZDBLAB_XACT/expspec_tps/non-primary-key/tps_30K.xml' AND CreateDate=to_date('Fri, Jan 10 2014 18:27:03', 'DY, MON DD YYYY HH24:MI:SS') 
-2014-01-10 18:27:26,227 INFO  - SELECT SourceXML FROM AZDBLAB_EXPERIMENTSPEC WHERE ExperimentSpecID=65 AND Name='ft' AND FileName='TestDataDef30K.xml' AND Kind='D' 
-2014-01-10 18:27:27,031 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_REFERSEXPERIMENTSPEC(ExperimentID, Kind, ExperimentSpecID) VALUES (51, 'D', 65) 
-2014-01-10 18:28:43,299 ERROR - Get ExperimentSpecID err. 

@@ -1,3 +1,0 @@
-2013-11-24 01:26:08,422 INFO  - Run Observer 
-2013-11-24 01:26:29,664 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_USER(UserName, CreateDate) VALUES ('yksuh', to_date('Sun, Nov 24 2013 01:26:29', 'DY, MON DD YYYY HH24:MI:SS')) 
-2013-11-24 01:26:38,744 INFO  - insert statement for labshelf: INSERT INTO AZDBLAB_NOTEBOOK(UserName, NotebookName, CreateDate) VALUES ('yksuh', 'XACT_TEST', to_date('Sun, Nov 24 2013 01:26:38', 'DY, MON DD YYYY HH24:MI:SS')) 

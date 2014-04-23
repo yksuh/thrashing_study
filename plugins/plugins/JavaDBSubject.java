@@ -244,7 +244,7 @@ public class JavaDBSubject extends ExperimentSubject {
 	public JavaDBSubject(String userName, String password, String connectString, String machineName) {
 		super(userName, password, connectString, machineName);
 //		System.err.printf("start _JavaDBSubject %s-%s-%s",userName, password, connectString);
-		
+		System.setProperty("derby.system.home", "/tmp/");
 	}
 	
 	public void SetStatement(Statement stmt) {
@@ -741,6 +741,7 @@ public class JavaDBSubject extends ExperimentSubject {
 	public static final String NUMBER = "INT";
 	public static final String CLOB = "CLOB";
 	private static final String DBMS_DRIVER_CLASS_NAME = "org.apache.derby.jdbc.ClientDriver";
+//	private static final String DBMS_DRIVER_CLASS_NAME = "org.apache.derby.jdbc.EmbeddedDriver";
 	
 	@Override
 	public String getSupportedShelfs() {

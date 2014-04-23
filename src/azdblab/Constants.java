@@ -683,7 +683,7 @@ public class Constants {
 	public static final String SEQUENCE_CLIENT = "SEQ_CLIENT";
 	public static final String SEQUENCE_TRANSACTION = "SEQ_TRANSACTION";
 	public static final String SEQUENCE_STATEMENT = "SEQ_STATEMENT";
-	public static final String SEQUENCE_CLIENTHASRESULT = "SEQ_CLIRESULT";
+	public static final String SEQUENCE_CLIENTHASRESULT = "CLIENTRESULT";
 	public static final String SEQUENCE_TRANSACTIONHASRESULT = "SEQ_XACTRESULT";	
 	
 	/**
@@ -841,7 +841,7 @@ public class Constants {
 	}
 	
 	public static HashMap<String, String> hiddenDBMSes = new HashMap<String, String>();
-	public static int MAX_ITERS = 5;
+	public static int MAX_ITERS = 3;
 	public static long THINK_TIME = 60000;
 	public static double BASE_SELECTIVITY = 0.01;
 	public static int NumIDs    = 5;

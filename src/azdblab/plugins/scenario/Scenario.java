@@ -744,17 +744,17 @@ public abstract class Scenario extends Plugin{
 		/***
 		 * DBMS Buffer Cache Size
 		 */
-		dbmsBuffCacheSizeMin = 0;
-		dbmsBuffCacheSizeMax = 0;
-		dbmsBuffCacheSizeIncr = 0;
+		dbmsBuffCacheSizeMin = dbcszMin;
+		dbmsBuffCacheSizeMax = dbcszMax;
+		dbmsBuffCacheSizeIncr = dbcszIncr;
 		/***
 		 * Number of Cores
 		 */
-		numCores = 0;
+		numCores = nCores;
 		/***
 		 * Duration
 		 */
-		batchRunTime = 0;
+		batchRunTime = btRT;
 		/***
 		 * Transaction Size
 		 */

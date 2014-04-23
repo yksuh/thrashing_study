@@ -15,15 +15,15 @@ CREATE TABLE AZDBLAB_BATCHSET(
 DROP TABLE AZDBLAB_BATCHSETHASPARAMETER CASCADE CONSTRAINTS;
 CREATE TABLE AZDBLAB_BATCHSETHASPARAMETER(
 	BATCHSETID 	     	NUMBER(10) NOT NULL PRIMARY KEY,
-	BufferCacheSize 	NUMBER(10,2) NOT NULL,
+	BufferSpace 	NUMBER(10,2) NOT NULL,
 	NumCores	 	NUMBER(10) NOT NULL,
-	BatchSizeIncrement 	NUMBER(10) NOT NULL,
+	BatchSzIncr 	NUMBER(10) NOT NULL,
 	Duration 		NUMBER(10) NOT NULL,
-	TransactionSize      	NUMBER(10,2) NOT NULL,--# of shared lock requests
-	ExclusiveLockRatio 	NUMBER(10,4) NOT NULL,--# of write lock requests
-	EffectiveDBRatio 	NUMBER(10,2) NOT NULL,--data access range
-	LockWaitTime 		NUMBER(10),
-	WasThrashed 		NUMBER(10),
+	XactSz      	NUMBER(10,2) NOT NULL,--# of shared lock requests
+	XLockRatio 	NUMBER(10,4) NOT NULL,--# of write lock requests
+	EffectiveDBSz 	NUMBER(10,2) NOT NULL,--data access range
+	LockWaitTime 	NUMBER(10),
+	MaxMPL 		NUMBER(10),
 	FOREIGN KEY (BATCHSETID) REFERENCES AZDBLAB_BATCHSET(BATCHSETID) ON DELETE CASCADE
 );
 

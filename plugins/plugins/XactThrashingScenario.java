@@ -82,6 +82,18 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		Main._logger.outputLog(seqName + " Created");
 	}
 	
+	/***
+	 * Drops sequence for some tables
+	 * @param seqName	sequence name
+	 * @throws Exception 
+	 */
+	private void dropSequence(String seqName) throws Exception {
+		String dropSequence = "Drop SEQUENCE " + seqName;
+		Main._logger.outputLog(dropSequence);
+		LabShelfManager.getShelf().executeUpdateSQL(dropSequence);
+		Main._logger.outputLog(seqName + " Dropped");
+	}
+	
 	/****
 	 * Install tables for thrashing study
 	 */
@@ -95,21 +107,24 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			if (!LabShelfManager.getShelf().tableExists(tmp.TableName)) {
 				LabShelfManager.getShelf().createTable(tmp.TableName,
 						tmp.columns, tmp.columnDataTypes,
-						tmp.columnDataTypeLengths, tmp.primaryKey,
+						tmp.columnDataTypeLengths, tmp.uniqueConstraintColumns, tmp.columnNullable, tmp.primaryKey,
 						tmp.foreignKey);
 				if(tmp.TableName.equalsIgnoreCase(Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER)){
 					String alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER 
-							+ " MODIFY DBMSBufferCacheSize NUMBER(10, 2)";
+							+ " MODIFY MaxMPL NUMBER(10, 2)";
 					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER 
-							+ " MODIFY TransactionSize NUMBER(10, 2)";
+							+ " MODIFY XactSz NUMBER(10, 2)";
 					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER 
-							+ " MODIFY ExclusiveLockRatio NUMBER(10, 4)";
+							+ " MODIFY XLockRatio NUMBER(10, 4)";
 					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER 
-							+ " MODIFY EffectiveDBRatio NUMBER(10, 2)";
+							+ " MODIFY EffectiveDBSz NUMBER(10, 2)";
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 				}
 				if (tmp.strSequenceName != null) {
 					try {
+						if (refreshTable) {
+							dropSequence(tmp.strSequenceName);
+						}
 						createSequence(tmp.strSequenceName, 1);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -419,7 +434,7 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			// build where clause
 			String strWHERE = buildWHEREForSelect(tbl);
 			// add this select statement in this transaction
-			String strSQLStmt = String.format("%s\n%s\n%s", strSELECT, strFROM, strWHERE);
+			String strSQLStmt = String.format("%s %s %s", strSELECT, strFROM, strWHERE);
 Main._logger.outputLog(strSQLStmt);
 			transaction.add(strSQLStmt);
 			// if exclusive lock ratio is greater than zero
@@ -431,7 +446,7 @@ Main._logger.outputLog(strSQLStmt);
 				// construct where clause
 				String strWHERE2  = buildWhereForUpdate(tbl);
 				// add this update statement in this transaction
-				String strSQLStmt2 = String.format("%s\n%s\n%s", strUPDATE, strSET, strWHERE2);
+				String strSQLStmt2 = String.format("%s %s %s", strUPDATE, strSET, strWHERE2);
 Main._logger.outputLog(strSQLStmt2);
 				transaction.add(strSQLStmt2);
 			}
@@ -837,7 +852,7 @@ Main._logger.outputLog("SQL: " + sql + " => " + elapsedTime + " (msec)");
 					long elapsedTime = System.currentTimeMillis()-xactStartTime;
 					stmtRunTimeVec.add(stmtRunTimePerXactVec);
 					xactRunTimeVec.add(new Long(elapsedTime));
-Main._logger.outputLog("transaction " + xactNum + " at " + _numExecXacts + " => " + elapsedTime + " (msec)");
+Main._logger.outputLog("Client " + _clientID + ") executed xact(" + xactNum + ") " + _numExecXacts + " times => " + elapsedTime + " (msec)");
 	//					synchronized(this){ // this variable could be accessed by multiple threads.
 	//						localTimeOut = timeOut;
 	//					}
@@ -989,36 +1004,73 @@ Main._logger.outputLog("transaction " + xactNum + " at " + _numExecXacts + " => 
 								   double eXclusiveLocks, 
 								   double effectiveDBSize,
 								   int totalBatchSets) throws Exception {
+		// insert batch set parameter
+		stepA(batchSetID, transactionSize, eXclusiveLocks, effectiveDBSize);
+					
 		// run this batch set atomically
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
 		for(int MPL=mplMin;MPL<=mplMax;MPL+=mplIncr){
-			int batchID = -1;
+//			int batchID = -1;
 			// get existing batchID if this is the case
-			String sql = String.format("SELECT batchID FROM AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d", batchSetID, MPL);
-			ResultSet rs =  LabShelfManager.getShelf().executeQuerySQL(sql);
-			if(rs != null){
-				rs.next();
-				batchID = rs.getInt(1);
-			}
-			else{
-				batchID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_BATCH);
-			}
-			Main._logger.outputLog(String.format("::: MPL=%s (batchID:%d) Test :::", MPL, batchID));
-			
-			// insert batch set parameter
-			stepA(batchSetID, transactionSize, eXclusiveLocks, effectiveDBSize);
-			
-			// initialize this batch
+//			String sql = String.format("SELECT batchID FROM AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d", batchSetID, MPL);
+//System.out.println(sql);
+//			ResultSet rs =  LabShelfManager.getShelf().executeQuerySQL(sql);
+//			if (rs.next()) {
+//				batchID = rs.getInt(1);
+//			}
+//			rs.close();
+//			if(batchID == -1)
+			int batchID = insertBatch(batchSetID, MPL);
+			 
+			// initialize this batch 
 			stepB(batchID, MPL, transactionSize, eXclusiveLocks, effectiveDBSize);
 			
-			// create transactions for each terminal
+			// run this batch for X times
 			stepC(batchID);
-			
 			Main._logger.outputLog(String.format(">> done", MPL, batchID));
 		}
 	}
 	
+	/****
+	 * Insert this batch into database
+	 * @param batchSetID batch set ID
+	 * @return batch ID
+	 */
+	private int insertBatch(int batchSetID, int MPL) {
+		int batchID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_BATCH);
+		try{
+			LabShelfManager.getShelf().insertTuple( 
+					Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
+					BATCH.columns,
+					new String[] {
+							String.valueOf(batchSetID),
+							String.valueOf(batchID),
+							String.valueOf(MPL)
+					},
+					BATCH.columnDataTypes);
+			LabShelfManager.getShelf().commit();
+		} catch (Exception e) {
+			if((e.getMessage()).toLowerCase().contains("unique")){
+				String sql = String.format("SELECT batchID from AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d", batchSetID, MPL);
+				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+				try {
+					if(rs.next()){
+						batchID = rs.getInt(1);
+					}else{
+						e.printStackTrace(); // error
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return batchID;
+			}
+		}
+		return batchID;
+	}
+
+
 	@Override
 	protected void stepA(int batchSetID, double transactionSize, double exclusiveLockRatio, double effectiveDBRatio){
 		// Now, let's insert parameter values into AZDBLab.
@@ -1044,7 +1096,7 @@ Main._logger.outputLog("transaction " + xactNum + " at " + _numExecXacts + " => 
 		// number of clients
 		int numClients = MPL;
 		// set transaction size
-		TransactionGenerator.setXactSize(transactionSize);
+		TransactionGenerator.setXactSize((double)(transactionSize/(double)100));
 		// set exclusive locks
 		TransactionGenerator.setXLocks(eXclusiveLcks);
 		// set effective db size
@@ -1176,7 +1228,7 @@ Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
 							String.valueOf(numExecXacts)
 					},
 					CLIENTHASRESULT.columnDataTypes);
-			LabShelfManager.getShelf().commit();
+			LabShelfManager.getShelf().commitlabshelf();
 		} catch (Exception e) {
 			e.printStackTrace();
 			Main._logger.reportError(e.getMessage());
@@ -1220,7 +1272,7 @@ Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
 									String.valueOf(xactRunTimeVec.get(tIter)) // xactRunTime
 							},
 							TRANSACTIONHASRESULT.columnDataTypes);
-					LabShelfManager.getShelf().commit();
+					LabShelfManager.getShelf().commitlabshelf();
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1241,6 +1293,7 @@ Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
 																	null				 		// statementLockWaitTime
 																 },
 																 STATEMENTHASRESULT.columnDataTypes);
+							LabShelfManager.getShelf().commitlabshelf();
 						} catch (SQLException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

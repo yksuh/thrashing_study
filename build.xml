@@ -95,7 +95,8 @@
 	<property name="exhaustive.jarfilename" value="ExhaustiveScenario_07_15_2010_11_10_10.jar" />
 	<property name="exhaustivewithouttiming.jarfilename" value="ExhaustiveWithoutTimingScenario_05_17_2012_11_10_10.jar" />
 	<property name="onepass.jarfilename" value="OnePassScenario_07_15_2010_11_10_10.jar" />
-	<property name="tps.jarfilename" value="TPSScenario_11_22_2013_18_10_30.jar" />
+	<!--<property name="tps.jarfilename" value="TPSScenario_11_22_2013_18_10_30.jar" />-->
+	<property name="xactthrashing.jarfilename" value="XactThrashingScenario_11_22_2013_18_10_30.jar" />
 	<property name="onepasswithouttiming.jarfilename" value="OnePassWithoutTimingScenario_07_15_2010_11_10_10.jar" />
 	<property name="uniqueplan.jarfilename" value="UniquePlanScenario_07_15_2010_11_10_10.jar" />
 	<property name="hwc.jarfilename" value="HelloWorldCardScenario_12_27_2011_14_00_00.jar" />
@@ -109,8 +110,8 @@
 	<property name="sqlstyleaspect.jarfilename" value="SQLStyleAspect_07_15_2010_11_10_10.jar" />
 	
 		
-	<!-- TPS schema copy -->
-	<target name="tpssch" depends="compile">
+	<!-- Xact Thrashing schema copy -->
+	<target name="xtsch" depends="compile">
 		<copy todir="${plugins.dir}/xml_schema/">
 			<fileset file="./plugins/xml_schema/transaction*" />
 		</copy>
@@ -285,7 +286,7 @@
 	</target>
 		
 	<!-- TPS Scenario Plugin -->
-	<target name="tpsplugin" depends="compile">
+	<!--<target name="tpsplugin" depends="compile">
 		<jar destfile="${tps.jarfilename}">
 			<zipfileset dir="dist/plugins" prefix="plugins">
 				<include name="TPS*.class" />
@@ -296,8 +297,20 @@
 			<fileset file="${tps.jarfilename}" />
 		</copy>
 		<delete file="./${tps.jarfilename}" />
+	</target>-->
+	<!-- XactThrashing Scenario Plugin -->
+	<target name="xtplugin" depends="compile">
+		<jar destfile="${xactthrashing.jarfilename}">
+			<zipfileset dir="dist/plugins" prefix="plugins">
+				<include name="XactThrashing*.class" />
+				<exclude name="META-INF/**/*" />
+			</zipfileset>
+		</jar>
+		<copy todir="${plugins.dir}">
+			<fileset file="${xactthrashing.jarfilename}" />
+		</copy>
+		<delete file="./${xactthrashing.jarfilename}" />
 	</target>
-	
 	<!-- OnePass Scenario Plugin -->
 	<target name="onepassplugin" depends="compile">
 		<jar destfile="${onepass.jarfilename}">

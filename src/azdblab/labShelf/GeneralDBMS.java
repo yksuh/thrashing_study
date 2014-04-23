@@ -410,7 +410,167 @@ public abstract class GeneralDBMS extends Plugin{
       System.exit(1);
     }
   }
+   
+  
+  /** Creates a DBMS table named tableName with the characteristics described by the parameters.  All
+   * parameters that are arrays must be the same length.  If they are not the same length an AZDBLab will terminate.
+   * Also, the index i for each array represents information about column i.
+   * @param tableName The name of the table that will be created.
+   * @param columnNames The names of the columns that belong to the table.
+   * @param columnDataTypes The data types of the columns that belong to the table.
+   * @param columnDataTypeLengths The number of characters/digits that each column will use.
+   * @param primaryKey The columns that will be part of the primary key.
+   * @param foreignKeys The foreign keys for this table.
+   * @param Table_Record_Table The table used to keep track of all relevant tables in the AZDBLab
+   */
+  public void createTable(
+      String tableName, 
+      String[] columnNames, 
+      int[] columnDataTypes,
+      int[] columnDataTypeLengths, 
+      String[] uniqueCols, 
+      int[] nullableCols, 
+      String[] primaryKey, 
+      ForeignKey[] foreignKeys) {
+    if (tableExists(tableName)){
+      return;
+    }
+    //If all arrays are not the same length exit
+    if ((columnNames.length != columnDataTypes.length) ||
+        (columnDataTypes.length != columnDataTypeLengths.length)) {
+    	Main._logger.outputLog("createTable: Parameter Arrays must have same length");
+      System.exit(1); //programmer bug, should be able to create a table
+    }
+    //assemble the CREATE TABLE statement
+    String createTable = "CREATE TABLE " + tableName + " ( ";
+    for (int i = 0; i < columnNames.length; i++) {
+      boolean isNullable = false;
+      String strCol = columnNames[i];
+//      if (primaryKey != null) {
+//	      for (int j = 0; j < primaryKey.length; j++) {
+////	    	  Main._logger.outputLog("col: " + strCol + ", primary key: " + primaryKey[j]);
+//	    	  if(strCol.equalsIgnoreCase(primaryKey[j])){
+////	    		  flag = true;
+//	    		  break;
+//	    	  }
+//	      }
+//      }
+      if (nullableCols != null) {
+	      for (int j = 0; j < nullableCols.length; j++) {
+//	    	  Main._logger.outputLog("col: " + strCol + ", primary key: " + primaryKey[j]);
+	    	  if(nullableCols[j] == 0){
+	    		  isNullable = false;
+	    		  break;
+	    	  }
+	      }
+      }
+      createTable += strCol + " " + 
+                     getDataTypeAsString(columnDataTypes[i],
+                                         columnDataTypeLengths[i]);
+      if(!isNullable)
+    	  createTable += " NOT NULL";
+      
+      if (i == columnNames.length - 1) {
+        break;
+      }
+      createTable += ", ";
+    }
     
+//    USING INDEX (create index ai on a (a1)));
+    
+    //creating the primary key SQL
+    if (primaryKey != null) {
+      createTable += ", PRIMARY KEY(";
+      for (int i = 0; i < primaryKey.length; i++) {
+        createTable += primaryKey[i];
+        if (i == primaryKey.length - 1) {
+          break;
+        }
+        createTable += ", ";
+      }
+      createTable += ")";
+    
+	//  oracle: CREATE TABLE a (a1 INT, a2 INT, PRIMARY KEY (a1) USING INDEX (create index ai on a (a1)))
+    //           http://infolab.stanford.edu/~ullman/fcdb/oracle/or-nonstandard.html
+    //           Oracle automatically creates an index for each UNIQUE or PRIMARY KEY declaration
+    //  DB2: CREATE TABLE a (a1 INT not null, a2 INT, PRIMARY KEY (a1))
+    //       CREATE TABLE a (a1 INT, a2 INT) + CREATE UNIQUE INDEX a_pk_idx on a(a1) 
+    // more investigation on the other dbmses..
+    // SQLServer: http://databases.about.com/od/sqlserver/a/indextuning.htm
+    // Postgres: http://www.java2s.com/Code/PostgreSQL/Constraints/PRIMARYKEYwillcreateimplicitindex.htm
+    //http://bytes.com/topic/mysql/answers/74529-primary-key-index
+//    CREATE TABLE ft_HT1 (id1 INT, id2 INT, id3 INT, id4 INT, 
+//	   PRIMARY KEY (id1) USING INDEX (create index ft_HT1_pk_idx on ft_HT1 (id1)));
+//      createTable += " USING INDEX (CREATE INDEX " + tableName + "_pk_idx" + " on " + tableName + "(";
+//      for (int i = 0; i < primaryKey.length; i++) {
+//    	 createTable += primaryKey[i];
+//		 if (i == primaryKey.length - 1) {
+//		   break;
+//		 }
+//		 createTable += ", ";
+//      }
+//      createTable += ")";      
+    }
+  
+  // unique columns
+  if (uniqueCols != null) {
+      createTable += ", UNIQUE(";
+      for (int i = 0; i < uniqueCols.length; i++) {
+        createTable += uniqueCols[i];
+        if (i == uniqueCols.length - 1) {
+          break;
+        }
+        createTable += ", ";
+      }
+      createTable += ")";
+  }
+  
+    //creating the Foreign Key SQL
+    if (foreignKeys != null) {
+      for (int i = 0; i < foreignKeys.length; i++) {
+        createTable += ", FOREIGN KEY(";
+        if (foreignKeys[i].columns.length != foreignKeys[i].columnsReferenced.length) {
+        	Main._logger.reportError("The two arrays in a Foreign Key Object must be the same length");
+          System.exit(1);
+        }
+        for (int j = 0; j < foreignKeys[i].columns.length; j++) {
+          createTable += foreignKeys[i].columns[j];
+          if (j == foreignKeys[i].columns.length - 1) {
+            break;
+          }
+          createTable += ", ";
+        }
+        createTable += ") REFERENCES " + foreignKeys[i].tableReferenced + " (";
+        for (int j = 0; j < foreignKeys[i].columnsReferenced.length; j++) {
+          createTable += foreignKeys[i].columnsReferenced[j];
+          if (j == foreignKeys[i].columnsReferenced.length - 1) {
+            break;
+          }
+          createTable += ", ";
+        }
+        createTable += ")";
+        if (foreignKeys[i].strCascadeOption != null) {
+          createTable += foreignKeys[i].strCascadeOption;
+        }
+      }
+    }
+    createTable += ")";
+    if (Main.verbose) {
+    	Main._logger.outputLog("Creating Table: " + tableName);
+    }
+    //Executing the SQL to create the table
+    try {
+    	Main._logger.outputLog("sql to create table: " + createTable);
+      _statement.executeUpdate(createTable);
+      // yksuh added commit as below
+      commit();
+    } catch (SQLException e) {
+    	Main._logger.reportError(createTable);
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
+  
   /****
    * Young's thesis for tpcc loading
    * @param tableName

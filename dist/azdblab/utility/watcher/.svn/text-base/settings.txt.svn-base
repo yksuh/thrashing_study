@@ -1,5 +1,0 @@
--mbeanname  src:type=Executor
--onclose  PRINT
--email  jendempsey@email.arizona.edu
--outstream  PRINTSTREAM
--coalesce false

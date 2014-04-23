@@ -860,14 +860,14 @@ _logger.outputLog(line);
 //			scen.setTerminals(numTerminals);
 //			scen.setIncrements(numIncr);
 //			scen.setEffectiveDBSz(effDBSz);
-			scen.executeExperiment();
 			scen.setConfigParamters(dbmsBuffCacheSizeMin, dbmsBuffCacheSizeMax, dbmsBuffCacheSizeIncr, 
-									numCores, 
-									batchRunTime, 
-									xactSizeMin, xactSizeMax, xactSizeIncr,
-									eXclusiveLockPctMin,  eXclusiveLockPctMax, eXclusiveLockPctIncr,
-									MPLMin, MPLMax, MPLIncr,
-									EffDBMin, EffDBMax, EffDBMin);
+					numCores, 
+					batchRunTime, 
+					xactSizeMin, xactSizeMax, xactSizeIncr,
+					eXclusiveLockPctMin,  eXclusiveLockPctMax, eXclusiveLockPctIncr,
+					MPLMin, MPLMax, MPLIncr,
+					EffDBMin, EffDBMax, EffDBMin);
+			scen.executeExperiment();
 			
 		} catch (InvalidExperimentRunException e) {
 			System.err

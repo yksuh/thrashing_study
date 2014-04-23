@@ -1101,6 +1101,7 @@ protected String getProcDiff(Socket procMonSock) throws ProcMonitorException {
 							ResultSet.CONCUR_UPDATABLE);
 		}
 		_statement.execute(sql);	
+		_statement.close();
 	}
   
   

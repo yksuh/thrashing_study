@@ -90,11 +90,10 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 			new int[] { 
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER
 			}, 
-			new int[] {10, 10, 10, 10}, 
-			new int[] { 0, 0, 0, 0}, 
+			new int[] {10, 10, 10}, 
+			new int[] { 0, 0, 0}, 
 			new String[] { "RUNID", "BATCHSETNUM"}, // unique
 			new String[] { "BATCHSETID" }, 	// primary key
 			new ForeignKey[] { 
@@ -114,16 +113,16 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 	public static final InternalTable BATCHSETHASPARAMETER = new InternalTable(
 			Constants.TABLE_PREFIX + Constants.TABLE_BATCHSETHASPARAMETER,
 			new String[] { 
-					"BATCHSETID", 
-					"DBMSBufferCacheSize", 
-					"NumCores", 
-					"BatchSizeIncrement", 
-					"Duration", 
-					"TransactionSize", 
-					"ExclusiveLockRatio", 
-					"EffectiveDBRatio", 
-					"LockWaitTime", 
-					"WasThrashed"
+					"BatchSetID", 		// batch set ID
+					"BufferSpace", 		// buffer space
+					"NumCores", 		// number of cores
+					"BatchSzIncr", 		// batch size increments
+					"Duration", 		// run duration
+					"XactSz", 			// # of shared locks
+					"XLockRatio", 		// # of exclusive locks
+					"EffectiveDBSz",	// effective database size	 
+					"LockWaitTime", 	// lock wait time
+					"MaxMPL"			// maximum MPL
 			}, 
 			new int[] { 
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
@@ -367,7 +366,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 	public static final InternalTable CLIENTHASRESULT = new InternalTable(
 			Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT,
 			new String[] { 
-					"CLIENTRESID",
+					"CLIRESID",
 					"CLIENTID",
 					"ITERNUM",
 					"NUMEXECUTEDXACTS"}, 
@@ -380,7 +379,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 			new int[] {10, 10, 10, 10}, 
 			new int[] { 0, 0, 0, 0}, 
 			new String[] { "CLIENTID", "ITERNUM"}, 	// primary key // unique
-			new String[] { "CLIENTRESID"}, 	// primary key
+			new String[] { "CLIRESID"}, 	// primary key
 			new ForeignKey[] { 
 					new ForeignKey(
 							new String[] { "CLIENTID" }, 
@@ -543,6 +542,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					while(rs.next()){
 						batchSetID = rs.getInt(1);
 					}
+					rs.close();
 					
 					// not existing ...
 					if(batchSetID == -1){
@@ -655,6 +655,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 								String.valueOf(batchSetNum)
 						},
 						BATCHSET.columnDataTypes);
+			LabShelfManager.getShelf().commitlabshelf();
 		} catch (SQLException e) {
 			Main._logger.reportError(e.getMessage());
 			// TODO Auto-generated catch block
@@ -686,6 +687,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 								paramVal[9], // Was Thrashed?
 						},
 						BATCHSETHASPARAMETER.columnDataTypes);
+			LabShelfManager.getShelf().commitlabshelf();
 		} catch (SQLException e) {
 			Main._logger.reportError(e.getMessage());
 			// TODO Auto-generated catch block

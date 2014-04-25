@@ -167,7 +167,7 @@ public class AZDBLabLogger extends Logger{
     	_logger.error(errorMsg);
     	System.err.println("[ERROR]"+errorMsg);
     }
-    public void reportError2(String errorMsg){
+    public void reportErrorNotOnConsole(String errorMsg){
     	_logger.error(errorMsg);
     }
 	public void outputDebugWithoutNewLine(String logMsg) {

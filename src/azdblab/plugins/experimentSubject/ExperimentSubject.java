@@ -1090,9 +1090,9 @@ protected String getProcDiff(Socket procMonSock) throws ProcMonitorException {
 	 */
 	public void executeSQLStmt(String sql) throws SQLException {
 		if(_statement == null){
-			Main._logger.reportError("Statement is null...");
+			//Main._logger.reportError("Statement is null...");
 			if(_connection == null){
-				Main._logger.reportError("Connection is null...");
+				//Main._logger.reportError("Connection is null...");
 				_connection = DriverManager.getConnection(strConnectString,
 						strUserName, strPassword);
 			}
@@ -1101,10 +1101,45 @@ protected String getProcDiff(Socket procMonSock) throws ProcMonitorException {
 							ResultSet.CONCUR_UPDATABLE);
 		}
 		_statement.execute(sql);	
-		_statement.close();
 	}
   
-  
+	 
+	  /**
+	   * Closes the DBMS connection that was opened by the open call.
+	   */
+	  public void NewClose() {
+	    try {
+		 if(_statement != null)
+	    	_statement.close();
+	    }catch(SQLException ex){
+//	    	Main._logger.reportError("Statement Close failed");
+//	    	Main._logger.reportErrorNotOnConsole(ex.getMessage());
+	    	//ex.printStackTrace();
+	    }
+	    _statement = null;
+	    try{
+	      if(_connection != null)
+	      _connection.close();
+	    } catch (SQLException e) {
+//	    	Main._logger.reportError("Connection Close failed");
+//	    	Main._logger.reportErrorNotOnConsole(e.getMessage());
+	    	//e.printStackTrace();
+	    }
+	    _connection = null;
+	  }
+	  /**
+	   * Commits all update operations made to the dbms.  This must be called for inserts statements to be seen.
+	   */
+	  public void NewCommit() {
+	    try {
+	      if (_connection != null && !_connection.isClosed())
+	        _connection.commit();
+	    } catch (SQLException e) {
+//	      Main._logger.reportError("Commit failed");
+//	      Main._logger.reportErrorNotOnConsole(e.getMessage());
+	    	//e.printStackTrace();
+	    }
+	  }
   /**
    * Set DataDefinition object.
    */

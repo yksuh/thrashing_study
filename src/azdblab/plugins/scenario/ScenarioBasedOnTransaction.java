@@ -527,10 +527,11 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 		int totalExLcks = (int)((xLocksMax-xLocksMin)/xLocksIncr)+1;
 		int totalEDBSize = (int)((edbSizeMax-edbSizeMin)/edbSizeIncr)+1;
 		int totalBatchSets = totalXactSz*totalExLcks*totalEDBSize;
+		double xactSz=xactSizeMin, xlcks=xLocksMin;
 		// transactio size
-		for(double xactSz=xactSizeMin;xactSz<=xactSizeMax;xactSz*=xactSizeIncr){
+		//for(double xactSz=xactSizeMin;xactSz<=xactSizeMax;xactSz*=xactSizeIncr){
 			// exclusive locks
-			for(double xlcks=xLocksMin;xlcks<=xLocksMax;xlcks+=xLocksIncr){
+			//for(double xlcks=xLocksMin;xlcks<=xLocksMax;xlcks+=xLocksIncr){
 				// effective db size
 				for(double edbSz=edbSizeMin;edbSz<=edbSizeMax;edbSz+=edbSizeIncr){
 					// increment batch set
@@ -596,8 +597,8 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 						Main._logger.outputLog("after the insertion  of the next task number");
 					}
 				}
-			}
-		}
+			//}
+		//}
 	}
 
 	/****

@@ -73,6 +73,19 @@ public abstract class GeneralDBMS extends Plugin{
     }
     _connection = null;
   }
+  
+  /**
+   * Closes the DBMS connection that was opened by the open call.
+   */
+  public void NewClose() {
+    try {
+      if(_connection != null)
+      _connection.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    _connection = null;
+  }
     
   /**
    * Commits all update operations made to the dbms.  This must be called for inserts statements to be seen.
@@ -176,9 +189,9 @@ public abstract class GeneralDBMS extends Plugin{
 				isOpened = true;
 				return;
 			} catch (SQLException sqlex) {
-				sqlex.printStackTrace();
+				//sqlex.printStackTrace();
 				isOpened = false;
-				Main._logger.outputLog("login details: " + strConnectString + ", " + strUserName + ", " + strPassword);
+//				Main._logger.outputLog("login details: " + strConnectString + ", " + strUserName + ", " + strPassword);
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 				System.exit(1); // programemer/dbsm error
@@ -444,25 +457,12 @@ public abstract class GeneralDBMS extends Plugin{
     //assemble the CREATE TABLE statement
     String createTable = "CREATE TABLE " + tableName + " ( ";
     for (int i = 0; i < columnNames.length; i++) {
-      boolean isNullable = false;
+      boolean isNullable = true;
       String strCol = columnNames[i];
-//      if (primaryKey != null) {
-//	      for (int j = 0; j < primaryKey.length; j++) {
-////	    	  Main._logger.outputLog("col: " + strCol + ", primary key: " + primaryKey[j]);
-//	    	  if(strCol.equalsIgnoreCase(primaryKey[j])){
-////	    		  flag = true;
-//	    		  break;
-//	    	  }
-//	      }
-//      }
       if (nullableCols != null) {
-	      for (int j = 0; j < nullableCols.length; j++) {
-//	    	  Main._logger.outputLog("col: " + strCol + ", primary key: " + primaryKey[j]);
-	    	  if(nullableCols[j] == 0){
-	    		  isNullable = false;
-	    		  break;
-	    	  }
-	      }
+    	  if(nullableCols[i] == 0){
+    		  isNullable = false;
+    	  }
       }
       createTable += strCol + " " + 
                      getDataTypeAsString(columnDataTypes[i],
@@ -835,6 +835,26 @@ public abstract class GeneralDBMS extends Plugin{
 	  close();
 	  open(false);
   }
+  
+  /**
+   * Used to insert a row into the DBMS.  
+   * Each column in this array will be inside of the select clause.  The from clause simply contains
+   * the tableName.  
+   * @param tableName The name of the table which will receive a new row.
+   * @param columnNames The name of the columns of the row being inserted. 
+   * @param columnValues The values of the columns being inserted.
+   * @param columnDataTypes The data types of the columns being inserted.
+   * @throws SQLException Thrown if the insertion fails.
+   */
+  public void NewInsertTuple(
+      String tableName, String[] columnNames, String[] columnValues, 
+      int[] columnDataTypes) throws SQLException {
+    String insertSQL = buildInsertSQL(tableName, columnNames, columnValues,
+                                      columnDataTypes);
+ Main._logger.outputDebug(insertSQL);
+    _statement.executeUpdate(insertSQL);
+  }
+  
   /**
    * Used to insert a row into the DBMS.  
    * Each column in this array will be inside of the select clause.  The from clause simply contains
@@ -888,7 +908,7 @@ public abstract class GeneralDBMS extends Plugin{
       insertSQL += ", ";
     }
     insertSQL += ")";
-System.out.println(insertSQL);
+//System.out.println(insertSQL);
     return insertSQL;
   }
      

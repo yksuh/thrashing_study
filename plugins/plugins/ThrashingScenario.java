@@ -47,7 +47,7 @@ public class ThrashingScenario extends ScenarioBasedOnTransaction {
 //	    }
 //	  }
 	
-	public static final boolean refreshTable = false;
+	public static final boolean refreshTable = true;
 	
 	public ThrashingScenario(ExperimentRun expRun) {
 		super(expRun);

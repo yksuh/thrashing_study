@@ -27,7 +27,7 @@ import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
  */
 
 public class XactThrashingScenario extends ScenarioBasedOnTransaction {
-	public static final boolean refreshTable = false;
+	public static final boolean refreshTable = true;
 	
 	public XactThrashingScenario(ExperimentRun expRun) {
 		super(expRun);

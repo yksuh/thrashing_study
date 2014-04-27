@@ -77,6 +77,9 @@
 				<xsd:element name="duration" minOccurs="0" maxOccurs="1">
 					<xsd:complexType>
 						<xsd:attribute name="seconds" type="xsd:string" use="required" />
+						<xsd:attribute name="min" type="xsd:string" use="optional" />
+						<xsd:attribute name="max" type="xsd:string" use="optional" />
+						<xsd:attribute name="increment" type="xsd:string" use="optional" />
 					</xsd:complexType>
 				</xsd:element>
 				<xsd:element name="xactSize" minOccurs="0" maxOccurs="1">

@@ -121,7 +121,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					"XactSz", 			// # of shared locks
 					"XLockRatio", 		// # of exclusive locks
 					"EffectiveDBSz",	// effective database size	 
-					"LockWaitTime", 	// lock wait time
+					"AvgLockWaitTime", 	// lock wait time
 					"MaxMPL"			// maximum MPL
 			}, 
 			new int[] { 
@@ -279,14 +279,16 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 			new String[] { 
 					"XACTID",
 					"CLIENTID", 
-					"XACTNUM"}, 
+					"XACTNUM",
+					"XACTSTR"}, 
 			new int[] { 
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_VARCHAR
 			}, 
-			new int[] {10, 10, 10}, 
-			new int[] { 0, 0, 0}, 
+			new int[] {10, 10, 10, 1000}, 
+			new int[] { 0, 0, 0, 0}, 
 			new String[] { "CLIENTID", "XACTNUM"}, // unique
 			new String[] { "XACTID"}, 	// primary key
 			new ForeignKey[] { 
@@ -297,36 +299,36 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 							" ON DELETE CASCADE") 
 			},
 			Constants.SEQUENCE_TRANSACTION);	
-	/**
-	 * The definition of the statement internal table.
-	 * 
-	 * @see InternalTable
-	 */
-	public static final InternalTable STATEMENT = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_STATEMENT,
-			new String[] { 
-					"STMTID",
-					"XACTID",
-					"STMTNUM", 
-					"STMTSQL"}, 
-			new int[] { 
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_VARCHAR
-			}, 
-			new int[] {10, 10, 10, 4000}, 
-			new int[] { 0, 0, 0, 0}, 
-			new String[] { "XACTID", "STMTNUM"}, // unique
-			new String[] { "STMTID"}, // primary key
-			new ForeignKey[] { 
-					new ForeignKey(
-							new String[] { "XACTID" }, 
-							Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTION, 
-							new String[] { "XACTID" }, 
-							" ON DELETE CASCADE")
-			},
-			Constants.SEQUENCE_STATEMENT);
+//	/**
+//	 * The definition of the statement internal table.
+//	 * 
+//	 * @see InternalTable
+//	 */
+//	public static final InternalTable STATEMENT = new InternalTable(
+//			Constants.TABLE_PREFIX + Constants.TABLE_STATEMENT,
+//			new String[] { 
+//					"STMTID",
+//					"XACTID",
+//					"STMTNUM", 
+//					"STMTSQL"}, 
+//			new int[] { 
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_VARCHAR
+//			}, 
+//			new int[] {10, 10, 10, 4000}, 
+//			new int[] { 0, 0, 0, 0}, 
+//			new String[] { "XACTID", "STMTNUM"}, // unique
+//			new String[] { "STMTID"}, // primary key
+//			new ForeignKey[] { 
+//					new ForeignKey(
+//							new String[] { "XACTID" }, 
+//							Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTION, 
+//							new String[] { "XACTID" }, 
+//							" ON DELETE CASCADE")
+//			},
+//			Constants.SEQUENCE_STATEMENT);
 	/**
 	 * The definition of the batch internal table.
 	 * 
@@ -337,16 +339,18 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 			new String[] { 
 					"BATCHID", 
 					"ITERNUM",
-					"SUMEXECUTEDXACTS",
-					"elapsedTime"}, 
+					"SumEXECUTEDXACTS",
+					"elapsedTime",
+					"SumLockWaitTime"}, 
 			new int[] { 
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER
 			}, 
-			new int[] {10, 10, 10,10}, 
-			new int[] { 0, 0, 0,0}, 
+			new int[] {10, 10, 10, 10, 10}, 
+			new int[] { 0, 0, 0, 0, 1}, 
 			null, // unique
 			new String[] { "BATCHID", "ITERNUM"}, 	// primary key
 			new ForeignKey[] { 
@@ -369,15 +373,17 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					"CLIRESID",
 					"CLIENTID",
 					"ITERNUM",
-					"NUMEXECUTEDXACTS"}, 
+					"NUMEXECUTEDXACTS",
+					"LockWaitTime"}, 
 			new int[] { 
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER
 			}, 
-			new int[] {10, 10, 10, 10}, 
-			new int[] { 0, 0, 0, 0}, 
+			new int[] {10, 10, 10, 10, 10}, 
+			new int[] { 0, 0, 0, 0, 0}, 
 			new String[] { "CLIENTID", "ITERNUM"}, 	// primary key // unique
 			new String[] { "CLIRESID"}, 	// primary key
 			new ForeignKey[] { 
@@ -427,43 +433,43 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 							" ON DELETE CASCADE") 
 			},
 			Constants.SEQUENCE_TRANSACTIONHASRESULT);	
-	/**
-	 * The definition of the statementhasresult internal table.
-	 * 
-	 * @see InternalTable
-	 */
-	public static final InternalTable STATEMENTHASRESULT = new InternalTable(
-			Constants.TABLE_PREFIX + Constants.TABLE_STATEMENTHASRESULT,
-			new String[] { 
-					"XACTRESID",
-					"STMTID",
-					"STMTITERNUM",
-					"RunTime",
-					"LockWaitTime"}, 
-			new int[] { 
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER
-			}, 
-			new int[] {10, 10, 10, 10, 10}, 
-			new int[] { 0, 0, 0, 0, 1}, 
-			null, // unique
-			new String[] { "XACTRESID", "STMTID", "STMTITERNUM"}, 	// primary key
-			new ForeignKey[] { 
-					new ForeignKey(
-							new String[] { "XACTRESID"}, 
-							Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
-							new String[] { "XACTRESID" }, 
-							" ON DELETE CASCADE"),
-					new ForeignKey(
-							new String[] { "STMTID" }, 
-							Constants.TABLE_PREFIX + Constants.TABLE_STATEMENT, 
-							new String[] { "STMTID" }, 
-							" ON DELETE CASCADE")
-			},
-			null);
+//	/**
+//	 * The definition of the statementhasresult internal table.
+//	 * 
+//	 * @see InternalTable
+//	 */
+//	public static final InternalTable STATEMENTHASRESULT = new InternalTable(
+//			Constants.TABLE_PREFIX + Constants.TABLE_STATEMENTHASRESULT,
+//			new String[] { 
+//					"XACTRESID",
+//					"STMTID",
+//					"STMTITERNUM",
+//					"RunTime",
+//					"LockWaitTime"}, 
+//			new int[] { 
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER,
+//					GeneralDBMS.I_DATA_TYPE_NUMBER
+//			}, 
+//			new int[] {10, 10, 10, 10, 10}, 
+//			new int[] { 0, 0, 0, 0, 1}, 
+//			null, // unique
+//			new String[] { "XACTRESID", "STMTID", "STMTITERNUM"}, 	// primary key
+//			new ForeignKey[] { 
+//					new ForeignKey(
+//							new String[] { "XACTRESID"}, 
+//							Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
+//							new String[] { "XACTRESID" }, 
+//							" ON DELETE CASCADE"),
+//					new ForeignKey(
+//							new String[] { "STMTID" }, 
+//							Constants.TABLE_PREFIX + Constants.TABLE_STATEMENT, 
+//							new String[] { "STMTID" }, 
+//							" ON DELETE CASCADE")
+//			},
+//			null);
 	
 	/**
 	 * Initialize experiment tables for thrashing study
@@ -538,13 +544,16 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					batchSetNum++;
 					
 					// Check this batchset
-					int batchSetID = -1;
+					int batchSetID = -1;	
 					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL("SELECT batchSetID from azdblab_batchset where runid = " + runID + " and batchSetNum = " + batchSetNum);
-					while(rs.next()){
-						batchSetID = rs.getInt(1);
+					try{
+						while(rs.next()){
+							batchSetID = rs.getInt(1);
+						}
+						rs.close();
+					}catch(Exception ex){
+						ex.printStackTrace();
 					}
-					rs.close();
-					
 					// not existing ...
 					if(batchSetID == -1){
 						// obtain a new batch set id
@@ -692,7 +701,19 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 		} catch (SQLException e) {
 			Main._logger.reportError(e.getMessage());
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
+			String updateSQL = "UPDATE AZDBLAB_BATCHSETHASPARAMETER " + 
+							   "SET BufferSpace = " + paramVal[1] + 
+							   " and NumCores = " + paramVal[2] + 
+							   " and BatchSzIncr = " + paramVal[3] + 
+							   " and Duration = " + paramVal[4] + 
+							   " and XactSz = " + paramVal[5] + 
+							   " and XLockRatio = " + paramVal[6] + 
+							   " and EffectiveDBSz = " + paramVal[7] + 
+							   " and AvgLockWaitTime = " + paramVal[8]+ 
+							   " and MaxMPL = " + paramVal[9] + 
+							   " WHERE batchSetID = " + paramVal[0];
+			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 		}
 	}
 

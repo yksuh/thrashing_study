@@ -22,6 +22,7 @@ import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
  * Default Setting: read committed, a single core, MPL=100
  */
 
+//public class OldTPSScenario extends ScenarioBasedOnTransaction {
 public class OldTPSScenario extends ScenarioBasedOnTransaction {
 //	protected class TimeoutTerminals extends TimerTask{
 //		ArrayList<Client> clients = null; 
@@ -507,18 +508,17 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 
 	@Override
 	protected void analyzeBatchSet(int batchSetID, double transactionSize,
-			double eXclusiveLocks, double effectiveDBSize, int totalBatchSets)
+			double eXclusiveLocks, double effectiveDBSize)
 			throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void stepA(int batchSetID, double transactionSize,
-			double exclusiveLockRatio, double effectiveDBRatio)
+	protected int stepA(double transactionSize, double exclusiveLockRatio, double effectiveDBRatio)
 			throws Exception {
 		// TODO Auto-generated method stub
-		
+		return 0;
 	}
 
 	@Override
@@ -528,8 +528,21 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 		
 	}
 
+//	@Override
+	protected void stepC(int batchSetRunResID, int batchID) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
 	@Override
-	protected void stepC(int MPL) throws Exception {
+	protected int stepC(int batchSetRunResID, int batchID, int numClients,
+			int iterNum) throws Exception {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected void stepD() throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

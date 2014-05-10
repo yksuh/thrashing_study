@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-import java.util.TimerTask;
 import java.util.Vector;
 
 import azdblab.Constants;
@@ -23,70 +22,83 @@ import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
  * We study DBMS thrashing
  * 
  * @author yksuh
- *
+ * 
  */
 
 public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 	public static final boolean refreshTable = true;
-	
+
 	public XactThrashingScenario(ExperimentRun expRun) {
 		super(expRun);
 		// TODO Auto-generated constructor stub
 		installTables();
 	}
 
-
 	/****
 	 * Get tables to be installed for this thrashing study
+	 * 
 	 * @return
 	 */
 	public Vector<InternalTable> getTables() {
 		if (refreshTable) {
 			LabShelfManager.getShelf().dropTable(BATCHSET.TableName);
-			LabShelfManager.getShelf().dropTable(BATCHSETHASPARAMETER.TableName);
-			LabShelfManager.getShelf().dropTable(BSSATISFIESASPECT.TableName);
 			LabShelfManager.getShelf().dropTable(BATCH.TableName);
 			LabShelfManager.getShelf().dropTable(CLIENT.TableName);
 			LabShelfManager.getShelf().dropTable(TRANSACTION.TableName);
-//			LabShelfManager.getShelf().dropTable(STATEMENT.TableName);
+			LabShelfManager.getShelf().dropTable(COMPLETED_BATCHSETTASK.TableName);
+			// LabShelfManager.getShelf().dropTable(STATEMENT.TableName);
+			
+			// result table
+			LabShelfManager.getShelf().dropTable(BATCHSETHASRESULT.TableName);
 			LabShelfManager.getShelf().dropTable(BATCHHASRESULT.TableName);
 			LabShelfManager.getShelf().dropTable(CLIENTHASRESULT.TableName);
 			LabShelfManager.getShelf().dropTable(TRANSACTIONHASRESULT.TableName);
-			//LabShelfManager.getShelf().dropTable(STATEMENTHASRESULT.TableName);
+			// LabShelfManager.getShelf().dropTable(STATEMENTHASRESULT.TableName);
+
+			// LabShelfManager.getShelf().dropTable(BSSATISFIESASPECT.TableName);
 		}
 
 		Vector<InternalTable> toRet = new Vector<InternalTable>();
 		toRet.add(BATCHSET);
-		toRet.add(BATCHSETHASPARAMETER);
-		toRet.add(BSSATISFIESASPECT);
 		toRet.add(BATCH);
 		toRet.add(CLIENT);
 		toRet.add(TRANSACTION);
-		//toRet.add(STATEMENT);	
+		toRet.add(COMPLETED_BATCHSETTASK);
+		// toRet.add(STATEMENT);
+
+		toRet.add(BATCHSETHASRESULT);
 		toRet.add(BATCHHASRESULT);
 		toRet.add(CLIENTHASRESULT);
 		toRet.add(TRANSACTIONHASRESULT);
-		//toRet.add(STATEMENTHASRESULT);
+		// toRet.add(STATEMENTHASRESULT);
+
+		// toRet.add(BATCHSETHASPARAMETER);
+		// toRet.add(BSSATISFIESASPECT);
 		return toRet;
 	}
-	
+
 	/***
 	 * Creates sequence for some tables
-	 * @param seqName	sequence name
-	 * @throws Exception 
+	 * 
+	 * @param seqName
+	 *            sequence name
+	 * @throws Exception
 	 */
 	private void createSequence(String seqName, int startNum) throws Exception {
-		String createSequence = "CREATE SEQUENCE " + seqName + " START WITH "+ startNum +" NOMAXVALUE";
+		String createSequence = "CREATE SEQUENCE " + seqName + " START WITH "
+				+ startNum + " NOMAXVALUE";
 		Main._logger.outputLog(createSequence);
 		LabShelfManager.getShelf().executeUpdateSQL(createSequence);
 		LabShelfManager.getShelf().commitlabshelf();
 		Main._logger.outputLog(seqName + " Created");
 	}
-	
+
 	/***
 	 * Drops sequence for some tables
-	 * @param seqName	sequence name
-	 * @throws Exception 
+	 * 
+	 * @param seqName
+	 *            sequence name
+	 * @throws Exception
 	 */
 	private void dropSequence(String seqName) throws Exception {
 		String dropSequence = "Drop SEQUENCE " + seqName;
@@ -95,7 +107,7 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		LabShelfManager.getShelf().commitlabshelf();
 		Main._logger.outputLog(seqName + " Dropped");
 	}
-	
+
 	/****
 	 * Install tables for thrashing study
 	 */
@@ -109,17 +121,38 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			if (!LabShelfManager.getShelf().tableExists(tmp.TableName)) {
 				LabShelfManager.getShelf().createTable(tmp.TableName,
 						tmp.columns, tmp.columnDataTypes,
-						tmp.columnDataTypeLengths, tmp.uniqueConstraintColumns, tmp.columnNullable, tmp.primaryKey,
-						tmp.foreignKey);
-				if(tmp.TableName.equalsIgnoreCase(Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER)){
-					String alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER 
-							+ " MODIFY MaxMPL NUMBER(10, 2)";
-					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER 
+						tmp.columnDataTypeLengths, tmp.uniqueConstraintColumns,
+						tmp.columnNullable, tmp.primaryKey, tmp.foreignKey);
+				if (tmp.TableName.equalsIgnoreCase(Constants.TABLE_PREFIX
+						+ Constants.TABLE_BATCHSET)) {
+					String alterTblSQL = "";
+					// alterTblSQL = "ALTER TABLE " +
+					// Constants.TABLE_PREFIX+Constants.TABLE_BATCHSET
+					// + " MODIFY MaxMPL NUMBER(10, 2)";
+					// LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
+					// LabShelfManager.getShelf().commitlabshelf();
+					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
+							+ Constants.TABLE_BATCHSET
 							+ " MODIFY XactSz NUMBER(10, 2)";
-					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER 
+					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
+					LabShelfManager.getShelf().commitlabshelf();
+					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
+							+ Constants.TABLE_BATCHSET
 							+ " MODIFY XLockRatio NUMBER(10, 4)";
-					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX+Constants.TABLE_BATCHSETHASPARAMETER 
+					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
+					LabShelfManager.getShelf().commitlabshelf();
+					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
+							+ Constants.TABLE_BATCHSET
 							+ " MODIFY EffectiveDBSz NUMBER(10, 2)";
+					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
+					LabShelfManager.getShelf().commitlabshelf();
+				}
+				if (tmp.TableName.equalsIgnoreCase(Constants.TABLE_PREFIX
+						+ Constants.TABLE_BATCHSETHASRESULT)) {
+					String alterTblSQL = "ALTER TABLE "
+							+ Constants.TABLE_PREFIX
+							+ Constants.TABLE_BATCHSETHASRESULT
+							+ " MODIFY AvgXactProcTime NUMBER(10, 2)";
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 					LabShelfManager.getShelf().commitlabshelf();
 				}
@@ -137,17 +170,17 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			}
 		}
 	}
-	
+
 	/***
 	 * Clients in a batch
 	 */
 	public Client[] clients;
-	protected boolean timeOut = false;
-	
-	static class TransactionGenerator{
+//	protected boolean timeOut = false;
+
+	static class TransactionGenerator {
 		private static double effectiveDBSz = 0;
 		private static double selectivity = 0;
-		
+
 		/****
 		 * Transaction number to transaction ID map
 		 */
@@ -156,69 +189,75 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		 * Statement number to transaction ID map
 		 */
 		private static HashMap<Long, Long> stmtNumToIDMap = new HashMap<Long, Long>();
-		
+
 		/***
 		 * Effective DB Size
 		 */
-		private static double effectiveDBSize = 0;
+		// private static double effectiveDBSize = 0;
 		/***
-		 * Transaction Size 
+		 * Transaction Size
 		 */
 		private static double xactSize = 0;
 		/***
-		 * eXclusive Locks 
+		 * eXclusive Locks
 		 */
 		private static double xLocks = 0;
-	
+
 		/*** For target table. Used for FROM and UPDATE clause ***/
-		private static RepeatableRandom repRandForTable  = new RepeatableRandom();
+		private static RepeatableRandom repRandForTable = new RepeatableRandom();
 		/*** For update ***/
-		private static RepeatableRandom repRandForSET    = new RepeatableRandom();
+		private static RepeatableRandom repRandForSET = new RepeatableRandom();
 		private static RepeatableRandom repRandForWhereInUpdate = new RepeatableRandom();
 		/*** For select ***/
-		private static RepeatableRandom repRandForSELECT 	 	= new RepeatableRandom();
+		private static RepeatableRandom repRandForSELECT = new RepeatableRandom();
 		private static RepeatableRandom repRandForWhereInSELECT = new RepeatableRandom();
 		/*** Generating values to be updated ***/
-		private static RepeatableRandom repRandForVal    = new RepeatableRandom();
-		
+		private static RepeatableRandom repRandForVal = new RepeatableRandom();
+
 		/****
 		 * Get xact number to id map
+		 * 
 		 * @return xactNumToIDMap
 		 */
-		public static HashMap<Long, Long> getXactNumToIDMap(){ 
+		public static HashMap<Long, Long> getXactNumToIDMap() {
 			return xactNumToIDMap;
 		}
+
 		/****
 		 * Get statment number to id map
+		 * 
 		 * @return xactNumToIDMap
 		 */
-		public static HashMap<Long, Long> getStmtNumToIDMap(){ 
+		public static HashMap<Long, Long> getStmtNumToIDMap() {
 			return stmtNumToIDMap;
 		}
-	
-		public static double getEffectiveDBRatio(){
+
+		public static double getEffectiveDBRatio() {
 			return effectiveDBSz;
 		}
-		
-		public static double getSelectivity(){
+
+		public static double getSelectivity() {
 			return selectivity;
 		}
-		
+
 		/****
 		 * Set transaction size (# of locks)
+		 * 
 		 * @param xactSz
 		 */
 		public static void setXactSize(double xactSz) {
 			xactSize = xactSz;
 		}
+
 		/****
 		 * Set exclusive locks (# of locks)
-		 * @param eXclusiveLocks 
+		 * 
+		 * @param eXclusiveLocks
 		 */
 		public static void setXLocks(double eXclusiveLockRatio) {
 			xLocks = eXclusiveLockRatio;
 		}
-		
+
 		/**
 		 * Gets a random number greater than or equal to start and less than or
 		 * equal to finish.
@@ -229,12 +268,14 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		 *            The upper bound for the random number.
 		 * @return The random number is returned.
 		 */
-		private static int getRandomNumber(RepeatableRandom rr, int start, int finish) {
+		private static int getRandomNumber(RepeatableRandom rr, int start,
+				int finish) {
 			int range = finish - start;
 			range++; // since Math.random never returns 1.0
 			// int result = (int) ( range * Math.random() );
 
-			// The cast to INT truncates, so we will get an integer between 0 and
+			// The cast to INT truncates, so we will get an integer between 0
+			// and
 			// (finish - start)
 			int result = 0;
 			result = (int) (range * rr.getNextDouble());
@@ -245,6 +286,7 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 
 		/***
 		 * Set effective database size
+		 * 
 		 * @param edb_size
 		 */
 		public static void setEffectiveDBSz(double edb_size) {
@@ -253,27 +295,31 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 
 		/*****
 		 * Build SELECT clause for SELECT statement
-		 * @param tbl a chosen tbl
+		 * 
+		 * @param tbl
+		 *            a chosen tbl
 		 * @return SELECT clause
 		 */
-		static String buildSELECTForSelect(Table tbl){
+		static String buildSELECTForSelect(Table tbl) {
 			String str = "SELECT ";
 			// get number of columns
 			int numCols = tbl.columns.length;
 			Vector<String> colNamesVec = new Vector<String>();
 			// copy column names
-			for(int i=0;i<numCols;i++){
+			for (int i = 0; i < numCols; i++) {
 				colNamesVec.add(tbl.columns[i].myName);
 			}
 			// build projection list
 			String strProjectionList = "";
-			long numChosenCols  = (long)((double)getRandomNumber(repRandForSELECT, 1, numCols));
-			for(int i=0;i<numChosenCols;i++){
-				int idx = (int)((double)getRandomNumber(repRandForSELECT, 0, colNamesVec.size()-1));
+			long numChosenCols = (long) ((double) getRandomNumber(
+					repRandForSELECT, 1, numCols));
+			for (int i = 0; i < numChosenCols; i++) {
+				int idx = (int) ((double) getRandomNumber(repRandForSELECT, 0,
+						colNamesVec.size() - 1));
 				String colName = colNamesVec.get(idx);
 				colNamesVec.remove(idx);
 				strProjectionList = colName;
-				if(i < numChosenCols-1){
+				if (i < numChosenCols - 1) {
 					strProjectionList += ",";
 				}
 			}
@@ -283,50 +329,57 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 
 		/*****
 		 * Build FROM clause for select statement
-		 * @param tbl a chosen tbl
+		 * 
+		 * @param tbl
+		 *            a chosen tbl
 		 * @return FROM clause
 		 */
-		static String buildFROMForSelect(Table tbl){
+		static String buildFROMForSelect(Table tbl) {
 			String str = "FROM ";
 			str += tbl.table_name_with_prefix;
 			return str;
 		}
-		
+
 		/*****
 		 * Build WHERE clause for SELECT
-		 * @param tbl a chosen tbl
+		 * 
+		 * @param tbl
+		 *            a chosen tbl
 		 * @return WHERE clause
 		 */
-		static String buildWHEREForSelect(Table tbl){
+		static String buildWHEREForSelect(Table tbl) {
 			// control lock range with the first column
 			String idxCol = "id1";
 			// determine the number of requested locks using transaction size
-			int numReqLocks = (int)(xactSize * (double)tbl.hy_min_card);
+			int numReqLocks = (int) (xactSize * (double) tbl.hy_min_card);
 			// determine end range using effective db size
 			int start = 0;
 			// determine end range using effective db size
-			int end = (int)((double)tbl.hy_min_card * effectiveDBSz);
+			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
 			// compute low key
-			loKey = (long)((double)getRandomNumber(repRandForWhereInSELECT, start, end-numReqLocks));
+			loKey = (long) ((double) getRandomNumber(repRandForWhereInSELECT,
+					start, end - numReqLocks));
 			// set high key
-			hiKey = (loKey+numReqLocks);
-			String str = "WHERE " + idxCol + " >= " + loKey + " and " + idxCol +" < " + hiKey;
+			hiKey = (loKey + numReqLocks);
+			String str = "WHERE " + idxCol + " >= " + loKey + " and " + idxCol
+					+ " < " + hiKey;
 			return str;
 		}
-		
+
 		/****
-		 * Get random string 
+		 * Get random string
+		 * 
 		 * @param size
 		 * @return a random string
 		 */
-		public static String RandomAlphaNumericString(int size){
-		    String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		    String ret = "";
-		    int length = chars.length();
-		    for (int i = 0; i < size; i ++){
-		        ret += chars.split("")[ (int) (Math.random() * (length - 1)) ];
-		    }
-		    return ret;
+		public static String RandomAlphaNumericString(int size) {
+			String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+			String ret = "";
+			int length = chars.length();
+			for (int i = 0; i < size; i++) {
+				ret += chars.split("")[(int) (Math.random() * (length - 1))];
+			}
+			return ret;
 		}
 
 		/***
@@ -337,20 +390,22 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		 * randomly-generated high key for select
 		 */
 		private static long hiKey = 0;
+
 		/***
-		 * Reset keys 
+		 * Reset keys
 		 */
-		public static void resetKeys(){
+		public static void resetKeys() {
 			loKey = 0;
 			hiKey = 0;
 		}
-		
+
 		/***
 		 * Construct update
+		 * 
 		 * @param tbl
 		 * @return
 		 */
-		static String buildUPDATEForUpdate(Table tbl){
+		static String buildUPDATEForUpdate(Table tbl) {
 			String str = "UPDATE ";
 			str += tbl.table_name_with_prefix;
 			return str;
@@ -358,74 +413,85 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 
 		/***
 		 * Build SET clause for UPDATE
+		 * 
 		 * @param tbl
 		 * @return
 		 */
-		static String buildSETForUpdate(Table tbl){
+		static String buildSETForUpdate(Table tbl) {
 			Column[] cols = tbl.columns;
-			int chosenCol = getRandomNumber(repRandForSET, 0, cols.length-1);
-			int newValue  = getRandomNumber(repRandForVal, 0, (int)tbl.hy_max_card);
+			int chosenCol = getRandomNumber(repRandForSET, 0, cols.length - 1);
+			int newValue = getRandomNumber(repRandForVal, 0,
+					(int) tbl.hy_max_card);
 			String colName = cols[chosenCol].myName;
 			String str = "";
 			// if integer column, set a random value
-			if(colName.contains("val")){
-				String newStrVal = RandomAlphaNumericString((int)cols[chosenCol].mySize);
-				str += "SET " + colName + " = '" + newStrVal + "' ";	
-			}else{
-				str += "SET " + colName + " = " + newValue + " ";	
+			if (colName.contains("val")) {
+				String newStrVal = RandomAlphaNumericString((int) cols[chosenCol].mySize);
+				str += "SET " + colName + " = '" + newStrVal + "' ";
+			} else {
+				str += "SET " + colName + " = " + newValue + " ";
 			}
-			// otherwise, set a random string			
+			// otherwise, set a random string
 			return str;
 		}
+
 		/*****
 		 * Assume that this gets invoked when xLocks are greater than zero
+		 * 
 		 * @param tbl
 		 * @return
 		 */
-		static String buildWhereForUpdate(Table tbl){
+		static String buildWhereForUpdate(Table tbl) {
 			// control lock range with the first column
 			String idxCol = "id1";
 			// low key for update
 			long loKeyForUpdate = 0;
 			// high key for update
 			long hiKeyForUpdate = 0;
-			if(xLocks == 1.0){
-				// determine the number of requested locks using transaction size
-				int numReqLocks = (int)(xactSize * (double)tbl.hy_min_card);
+			if (xLocks == 1.0) {
+				// determine the number of requested locks using transaction
+				// size
+				int numReqLocks = (int) (xactSize * (double) tbl.hy_min_card);
 				// determine end range using effective db size
 				int start = 0;
 				// determine end range using effective db size
-				int end = (int)((double)tbl.hy_min_card * effectiveDBSz);
+				int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
 				// compute low key
-				loKeyForUpdate = (long)((double)getRandomNumber(repRandForWhereInUpdate, start, end-numReqLocks));
+				loKeyForUpdate = (long) ((double) getRandomNumber(
+						repRandForWhereInUpdate, start, end - numReqLocks));
 				// set high key
-				hiKeyForUpdate = (loKeyForUpdate+numReqLocks);
-			}else{
-				// determine the number of requested locks using transaction size
-				int numXLocks = (int)(((double)(xactSize * (double)tbl.hy_min_card))*xLocks);
+				hiKeyForUpdate = (loKeyForUpdate + numReqLocks);
+			} else {
+				// determine the number of requested locks using transaction
+				// size
+				int numXLocks = (int) (((double) (xactSize * (double) tbl.hy_min_card)) * xLocks);
 				// determine end range using effective db size
 				long start = loKey;
 				// determine end range using effective db size
 				long end = hiKey;
-				loKeyForUpdate = (long)((double)getRandomNumber(repRandForWhereInUpdate, (int)start, (int)(end-numXLocks)));
-				hiKeyForUpdate = (loKeyForUpdate+numXLocks);
+				loKeyForUpdate = (long) ((double) getRandomNumber(
+						repRandForWhereInUpdate, (int) start,
+						(int) (end - numXLocks)));
+				hiKeyForUpdate = (loKeyForUpdate + numXLocks);
 			}
-			String str = "WHERE " + idxCol + " >= " + loKeyForUpdate + " and " + idxCol +" < " + hiKeyForUpdate;
+			String str = "WHERE " + idxCol + " >= " + loKeyForUpdate + " and "
+					+ idxCol + " < " + hiKeyForUpdate;
 			return str;
 		}
-		
+
 		/****
 		 * Build transaction
+		 * 
 		 * @param clientNum
 		 * @return a list of SQL statements
 		 */
-		public static Vector<String> buildTransaction(int clientNum, long xactNum) {
+		public static Vector<String> buildTransaction(int clientID, long xactNum) {
 			// vector for SQL statements for this transaction
 			Vector<String> transaction = new Vector<String>();
 			// randomly select a table
-			int chosenTblNum = getRandomNumber(repRandForTable, 0, myXactTables.length-1);
+			int chosenTblNum = getRandomNumber(repRandForTable, 0,	myXactTables.length - 1);
 			Table tbl = myXactTables[chosenTblNum];
-			
+
 			// build select clause
 			String strSELECT = buildSELECTForSelect(tbl);
 			// build from clause
@@ -433,306 +499,348 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			// build where clause
 			String strWHERE = buildWHEREForSelect(tbl);
 			// add this select statement in this transaction
-			String strSQLStmt = String.format("%s %s %s", strSELECT, strFROM, strWHERE);
-//Main._logger.outputLog(strSQLStmt);
+			String strSQLStmt = String.format("%s %s %s", strSELECT, strFROM,
+					strWHERE);
+			// Main._logger.outputLog(strSQLStmt);
 			transaction.add(strSQLStmt);
 			// if exclusive lock ratio is greater than zero
-			if(xLocks > 0){
+			if (xLocks > 0) {
 				// construct update clause
 				String strUPDATE = buildUPDATEForUpdate(tbl);
 				// construct set clause
-				String strSET 	 = buildSETForUpdate(tbl);
+				String strSET = buildSETForUpdate(tbl);
 				// construct where clause
-				String strWHERE2  = buildWhereForUpdate(tbl);
+				String strWHERE2 = buildWhereForUpdate(tbl);
 				// add this update statement in this transaction
-				String strSQLStmt2 = String.format("%s %s %s", strUPDATE, strSET, strWHERE2);
-//Main._logger.outputLog(strSQLStmt2);
+				String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
+						strSET, strWHERE2);
+				// Main._logger.outputLog(strSQLStmt2);
 				transaction.add(strSQLStmt2);
 			}
-			// Insert this client's transaction and its statements while setting number to ID maps
-			insertTransaction(clientNum, xactNum, transaction);
+			// Insert this client's transaction and its statements while setting 
+			// number to ID maps
+			insertTransaction(clientID, xactNum, transaction);
 			// Reset keys
 			resetKeys();
 			return transaction;
 		}
-		
+
 		/****
-		 * Insert transaction and statements, while setting the maps of transaction/statement number to ID
-		 * @param clientID current client
-		 * @param xactNum transaction number
-		 * @param transaction transaction
+		 * Insert transaction and statements, while setting the maps of
+		 * transaction/statement number to ID
+		 * 
+		 * @param clientID
+		 *            current client
+		 * @param xactNum
+		 *            transaction number
+		 * @param transaction
+		 *            transaction
 		 */
 		private static void insertTransaction(int clientID, long xactNum, Vector<String> transaction) {
 			// get transaction string
 			String xactStr = "";
-			for(int i=0;i<transaction.size();i++){
+			for (int i = 0; i < transaction.size(); i++) {
 				xactStr += transaction.get(i);
-				if(i < transaction.size()-1){
+				if (i < transaction.size() - 1) {
 					xactStr += ";";
 				}
 			}
-			
-			// get transaction id			
+
+			// get transaction id
 			int xactID = -1;
-			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL("SELECT xactID from azdblab_transaction where clientid = " + clientID + " and xactnum = " + xactNum);
+			ResultSet rs = null;
 			try {
-				while(rs.next()){
+				rs = LabShelfManager.getShelf().executeQuerySQL(
+						"SELECT TransactionID " + "from azdblab_transaction"
+								+ " where clientid = " + clientID
+								+ " and TransactionNum = " + xactNum);
+				while (rs.next()) {
 					xactID = rs.getInt(1);
 				}
 				rs.close();
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
-//				e1.printStackTrace();
+				// e1.printStackTrace();
 			}
-			
+
 			// not existing ...
-			if(xactID == -1){
+			if (xactID == -1) {
 				// obtain a new batch set id
-				xactID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_TRANSACTION);
+				xactID = LabShelfManager.getShelf().getSequencialID(
+						Constants.SEQUENCE_TRANSACTION);
 				// add transaction
 				try {
 					LabShelfManager.getShelf().NewInsertTuple(
-								Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTION, 
-								TRANSACTION.columns, 
-								new String[] {
-										String.valueOf(xactID),
-										String.valueOf(clientID),
-										String.valueOf(xactNum),
-										String.valueOf(xactStr),
-								},
-								TRANSACTION.columnDataTypes);
+							Constants.TABLE_PREFIX
+									+ Constants.TABLE_TRANSACTION,
+							TRANSACTION.columns,
+							new String[] { String.valueOf(xactID),
+									String.valueOf(clientID),
+									String.valueOf(xactNum),
+									String.valueOf(xactStr), },
+							TRANSACTION.columnDataTypes);
 					LabShelfManager.getShelf().commit();
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			} else { // update transaction string
+//				String updateSQL = "UPDATE azdblab_transaction "
+//						+ "SET TransactionStr = '" + xactStr + "' "
+//						+ "WHERE TransactionID = " + xactID;
+//				Main._logger.outputLog(updateSQL);
+//				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 			}
-			else{ // update transaction string
-				String updateSQL = "UPDATE azdblab_transaction " +
-						   "SET xactStr = " + xactStr + " " +
-						   "WHERE xactID = " + xactID + " and clientID = " + clientID + " and xactNum = " + xactNum;
-Main._logger.outputLog(updateSQL);
-				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
-			}
-			
-Main._logger.outputLog(String.format("Client %d's transaction(%d)-(%d)", clientID, xactNum, xactID));
-//			// add statement
-//			for(int stmtNum=0;stmtNum<transaction.size();stmtNum++){
-//				String strSQLStmt = transaction.get(stmtNum);
-//				// add statement
-//				try {
-//					int stmtID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_STATEMENT);
-//Main._logger.outputLog("\t stmt("+stmtID+")=>"+strSQLStmt);
-//					LabShelfManager.getShelf().NewInsertTuple(
-//								Constants.TABLE_PREFIX + Constants.TABLE_STATEMENT, 
-//								STATEMENT.columns, 
-//								new String[] {
-//										String.valueOf(stmtID),    // statement ID
-//										String.valueOf(xactID),    // transaction ID
-//										String.valueOf(stmtNum),   // statement number
-//										String.valueOf(strSQLStmt) // statement SQL
-//								},
-//								STATEMENT.columnDataTypes);
-//					LabShelfManager.getShelf().commit();
-//					Long sNum = new Long(stmtNum);
-//					// build statement number to ID map
-//					stmtNumToIDMap.put(sNum, new Long(stmtID));
-//					Long sID = stmtNumToIDMap.get(sNum);
-//					if(sID != stmtID){
-//						Main._logger.outputLog("Statement ID is different!");
-//						System.exit(-1);
-//					}
-//				} catch (SQLException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
+
+			// Main._logger.outputLog(String.format("Client %d's transaction(%d)-(%d)",
+			// clientID, xactNum, xactID));
+			// // add statement
+			// for(int stmtNum=0;stmtNum<transaction.size();stmtNum++){
+			// String strSQLStmt = transaction.get(stmtNum);
+			// // add statement
+			// try {
+			// int stmtID =
+			// LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_STATEMENT);
+			// Main._logger.outputLog("\t stmt("+stmtID+")=>"+strSQLStmt);
+			// LabShelfManager.getShelf().NewInsertTuple(
+			// Constants.TABLE_PREFIX + Constants.TABLE_STATEMENT,
+			// STATEMENT.columns,
+			// new String[] {
+			// String.valueOf(stmtID), // statement ID
+			// String.valueOf(xactID), // transaction ID
+			// String.valueOf(stmtNum), // statement number
+			// String.valueOf(strSQLStmt) // statement SQL
+			// },
+			// STATEMENT.columnDataTypes);
+			// LabShelfManager.getShelf().commit();
+			// Long sNum = new Long(stmtNum);
+			// // build statement number to ID map
+			// stmtNumToIDMap.put(sNum, new Long(stmtID));
+			// Long sID = stmtNumToIDMap.get(sNum);
+			// if(sID != stmtID){
+			// Main._logger.outputLog("Statement ID is different!");
+			// System.exit(-1);
+			// }
+			// } catch (SQLException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
+			// }
 			// build transaction number to ID map
 			Long xtNum = new Long(xactNum);
 			Long xtID = new Long(xactID);
 			xactNumToIDMap.put(xtNum, xtID);
 			Long xID = xactNumToIDMap.get(xtNum);
-			if(xID != xtID){
+			if (xID != xtID) {
 				Main._logger.outputLog("Transaction ID is different!");
 				System.exit(-1);
 			}
 			return;
 		}
 	}
-	
+
 	/****
 	 * Build a client in a batch
+	 * 
 	 * @author yksuh
-	 *
+	 * 
 	 */
-	public class Client extends Thread{
-//		class TimeoutCloseThread extends TimerTask{
-//			public void run() {
-//		      try {
-//		    	  Main._logger.outputLog("\t>>Closing Client #"+_id+" is timeouted.");
-//		    	  
-//		    	  Main._logger.outputLog("\t>>Just return.");
-//		    	  this.cancel();
-//		      } catch (Exception ex) {
-//		      }
-//		    }
-//		  }
-		
-//		private Statement _stmt;
-//		private String _sql;
-//		private long _card = 30000;
-//		private String _driverName = "";
-//		private String _connStr = "";
-//		private String _userName = "";
-//		private String _password = "";
-//		private int 						_id = 0;
-//		private long 						  _xactNum = 0;	// transaction number
+	public class Client extends Thread {
+		// class TimeoutCloseThread extends TimerTask{
+		// public void run() {
+		// try {
+		// Main._logger.outputLog("\t>>Closing Client #"+_id+" is timeouted.");
+		//
+		// Main._logger.outputLog("\t>>Just return.");
+		// this.cancel();
+		// } catch (Exception ex) {
+		// }
+		// }
+		// }
+
+		// private Statement _stmt;
+		// private String _sql;
+		// private long _card = 30000;
+		// private String _driverName = "";
+		// private String _connStr = "";
+		// private String _userName = "";
+		// private String _password = "";
+		// private int _id = 0;
+		// private long _xactNum = 0; // transaction number
 		/****
 		 * Batch ID in database
 		 */
-		private int 						  _batchID  			  = 0; 		
+		private int _batchID = 0;
 		/****
 		 * Assigned this client's number
 		 */
-		private int 						  _clientNum 			  = 0; 
+		private int _clientNum = 0;
 		/*****
 		 * Client ID in database
 		 */
-		private int 						  _clientID				  = 0;  
+		private int _clientID = 0;
 		/****
 		 * Connection object
 		 */
-		private Connection					  _conn				      = null;
+		private Connection _conn = null;
 		/***
 		 * Number of executed transactions
 		 */
-		private int 						  _numExecXacts 		  = 0;
+		private int _numExecXacts = 0;
 		/****
-		 * Number of transactions that this client has 
-		 * For now, we use only one transaction
+		 * Number of transactions that this client has For now, we use only one
+		 * transaction
 		 */
-		private int 						  _numXactsToHave 		  = 1;
+		private int _numXactsToHave = 1;
 		/****
-		 * Generated Transactions 
+		 * Generated Transactions
 		 */
-		private HashMap<Long, Vector<String>> _transactionMap 		  = null;
+		private HashMap<Long, Vector<String>> _transactionMap = null;
 		/****
 		 * Map of transaction number to ID
 		 */
-		private HashMap<Long, Long>			  _xactNumToIDMap 		  = null;
+		private HashMap<Long, Long> _xactNumToIDMap = null;
 		/****
 		 * Map of statement number to ID
 		 */
-//		private HashMap<Long, Long>			  _stmtNumToIDMap 		  = null;
+		// private HashMap<Long, Long> _stmtNumToIDMap = null;
 		/****
 		 * Map of transaction number to its runtime vector
 		 */
-		private HashMap<Long, Vector<Long>>   		  _xactNumToRunTimeVecMap  = null;
+		private HashMap<Long, Vector<Long>> _xactNumToRunTimeVecMap = null;
+		private long _sumRunTime = 0;
+		private Statement _stmt;
+		private String _driverName;
+		private String _connStr;
+		private String _userName;
+		private String _password;
+		private boolean _timeOut;
+		private long _startTime;
+
 		/****
 		 * Map of statement number to its runtime vector
 		 */
-//		private HashMap<Long, Vector<Vector<Long>>>   _xactNumToStmtRunTimeVecMap  = null;
-		
-		public Client(int batchID, int clientNum){
+		// private HashMap<Long, Vector<Vector<Long>>>
+		// _xactNumToStmtRunTimeVecMap = null;
+
+		public Client(int batchID, int clientNum) {
 			_batchID = batchID;
 			_clientNum = clientNum;
-			_transactionMap 		  = new HashMap<Long, Vector<String>>();
-			_xactNumToIDMap 		  = new HashMap<Long, Long>();
-//			_stmtNumToIDMap 		  = new HashMap<Long, Long>();
-			_xactNumToRunTimeVecMap   = new HashMap<Long, Vector<Long>>();
-//			_xactNumToStmtRunTimeVecMap  = new HashMap<Long, Vector<Vector<Long>>>();
+			_transactionMap = new HashMap<Long, Vector<String>>();
+			_xactNumToIDMap = new HashMap<Long, Long>();
+			// _stmtNumToIDMap = new HashMap<Long, Long>();
+			_xactNumToRunTimeVecMap = new HashMap<Long, Vector<Long>>();
+			_timeOut = false;
+			// _xactNumToStmtRunTimeVecMap = new HashMap<Long,
+			// Vector<Vector<Long>>>();
 		}
-		
-		public int getBatchID(){
+
+		public int getBatchID() {
 			return _batchID;
 		}
-		
-		public int getClientNumber(){
+
+		public int getClientNumber() {
 			return _clientNum;
 		}
-		
-		public int getClientID(){
+
+		public int getClientID() {
 			return _clientID;
 		}
-		
-		public void close(){
-//			TimeoutCloseThread tct = new TimeoutCloseThread();
-//			Timer closeTimer = new Timer();
-//			Main._logger.outputLog("\t>>Timer set for closing Client #"+_id);
-//			closeTimer.scheduleAtFixedRate(tct, 10000, 10000);
-			
-			Main._logger.outputLog("\t>>Client #"+_clientNum+" is being closed ... (" + _numExecXacts+")");
-			try {
-				//System.out.println("DBMS: " + experimentSubject.getDBMSName());
-//				try{
-////Main._logger.outputLog("Statement is being canceled-Client #"+_id);
-////					_stmt.cancel();
-//Main._logger.outputLog("\tStatement is being closed-Client #"+_id);
-//					_stmt.close();
-//Main._logger.outputLog("\tDone with closing statement -Client #"+_id);
-//				}catch(Exception ex){
-//					if((ex.getMessage()).toLowerCase().contains("closed")){
-//						_conn.commit();
-//						_conn.close();
-////						tct.cancel();
-//						return;
-//					}
-//					if(ex.getMessage().toLowerCase().contains("no current connection"))				return;
-//				}
-//Main._logger.outputLog("Connection is being committed-Client #"+_id);
-//				_conn.commit();
-//Main._logger.outputLog("Connection is being closed-Client #"+_id);
-				if(_conn != null)
-					_conn.close();
-Main._logger.outputLog("\tDone with closing connection -Client #"+_clientNum);
-//				tct.cancel();
-			} catch (SQLException e) {
-				//Main._logger.reportError(e.getMessage());
-//				tct.cancel();
-				return;
-			}
-		}
-		
-//		public void init(String drvName, String strConnStr, String strUserName, String strPassword, double edbSz){
-////Main._logger.outputLog("login details: " + strConnStr + ", " + strUserName + ", " + strPassword);
-//			try{
-//				driverName=drvName; connStr=strConnStr; userName=strUserName; password=strPassword;
-//				// Main._logger.outputLog("login details: " + strConnectString +  ", " +  strUserName + ", " + strPassword + ", " + strdrvname);
-//				Class.forName(drvName);
-//				_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
-////Main._logger.outputLog(experimentSubject.getDBMSName());
-////				if(experimentSubject.getDBMSName().toLowerCase().contains("teradata")){
-////					experimentSubject.open(false);
-////				}
-//				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
-////				TransactionGenerator tg = new TransactionGenerator();
-//				
-//				/****
-//				 * Ver2
-//				 */
-//				_sql = TransactionGenerator.buildDML();
-//Main._logger.outputLog(_sql); // this should later be replaced by sql array
-//				return;
-//			} catch (SQLException | ClassNotFoundException sqlex) {
-////				sqlex.printStackTrace();
-////				Main._logger.outputLog("login details: " + strConnStr + ", " + strUserName + ", " + strPassword);
-//			} 
-////			catch (ClassNotFoundException e) {
-////				e.printStackTrace();
-////				System.exit(1); 
-////			}
-//		}
-		
+
+		// public void close(){
+		// // TimeoutCloseThread tct = new TimeoutCloseThread();
+		// // Timer closeTimer = new Timer();
+		// // Main._logger.outputLog("\t>>Timer set for closing Client #"+_id);
+		// // closeTimer.scheduleAtFixedRate(tct, 10000, 10000);
+		//
+		// Main._logger.outputLog("\t>>Client #"+_clientNum+" is being closed ... ("
+		// + _numExecXacts+")");
+		// try {
+		// //System.out.println("DBMS: " + experimentSubject.getDBMSName());
+		// // try{
+		// ////Main._logger.outputLog("Statement is being canceled-Client #"+_id);
+		// //// _stmt.cancel();
+		// //Main._logger.outputLog("\tStatement is being closed-Client #"+_id);
+		// // _stmt.close();
+		// //Main._logger.outputLog("\tDone with closing statement -Client #"+_id);
+		// // }catch(Exception ex){
+		// // if((ex.getMessage()).toLowerCase().contains("closed")){
+		// // _conn.commit();
+		// // _conn.close();
+		// //// tct.cancel();
+		// // return;
+		// // }
+		// //
+		// if(ex.getMessage().toLowerCase().contains("no current connection"))
+		// return;
+		// // }
+		// //Main._logger.outputLog("Connection is being committed-Client #"+_id);
+		// // _conn.commit();
+		// //Main._logger.outputLog("Connection is being closed-Client #"+_id);
+		// if(_conn != null)
+		// _conn.close();
+		// Main._logger.outputLog("\tDone with closing connection -Client #"+_clientNum);
+		// // tct.cancel();
+		// } catch (SQLException e) {
+		// //Main._logger.reportError(e.getMessage());
+		// // tct.cancel();
+		// return;
+		// }
+		// }
+
+		// public void init(String drvName, String strConnStr, String
+		// strUserName, String strPassword, double edbSz){
+		// //Main._logger.outputLog("login details: " + strConnStr + ", " +
+		// strUserName + ", " + strPassword);
+		// try{
+		// driverName=drvName; connStr=strConnStr; userName=strUserName;
+		// password=strPassword;
+		// // Main._logger.outputLog("login details: " + strConnectString + ", "
+		// + strUserName + ", " + strPassword + ", " + strdrvname);
+		// Class.forName(drvName);
+		// _conn = DriverManager.getConnection(strConnStr, strUserName,
+		// strPassword);
+		// //Main._logger.outputLog(experimentSubject.getDBMSName());
+		// //
+		// if(experimentSubject.getDBMSName().toLowerCase().contains("teradata")){
+		// // experimentSubject.open(false);
+		// // }
+		// _stmt =
+		// _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
+		// // TransactionGenerator tg = new TransactionGenerator();
+		//
+		// /****
+		// * Ver2
+		// */
+		// _sql = TransactionGenerator.buildDML();
+		// Main._logger.outputLog(_sql); // this should later be replaced by sql
+		// array
+		// return;
+		// } catch (SQLException | ClassNotFoundException sqlex) {
+		// // sqlex.printStackTrace();
+		// // Main._logger.outputLog("login details: " + strConnStr + ", " +
+		// strUserName + ", " + strPassword);
+		// }
+		// // catch (ClassNotFoundException e) {
+		// // e.printStackTrace();
+		// // System.exit(1);
+		// // }
+		// }
+
 		/***
-		 * Insert a client into AZDBLab
-		 * @param clientNum client number
+		 * Retrieve Client ID
+		 * 
+		 * @param client ID
 		 */
-		private int insertClient() {
+		private int retrieveClientID(int clientNum) {
 			// get client id
-			int clientID = -1;	
-			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL("SELECT clientID from azdblab_client where batchID = " + _batchID + " and CLIENTNUM = " + _clientNum);
+			int clientID = -1;
+			String query = "SELECT clientID from azdblab_client where batchID = "
+					+ _batchID + " and CLIENTNUM = " + clientNum;
+			// Main._logger.outputLog(query);
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
 			try {
-				while(rs.next()){
+				while (rs.next()) {
 					clientID = rs.getInt(1);
 				}
 				rs.close();
@@ -741,303 +849,539 @@ Main._logger.outputLog("\tDone with closing connection -Client #"+_clientNum);
 				e.printStackTrace();
 			}
 			// not existing ...
-			if(clientID == -1){
-				// obtain a new batch set id
-				clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
-				try {
-					LabShelfManager.getShelf().NewInsertTuple(
-								Constants.TABLE_PREFIX + Constants.TABLE_CLIENT, 
-								CLIENT.columns, 
-								new String[] {
-										String.valueOf(clientID),
-										String.valueOf(_batchID),
-										String.valueOf(_clientNum)
-								},
+			if (clientID == -1) {
+				System.err.println("No client ID is so weird ...");
+				System.exit(-1);
+			}
+			return clientID;
+		}
+
+		/***
+		 * Insert a client into AZDBLab
+		 * 
+		 * @param clientNum
+		 *            client number
+		 */
+		private int insertClient(int batchID, int clientNum) {
+			// obtain a new batch set id
+			int clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
+			try {
+				String insertSQL = LabShelfManager.getShelf()
+						.NewInsertTuple(
+								Constants.TABLE_PREFIX
+										+ Constants.TABLE_CLIENT,
+								CLIENT.columns,
+								new String[] { String.valueOf(clientID),
+										String.valueOf(batchID),
+										String.valueOf(clientNum) },
 								CLIENT.columnDataTypes);
-					LabShelfManager.getShelf().commit();
-	//Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ", _clientNum, _batchID));
-				} catch (SQLException e) {
-//					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				// Main._logger.outputLog(insertSQL);
+				LabShelfManager.getShelf().commit();
+				// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
+				// _clientNum, _batchID));
+			} catch (SQLException e) {
+				// // TODO Auto-generated catch block
+				e.printStackTrace();
+				Main._logger.reportError(e.getMessage());
+				System.exit(-1);
 			}
 			return clientID;
 		}
 		
-		public void init(String drvName, String strConnStr, String strUserName, String strPassword){
-//Main._logger.outputLog("login details: " + strConnStr + ", " + strUserName + ", " + strPassword);
-			try{
-//				_driverName=drvName; _connStr=strConnStr; _userName=strUserName; _password=strPassword;
-				// Main._logger.outputLog("login details: " + strConnectString +  ", " +  strUserName + ", " + strPassword + ", " + strdrvname);
+		public void init(String drvName, String strConnStr, String strUserName,
+				String strPassword) throws Exception {
+			// Main._logger.outputLog("login details: " + strConnStr + ", " +
+			// strUserName + ", " + strPassword);
+			try {
+				_driverName = drvName;
+				_connStr = strConnStr;
+				_userName = strUserName;
+				_password = strPassword;
+				// Main._logger.outputLog("login details: " + strConnectString +
+				// ", " + strUserName + ", " + strPassword + ", " + strdrvname);
 				Class.forName(drvName);
-				_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
-//				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
-				// insert this client record into database
-				_clientID  = insertClient();
-				// generating transactions
-				for(int i=0;i<_numXactsToHave ;i++){
-					Vector<String> transaction = TransactionGenerator.buildTransaction(_clientNum, i); // transaction 
-					_transactionMap.put(new Long(i), transaction);
-					_xactNumToIDMap = TransactionGenerator.getXactNumToIDMap(); // ID associated with transaction number
-//					_stmtNumToIDMap = TransactionGenerator.getStmtNumToIDMap(); // ID associated with statement number
+				int j = 1;
+				while(_conn == null){
+					_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
+					if(j++ % 10 == 0){
+						Thread.sleep(10000);
+						Main._logger.outputLog(j+"th connection trial...");
+						throw new Exception("Client " + _clientID + " cannot have a connection!");
+					}
 				}
+				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+						ResultSet.CONCUR_UPDATABLE);
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
-//				sqlex.printStackTrace();
-//				Main._logger.outputLog("login details: " + strConnStr + ", " + strUserName + ", " + strPassword);
-			} 
+				sqlex.printStackTrace();
+				// Main._logger.outputLog("login details: " + strConnStr + ", "
+				// + strUserName + ", " + strPassword);
+			}
 		}
-		
-//		public void run(){
-////			long starttime = System.currentTimeMillis();
-//			while(true){
-//				if(timeOut) break;
-////			while(System.currentTimeMillis() - starttime < duration*1000){
-////			boolean localTimeOut = false;
-////			while(true){
-//				try {
-//					if(_conn == null){ 
-//						Class.forName(_driverName);
-//						_conn = DriverManager.getConnection(_connStr, _userName, _password);
-//					}
-//					// open a connection to an experiment subject
-//					_conn.setAutoCommit(false);
-//					_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
-//					if(experimentSubject.getDBMSName().toLowerCase().contains("teradata")){
-//						_stmt.executeUpdate("DATABASE azdblab_user;");
-//						_conn.commit();
-//					}
-//					// run transaction
-//					for(int i=0;i<_transaction.size();i++){
-//						_stmt.execute(_transaction.get(i));
-//					}
-//					_stmt.close();
-//					_conn.commit();
-//	//					synchronized(this){ // this variable could be accessed by multiple threads.
-//	//						localTimeOut = timeOut;
-//	//					}
-//	//					if(!localTimeOut)
-//					numTrans++;
-//	//					else{
-//	//						Main._logger.outputLog("time out >> Client #"+_id+"> # of total transactions: " + numTrans);
-//	//						return;
-//	//					}
-//	//					if(numTrans%10000==0){
-//	//						Main._logger.outputLog("Client #"+_id+"> # of current transactions: " + numTrans);
-//	//					}
-//				} catch (SQLException | ClassNotFoundException e) {
-//					//e.printStackTrace();
-////					String msg = e.getMessage().toLowerCase();
-//////					Main._logger.outputLog("Client #"+_id+"> : " + msg);
-////					// DB2: http://www-01.ibm.com/support/docview.wss?uid=swg21424265
-////					//DB2 SQL Error: SQLCODE=-952, SQLSTATE=57014 SQL0952N Processing was cancelled due to an interrupt SQLSTATE=57014
-////					if(msg.contains("cancel") // sqlserver 
-////					|| msg.contains("closed") // oracle
-////					||msg.contains("952") // db
-////					||msg.contains("interrupt") // mysql
-////					||msg.contains("i/o error") // for postgres
-////					||msg.contains("no current connection") // for javadb
-////					){  
-////						//Main._logger.outputLog(msg);
-//////						Main._logger.outputLog("Client #"+_id+"> # of total transactions: " + numTrans);
-////						return;
-////					}
-////					else{
-////						e.printStackTrace();
-////						Main._logger.reportError("An unknown error happened. Retrying ... ");
-////						if(!msg.contains("aborted") && !msg.contains("deadlock") && !msg.contains("row error")) 
-////							Main._logger.reportError(e.getMessage());
-////						break;
-////						if(experimentSubject.getDBMSName().toLowerCase().contains("pgsql")){
-////							if(msg.contains("aborted")){
-////								continue;
-////							}
-////						}
-//						continue;
-////						System.exit(-1);
-////					}
-////					e.printStackTrace();
-////					continue;
-//				}
-////				numTrans++;
-////				if(numTrans%30==0){
-////					Main._logger.outputLog("Client #"+_id+"> # of current transactions: " + numTrans);
-////				}
-//			}
-//			close();
-//			timeOut = false;
-//			return;
-//		}
-		
+
+		// public void run(){
+		// // long starttime = System.currentTimeMillis();
+		// while(true){
+		// if(timeOut) break;
+		// // while(System.currentTimeMillis() - starttime < duration*1000){
+		// // boolean localTimeOut = false;
+		// // while(true){
+		// try {
+		// if(_conn == null){
+		// Class.forName(_driverName);
+		// _conn = DriverManager.getConnection(_connStr, _userName, _password);
+		// }
+		// // open a connection to an experiment subject
+		// _conn.setAutoCommit(false);
+		// _stmt =
+		// _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
+		// if(experimentSubject.getDBMSName().toLowerCase().contains("teradata")){
+		// _stmt.executeUpdate("DATABASE azdblab_user;");
+		// _conn.commit();
+		// }
+		// // run transaction
+		// for(int i=0;i<_transaction.size();i++){
+		// _stmt.execute(_transaction.get(i));
+		// }
+		// _stmt.close();
+		// _conn.commit();
+		// // synchronized(this){ // this variable could be accessed by multiple
+		// threads.
+		// // localTimeOut = timeOut;
+		// // }
+		// // if(!localTimeOut)
+		// numTrans++;
+		// // else{
+		// //
+		// Main._logger.outputLog("time out >> Client #"+_id+"> # of total transactions: "
+		// + numTrans);
+		// // return;
+		// // }
+		// // if(numTrans%10000==0){
+		// //
+		// Main._logger.outputLog("Client #"+_id+"> # of current transactions: "
+		// + numTrans);
+		// // }
+		// } catch (SQLException | ClassNotFoundException e) {
+		// //e.printStackTrace();
+		// // String msg = e.getMessage().toLowerCase();
+		// //// Main._logger.outputLog("Client #"+_id+"> : " + msg);
+		// // // DB2: http://www-01.ibm.com/support/docview.wss?uid=swg21424265
+		// // //DB2 SQL Error: SQLCODE=-952, SQLSTATE=57014 SQL0952N Processing
+		// was cancelled due to an interrupt SQLSTATE=57014
+		// // if(msg.contains("cancel") // sqlserver
+		// // || msg.contains("closed") // oracle
+		// // ||msg.contains("952") // db
+		// // ||msg.contains("interrupt") // mysql
+		// // ||msg.contains("i/o error") // for postgres
+		// // ||msg.contains("no current connection") // for javadb
+		// // ){
+		// // //Main._logger.outputLog(msg);
+		// ////
+		// Main._logger.outputLog("Client #"+_id+"> # of total transactions: " +
+		// numTrans);
+		// // return;
+		// // }
+		// // else{
+		// // e.printStackTrace();
+		// //
+		// Main._logger.reportError("An unknown error happened. Retrying ... ");
+		// // if(!msg.contains("aborted") && !msg.contains("deadlock") &&
+		// !msg.contains("row error"))
+		// // Main._logger.reportError(e.getMessage());
+		// // break;
+		// //
+		// if(experimentSubject.getDBMSName().toLowerCase().contains("pgsql")){
+		// // if(msg.contains("aborted")){
+		// // continue;
+		// // }
+		// // }
+		// continue;
+		// // System.exit(-1);
+		// // }
+		// // e.printStackTrace();
+		// // continue;
+		// }
+		// // numTrans++;
+		// // if(numTrans%30==0){
+		// //
+		// Main._logger.outputLog("Client #"+_id+"> # of current transactions: "
+		// + numTrans);
+		// // }
+		// }
+		// close();
+		// timeOut = false;
+		// return;
+		// }
+
+		/**
+		 * Closes the DBMS connection that was opened by the open call.
+		 */
+		public void terminate() {
+			long elapsedTime = System.currentTimeMillis()-_startTime;
+			String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, elapsedTime, _numExecXacts);
+			Main._logger.outputLog(str);
+			try {
+				if (_stmt != null)
+					_stmt.close();
+			} catch (SQLException ex) {
+				// Main._logger.reportError("Statement Close failed");
+				// Main._logger.reportErrorNotOnConsole(ex.getMessage());
+				// ex.printStackTrace();
+			}
+			_stmt = null;
+			try {
+				if (_conn != null)
+					_conn.close();
+			} catch (SQLException e) {
+				// Main._logger.reportError("Connection Close failed");
+				// Main._logger.reportErrorNotOnConsole(e.getMessage());
+				// e.printStackTrace();
+			}
+			_conn = null;
+			Main._logger.outputLog("\tDone with closing Client #" + _clientNum);
+		}
+
+		/**
+		 * Commits all update operations made to the dbms. This must be called
+		 * for inserts statements to be seen.
+		 */
+		public void NewCommit() {
+			try {
+				if (_conn != null && !_conn.isClosed())
+					_conn.commit();
+			} catch (SQLException e) {
+				// Main._logger.reportError("Commit failed");
+				// Main._logger.reportErrorNotOnConsole(e.getMessage());
+				// e.printStackTrace();
+			}
+		}
+
 		/***
 		 * Continuously run a transaction of this client
 		 */
-		public void run(){
+		public void run() {
 			// Get a transaction to run
 //			Vector<String> transactionToRun = new Vector<String>();
 //			for(int xactNum=0;xactNum<_transactionMap.size();xactNum++){
 //				transactionToRun = _transactionMap.get(new Long(xactNum));
-				int transactionNum = 0;
-				Long xactNum = new Long(transactionNum);
-				Vector<String> transactionToRun = _transactionMap.get(xactNum);
-				assert(transactionToRun != null);
-//			}
+			
+			// reset time out
+			_timeOut = false;
+			int transactionNum = 0;
+			Long xactNum = new Long(transactionNum);
+			Vector<String> transactionToRun = _transactionMap.get(xactNum);
+			assert (transactionToRun != null);
+			// }
 			/***
 			 * Initialize transaction runtime vector
 			 */
-			Vector<Long> 			xactRunTimeVec = new Vector<Long>();
-//			_xactNumToRunTimeVecMap _xactNumToStmtRunTimeVecMap
-//			/***
-//			 * Initialize statement runtime vector
-//			 */
-//			Vector<Vector<Long>>	stmtRunTimeVec = new Vector<Vector<Long>>();
-//			long minTime = -1;
-			while(true){
-				if(timeOut) {
-					break;
+			Vector<Long> xactRunTimeVec = new Vector<Long>();
+			// _xactNumToRunTimeVecMap _xactNumToStmtRunTimeVecMap
+			// /***
+			// * Initialize statement runtime vector
+			// */
+			// Vector<Vector<Long>> stmtRunTimeVec = new Vector<Vector<Long>>();
+			// long minTime = -1;
+			while (true) {
+				if (_timeOut) {
+					return;
 				}
 				try {
 					// run time vector for each statement
-//					Vector<Long> stmtRunTimePerXactVec = new Vector<Long>();
+					// Vector<Long> stmtRunTimePerXactVec = new Vector<Long>();
 					// open a connection to an experiment subject
-					experimentSubject.open(false);
-					long xactStartTime = System.currentTimeMillis();
-					// run transaction
-					for(int i=0;i<transactionToRun.size();i++){
-						String sql = transactionToRun.get(i);
-						// select
-						//long startTime = System.currentTimeMillis();
-						experimentSubject.executeSQLStmt(sql);
-						//long elapsedTime = System.currentTimeMillis()-startTime;
-						//stmtRunTimePerXactVec.add(new Long(elapsedTime));
-//Main._logger.outputLog("SQL: " + sql + " => " + elapsedTime + " (msec)");
-					}
-					experimentSubject.NewCommit();
-					experimentSubject.NewClose();
-					long elapsedTime = System.currentTimeMillis()-xactStartTime;					
-//					stmtRunTimeVec.add(stmtRunTimePerXactVec);
-					xactRunTimeVec.add(new Long(elapsedTime));
-	//					synchronized(this){ // this variable could be accessed by multiple threads.
-	//						localTimeOut = timeOut;
-	//					}
-	//					if(!localTimeOut)
-					_numExecXacts++;
-	//					else{
-	//						Main._logger.outputLog("time out >> Client #"+_id+"> # of total transactions: " + numTrans);
-	//						return;
-	//					}
-	//					if(numTrans%10000==0){
-	//						Main._logger.outputLog("Client #"+_id+"> # of current transactions: " + numTrans);
-	//					}
-					// put the current results into the below maps
-					_xactNumToRunTimeVecMap.put(xactNum, xactRunTimeVec);
-//					_xactNumToStmtRunTimeVecMap.put(xactNum, stmtRunTimeVec);
-//Main._logger.outputLog("Client " + _clientID + ") executed xact(" + xactNum + ") " + _numExecXacts + " times, " 
-//		+ "stmt run size => " + xactRunTimeVec.size()
-//		+ "xact run size => " + stmtRunTimeVec.size());
-				} catch (SQLException e) {
-					//e.printStackTrace();
-//					String msg = e.getMessage().toLowerCase();
-////					Main._logger.outputLog("Client #"+_id+"> : " + msg);
-//					// DB2: http://www-01.ibm.com/support/docview.wss?uid=swg21424265
-//					//DB2 SQL Error: SQLCODE=-952, SQLSTATE=57014 SQL0952N Processing was cancelled due to an interrupt SQLSTATE=57014
-//					if(msg.contains("cancel") // sqlserver 
-//					|| msg.contains("closed") // oracle
-//					||msg.contains("952") // db
-//					||msg.contains("interrupt") // mysql
-//					||msg.contains("i/o error") // for postgres
-//					||msg.contains("no current connection") // for javadb
-//					){  
-//						//Main._logger.outputLog(msg);
-////						Main._logger.outputLog("Client #"+_id+"> # of total transactions: " + numTrans);
-//						return;
-//					}
-//					else{
-//						e.printStackTrace();
-//						Main._logger.reportError("An unknown error happened. Retrying ... ");
-//						if(!msg.contains("aborted") && !msg.contains("deadlock") && !msg.contains("row error")) 
-//							Main._logger.reportError(e.getMessage());
-//						break;
-//						if(experimentSubject.getDBMSName().toLowerCase().contains("pgsql")){
-//							if(msg.contains("aborted")){
-//								continue;
+					if (_stmt == null) {
+						// Main._logger.reportError("Statement is null...");
+//						while(_conn == null) {
+							// Main._logger.reportError("Connection is null...");
+							_conn = DriverManager.getConnection(_connStr,
+									_userName, _password);
+//							if (timeOut) {
+//								break;
 //							}
 //						}
-						continue;
-//						System.exit(-1);
-//					}
-//					e.printStackTrace();
-//					continue;
+						_stmt = _conn.createStatement(
+								ResultSet.TYPE_FORWARD_ONLY,
+								ResultSet.CONCUR_UPDATABLE);
+					}
+					_conn.setAutoCommit(false);
+					long xactStartTime = System.currentTimeMillis();
+					// run transaction
+					for (int i = 0; i < transactionToRun.size(); i++) {
+						String sql = transactionToRun.get(i);
+						// select
+						// long startTime = System.currentTimeMillis();
+						try {
+							_stmt.execute(sql);
+						} catch (Exception ex) {
+							continue;
+						}
+						// long elapsedTime =
+						// System.currentTimeMillis()-startTime;
+						// stmtRunTimePerXactVec.add(new Long(elapsedTime));
+						// Main._logger.outputLog("SQL: " + sql + " => " +
+						// elapsedTime + " (msec)");
+					}
+					NewCommit();
+					// NewClose();
+					long elapsedTime = System.currentTimeMillis()
+							- xactStartTime;
+					_sumRunTime += elapsedTime;
+					// stmtRunTimeVec.add(stmtRunTimePerXactVec);
+					xactRunTimeVec.add(new Long(elapsedTime));
+					// synchronized(this){ // this variable could be accessed by
+					// multiple threads.
+					// localTimeOut = timeOut;
+					// }
+					// if(!localTimeOut)
+					_numExecXacts++;
+					// else{
+					// Main._logger.outputLog("time out >> Client #"+_id+"> # of total transactions: "
+					// + numTrans);
+					// return;
+					// }
+					// if(numTrans%10000==0){
+					// Main._logger.outputLog("Client #"+_id+"> # of current transactions: "
+					// + numTrans);
+					// }
+					// put the current results into the below maps
+					_xactNumToRunTimeVecMap.put(xactNum, xactRunTimeVec);
+					// _xactNumToStmtRunTimeVecMap.put(xactNum, stmtRunTimeVec);
+					// Main._logger.outputLog("Client " + _clientID +
+					// ") executed xact(" + xactNum + ") " + _numExecXacts +
+					// " times, "
+					// + "stmt run size => " + xactRunTimeVec.size()
+					// + "xact run size => " + stmtRunTimeVec.size());
+				} catch (SQLException e) {
+					// e.printStackTrace();
+					// String msg = e.getMessage().toLowerCase();
+					// // Main._logger.outputLog("Client #"+_id+"> : " + msg);
+					// // DB2:
+					// http://www-01.ibm.com/support/docview.wss?uid=swg21424265
+					// //DB2 SQL Error: SQLCODE=-952, SQLSTATE=57014 SQL0952N
+					// Processing was cancelled due to an interrupt
+					// SQLSTATE=57014
+					// if(msg.contains("cancel") // sqlserver
+					// || msg.contains("closed") // oracle
+					// ||msg.contains("952") // db
+					// ||msg.contains("interrupt") // mysql
+					// ||msg.contains("i/o error") // for postgres
+					// ||msg.contains("no current connection") // for javadb
+					// ){
+					// //Main._logger.outputLog(msg);
+					// //
+					// Main._logger.outputLog("Client #"+_id+"> # of total transactions: "
+					// + numTrans);
+					// return;
+					// }
+					// else{
+					// e.printStackTrace();
+					// Main._logger.reportError("An unknown error happened. Retrying ... ");
+					// if(!msg.contains("aborted") && !msg.contains("deadlock")
+					// && !msg.contains("row error"))
+					// Main._logger.reportError(e.getMessage());
+					// break;
+					// if(experimentSubject.getDBMSName().toLowerCase().contains("pgsql")){
+					// if(msg.contains("aborted")){
+					// continue;
+					// }
+					// }
+					continue;
+					// System.exit(-1);
+					// }
+					// e.printStackTrace();
+					// continue;
 				}
-//				numTrans++;
-//				if(numTrans%30==0){
-//					Main._logger.outputLog("Client #"+_id+"> # of current transactions: " + numTrans);
-//				}
+				// numTrans++;
+				// if(numTrans%30==0){
+				// Main._logger.outputLog("Client #"+_id+"> # of current transactions: "
+				// + numTrans);
+				// }
 			}
-			close();
-			timeOut = false;
+			// close();
 		}
-//		private long getStatementID(int stmtNum) {
-//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL("select stmtID " +
-//					" from " + Constants.TABLE_PREFIX+Constants.TABLE_STATEMENT 
-//					+ " where xactID = " + _xactID + " and stmtNum = " + stmtNum);
-//			try {
-//				rs.next();
-//			} catch (SQLException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			long stmtID = -1;
-//			try {
-//				stmtID = rs.getInt(1);
-//			} catch (SQLException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			return stmtID;
-//		}
+
+		// private long getStatementID(int stmtNum) {
+		// ResultSet rs =
+		// LabShelfManager.getShelf().executeQuerySQL("select stmtID " +
+		// " from " + Constants.TABLE_PREFIX+Constants.TABLE_STATEMENT
+		// + " where xactID = " + _xactID + " and stmtNum = " + stmtNum);
+		// try {
+		// rs.next();
+		// } catch (SQLException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// long stmtID = -1;
+		// try {
+		// stmtID = rs.getInt(1);
+		// } catch (SQLException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// return stmtID;
+		// }
 		/****
 		 * Return a map of transaction number to ID
+		 * 
 		 * @return map of transaction number to ID
 		 */
 		public HashMap<Long, Long> getXactNumToIDMap() {
 			return _xactNumToIDMap;
 		}
-//		/****
-//		 * Return a map of statement number to ID
-//		 * @return map of statement number to ID
-//		 */
-//		public HashMap<Long, Long> getStmtNumToIDMap() {
-//			return _stmtNumToIDMap;
-//		}
+
+		// /****
+		// * Return a map of statement number to ID
+		// * @return map of statement number to ID
+		// */
+		// public HashMap<Long, Long> getStmtNumToIDMap() {
+		// return _stmtNumToIDMap;
+		// }
 		/****
 		 * Return number of transactions that this client has
-		 * @return  number of transactions that this client has
+		 * 
+		 * @return number of transactions that this client has
 		 */
 		public long getNumXactsToHave() {
 			return _numXactsToHave;
 		}
+
 		/****
 		 * Return a map of transaction number to runtime vector
+		 * 
 		 * @return map of transaction number to runtime vector
 		 */
 		public HashMap<Long, Vector<Long>> getXactNumToRunTimeVecMap() {
 			return _xactNumToRunTimeVecMap;
 		}
-//		/****
-//		 * Return a map of transaction number to statement runtime vector
-//		 * @return map of transaction number to statement runtime vector
-//		 */
-//		public HashMap<Long, Vector<Vector<Long>>> getXactNumToStmtRunTimeVecMap() {
-//			return _xactNumToStmtRunTimeVecMap;
-//		}		
+
+		// /****
+		// * Return a map of transaction number to statement runtime vector
+		// * @return map of transaction number to statement runtime vector
+		// */
+		// public HashMap<Long, Vector<Vector<Long>>>
+		// getXactNumToStmtRunTimeVecMap() {
+		// return _xactNumToStmtRunTimeVecMap;
+		// }
 		/****
 		 * Return number of executed transactions
+		 * 
 		 * @return
 		 */
-		public int getNumExecXacts(){
-			timeOut = true;
+		public int getNumExecXacts() {
 			return _numExecXacts;
+		}
+
+		public long getTotalRunTime() {
+			return _sumRunTime;
+		}
+
+		public void setStartTime(long startTime) {
+			_startTime = startTime;			
+		}
+		
+		public void destroyed(){
+			if (this != null) {
+				this.interrupt();
+				try {
+					this.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        }
+		}
+
+		public void setTimeOut() {
+			_timeOut = true;
+		}
+
+		/*****
+		 * Obtain client id
+		 * @param batchID batch ID
+		 * @param clientNum client number
+		 * @param iterNum iteration number
+		 */
+		public void setClientID(int batchID, int clientNum, int iterNum) {
+			if(iterNum == 1){
+				// insert this client record into database
+				_clientID = insertClient(batchID, clientNum);
+			}else{
+				// insert this client record into database
+				_clientID = retrieveClientID(clientNum);
+			}
+		}
+		
+		/*****
+		 * Configure clients with their corresponding transactions
+		 * @param batchID
+		 * @param clientNum
+		 * @param iterNum
+		 */
+		public void configure(int iterNum) {
+			// generating transactions
+			for (int i = 0; i < _numXactsToHave; i++) {
+				Vector<String> transaction = null;
+				if(iterNum == 1){
+					transaction 	= TransactionGenerator.buildTransaction(_clientID, i); // transaction
+					_xactNumToIDMap = TransactionGenerator.getXactNumToIDMap();
+				}else{
+					transaction 	= retrieveTransaction(_clientID, i);
+				}
+				_transactionMap.put(new Long(i), transaction);
+			}
+		}
+		
+		/****
+		 * Retrieve stored transactions
+		 * @param clientID
+		 * @param xactNum
+		 * @return
+		 */
+		public Vector<String> retrieveTransaction(int clientID, int xactNum) {
+			// get transaction id
+			int xactID = -1;
+			String xactStatements = "";
+			ResultSet rs = null;
+			try {
+				rs = LabShelfManager.getShelf().executeQuerySQL(
+						"SELECT TransactionID, TransactionStr" + "from azdblab_transaction"
+								+ " where clientid = " + clientID
+								+ " and TransactionNum = " + xactNum);
+				while (rs.next()) {
+					xactID = rs.getInt(1);
+					xactStatements = rs.getString(2);
+				}
+				rs.close();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				// e1.printStackTrace();
+			}
+
+			// not existing ...
+			if (xactID == -1) {
+				Main._logger.outputLog("No transaction exists in DB.");
+				System.exit(-1);
+			} 
+			
+			Vector<String> xactStrVec = new Vector<String>();
+			String[] stmts = xactStatements.split(";");
+			for(int i=0;i<stmts.length;i++){
+				xactStrVec.add(stmts[i]);
+			}
+			
+			// build transaction number to ID map
+			Long xtNum = new Long(xactNum);
+			Long xtID = new Long(xactID);
+			
+			_xactNumToIDMap.put(xtNum, xtID);
+			Long xID = _xactNumToIDMap.get(xtNum);
+			if (xID != xtID) {
+				Main._logger.outputLog("Transaction ID is different!");
+				System.exit(-1);
+			}
+			return xactStrVec;
 		}
 	}
 
@@ -1045,6 +1389,7 @@ Main._logger.outputLog("\tDone with closing connection -Client #"+_clientNum);
 	protected void setName() {
 		scenarioName = Constants.NAME_XACT_THRASHING_SCENARIO;
 	}
+
 
 	@Override
 	protected void setVersion() {
@@ -1058,59 +1403,170 @@ Main._logger.outputLog("\tDone with closing connection -Client #"+_clientNum);
 
 	/*****
 	 * Analyze a batch set
-	 * @param batchSetID batch set ID
-	 * @param transactionSize transaction size
-	 * @param eXclusiveLocks exclusive locks
-	 * @param effectiveDBSize effective DB size
-	 * @param totalBatchSets number of batch sets
+	 * 
+	 * @param batchSetID
+	 *            batch set ID
+	 * @param transactionSize
+	 *            transaction size
+	 * @param eXclusiveLocks
+	 *            exclusive locks
+	 * @param effectiveDBSize
+	 *            effective DB size
+	 * @param totalBatchSets
+	 *            number of batch sets
 	 * @throws Exception
 	 */
 	@Override
-	protected void analyzeBatchSet(int batchSetID, 
-								   double transactionSize, 
-								   double eXclusiveLocks, 
-								   double effectiveDBSize,
-								   int totalBatchSets) throws Exception {
-		// insert batch set parameter
-		stepA(batchSetID, transactionSize, eXclusiveLocks, effectiveDBSize);
-					
+	protected void analyzeBatchSet(int runID, double transactionSize,
+			double eXclusiveLocks, double effectiveDBSize) throws Exception {
+		// insert batchset into database
+		int batchSetID = stepA(transactionSize, eXclusiveLocks, effectiveDBSize);
+		Main._logger.outputLog(String.format(
+				"Start the batchSet #%d(runID:%d,%.4f/%.2f/%.2f) analysis!",
+				batchSetID, runID, transactionSize, eXclusiveLocks,
+				effectiveDBSize));
+
+		// make a batchset run result
+		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID);
 		// run this batch set atomically
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
-		for(int MPL=mplMin;MPL<=mplMax;MPL+=mplIncr){
-//			int batchID = -1;
-			// get existing batchID if this is the case
-//			String sql = String.format("SELECT batchID FROM AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d", batchSetID, MPL);
-//System.out.println(sql);
-//			ResultSet rs =  LabShelfManager.getShelf().executeQuerySQL(sql);
-//			if (rs.next()) {
-//				batchID = rs.getInt(1);
-//			}
-//			rs.close();
-//			if(batchID == -1)
+		for (int MPL = mplMin; MPL <= mplMax; MPL += mplIncr) {
 			int batchID = insertBatch(batchSetID, MPL);
-			 
-			// initialize this batch 
+
+			// initialize this batch
 			stepB(batchID, MPL, transactionSize, eXclusiveLocks, effectiveDBSize);
 			
-			// run this batch for X times
-			stepC(batchID);
-			Main._logger.outputLog(String.format(">> done", MPL, batchID));
+			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
+				// run this batch for X times
+				int retry = stepC(batchSetRunResID, batchID, MPL, k);
+				if(retry != k){
+					k--;
+					continue;
+				}
+				
+				// wait for a minute to clean up any remaining transactions
+//				try{
+//					Thread.sleep(Constants.THINK_TIME);
+//				}catch(Exception ex){
+//					ex.printStackTrace();
+//				}
+			}
+			
+			// close this batch
+			stepD();
+		}
+		Main._logger.outputLog(String.format(
+				"Update the batchset #%d(runID:%d) analysis!", batchSetID,
+				runID));
+		// Analyze if this batchset thrashes...
+		updateBatchSetRunRecord(batchSetRunResID);
+	}
+
+	@Override
+	protected void stepD() {
+		for (Client c : clients) {
+			try{
+				int num = c.getClientNumber();
+				if(c.isAlive()){
+					c.destroyed();
+				}
+				Main._logger.outputLog(String.format("Client #%d has been successfully destroyed.", num));
+			}catch(Exception ex){
+				ex.printStackTrace();
+			}
 		}
 	}
-	
+
+	private void updateBatchSetRunRecord(int batchSetRunResID) {
+		int maxMPL = 0;
+		double avgXactProcTime = 0;
+		/*****
+		 * TODO: Add an algorithm of determining the presence of thrashing on
+		 * this batchset
+		 */
+
+		// Update this record!
+		String updateSQL = "Update " + Constants.TABLE_PREFIX
+				+ Constants.TABLE_BATCHSETHASRESULT + " SET MaxMPL = " + maxMPL
+				+ ", AvgXactProcTime = " + avgXactProcTime
+				+ " WHERE BatchSetRunResID = " + batchSetRunResID;
+		Main._logger.outputLog(updateSQL);
+		LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+		LabShelfManager.getShelf().commit();
+	}
+
+	/****
+	 * 
+	 * @param runID
+	 * @param batchSetID
+	 * @return
+	 */
+	private int insertBatchSetRunResult(int runID, int batchSetID) {
+//		Main._logger.outputLog("###<BEGIN>Make a batchsetrun record ################");
+		// get batchset run result id
+		int batchSetRunResID = -1;
+
+		String sql = "SELECT BatchSetRunResID " + "FROM "
+				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSETHASRESULT
+				+ " " + "WHERE BatchSetID = " + batchSetID + " and RunID = "
+				+ runID;
+//Main._logger.outputLog(sql);
+		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+		try {
+			while (rs.next()) {
+				batchSetRunResID = rs.getInt(1);
+			}
+			rs.close();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			// e1.printStackTrace();
+			System.err.println(e1.getMessage());
+		}
+
+		// when not existing ...
+		if (batchSetRunResID == -1) {
+			// obtain a new batch set id
+			batchSetRunResID = LabShelfManager.getShelf().getSequencialID(
+					Constants.SEQUENCE_BATCHSETHASRESULT);
+			// add transaction
+			try {
+				String insertSQL = LabShelfManager.getShelf().NewInsertTuple(
+						Constants.TABLE_PREFIX
+								+ Constants.TABLE_BATCHSETHASRESULT,
+						BATCHSETHASRESULT.columns,
+						new String[] { String.valueOf(batchSetRunResID),
+								String.valueOf(runID),
+								String.valueOf(batchSetID), null, null, },
+						BATCHSETHASRESULT.columnDataTypes);
+//Main._logger.outputDebug(insertSQL);
+				LabShelfManager.getShelf().commit();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				System.err.println(e.getMessage());
+			}
+		}
+//		Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
+		return batchSetRunResID;
+	}
+
 	/****
 	 * Insert this batch into database
-	 * @param batchSetID batch set ID
+	 * 
+	 * @param batchSetID
+	 *            batch set ID
 	 * @return batch ID
 	 */
 	private int insertBatch(int batchSetID, int MPL) {
-		
 		// Check this batch
 		int batchID = -1;
-		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL("SELECT batchID from azdblab_batch where batchSetID = " + batchSetID + " and MPL = " + MPL);
+		String sql = "SELECT batchID from " + Constants.TABLE_PREFIX
+				+ Constants.TABLE_BATCH + " where batchSetID = " + batchSetID
+				+ " and MPL = " + MPL;
+		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+//Main._logger.outputLog(sql);
 		try {
-			while(rs.next()){
+			while (rs.next()) {
 				batchID = rs.getInt(1);
 			}
 			rs.close();
@@ -1119,335 +1575,721 @@ Main._logger.outputLog("\tDone with closing connection -Client #"+_clientNum);
 			e2.printStackTrace();
 		}
 		// not existing ...
-		if(batchID == -1){
+		if (batchID == -1) {
 			// obtain a new batch set id
-			batchID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_BATCH);
-			try{
-				LabShelfManager.getShelf().NewInsertTuple( 
-						Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
-						BATCH.columns,
-						new String[] {
-								String.valueOf(batchSetID),
-								String.valueOf(batchID),
-								String.valueOf(MPL)
-						},
-						BATCH.columnDataTypes);
+			batchID = LabShelfManager.getShelf().getSequencialID(
+					Constants.SEQUENCE_BATCH);
+			try {
+				String insertSQL = LabShelfManager.getShelf()
+						.NewInsertTuple(
+								Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
+								BATCH.columns,
+								new String[] { String.valueOf(batchID),
+										String.valueOf(batchSetID),
+										String.valueOf(MPL) },
+								BATCH.columnDataTypes);
+//Main._logger.outputDebug(insertSQL);
 				LabShelfManager.getShelf().commit();
 			} catch (Exception e) {
+				Main._logger.reportError(e.getMessage());
 				e.printStackTrace();
-//				if((e.getMessage()).toLowerCase().contains("unique")){
-//					String sql = String.format("SELECT batchID from AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d", batchSetID, MPL);
-//					ResultSet rs2 = LabShelfManager.getShelf().executeQuerySQL(sql);
-//					try {
-//						while(rs2.next()){
-//							batchID = rs2.getInt(1);
-//						}
-//						rs2.close();
-//					} catch (SQLException e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
-//				}
+				System.exit(-1);
+				// if((e.getMessage()).toLowerCase().contains("unique")){
+				// String sql =
+				// String.format("SELECT batchID from AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d",
+				// batchSetID, MPL);
+				// ResultSet rs2 =
+				// LabShelfManager.getShelf().executeQuerySQL(sql);
+				// try {
+				// while(rs2.next()){
+				// batchID = rs2.getInt(1);
+				// }
+				// rs2.close();
+				// } catch (SQLException e1) {
+				// // TODO Auto-generated catch block
+				// e1.printStackTrace();
+				// }
+				// }
 			}
 		}
 		return batchID;
 	}
 
+	@Override
+	protected int stepA(double transactionSize, double exclusiveLockRatio,
+			double effectiveDBRatio) {
+batchRunTime = 10;
+		int batchSetID = -1;
+		String batchSetQuery = "SELECT BatchSetID " + "FROM "
+				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " "
+				+ "WHERE ExperimentID = "
+				+ this.getExperimentRun().getMyExperiment().getExperimentID()
+				+ " and BatchSzIncr = " + this.mplIncr + " and XactSz = "
+				+ transactionSize + " and XLockRatio = " + exclusiveLockRatio
+				+ " and EffectiveDBSz = " + effectiveDBRatio;
+		Main._logger.outputDebug(batchSetQuery);
+		ResultSet rs = LabShelfManager.getShelf()
+				.executeQuerySQL(batchSetQuery);
+		try {
+			while (rs.next()) {
+				batchSetID = rs.getInt(1);
+			}
+			rs.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		// not existing ...
+		if (batchSetID == -1) {
+			// obtain a new batch set id
+			batchSetID = LabShelfManager.getShelf().getSequencialID(
+					Constants.SEQUENCE_BATCHSET);
+			// Now, let's insert parameter values into AZDBLab.
+			String[] paramVal = new String[BATCHSET.columns.length];
+			int i = 0;
+			paramVal[i++] = String.format("%d", batchSetID);
+			paramVal[i++] = String.format("%d", this.getExperimentRun()
+					.getMyExperiment().getExperimentID());
+			paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
+			paramVal[i++] = String.format("%d", numCores);
+			paramVal[i++] = String.format("%d", mplIncr);
+			paramVal[i++] = String.format("%d", batchRunTime);
+			paramVal[i++] = String.format("%.4f", transactionSize);
+			paramVal[i++] = String.format("%.2f", exclusiveLockRatio);
+			paramVal[i++] = String.format("%.2f", effectiveDBRatio);
+			insertBatchSet(paramVal);
+		}
+		return batchSetID;
+	}
 
 	@Override
-	protected void stepA(int batchSetID, double transactionSize, double exclusiveLockRatio, double effectiveDBRatio){
-		// Now, let's insert parameter values into AZDBLab.
-		String[] paramVal = new String[BATCHSETHASPARAMETER.columns.length];
-		int i=0;
-		paramVal[i++] = String.format("%d",   batchSetID);
-		paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
-		paramVal[i++] = String.format("%d",   numCores);
-		paramVal[i++] = String.format("%d",   mplIncr);
-		paramVal[i++] = String.format("%d",   batchRunTime);
-		paramVal[i++] = String.format("%.4f", transactionSize);
-		paramVal[i++] = String.format("%.2f", exclusiveLockRatio);
-		paramVal[i++] = String.format("%.2f", effectiveDBRatio);
-		paramVal[i++] = String.format("%d", 0); // lock wait time
-		paramVal[i++] = String.format("%d", 0); // was thrashed
-		insertBatchSetParam(paramVal);
-	}
-	
-	@Override
-	protected void stepB(int batchID,
-						 int MPL, double transactionSize, double eXclusiveLcks, double effectiveDBSize) throws Exception {
-		recordRunProgress(0, "Beginning batch ("+ batchID + ") initialization (MPL=" + MPL + ")");
+	protected void stepB(int batchID, int MPL, double transactionSize,
+			double eXclusiveLcks, double effectiveDBSize) throws Exception {
+//		recordRunProgress(0, "Beginning batch (" + batchID
+//				+ ") initialization (MPL=" + MPL + ")");
 		// number of clients
 		int numClients = MPL;
 		// set transaction size
-		TransactionGenerator.setXactSize((double)(transactionSize/(double)100));
+		TransactionGenerator
+				.setXactSize((double) (transactionSize / (double) 100));
 		// set exclusive locks
 		TransactionGenerator.setXLocks(eXclusiveLcks);
 		// set effective db size
 		TransactionGenerator.setEffectiveDBSz(effectiveDBSize);
-		
+//		recordRunProgress(100, "Done with batch (" + batchID
+//				+ ") initialization (MPL=" + MPL + ")");
+	}
+
+	/***
+	 * Runs transactions per client in a batch
+	 * 
+	 * @param batchID2
+	 * @throws Exception
+	 */
+	@Override
+	protected int stepC(int batchSetRunResID, int batchID, int numClients, int iterNum) throws Exception {
+		// TimeoutTerminals terminalTimeOuter = new TimeoutTerminals(clients);
+		// Timer xactRunTimer = new Timer();
+		// xactRunTimer.scheduleAtFixedRate(terminalTimeOuter, duration*1000,
+		// duration*1000);
+		// recordRunProgress(0,
+		// "Before running the batch for specified duration");
+		// timeOut = false;
 		clients = new Client[numClients];
-		for(int i=0;i<numClients;i++){
+		for (int i = 0; i < numClients; i++) {
 			// assign client number
-			int clientNum = i+1;
+			int clientNum = i + 1;
 			// ready for open connection
 			String strDrvName = experimentSubject.getDBMSDriverClassName();
 			String strConnStr = experimentSubject.getConnectionString();
 			String strUserName = experimentSubject.getUserName();
 			String strPassword = experimentSubject.getPassword();
-Main._logger.outputLog("Client " + (clientNum) + " is being initialized...");
+			// Main._logger.outputLog("Client " + (clientNum) +
+			// " is being initialized...");
 			clients[i] = new Client(batchID, clientNum);
+			// set client ID
+			clients[i].setClientID(batchID, clientNum, iterNum);
 			// set up client (i+1)
-			clients[i].init(strDrvName,strConnStr,strUserName,strPassword);
+			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
+			// configure this client
+			clients[i].configure(iterNum);
 		}
-		recordRunProgress(100, "Done with batch ("+ batchID + ") initialization (MPL=" + MPL + ")");
-	}
-	
-	/***
-	 * Runs transactions per client in a batch
-	 * @throws Exception
-	 */
-	@Override
-	protected void stepC(int batchID) throws Exception {
-//		TimeoutTerminals terminalTimeOuter = new TimeoutTerminals(clients);
-//		Timer xactRunTimer = new Timer();
-//		xactRunTimer.scheduleAtFixedRate(terminalTimeOuter, duration*1000, duration*1000);
-		batchRunTime = 10;
-//		recordRunProgress(0, "Before running the batch for specified duration");
-//		timeOut = false;
-		for(int k=1;k<=Constants.MAX_ITERS;k++){// MAX_ITERS: 5 as did in Jung's paper
-			long startTime = System.currentTimeMillis();
-	//		long endTime = 0;
-			int totalXacts = 0;
-			long elapsedTimeMillis = 0;
-			boolean runStarted = false;
-			while((elapsedTimeMillis=(System.currentTimeMillis() - startTime)) < batchRunTime*1000){// global timer
-				if(runStarted) continue;
-				try{
-					for(Client c : clients){
-						c.start();
-					}
-				}catch(Exception ex){
+		
+		long startTime = System.currentTimeMillis();
+		int totalXacts = 0;
+		long sumOfBatchRunElapsedTime = 0;
+		long elapsedTimeMillis = 0;
+		boolean runStarted = false;
+		while ((elapsedTimeMillis = (System.currentTimeMillis() - startTime)) < batchRunTime * 1000) {// global timer
+			if (!runStarted){
+				for (Client c : clients) {
+					c.setStartTime(startTime);
+					c.start();
 				}
 				runStarted = true;
 			}
-	//		timeOut = true;
-			// record number of transactions successfully executed
-			for(Client c : clients){
-				int numXacts = c.getNumExecXacts();
-				insertResultsPerClient(c, k, numXacts);
-				Main._logger.outputLog("Client #"+c.getClientID()+"> # of total transactions: " + numXacts);
-				totalXacts += numXacts;
+		}
+		
+		// inspect elapsed time
+		long elapsedTimeInSec = elapsedTimeMillis / 1000;
+		if (elapsedTimeInSec != batchRunTime) {
+			for (Client c : clients) {
+				c.terminate();
 			}
-			long elapsedTimeInSec = elapsedTimeMillis / 1000;
-			if(elapsedTimeInSec != batchRunTime){ k--; continue; }
-			insertBatchResult(batchID, k, totalXacts, elapsedTimeMillis);
-			// wait for a minute to clean up any remaining transactions 
-			try{
-				Thread.sleep(Constants.THINK_TIME); 
-			}catch(Exception ex){
-				ex.printStackTrace();
+			Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", batchID, iterNum));
+			return iterNum--; // reiteration this 
+		}else{
+			for (Client c : clients) {
+				// locally set timeOut 
+				c.setTimeOut();
+				c.terminate();
 			}
 		}
+
+		// Collect transaction run stat
+		class XactRunStatPerClient{
+			long numXactsToHave;
+			long id;
+			long num;
+			long numExecXacts;
+			long runTime;
+			HashMap<Long, Long> xactNumToIDMap;
+			HashMap<Long, Vector<Long>> xactNumToRunTimeVecMap;
+		}
+		
+		XactRunStatPerClient[] stats = new XactRunStatPerClient[clients.length];
+		int i=0;
+		for (Client c : clients) {
+			stats[i] 				= new XactRunStatPerClient();
+			stats[i].numExecXacts 	= c.getNumExecXacts(); // timeout
+			stats[i].runTime 		= c.getTotalRunTime();
+			stats[i].xactNumToRunTimeVecMap = c.getXactNumToRunTimeVecMap();
+			i++;
+		}
+		i = 0;
+		// record number of transactions successfully executed
+		for (Client c : clients) {
+			stats[i].id 			= c.getClientID();
+			stats[i].num 			= c.getClientNumber();
+			stats[i].numXactsToHave = c.getNumXactsToHave();
+			stats[i].xactNumToIDMap =  c.getXactNumToIDMap();
+			totalXacts += stats[i].numExecXacts;
+			sumOfBatchRunElapsedTime += stats[i].runTime;
+			i++;
+		}
+		
+		// insert batch run results
+		long batchRunResID = insertBatchRunResult(batchSetRunResID, batchID, iterNum, totalXacts, sumOfBatchRunElapsedTime,
+				elapsedTimeMillis);
+		// insert per-client and transaction run results
+		for (XactRunStatPerClient stat : stats) {
+//String str = String.format("client %d's ", stat.id);
+//Main._logger.outputLog("###<BEGIN>INSERT " + str + " run result ################");
+//Main._logger.outputDebug("executed transactions at Client "	+ stat.num + ": " + stat.numExecXacts);
+			long clientRunResID = insertClientRunResult(batchRunResID, stat.id, stat.num, iterNum, stat.runTime, stat.numExecXacts);
+//Main._logger.outputLog("###<End>INSERT " + str + " run result ################");
+			
+			// insert transaction results
+			computeAndInsertXactRunStat(clientRunResID, 		// client run result id
+										stat.id, 				// client id
+										stat.numXactsToHave,	// # of xacts this client has
+										stat.xactNumToIDMap, 	// xact num to id
+										stat.numExecXacts,		// number of executed transactions
+										stat.xactNumToRunTimeVecMap, // runtime vector 
+										iterNum); // iteration number
+		}
+		return iterNum;
 	}
+
 	/******
 	 * Insert batch run result
-	 * @param batchID batch ID
-	 * @param iterNum iteration number
-	 * @param totalXacts total transactions executed
-	 * @param batchRunTimeMillis elapsed time milliseconds
+	 * 
+	 * @param batchID
+	 *            batch ID
+	 * @param iterNum
+	 *            iteration number
+	 * @param totalXacts
+	 *            total transactions executed
+	 * @param batchRunTimeMillis
+	 *            elapsed time milliseconds
 	 * @throws Exception
 	 */
-	protected void insertBatchResult(int batchID, int iterNum, int totalXacts, long batchRunTimeMillis) throws Exception {
-		Main._logger.outputLog("###<BEGIN>INSERT batch Result ################");
+	protected long insertBatchRunResult(long batchSetRunResID, int batchID,
+			int iterNum, int totalXacts, long sumXactRunTime,
+			long batchRunTimeMillis) throws Exception {
+//		Main._logger.outputLog("###<BEGIN>INSERT batch Result ################");
 		float elapsedTimeSec = batchRunTimeMillis / 1000F;
-		float tps = (float)totalXacts / elapsedTimeSec;
-		System.out.format("============== %d> TPS RESULTS =====================\n",iterNum);
-		Main._logger.outputLog("Time: "+ batchRunTimeMillis +" ms");
-		Main._logger.outputLog("Total transactions: "+totalXacts);
-		Main._logger.outputLog("Transactions per second: "+String.format("%.2f", tps));
-        Main._logger.outputLog("Inserting tps result : " + numTerminals + " for duration " + duration + " (secs)");
-        long sumLockWaitTime = 0;
-        // insert batch result
-        try{
-			LabShelfManager.getShelf().NewInsertTuple( 
+		float tps = (float) totalXacts / elapsedTimeSec;
+		
+		
+long batchSetID = -1;
+long MPL = 0;
+String query = "SELECT BatchSetID, MPL " + "FROM "
+		+ Constants.TABLE_PREFIX + Constants.TABLE_BATCH + " "
+		+ "WHERE BatchID = " + batchID;
+ResultSet rs2 = LabShelfManager.getShelf().executeQuerySQL(query);
+try {
+	while (rs2.next()) {
+		batchSetID = rs2.getInt(1);
+		MPL = rs2.getInt(2);
+	}
+	rs2.close();
+} catch (Exception ex) {
+	ex.printStackTrace();
+}
+		System.out.format(
+				"============== <BatchSet(%d)-MPL(%d)> TPS RESULTS (%d) =====================\n",
+				batchSetID,
+				MPL,
+				iterNum);
+		Main._logger.outputLog("Time: " + batchRunTimeMillis + " ms");
+		Main._logger.outputLog("Total transactions: " + totalXacts);
+		Main._logger.outputLog("Transactions per second: "	+ String.format("%.2f", tps));
+
+		// obtain a batchrunresult record identifier
+		long batchRunResID = -1;
+		String batchSetQuery = "SELECT batchRunResID " + "FROM "
+				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASRESULT + " "
+				+ "WHERE BatchSetRunResID = " + batchSetRunResID
+				+ " and BatchID = " + batchID + " and IterNum = " + iterNum;
+//Main._logger.outputDebug(batchSetQuery);
+		ResultSet rs = LabShelfManager.getShelf()
+				.executeQuerySQL(batchSetQuery);
+		try {
+			while (rs.next()) {
+				batchRunResID = rs.getInt(1);
+			}
+			rs.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		if (batchRunResID == -1) {
+			batchRunResID = LabShelfManager.getShelf().getSequencialIDToLong(
+					Constants.SEQUENCE_BATCHHASRESULT);
+			assert (batchRunResID < 1) : "Batch result ID is less than 0. So weird...";
+			String insertSQL = LabShelfManager.getShelf().NewInsertTuple(
 					Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASRESULT,
 					BATCHHASRESULT.columns,
-					new String[] {
-							String.valueOf(batchID),
-							String.valueOf(iterNum),
-							String.valueOf(totalXacts),
+					new String[] { String.valueOf(batchRunResID),
+							String.valueOf(batchSetRunResID),
+							String.valueOf(batchID), String.valueOf(iterNum),
 							String.valueOf(batchRunTimeMillis),
-							String.valueOf(sumLockWaitTime)
-					},
+							String.valueOf(totalXacts),
+							String.valueOf(sumXactRunTime) },
 					BATCHHASRESULT.columnDataTypes);
 			LabShelfManager.getShelf().commit();
-		} catch (Exception e) {
-//			e.printStackTrace();
-			String updateSQL 
-					= "Update " + Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASRESULT
-					+ " SET SUMEXECUTEDXACTS = " + totalXacts + ", elapsedTime = " + batchRunTimeMillis
-					+ " WHERE batchID = " + batchID + " and iterNum = " + iterNum;
-			Main._logger.outputLog(updateSQL);
+//Main._logger.outputDebug(insertSQL);
+		} else {
+			Main._logger.outputDebug("batchRun result ID: " + batchRunResID);
+			String updateSQL = "Update " + Constants.TABLE_PREFIX
+					+ Constants.TABLE_BATCHHASRESULT + " SET "
+					+ " ElapsedTime = " + batchRunTimeMillis + ", "
+					+ " SumExecXacts = " + totalXacts + ", "
+					+ " SumXactProcTime = " + sumXactRunTime
+					+ " WHERE BatchSetRunResID = " + batchSetRunResID
+					+ " and batchID = " + batchID + " and iterNum = " + iterNum;
+Main._logger.outputLog(updateSQL);
 			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 		}
-		Main._logger.outputLog("###<END>INSERT batch Result ###################");
+//		Main._logger.outputLog("###<END>INSERT batch Result ###################");
+		return batchRunResID;
 	}
+
 	/****
 	 * Insert per-client result into AZDBLab
-	 * @param clientID client ID
-	 * @param iterNum iteration number
-	 * @param numXacts number of transactions executed in this iteration
+	 * 
+	 * @param batchRunResID
+	 * @param clientID
+	 *            client ID
+	 * @param iterNum
+	 *            iteration number
+	 * @param sumXactElapsedTime
+	 *            sum of elapsed times of transactions executed in this iteration
+	 * @param numXacts
+	 *            number of transactions executed in this iteration
+	 * @return client run result
 	 */
-	private void insertResultsPerClient(Client c, int iterNum, int numExecXacts) throws SQLException {
-		String str = String.format("client %d's", c.getClientID()); 
-		Main._logger.outputLog("###<BEGIN>INSERT "+ str +"transaction running result ################");
-//		int numExecXacts = c.getNumExecXacts();
-Main._logger.outputDebug("executed transactions at Client " + c.getClientID() + ": " + numExecXacts);
-		long clientID = c.getClientID(), lockWaitTime = 0;
-		long clientResID = 0;
-		try{
-			// get client result id
-			String sql = "SELECT CLIRESID from azdblab_clientresult where CLIENTID = " + clientID + " and ITERNUM = " + iterNum;
+	private long insertClientRunResult(long batchRunResID, 
+									   long clientID,
+									   long clientNum,
+									   int iterNum, 
+									   long sumXactElapsedTime, 
+									   long numExecXacts) throws SQLException {
+		// get client run result identifier
+		long clientRunResID = -1;
+		try {
+			// get client run result id
+			String sql = "SELECT ClientRunResID " + "FROM "
+					+ Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT
+					+ " WHERE BatchRunResID = " + batchRunResID
+					+ " and ClientID = " + clientID + " and IterNum = " + iterNum;
+//Main._logger.outputDebug(sql);
 			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-			try {
-				while(rs.next()){
-					clientResID = rs.getInt(1);
-				}
-				rs.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			while (rs.next()) {
+				clientRunResID = rs.getInt(1);
 			}
-			// not existing ...
-			if(clientResID == -1){
-				clientResID = LabShelfManager.getShelf().getSequencialIDToLong(Constants.SEQUENCE_CLIENTHASRESULT);
-				assert (clientResID < 1) : "Client result ID is less than 0. So weird...";
-				LabShelfManager.getShelf().NewInsertTuple( 
-						Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT,
+			rs.close();
+
+			// when not existing ...
+			if (clientRunResID == -1) {
+				clientRunResID = LabShelfManager.getShelf()
+						.getSequencialIDToLong(
+								Constants.SEQUENCE_CLIENTHASRESULT);
+				assert (clientRunResID < 1) : "Client result ID is less than 0. So weird...";
+				String insertSQL = LabShelfManager.getShelf().NewInsertTuple(
+						Constants.TABLE_PREFIX
+								+ Constants.TABLE_CLIENTHASRESULT,
 						CLIENTHASRESULT.columns,
-						new String[] {
-								String.valueOf(clientResID),
-								String.valueOf(c.getClientID()),
+						new String[] { String.valueOf(clientRunResID),
+								String.valueOf(batchRunResID),
+								String.valueOf(clientID),
 								String.valueOf(iterNum),
 								String.valueOf(numExecXacts),
-								String.valueOf(lockWaitTime)
-						},
+								String.valueOf(sumXactElapsedTime) },
 						CLIENTHASRESULT.columnDataTypes);
+//Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);
 				LabShelfManager.getShelf().commit();
-			}
-			else{
-				String updateSQL = "Update " + Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT
-								 + " SET numXacts = " + numExecXacts
-								 + " WHERE clientID = " + c.getClientID() + " and iterNum = " + iterNum;
+			} else {
+Main._logger.outputDebug("client " + clientID
+		+ " run result ID: " + clientRunResID);
+				String updateSQL = "Update " + Constants.TABLE_PREFIX
+						+ Constants.TABLE_CLIENTHASRESULT
+						+ " SET NumExecXacts = " + numExecXacts
+						+ ", SumXactProcTime = " + sumXactElapsedTime
+						+ " WHERE batchRunResID = " + batchRunResID
+						+ " and clientID = " + clientID
+						+ " and iterNum = " + iterNum;
 				Main._logger.outputLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+				LabShelfManager.getShelf().commit();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			Main._logger.reportError(e.getMessage());
 		}
-		Main._logger.outputLog("###<End>INSERT "+ str +"transaction running result ################");
-		
-		long numXactsToHave 									   	 = c.getNumXactsToHave();
-		HashMap<Long, Long> 				xactNumToIDMap		   	 = c.getXactNumToIDMap();
-//		HashMap<Long, Long> 				stmtNumToIDMap		   	 = c.getStmtNumToIDMap();
-		HashMap<Long, Vector<Long>> 		xactNumToRunTimeVecMap 	 = c.getXactNumToRunTimeVecMap();
-//		HashMap<Long, Vector<Vector<Long>>> stmtRunTimeVecPerXactMap = c.getXactNumToStmtRunTimeVecMap();
-		
-		// insert transaction results;
-		for(int xtNum=0;xtNum<numXactsToHave;xtNum++){
-			Long xactNum = new Long(xtNum);
-			// Get transaction executions results at transaction/statement levels
-			Vector<Long>		 xactRunTimeVec 		= xactNumToRunTimeVecMap.get(xactNum);
-			if(xactRunTimeVec == null){
-				System.out.println("transaction runtime vector is null");
-				System.exit(-1);
+		return clientRunResID;
+	}
+
+	// /****
+	// * Insert transaction run results of this client
+	// * @param c Client
+	// * @param clientResID client result ID
+	// * @param iterNum iteration number
+	// */
+	// private void insertTransactionRunResult(Client c, long clientResID, int
+	// iterNum) {
+	// long numXactsToHave = c.getNumXactsToHave();
+	// HashMap<Long, Long> xactNumToIDMap = c.getXactNumToIDMap();
+	// // HashMap<Long, Long> stmtNumToIDMap = c.getStmtNumToIDMap();
+	// HashMap<Long, Vector<Long>> xactNumToRunTimeVecMap =
+	// c.getXactNumToRunTimeVecMap();
+	// // HashMap<Long, Vector<Vector<Long>>> stmtRunTimeVecPerXactMap =
+	// c.getXactNumToStmtRunTimeVecMap();
+	//
+	// // insert transaction results;
+	// for(int xtNum=0;xtNum<numXactsToHave;xtNum++){
+	// Long xactNum = new Long(xtNum);
+	// // Get transaction executions results at transaction/statement levels
+	// Vector<Long> xactRunTimeVec = xactNumToRunTimeVecMap.get(xactNum);
+	// if(xactRunTimeVec == null){
+	// System.out.println("transaction runtime vector is null");
+	// System.exit(-1);
+	// }
+	// // Vector<Vector<Long>> stmtRunTimeVecPerXact =
+	// stmtRunTimeVecPerXactMap.get(xactNum);
+	// // if(stmtRunTimeVecPerXact == null){
+	// // System.out.println("Statement runtime vector is null");
+	// // System.exit(-1);
+	// // }
+	// // Get transaction ID in database
+	// Long xactID = xactNumToIDMap.get(xactNum);
+	// if(xactID == null){
+	// System.out.println("Transaction ID can't be null");
+	// System.exit(-1);
+	// }
+	// String str = String.format("Client %d's transaction", c.getClientID());
+	// Main._logger.outputLog("###<BEGIN>INSERT "+ str
+	// +" run result ################");
+	// long sumTotalTime = 0;
+	// double avgXactProcTime = 0;
+	// long minXactProcTime = Long.MAX_VALUE;
+	// long maxXactProcTime = Long.MIN_VALUE;
+	// // For each iteration, we insert the transaction results into database.
+	// for(int tIter=0;tIter<xactRunTimeVec.size();tIter++){
+	// long xactResID = 0;
+	// long runTime = xactRunTimeVec.get(tIter);
+	// if(runTime > maxXactProcTime)
+	// maxXactProcTime = runTime;
+	// if(runTime < minXactProcTime)
+	// minXactProcTime = runTime;
+	// sumTotalTime += runTime;
+	// try {
+	// // // get transaction run result id
+	// // String sql = "SELECT CLIRESID from "+Constants.TABLE_PREFIX +
+	// Constants.TABLE_CLIENTHASRESULT
+	// // +" where CLIENTID = " + c.getClientID() + " and ITERNUM = " + iterNum;
+	// // ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+	// // try {
+	// // while(rs.next()){
+	// // clientResID = rs.getInt(1);
+	// // }
+	// // rs.close();
+	// // } catch (SQLException e) {
+	// // // TODO Auto-generated catch block
+	// // e.printStackTrace();
+	// // }
+	// // // not existing ...
+	// // if(xactResID == -1){
+	// // xactResID =
+	// LabShelfManager.getShelf().getSequencialIDToLong(Constants.SEQUENCE_TRANSACTIONHASRESULT);
+	// // assert (xactResID < 1) : "xactResID is less than 1. Weird..";
+	// // LabShelfManager.getShelf().NewInsertTuple(
+	// // Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
+	// // TRANSACTIONHASRESULT.columns,
+	// // new String[] {
+	// // String.valueOf(xactResID), // xact has result ID
+	// // String.valueOf(clientResID),// client has result ID
+	// // String.valueOf(xactID), // xact ID
+	// // String.valueOf(tIter), // iterNum
+	// // String.valueOf(runTime) // xactRunTime
+	// // },
+	// // TRANSACTIONHASRESULT.columnDataTypes);
+	// // LabShelfManager.getShelf().commit();
+	// // }
+	// // else{
+	// // String updateSQL = "Update " + Constants.TABLE_PREFIX +
+	// Constants.TABLE_TRANSACTIONHASRESULT
+	// // + " SET RUNTIME = " + runTime
+	// // + " WHERE CLIRESID = " + clientResID + " and xactID = " + xactID +
+	// " and XACTITERNUM = " + tIter;
+	// // Main._logger.outputLog(updateSQL);
+	// // LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+	// // }
+	// xactResID =
+	// LabShelfManager.getShelf().getSequencialIDToLong(Constants.SEQUENCE_TRANSACTIONHASRESULT);
+	// assert (xactResID < 1) : "xactResID is less than 1. Weird..";
+	// String insertSQL =
+	// LabShelfManager.getShelf().NewInsertTuple(
+	// Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
+	// TRANSACTIONHASRESULT.columns,
+	// new String[] {
+	// String.valueOf(xactResID), // xact has result ID
+	// String.valueOf(clientResID),// client has result ID
+	// String.valueOf(xactID), // xact ID
+	// String.valueOf(tIter), // iterNum
+	// String.valueOf(runTime) // xactRunTime
+	// },
+	// TRANSACTIONHASRESULT.columnDataTypes);
+	// //Main._logger.outputDebug(insertSQL);
+	// LabShelfManager.getShelf().commit();
+	// } catch (SQLException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// // // insert statement results
+	// // Vector<Long> stmtRunTimePerXact =
+	// stmtRunTimeVecPerXact.get(xactNum.intValue());
+	// // if(stmtRunTimePerXact != null){
+	// // for(int sIter=0;sIter<stmtRunTimePerXact.size();sIter++){
+	// // Long stmtIterNum = new Long(sIter);
+	// // Long stmtID = stmtNumToIDMap.get(stmtIterNum);
+	// // if(stmtID == null){
+	// // System.out.println("Statement ID can't be null");
+	// // System.exit(-1);
+	// // }
+	// // try {
+	// //
+	// LabShelfManager.getShelf().NewInsertTuple(Constants.TABLE_PREFIX+Constants.TABLE_STATEMENTHASRESULT,
+	// // STATEMENTHASRESULT.columns,
+	// // new String[]{
+	// // String.valueOf(xactResID), // transaction has result ID
+	// // String.valueOf(stmtID), // statement ID
+	// // String.valueOf(sIter), // statmentIterNum
+	// // String.valueOf(xactRunTimeVec.get(sIter)), // statementRunTime
+	// // null // statementLockWaitTime
+	// // },
+	// // STATEMENTHASRESULT.columnDataTypes);
+	// // LabShelfManager.getShelf().commit();
+	// // } catch (SQLException e) {
+	// // // TODO Auto-generated catch block
+	// // e.printStackTrace();
+	// // }
+	// // }
+	// // }
+	// }
+	// avgXactProcTime = (double)sumTotalTime / (double)xactRunTimeVec.size();
+	// String strStat =
+	// String.format("[numXacts: %d, min: %d (ms), max: %d (ms), avg: %.2f (ms)]",
+	// xactRunTimeVec.size(),
+	// minXactProcTime,
+	// maxXactProcTime,
+	// avgXactProcTime);
+	// Main._logger.outputLog("###<End>INSERT "+ str +" run result => " +
+	// strStat);
+	// }
+	// }
+
+	/*****
+	 * Insert transaction run result into DB
+	 * @param clientRunResID client run result ID
+	 * @param xactID transaction ID
+	 * @param numExecXacts number of executed transactions
+	 * @param minXactProcTime minimum transaction processing time
+	 * @param maxXactProcTime maximum transaction processing time
+	 * @param sumXactProcTime sum of transaction processing time
+	 * @param sumLockWaitTime sum of lock wait time
+	 */
+	private void insertTransactionRunResult(long clientRunResID,
+											long xactID,
+											long numExecXacts,
+											long minXactProcTime,
+											long maxXactProcTime,
+											long sumXactProcTime,
+											long sumLockWaitTime){
+		// get transaction run result identifier
+		long xactRunResID = -1;
+		try {
+			// get client run result id
+			String sql = "SELECT TransactionRunResID " + "FROM "
+					+ Constants.TABLE_PREFIX
+					+ Constants.TABLE_TRANSACTIONHASRESULT + " "
+					+ "WHERE ClientRunResID = " + clientRunResID
+					+ " and TransactionID = " + xactID;
+//Main._logger.outputDebug(sql);
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+			while (rs.next()) {
+				xactRunResID = rs.getInt(1);
 			}
-//			Vector<Vector<Long>> stmtRunTimeVecPerXact 	= stmtRunTimeVecPerXactMap.get(xactNum);
-//			if(stmtRunTimeVecPerXact == null){
-//				System.out.println("Statement runtime vector is null");
-//				System.exit(-1);
-//			}
+			rs.close();
+
+			// when not existing ...
+			if (xactRunResID == -1) {
+				xactRunResID = LabShelfManager.getShelf()
+						.getSequencialIDToLong(
+								Constants.SEQUENCE_TRANSACTIONHASRESULT);
+				assert (xactRunResID < 1) : "transaction result ID is less than 0. So weird...";
+				String insertSQL = LabShelfManager
+						.getShelf()
+						.NewInsertTuple(
+								Constants.TABLE_PREFIX
+										+ Constants.TABLE_TRANSACTIONHASRESULT,
+								TRANSACTIONHASRESULT.columns,
+								new String[] {
+										String.valueOf(xactRunResID), // xact has result ID
+										String.valueOf(clientRunResID),// client has result ID
+										String.valueOf(xactID), // xact ID
+										String.valueOf(numExecXacts), // numExecs
+										String.valueOf(minXactProcTime), // minXactRunTime
+										String.valueOf(maxXactProcTime), // maxXactRunTime
+										String.valueOf(sumXactProcTime), // sumXactRunTime
+										String.valueOf(sumLockWaitTime) // lockWaitTime
+								}, TRANSACTIONHASRESULT.columnDataTypes);
+				LabShelfManager.getShelf().commit();
+//Main._logger.outputLog(insertSQL);
+			} else {
+				String updateSQL = "Update " + Constants.TABLE_PREFIX
+						+ Constants.TABLE_TRANSACTIONHASRESULT + " SET "
+						+ " NumExecXacts = " + numExecXacts
+						+ ", minXactProcTime = " + minXactProcTime
+						+ ", maxXactProcTime = " + maxXactProcTime
+						+ ", sumXactProcTime = " + sumXactProcTime
+						+ ", sumLockWaitTime = " + sumLockWaitTime
+						+ " WHERE TransactionRunResID = " + xactRunResID;
+				Main._logger.outputLog(updateSQL);
+				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+				LabShelfManager.getShelf().commit();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Main._logger.reportError(e.getMessage());
+		}
+	}
+	
+	/*****
+	 * Compute insert into DB transaction run result stats  
+	 * @param clientRunResID client run result identifier
+	 * @param clientID client ID
+	 * @param numXactsToHave # of transactions
+	 * @param xactNumToIDMap transaction number to ID
+	 * @param xactNumToRunTimeVecMap transaction number to runTime
+	 * @param iterNum iteration number
+	 */
+	private void computeAndInsertXactRunStat(long clientRunResID,
+											 long clientID,
+											 long numXactsToHave,
+											 HashMap<Long, Long> xactNumToIDMap,
+											 long numExecXacts,
+											 HashMap<Long, Vector<Long>> xactNumToRunTimeVecMap,
+											 int iterNum) {
+		// HashMap<Long, Long> stmtNumToIDMap = c.getStmtNumToIDMap();
+		// HashMap<Long, Vector<Vector<Long>>> stmtRunTimeVecPerXactMap =
+		// c.getXactNumToStmtRunTimeVecMap();
+
+		// insert transaction results;
+		for (int xtNum = 0; xtNum < numXactsToHave; xtNum++) {
+			Long xactNum = new Long(xtNum);
 			// Get transaction ID in database
 			Long xactID = xactNumToIDMap.get(xactNum);
-			if(xactID == null){
+			if (xactID == null) {
 				System.out.println("Transaction ID can't be null");
 				System.exit(-1);
 			}
-			// For each iteration, we insert the transaction results into database.
-			for(int tIter=0;tIter<xactRunTimeVec.size();tIter++){
-				long xactResID = 0;
-				long runTime = xactRunTimeVec.get(tIter);
-				try {
-					// get client result id
-					String sql = "SELECT CLIRESID from azdblab_clientresult where CLIENTID = " + clientID + " and ITERNUM = " + iterNum;
-					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-					try {
-						while(rs.next()){
-							clientResID = rs.getInt(1);
-						}
-						rs.close();
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					// not existing ...
-					if(xactResID == -1){
-						xactResID = LabShelfManager.getShelf().getSequencialIDToLong(Constants.SEQUENCE_TRANSACTIONHASRESULT);
-						assert (xactResID < 1) : "xactResID is less than 1. Weird..";
-						LabShelfManager.getShelf().NewInsertTuple( 
-								Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT,
-								TRANSACTIONHASRESULT.columns,
-								new String[] {
-										String.valueOf(xactResID),  // xact has result ID
-										String.valueOf(clientResID),// client has result ID
-										String.valueOf(xactID), 	// xact ID
-										String.valueOf(tIter), 		// iterNum
-										String.valueOf(runTime) // xactRunTime
-								},
-								TRANSACTIONHASRESULT.columnDataTypes);
-						LabShelfManager.getShelf().commit();
-					}
-					else{
-						String updateSQL = "Update " + Constants.TABLE_PREFIX + Constants.TABLE_TRANSACTIONHASRESULT
-										 + " SET RUNTIME = " + runTime
-										 + " WHERE CLIRESID = " + clientResID + " and xactID = " + xactID + " and XACTITERNUM = " + tIter;
-						Main._logger.outputLog(updateSQL);
-						LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
-					}
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-//				// insert statement results 
-//				Vector<Long> stmtRunTimePerXact = stmtRunTimeVecPerXact.get(xactNum.intValue());
-//				if(stmtRunTimePerXact != null){
-//					for(int sIter=0;sIter<stmtRunTimePerXact.size();sIter++){
-//						Long stmtIterNum = new Long(sIter);
-//						Long stmtID = stmtNumToIDMap.get(stmtIterNum);
-//						if(stmtID == null){
-//							System.out.println("Statement ID can't be null");
-//							System.exit(-1);
-//						}
-//						try {
-//							LabShelfManager.getShelf().NewInsertTuple(Constants.TABLE_PREFIX+Constants.TABLE_STATEMENTHASRESULT, 
-//																 STATEMENTHASRESULT.columns, 
-//																 new String[]{
-//																	String.valueOf(xactResID), 	// transaction has result ID
-//																	String.valueOf(stmtID), 	// statement ID
-//																	String.valueOf(sIter), 		// statmentIterNum
-//																	String.valueOf(xactRunTimeVec.get(sIter)), // statementRunTime
-//																	null				 		// statementLockWaitTime
-//																 },
-//																 STATEMENTHASRESULT.columnDataTypes);
-//							LabShelfManager.getShelf().commit();
-//						} catch (SQLException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-//					}
-//				}
+			
+			// insert transaction run result
+//			String str = String.format("client (%d)'s transaction (%d) at i=%d", clientID, xactNum, iterNum);
+//			Main._logger.outputLog("###<BEGIN>INSERT " + str + " run result ################");
+			// Get transaction executions results at transaction/statement
+			// levels
+			Vector<Long> xactRunTimeVec = xactNumToRunTimeVecMap.get(xactNum);
+			if (xactRunTimeVec == null) {
+//				System.out.println("transaction runtime vector is null");
+				// insert transaction run results
+				insertTransactionRunResult(clientRunResID, xactID, 0, -1, -1, -1, -1);
+				// print out run stat
+				String strStat = String.format("[numXacts: 0]");
+//				Main._logger.outputLog("###<End>INSERT " + str + " run result => " + strStat);
+				return;
 			}
-		}
+
+			// compute stats of transaction runs
+			long sumLockWaitTime = 0;
+//			double avgLockWaitTime = 0;
+			long sumXactProcTime = 0;
+//			double avgXactProcTime = 0;
+			long minXactProcTime = Long.MAX_VALUE;
+			long maxXactProcTime = Long.MIN_VALUE;
+//			numExecXacts = xactRunTimeVec.size();
+			// For each iteration, we insert the transaction results into database.
+			for (int tIter = 0; tIter < numExecXacts; tIter++) {
+				long runTime = xactRunTimeVec.get(tIter);
+				if (runTime > maxXactProcTime)
+					maxXactProcTime = runTime;
+				if (runTime < minXactProcTime)
+					minXactProcTime = runTime;
+				sumXactProcTime += runTime;
+			}
+//			avgXactProcTime = (double) sumXactProcTime
+//					/ (double) xactRunTimeVec.size();
+
+			// compute lock wait time
+			for (int tIter = 0; tIter < numExecXacts; tIter++) {
+				long runTime = xactRunTimeVec.get(tIter);
+				sumLockWaitTime += (runTime - minXactProcTime);
+			}
+//			avgLockWaitTime = (double) sumLockWaitTime / (double)numExecXacts;
+
+			if(minXactProcTime == Long.MAX_VALUE) minXactProcTime = -1;
+			if(maxXactProcTime == Long.MIN_VALUE) maxXactProcTime = -1;
+			// insert transaction run results
+			insertTransactionRunResult(clientRunResID, xactID, numExecXacts, minXactProcTime, maxXactProcTime, sumXactProcTime, sumLockWaitTime);
+			// print out run stat
+//			String strStat = String
+//					.format("[numXacts: %d, min: %d(ms), max: %d(ms), avg: %.2f(ms), lw: %d(ms), lw avg: %.2f(ms)]",
+//							numExecXacts, minXactProcTime,
+//							maxXactProcTime, avgXactProcTime, sumLockWaitTime,
+//							avgLockWaitTime);
+//			Main._logger.outputLog("###<End>INSERT " + str + " run result => " + strStat);
+		} // end for
 	}
 }

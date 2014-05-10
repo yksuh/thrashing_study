@@ -529,11 +529,11 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 			recordTPSResult(MPL, totalXacts, elapsedTimeMillis, TransactionGenerator.getEffectiveDBRatio(), k, TransactionGenerator.getSelectivity());
 			
 			// wait for three minutes to clean up any remaining transactions 
-			try{
-				Thread.sleep(Constants.THINK_TIME); 
-			}catch(Exception ex){
-				ex.printStackTrace();
-			}
+//			try{
+//				Thread.sleep(Constants.THINK_TIME); 
+//			}catch(Exception ex){
+//				ex.printStackTrace();
+//			}
 		}
 	}
 	
@@ -649,19 +649,29 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 //	
 
 	@Override
-	protected void analyzeBatchSet(int batchSetID, double transactionSize,
-			double eXclusiveLocks, double effectiveDBSize, int totalBatchSets)
+//	protected void analyzeBatchSet(int batchSetID, double transactionSize,
+//			double eXclusiveLocks, double effectiveDBSize, int totalBatchSets)
+//			throws Exception {
+//		// TODO Auto-generated method stub
+//		
+//	}
+	protected void analyzeBatchSet(int runID, double transactionSize, double eXclusiveLocks, double effectiveDBSize)
 			throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void stepA(int batchSetID, double transactionSize,
-			double exclusiveLockRatio, double effectiveDBRatio)
+//	protected void stepA(int batchSetID, double transactionSize,
+//			double exclusiveLockRatio, double effectiveDBRatio)
+//			throws Exception {
+//		// TODO Auto-generated method stub
+//		
+//	}
+	protected int stepA(double transactionSize, double exclusiveLockRatio, double effectiveDBRatio)
 			throws Exception {
 		// TODO Auto-generated method stub
-		
+		return 0;
 	}
 
 	@Override
@@ -671,12 +681,15 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 		
 	}
 
-	@Override
-	protected void stepC(int MPL) throws Exception {
+//	@Override
+//	protected void stepC(int MPL) throws Exception {
+//		// TODO Auto-generated method stub
+//		
+//	}
+	protected void stepC(int batchRunResID, int batchID) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
-
 //	
 //	private void saveAllProcesses(int runID) {
 //		try {
@@ -818,6 +831,19 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 //				createSequence(INTERNAL_TABLES[i].strSequenceName);
 //			}
 //		}
+
+	@Override
+	protected int stepC(int batchSetRunResID, int batchID, int numClients,
+			int iterNum) throws Exception {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected void stepD() throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
 	
 //	/**
 //	 * 

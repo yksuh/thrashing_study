@@ -761,6 +761,7 @@ public abstract class GeneralDBMS extends Plugin{
       
   public int getSequencialID(String seqName) {
     String  getSeqID  = "SELECT " + seqName + ".NEXTVAL FROM DUAL";
+//System.out.println(getSeqID);
     try {
       ResultSet  rs  = _statement.executeQuery(getSeqID);
       int      id  = -1;
@@ -846,13 +847,14 @@ public abstract class GeneralDBMS extends Plugin{
    * @param columnDataTypes The data types of the columns being inserted.
    * @throws SQLException Thrown if the insertion fails.
    */
-  public void NewInsertTuple(
+  public String NewInsertTuple(
       String tableName, String[] columnNames, String[] columnValues, 
       int[] columnDataTypes) throws SQLException {
     String insertSQL = buildInsertSQL(tableName, columnNames, columnValues,
                                       columnDataTypes);
- Main._logger.outputDebug(insertSQL);
+Main._logger.outputLog(insertSQL);	    
     _statement.executeUpdate(insertSQL);
+    return insertSQL;
   }
   
   /**

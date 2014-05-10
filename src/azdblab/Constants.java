@@ -662,29 +662,40 @@ public class Constants {
 	/**
 	 * Tables for thrashing study
 	 */
-	public static final String TABLE_BATCHSET = "BATCHSET";
-	public static final String TABLE_BATCHSETHASPARAMETER = "BATCHSETHASPARAMETER";
-	public static final String TABLE_BSSATISFIESASPECT = "BSSATISFIESASPECT";	// batchsetsatisifiesaspect
-	public static final String TABLE_BATCH = "BATCH";
-	public static final String TABLE_BATCHHASRESULT = "BATCHHASRESULT";
-	public static final String TABLE_CLIENT = "CLIENT";
-	public static final String TABLE_CLIENTHASRESULT = "CLIENTHASRESULT";
-	public static final String TABLE_TRANSACTION = "TRANSACTION";
-	public static final String TABLE_TRANSACTIONHASRESULT = "TRANSACTIONHASRESULT";
-	public static final String TABLE_STATEMENT = "STATEMENT";
-	public static final String TABLE_STATEMENTHASRESULT = "STATEMENTHASRESULT";
-	public static final String TABLE_COMPLETEDFGTASK = "COMPLETEDFGTASK"; // fine-grained task
+	public static final String TABLE_BATCHSET 		= "BATCHSET";
+	public static final String TABLE_BATCH 			= "BATCH";
+	public static final String TABLE_CLIENT 		= "CLIENT";
+	public static final String TABLE_TRANSACTION 	= "TRANSACTION";
+	
+	public static final String TABLE_BATCHSETHASRESULT 		= "BATCHSETHASRESULT";
+	public static final String TABLE_BATCHHASRESULT 		= "BATCHHASRESULT";
+	public static final String TABLE_CLIENTHASRESULT 		= "CLIENTHASRESULT";
+	public static final String TABLE_TRANSACTIONHASRESULT 	= "TRANSACTIONHASRESULT";
+	public static final String TABLE_COMPLETED_BATCHSETTASK = "COMPLETEDBATCHSETTASK";
 	
 	/***
 	 * Sequence for thrashing study 
 	 */
-	public static final String SEQUENCE_BATCHSET = "SEQ_BATCHSET";
-	public static final String SEQUENCE_BATCH = "SEQ_BATCH";
-	public static final String SEQUENCE_CLIENT = "SEQ_CLIENT";
+	// main tables
+	public static final String SEQUENCE_BATCHSET 	= "SEQ_BATCHSET";
+	public static final String SEQUENCE_BATCH 		= "SEQ_BATCH";
+	public static final String SEQUENCE_CLIENT 		= "SEQ_CLIENT";
 	public static final String SEQUENCE_TRANSACTION = "SEQ_TRANSACTION";
-	public static final String SEQUENCE_STATEMENT = "SEQ_STATEMENT";
-	public static final String SEQUENCE_CLIENTHASRESULT = "CLIENTRESULT";
-	public static final String SEQUENCE_TRANSACTIONHASRESULT = "SEQ_XACTRESULT";	
+	// result tables
+	public static final String SEQUENCE_BATCHSETHASRESULT 		= "SEQ_BATCHSETRESULT";
+	public static final String SEQUENCE_BATCHHASRESULT 			= "SEQ_BATCHRESULT";
+	public static final String SEQUENCE_CLIENTHASRESULT			= "SEQ_CLIENTRESULT";
+	public static final String SEQUENCE_TRANSACTIONHASRESULT 	= "SEQ_XACTRESULT";	
+	
+	/****
+	 * Deprecated
+	 */
+//	public static final String TABLE_STATEMENT = "STATEMENT";
+//	public static final String TABLE_STATEMENTHASRESULT = "STATEMENTHASRESULT";
+//	public static final String TABLE_BATCHSETHASPARAMETER = "BATCHSETHASPARAMETER";
+//	public static final String TABLE_BSSATISFIESASPECT = "BSSATISFIESASPECT";	// batchsetsatisifiesaspect
+//	public static final String TABLE_COMPLETEDFGTASK = "COMPLETEDFGTASK"; // fine-grained task
+//	public static final String SEQUENCE_STATEMENT = "SEQ_STATEMENT";
 	
 	/**
 	 * The data generation type for a column that indicates randomly generated
@@ -841,12 +852,12 @@ public class Constants {
 	}
 	
 	public static HashMap<String, String> hiddenDBMSes = new HashMap<String, String>();
-	public static int MAX_ITERS = 3;
 	public static long THINK_TIME = 60000;
 	public static double BASE_SELECTIVITY = 0.01;
 	public static int NumIDs    = 5;
 	public static int NumValues = 2;
 	
+	public static int MAX_ITERS = 2;
 	public static final String TABLE_TPSRESULT_NAME = "AZDBLAB_XACTRUNSTAT";
 	public static final long MAX_EXECUTIONTIME = 9999999;
 	public static final String FIGURE_DIR = "work_docs/";

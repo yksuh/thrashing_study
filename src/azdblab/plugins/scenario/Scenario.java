@@ -411,7 +411,7 @@ public abstract class Scenario extends Plugin{
 	protected int getMaxTaskNum(int runID) throws Exception {
 		int res = -1;
 		String table_name = Constants.TABLE_PREFIX
-				+ Constants.TABLE_COMPLETED_TASK;
+				+ Constants.TABLE_COMPLETED_BATCHSETTASK;
 		String sql = "SELECT max(TASKNUMBER) FROM " + table_name
 				+ " WHERE RUNID = " + runID;
 		Main._logger.outputLog("task sql: " + sql);
@@ -428,7 +428,7 @@ public abstract class Scenario extends Plugin{
 		String transactionTime = sdf
 				.format(new Date(System.currentTimeMillis()));
 		String table_name = Constants.TABLE_PREFIX
-				+ Constants.TABLE_COMPLETED_TASK;
+				+ Constants.TABLE_COMPLETED_BATCHSETTASK;
 		String sql = "INSERT INTO " + table_name + " VALUES(" + runID + ", "
 				+ task_num + ", to_timestamp('" + transactionTime + "'" + ", '" + Constants.TIMESTAMPFORMAT + "'))";
 		Main._logger.outputLog("task sql: " + sql);

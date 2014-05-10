@@ -1,0 +1,78 @@
+<dataDefinition name="ft">
+
+	<documentation>
+
+		A database that has tables with cardinalities that are a power of 10.  From 1 to 
+		30,000.
+
+	</documentation>
+
+	<table name="HT1" cardinality="1000">
+
+		<column name="id1" dataType="number" dataLength="20" dataGenerationType="sequential" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id2" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id3" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id4" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+		<column name="id5" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+		<column name="val1" dataType="char" dataLength="90" inPrimaryKey="false"/>
+		<column name="val2" dataType="char" dataLength="90" inPrimaryKey="false"/>
+	</table>
+
+	<table name="HT2" cardinality="1000">
+
+		<column name="id1" dataType="number" dataLength="20" dataGenerationType="sequential" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id2" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id3" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id4" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+		<column name="id5" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+		<column name="val1" dataType="char" dataLength="90" inPrimaryKey="false"/>
+		<column name="val2" dataType="char" dataLength="90" inPrimaryKey="false"/>
+	</table>
+
+	<table name="HT3" cardinality="1000">
+
+		<column name="id1" dataType="number" dataLength="20" dataGenerationType="sequential" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id2" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id3" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id4" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+		<column name="id5" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+		<column name="val1" dataType="char" dataLength="90" inPrimaryKey="false"/>
+		<column name="val2" dataType="char" dataLength="90" inPrimaryKey="false"/>
+	</table>
+
+	<table name="HT4" cardinality="1000">
+
+		<column name="id1" dataType="number" dataLength="20" dataGenerationType="sequential" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id2" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id3" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+		<column name="id4" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+		<column name="id5" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+		<column name="val1" dataType="char" dataLength="90" inPrimaryKey="false"/>
+		<column name="val2" dataType="char" dataLength="90" inPrimaryKey="false"/>
+	</table>
+	<table name="HT5" cardinality="1000">
+
+                <column name="id1" dataType="number" dataLength="20" dataGenerationType="sequential" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+                <column name="id2" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+                <column name="id3" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+
+                <column name="id4" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+                <column name="id5" dataType="number" dataLength="20" dataGenerationType="random" distributionMinimum="0" distributionMaximum="1000" inPrimaryKey="false"/>
+                <column name="val1" dataType="char" dataLength="90" inPrimaryKey="false"/>
+                <column name="val2" dataType="char" dataLength="90" inPrimaryKey="false"/>
+        </table>
+</dataDefinition>

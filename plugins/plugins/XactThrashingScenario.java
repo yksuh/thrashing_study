@@ -485,7 +485,8 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		 * @param clientNum
 		 * @return a list of SQL statements
 		 */
-		public static Vector<String> buildTransaction(int clientID, long xactNum) {
+		public static HashMap<Long, Vector<String>> buildTransaction(int clientID, long xactNum) {
+			HashMap<Long, Vector<String>> recMap = new HashMap<Long, Vector<String>>();
 			// vector for SQL statements for this transaction
 			Vector<String> transaction = new Vector<String>();
 			// randomly select a table
@@ -519,24 +520,21 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			}
 			// Insert this client's transaction and its statements while setting 
 			// number to ID maps
-			insertTransaction(clientID, xactNum, transaction);
+			long xactID = insertTransaction(clientID, xactNum, transaction);
 			// Reset keys
 			resetKeys();
-			return transaction;
+			recMap.put(new Long(xactID), transaction);
+			return recMap;
 		}
 
-		/****
-		 * Insert transaction and statements, while setting the maps of
-		 * transaction/statement number to ID
-		 * 
-		 * @param clientID
-		 *            current client
-		 * @param xactNum
-		 *            transaction number
-		 * @param transaction
-		 *            transaction
+		/*****
+		 * Insert a given transaction into DB
+		 * @param clientID client ID
+		 * @param xactNum transaction number
+		 * @param transaction actual statements
+		 * @return transaction ID
 		 */
-		private static void insertTransaction(int clientID, long xactNum, Vector<String> transaction) {
+		private static long insertTransaction(int clientID, long xactNum, Vector<String> transaction) {
 			// get transaction string
 			String xactStr = "";
 			for (int i = 0; i < transaction.size(); i++) {
@@ -547,27 +545,26 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			}
 
 			// get transaction id
-			int xactID = -1;
-			ResultSet rs = null;
-			try {
-				rs = LabShelfManager.getShelf().executeQuerySQL(
-						"SELECT TransactionID " + "from azdblab_transaction"
-								+ " where clientid = " + clientID
-								+ " and TransactionNum = " + xactNum);
-				while (rs.next()) {
-					xactID = rs.getInt(1);
-				}
-				rs.close();
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				// e1.printStackTrace();
-			}
+//			int xactID = -1;
+//			ResultSet rs = null;
+//			try {
+//				rs = LabShelfManager.getShelf().executeQuerySQL(
+//						"SELECT TransactionID " + "from azdblab_transaction"
+//								+ " where clientid = " + clientID
+//								+ " and TransactionNum = " + xactNum);
+//				while (rs.next()) {
+//					xactID = rs.getInt(1);
+//				}
+//				rs.close();
+//			} catch (SQLException e1) {
+//				// TODO Auto-generated catch block
+//				// e1.printStackTrace();
+//			}
 
 			// not existing ...
-			if (xactID == -1) {
+//			if (xactID == -1) {
 				// obtain a new batch set id
-				xactID = LabShelfManager.getShelf().getSequencialID(
-						Constants.SEQUENCE_TRANSACTION);
+				long xactID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_TRANSACTION);
 				// add transaction
 				try {
 					LabShelfManager.getShelf().NewInsertTuple(
@@ -584,13 +581,13 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			} else { // update transaction string
+//			} else { // update transaction string
 //				String updateSQL = "UPDATE azdblab_transaction "
 //						+ "SET TransactionStr = '" + xactStr + "' "
 //						+ "WHERE TransactionID = " + xactID;
 //				Main._logger.outputLog(updateSQL);
 //				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
-			}
+//			}
 
 			// Main._logger.outputLog(String.format("Client %d's transaction(%d)-(%d)",
 			// clientID, xactNum, xactID));
@@ -627,15 +624,15 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			// }
 			// }
 			// build transaction number to ID map
-			Long xtNum = new Long(xactNum);
-			Long xtID = new Long(xactID);
-			xactNumToIDMap.put(xtNum, xtID);
-			Long xID = xactNumToIDMap.get(xtNum);
-			if (xID != xtID) {
-				Main._logger.outputLog("Transaction ID is different!");
-				System.exit(-1);
-			}
-			return;
+//			Long xtNum = new Long(xactNum);
+//			Long xtID = new Long(xactID);
+//			xactNumToIDMap.put(xtNum, xtID);
+//			Long xID = xactNumToIDMap.get(xtNum);
+//			if (xID != xtID) {
+//				Main._logger.outputLog("Transaction ID is different!");
+//				System.exit(-1);
+//			}
+			return xactID;
 		}
 	}
 
@@ -826,67 +823,6 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		// // System.exit(1);
 		// // }
 		// }
-
-		/***
-		 * Retrieve Client ID
-		 * 
-		 * @param client ID
-		 */
-		private int retrieveClientID(int clientNum) {
-			// get client id
-			int clientID = -1;
-			String query = "SELECT clientID from azdblab_client where batchID = "
-					+ _batchID + " and CLIENTNUM = " + clientNum;
-			// Main._logger.outputLog(query);
-			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
-			try {
-				while (rs.next()) {
-					clientID = rs.getInt(1);
-				}
-				rs.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			// not existing ...
-			if (clientID == -1) {
-				System.err.println("No client ID is so weird ...");
-				System.exit(-1);
-			}
-			return clientID;
-		}
-
-		/***
-		 * Insert a client into AZDBLab
-		 * 
-		 * @param clientNum
-		 *            client number
-		 */
-		private int insertClient(int batchID, int clientNum) {
-			// obtain a new batch set id
-			int clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
-			try {
-				String insertSQL = LabShelfManager.getShelf()
-						.NewInsertTuple(
-								Constants.TABLE_PREFIX
-										+ Constants.TABLE_CLIENT,
-								CLIENT.columns,
-								new String[] { String.valueOf(clientID),
-										String.valueOf(batchID),
-										String.valueOf(clientNum) },
-								CLIENT.columnDataTypes);
-				// Main._logger.outputLog(insertSQL);
-				LabShelfManager.getShelf().commit();
-				// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
-				// _clientNum, _batchID));
-			} catch (SQLException e) {
-				// // TODO Auto-generated catch block
-				e.printStackTrace();
-				Main._logger.reportError(e.getMessage());
-				System.exit(-1);
-			}
-			return clientID;
-		}
 		
 		public void init(String drvName, String strConnStr, String strUserName,
 				String strPassword) throws Exception {
@@ -1303,33 +1239,59 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		 * @param clientNum client number
 		 * @param iterNum iteration number
 		 */
-		public void setClientID(int batchID, int clientNum, int iterNum) {
-			if(iterNum == 1){
-				// insert this client record into database
-				_clientID = insertClient(batchID, clientNum);
-			}else{
-				// insert this client record into database
-				_clientID = retrieveClientID(clientNum);
+		public void setClientID(int batchID, int clientNum) {
+			// set client id
+			int clientID = -1;
+			String query = "SELECT clientID from azdblab_client where batchID = "
+					+ _batchID + " and clientNum = " + clientNum;
+			// Main._logger.outputLog(query);
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
+			try {
+				while (rs.next()) {
+					clientID = rs.getInt(1);
+				}
+				rs.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			// not existing ...
+			if (clientID == -1) {
+				// obtain a new batch set id
+				clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
+				try {
+					String insertSQL = LabShelfManager.getShelf()
+							.NewInsertTuple(
+									Constants.TABLE_PREFIX
+											+ Constants.TABLE_CLIENT,
+									CLIENT.columns,
+									new String[] { String.valueOf(clientID),
+											String.valueOf(batchID),
+											String.valueOf(clientNum) },
+									CLIENT.columnDataTypes);
+					// Main._logger.outputLog(insertSQL);
+					LabShelfManager.getShelf().commit();
+					// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
+					// _clientNum, _batchID));
+				} catch (SQLException e) {
+					// // TODO Auto-generated catch block
+					e.printStackTrace();
+					Main._logger.reportError(e.getMessage());
+					System.exit(-1);
+				}
+			}
+			// set client ID found in DB
+			_clientID = clientID;
 		}
 		
 		/*****
-		 * Configure clients with their corresponding transactions
-		 * @param batchID
-		 * @param clientNum
-		 * @param iterNum
+		 * Set transactions of clients
 		 */
-		public void configure(int iterNum) {
+		public void setTransaction() {
 			// generating transactions
-			for (int i = 0; i < _numXactsToHave; i++) {
-				Vector<String> transaction = null;
-				if(iterNum == 1){
-					transaction 	= TransactionGenerator.buildTransaction(_clientID, i); // transaction
-					_xactNumToIDMap = TransactionGenerator.getXactNumToIDMap();
-				}else{
-					transaction 	= retrieveTransaction(_clientID, i);
-				}
-				_transactionMap.put(new Long(i), transaction);
+			for (int xactNum = 0; xactNum < _numXactsToHave; xactNum++) {
+				Vector<String> transaction = retrieveTransaction(_clientID, xactNum);
+				_transactionMap.put(new Long(xactNum), transaction);
 			}
 		}
 		
@@ -1340,8 +1302,9 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		 * @return
 		 */
 		public Vector<String> retrieveTransaction(int clientID, int xactNum) {
+			Vector<String> retXact = null;
 			// get transaction id
-			int xactID = -1;
+			long xactID = -1;
 			String xactStatements = "";
 			ResultSet rs = null;
 			try {
@@ -1361,14 +1324,16 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 
 			// not existing ...
 			if (xactID == -1) {
-				Main._logger.outputLog("No transaction exists in DB.");
-				System.exit(-1);
-			} 
-			
-			Vector<String> xactStrVec = new Vector<String>();
-			String[] stmts = xactStatements.split(";");
-			for(int i=0;i<stmts.length;i++){
-				xactStrVec.add(stmts[i]);
+				// generation transaction for this client
+				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(_clientID, xactNum);
+				xactID = xactMap.keySet().iterator().next();
+				retXact = xactMap.values().iterator().next();
+			}else{
+				retXact = new Vector<String>();
+				String[] stmts = xactStatements.split(";");
+				for(int i=0;i<stmts.length;i++){
+					retXact.add(stmts[i]);
+				}
 			}
 			
 			// build transaction number to ID map
@@ -1381,7 +1346,7 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 				Main._logger.outputLog("Transaction ID is different!");
 				System.exit(-1);
 			}
-			return xactStrVec;
+			return retXact;
 		}
 	}
 
@@ -1708,11 +1673,11 @@ batchRunTime = 10;
 			// " is being initialized...");
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
-			clients[i].setClientID(batchID, clientNum, iterNum);
+			clients[i].setClientID(batchID, clientNum);
 			// set up client (i+1)
 			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
 			// configure this client
-			clients[i].configure(iterNum);
+			clients[i].setTransaction();
 		}
 		
 		long startTime = System.currentTimeMillis();

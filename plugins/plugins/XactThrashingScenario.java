@@ -26,7 +26,7 @@ import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
  */
 
 public class XactThrashingScenario extends ScenarioBasedOnTransaction {
-	public static final boolean refreshTable = true;
+	public static final boolean refreshTable = false;
 
 	public XactThrashingScenario(ExperimentRun expRun) {
 		super(expRun);
@@ -836,15 +836,15 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 				// Main._logger.outputLog("login details: " + strConnectString +
 				// ", " + strUserName + ", " + strPassword + ", " + strdrvname);
 				Class.forName(drvName);
-				int j = 1;
-				while(_conn == null){
+//				int j = 1;
+//				while(_conn == null){
 					_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
-					if(j++ % 10 == 0){
-						Thread.sleep(10000);
-						Main._logger.outputLog(j+"th connection trial...");
-						throw new Exception("Client " + _clientID + " cannot have a connection!");
-					}
-				}
+//					if(j++ % 10 == 0){
+//						Thread.sleep(10000);
+//						Main._logger.outputLog(j+"th connection trial...");
+//						throw new Exception("Client " + _clientID + " cannot have a connection!");
+//					}
+//				}
 				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_UPDATABLE);
 				return;
@@ -954,9 +954,11 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		 * Closes the DBMS connection that was opened by the open call.
 		 */
 		public void terminate() {
-			long elapsedTime = System.currentTimeMillis()-_startTime;
-			String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, elapsedTime, _numExecXacts);
-			Main._logger.outputLog(str);
+//			long elapsedTime = System.currentTimeMillis()-_startTime;
+//if(_clientNum % 10 == 0){
+//	String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, elapsedTime, _numExecXacts);
+//	Main._logger.outputLog(str);
+//}
 			try {
 				if (_stmt != null)
 					_stmt.close();
@@ -975,7 +977,9 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 				// e.printStackTrace();
 			}
 			_conn = null;
-			Main._logger.outputLog("\tDone with closing Client #" + _clientNum);
+if(_clientNum % 100 == 0){
+	Main._logger.outputLog("\tDone with closing Client #" + _clientNum);
+}
 		}
 
 		/**
@@ -1021,6 +1025,12 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			// long minTime = -1;
 			while (true) {
 				if (_timeOut) {
+					long elapsedTime = System.currentTimeMillis()-_startTime;
+if(_clientNum % 100 == 0){
+	String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, elapsedTime, _numExecXacts);
+	Main._logger.outputLog(str);
+}
+					_timeOut = false;
 					return;
 				}
 				try {
@@ -1309,7 +1319,7 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			ResultSet rs = null;
 			try {
 				rs = LabShelfManager.getShelf().executeQuerySQL(
-						"SELECT TransactionID, TransactionStr" + "from azdblab_transaction"
+						"SELECT TransactionID, TransactionStr from azdblab_transaction"
 								+ " where clientid = " + clientID
 								+ " and TransactionNum = " + xactNum);
 				while (rs.next()) {
@@ -1393,29 +1403,35 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 
 		// make a batchset run result
 		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID);
-		// run this batch set atomically
+		
+		// prepare for transaction generation
+		stepB(transactionSize, eXclusiveLocks, effectiveDBSize);
+				
+		// initialize and run this batch set atomically
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
 		for (int MPL = mplMin; MPL <= mplMax; MPL += mplIncr) {
 			int batchID = insertBatch(batchSetID, MPL);
 
-			// initialize this batch
-			stepB(batchID, MPL, transactionSize, eXclusiveLocks, effectiveDBSize);
-			
 			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
+				Main._logger.outputLog(String.format("<<<<<< %d(/%d) iteration start!", k, Constants.MAX_ITERS));
+				
 				// run this batch for X times
 				int retry = stepC(batchSetRunResID, batchID, MPL, k);
 				if(retry != k){
 					k--;
 					continue;
 				}
+
+				Main._logger.outputLog(String.format("<<<<<<<<<< Done!\n", k, Constants.MAX_ITERS));
 				
 				// wait for a minute to clean up any remaining transactions
-//				try{
+				try{
 //					Thread.sleep(Constants.THINK_TIME);
-//				}catch(Exception ex){
-//					ex.printStackTrace();
-//				}
+					Thread.sleep(15000);
+				}catch(Exception ex){
+					ex.printStackTrace();
+				}				
 			}
 			
 			// close this batch
@@ -1436,7 +1452,8 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 				if(c.isAlive()){
 					c.destroyed();
 				}
-				Main._logger.outputLog(String.format("Client #%d has been successfully destroyed.", num));
+				if(num % 100 == 0)
+					Main._logger.outputLog(String.format("Client #%d has been successfully destroyed.", num));
 			}catch(Exception ex){
 				ex.printStackTrace();
 			}
@@ -1583,7 +1600,6 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 	@Override
 	protected int stepA(double transactionSize, double exclusiveLockRatio,
 			double effectiveDBRatio) {
-batchRunTime = 10;
 		int batchSetID = -1;
 		String batchSetQuery = "SELECT BatchSetID " + "FROM "
 				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " "
@@ -1592,7 +1608,7 @@ batchRunTime = 10;
 				+ " and BatchSzIncr = " + this.mplIncr + " and XactSz = "
 				+ transactionSize + " and XLockRatio = " + exclusiveLockRatio
 				+ " and EffectiveDBSz = " + effectiveDBRatio;
-		Main._logger.outputDebug(batchSetQuery);
+//Main._logger.outputDebug(batchSetQuery);
 		ResultSet rs = LabShelfManager.getShelf()
 				.executeQuerySQL(batchSetQuery);
 		try {
@@ -1628,12 +1644,12 @@ batchRunTime = 10;
 	}
 
 	@Override
-	protected void stepB(int batchID, int MPL, double transactionSize,
+	protected void stepB(double transactionSize,
 			double eXclusiveLcks, double effectiveDBSize) throws Exception {
 //		recordRunProgress(0, "Beginning batch (" + batchID
 //				+ ") initialization (MPL=" + MPL + ")");
 		// number of clients
-		int numClients = MPL;
+//		int numClients = MPL;
 		// set transaction size
 		TransactionGenerator
 				.setXactSize((double) (transactionSize / (double) 100));
@@ -1680,11 +1696,20 @@ batchRunTime = 10;
 			clients[i].setTransaction();
 		}
 		
-		long startTime = System.currentTimeMillis();
+		// flush caches
+		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
+		Main._logger.outputLog("Finish Flushing Disk Drive Cache");
+		experimentSubject.flushOSCache();
+		Main._logger.outputLog("Finish Flushing OS Cache");
+		experimentSubject.flushDBMSCache();
+		Main._logger.outputLog("Finish Flushing DBMS Cache");
+		
+		batchRunTime = 30;
 		int totalXacts = 0;
 		long sumOfBatchRunElapsedTime = 0;
 		long elapsedTimeMillis = 0;
 		boolean runStarted = false;
+		long startTime = System.currentTimeMillis();
 		while ((elapsedTimeMillis = (System.currentTimeMillis() - startTime)) < batchRunTime * 1000) {// global timer
 			if (!runStarted){
 				for (Client c : clients) {
@@ -1695,22 +1720,24 @@ batchRunTime = 10;
 			}
 		}
 		
+		boolean runAgain = false;
 		// inspect elapsed time
 		long elapsedTimeInSec = elapsedTimeMillis / 1000;
-		if (elapsedTimeInSec != batchRunTime) {
-			for (Client c : clients) {
-				c.terminate();
-			}
-			Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", batchID, iterNum));
-			return iterNum--; // reiteration this 
-		}else{
-			for (Client c : clients) {
-				// locally set timeOut 
-				c.setTimeOut();
-				c.terminate();
-			}
+		if (elapsedTimeInSec > batchRunTime) {
+			runAgain = true;
 		}
-
+		for (Client c : clients) {
+			// locally set timeOut 
+			c.setTimeOut();
+			c.terminate();
+		}
+		
+		if(runAgain){
+			Main._logger.outputLog(String.format("Elapsed Time: %d(ms), batchRunTime: %d(ms)", elapsedTimeInSec, batchRunTime));
+			Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
+			return iterNum--; // reiteration this 
+		}
+		
 		// Collect transaction run stat
 		class XactRunStatPerClient{
 			long numXactsToHave;
@@ -1857,7 +1884,7 @@ try {
 Main._logger.outputLog(updateSQL);
 			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 		}
-//		Main._logger.outputLog("###<END>INSERT batch Result ###################");
+		Main._logger.outputLog("==============================================");
 		return batchRunResID;
 	}
 

@@ -620,8 +620,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 	 * Initialize as many clients as MPL for each batch in this batch set
 	 * @throws Exception
 	 */
-	protected abstract void stepB(int batchID, int MPL, 
-								  double transactionSize, 
+	protected abstract void stepB(double transactionSize, 
 								  double eXclusiveLcks, 
 								  double effectiveDBSize) throws Exception;
 	/***
@@ -795,7 +794,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 						},
 						BATCHSET.columnDataTypes);
 			LabShelfManager.getShelf().commit();
-Main._logger.outputDebug(insertSQL);			
+//Main._logger.outputDebug(insertSQL);			
 		} catch (SQLException e) {
 			Main._logger.reportError(e.getMessage());
 			e.printStackTrace();

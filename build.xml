@@ -1,4 +1,7 @@
 <project name="AZDBLAB">
+	<path id="classpath.lib">
+		<fileset dir="./libs" includes="**/*.jar" />  
+	</path>
 	<target name="compile">
 		<echo>Compiling AZDBLAB classes </echo>
 		<mkdir dir="dist" />
@@ -7,12 +10,14 @@
 				<pathelement location="dist" />
 				<pathelement location="libs/**" />
 			</classpath>
+			<classpath refid="classpath.lib"/>
 		</javac>
 		<javac srcdir="plugins" includeantruntime="false" executable="/javac" destdir="dist" compiler="javac1.6" excludes="plugins/unit_testing/*.* plugins/expired/*.*">
 			<classpath>
-				<pathelement location="dist" />
 				<pathelement location="libs/**" />
+				<pathelement location="dist" />
 			</classpath>
+			<classpath refid="classpath.lib"/>
 		</javac>
 	</target>
 	

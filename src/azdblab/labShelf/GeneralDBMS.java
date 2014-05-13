@@ -852,7 +852,7 @@ public abstract class GeneralDBMS extends Plugin{
       int[] columnDataTypes) throws SQLException {
     String insertSQL = buildInsertSQL(tableName, columnNames, columnValues,
                                       columnDataTypes);
-Main._logger.outputLog(insertSQL);	    
+//Main._logger.outputLog(insertSQL);	    
     _statement.executeUpdate(insertSQL);
     return insertSQL;
   }

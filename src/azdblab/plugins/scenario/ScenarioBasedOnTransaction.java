@@ -620,8 +620,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 	 * Initialize as many clients as MPL for each batch in this batch set
 	 * @throws Exception
 	 */
-	protected abstract void stepB(int batchID, int MPL, 
-								  double transactionSize, 
+	protected abstract void stepB(double transactionSize, 
 								  double eXclusiveLcks, 
 								  double effectiveDBSize) throws Exception;
 	/***
@@ -650,15 +649,17 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 		int totalBatchSets = totalXactSz*totalExLcks*totalEDBSize;
 //		double xactSz=xactSizeMin, xlcks=xLocksMin;
 		// transactio size
-//		for(double xactSz=xactSizeMin;xactSz<=xactSizeMax;xactSz*=xactSizeIncr){
-		for(double xactSz=xactSizeMin;xactSz<=xactSizeMin;xactSz*=xactSizeIncr){
+		for(double xactSz=xactSizeMin;xactSz<=xactSizeMax;xactSz*=xactSizeIncr){
+//		for(double xactSz=xactSizeMin;xactSz<=xactSizeMin;xactSz*=xactSizeIncr){
 			// exclusive locks
-//			for(double xlcks=xLocksMin;xlcks<=xLocksMax;xlcks+=xLocksIncr){
-			for(double xlcks=xLocksMin;xlcks<=xLocksMin;xlcks+=xLocksIncr){
+			for(double xlcks=xLocksMin;xlcks<=xLocksMax;xlcks+=xLocksIncr){
+			//for(double xlcks=xLocksMin;xlcks<=xLocksMin;xlcks+=xLocksIncr){
 				// effective db size
 				for(double edbSz=edbSizeMin;edbSz<=edbSizeMax;edbSz+=edbSizeIncr){
 					batchSetNumToRun++;
-					
+					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, edbSz: %d%%)", 
+							batchSetNumToRun, xactSz*100, (int)(xlcks*100), (int)(edbSz*10));
+					Main._logger.outputLog(str);
 					// get task number 
 					maxTaskNum = getMaxTaskNum(runID);
 					if(batchSetNumToRun <= maxTaskNum-1){
@@ -795,7 +796,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 						},
 						BATCHSET.columnDataTypes);
 			LabShelfManager.getShelf().commit();
-Main._logger.outputDebug(insertSQL);			
+//Main._logger.outputDebug(insertSQL);			
 		} catch (SQLException e) {
 			Main._logger.reportError(e.getMessage());
 			e.printStackTrace();
@@ -890,13 +891,13 @@ Main._logger.outputDebug(updateSQL);
 		Main._logger.outputLog("######################################################################");
 		
 		// sanity check on table drop
-		for (int i = 0; i < myXactTables.length; i++) {
-			Table curr_table = myXactTables[i];
-			// sanity check for table drop
-			if(experimentSubject.tableExists(curr_table.table_name_with_prefix)){
-				throw new SanityCheckException("Experiment paused by sanity check violation on table drop of " + curr_table.table_name_with_prefix + ".");
-			}
-		}
+//		for (int i = 0; i < myXactTables.length; i++) {
+//			Table curr_table = myXactTables[i];
+//			// sanity check for table drop
+//			if(experimentSubject.tableExists(curr_table.table_name_with_prefix)){
+//				throw new SanityCheckException("Experiment paused by sanity check violation on table drop of " + curr_table.table_name_with_prefix + ".");
+//			}
+//		}
 	}
 //	/**
 //	 * Measuring the transaction per second

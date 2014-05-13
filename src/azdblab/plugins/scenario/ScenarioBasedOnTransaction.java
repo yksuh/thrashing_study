@@ -658,7 +658,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 				for(double edbSz=edbSizeMin;edbSz<=edbSizeMax;edbSz+=edbSizeIncr){
 					batchSetNumToRun++;
 					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, edbSz: %d%%)", 
-							batchSetNumToRun, xactSz*100, (int)(xlcks*100), (int)(edbSz*10));
+							batchSetNumToRun, xactSz*100, (int)(xlcks*100), (int)(edbSz*100));
 					Main._logger.outputLog(str);
 					// get task number 
 					maxTaskNum = getMaxTaskNum(runID);

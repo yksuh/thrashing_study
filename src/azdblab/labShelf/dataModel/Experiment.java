@@ -1495,9 +1495,9 @@ public class Experiment extends TableDefinition {
 	 */
 	public double getTransactionSizeMax() {
 		NodeList nlst = elementExpDescription
-				.getElementsByTagName("dbmsBufferCacheSize");
+				.getElementsByTagName("xactSize");
 		if (nlst == null) {
-			Main._logger.outputLog("no dbmsBufferCacheSize element!");
+			Main._logger.outputLog("no transaction size element!");
 		}
 		try {
 			return Double.parseDouble(((Element) nlst.item(0))

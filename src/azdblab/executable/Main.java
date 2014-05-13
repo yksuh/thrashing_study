@@ -576,7 +576,7 @@ _logger.outputLog(line);
 		 */
 		double xactSizeMin = 0;
 		double xactSizeMax = 0;
-		double xactSizeIncr = 0;
+		int xactSizeIncr = 0;
 		/***
 		 * Exclusive Locks
 		 */

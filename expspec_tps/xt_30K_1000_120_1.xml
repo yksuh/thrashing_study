@@ -22,12 +22,10 @@
       </table>
     </tableSet>
   </tableConfiguration>
-  <dbmsBufferCacheSize min="1" max="1" increment="1"/>
+  <dbmsBufferCacheSize min="1" max="1" increment="0"/>
   <multiCoreConfiguration numberCores="1"/>
   <duration seconds="120"/>
-  <!--<xactSize min="0.00001" max="0.01" increment="10"/>--><!-- selectivity in (%)-->
-  <xactSize min="0.00001" max="0.01" increment="10"/><!-- selectivity in (%)-->
-  <!--<xLocks min="0" max="1" increment="0.25"/>--> <!-- exclusive lock ratio -->
+  <xactSize min="0.0001" max="0.01" increment="10"/><!-- selectivity in (%)-->
   <xLocks min="0" max="1" increment="0.25"/> <!-- exclusive lock ratio -->
   <terminalConfiguration numberTerminals="1000" increment="100"/><!-- for compatibility test -->
   <multiProgrammingLevel min="100" max="1000" increment="100"/>

@@ -798,16 +798,16 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 			LabShelfManager.getShelf().commit();
 //Main._logger.outputDebug(insertSQL);			
 		} catch (SQLException e) {
-			Main._logger.reportError(e.getMessage());
+//			Main._logger.reportError(e.getMessage());
 			e.printStackTrace();
 			String updateSQL = "UPDATE " + Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " " + 
 							   "SET BufferSpace = " + paramVal[2] + 
-							   " and NumCores = " + paramVal[3] + 
-							   " and BatchSzIncr = " + paramVal[4] + 
-							   " and Duration = " + paramVal[5] + 
-							   " and XactSz = " + paramVal[6] + 
-							   " and XLockRatio = " + paramVal[7] + 
-							   " and EffectiveDBSz = " + paramVal[8] +
+							   ", NumCores = " + paramVal[3] + 
+							   ",  BatchSzIncr = " + paramVal[4] + 
+							   ",  Duration = " + paramVal[5] + 
+							   ",  XactSz = " + paramVal[6] + 
+							   ",  XLockRatio = " + paramVal[7] + 
+							   ",  EffectiveDBSz = " + paramVal[8] +
 							   " WHERE BatchSetID = " + paramVal[0];
 Main._logger.outputDebug(updateSQL);			
 			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);

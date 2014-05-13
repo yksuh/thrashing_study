@@ -1399,9 +1399,9 @@ if(_clientNum % 100 == 0){
 		// insert batchset into database
 		int batchSetID = stepA(transactionSize, eXclusiveLocks, effectiveDBSize);
 		Main._logger.outputLog(String.format(
-				"Start the batchSet #%d(runID:%d,%.4f/%.2f/%.2f) analysis!",
-				batchSetID, runID, transactionSize, eXclusiveLocks,
-				effectiveDBSize));
+				"Start the batchSet #%d(runID:%d,xactSz:%.2f%%/xLcks:%d%%/effDBSz:%d%%) analysis!",
+				batchSetID, runID, transactionSize*100, eXclusiveLocks*100,
+				effectiveDBSize*100));
 
 		// make a batchset run result
 		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID);

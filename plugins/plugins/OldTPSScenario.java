@@ -521,12 +521,7 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 		return 0;
 	}
 
-	@Override
-	protected void stepB(int batchID, int MPL, double transactionSize,
-			double eXclusiveLcks, double effectiveDBSize) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 //	@Override
 	protected void stepC(int batchSetRunResID, int batchID) throws Exception {
@@ -543,6 +538,13 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 
 	@Override
 	protected void stepD() throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void stepB(double transactionSize, double eXclusiveLcks,
+			double effectiveDBSize) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

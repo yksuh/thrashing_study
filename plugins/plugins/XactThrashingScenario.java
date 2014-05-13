@@ -1705,7 +1705,11 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 		experimentSubject.flushDBMSCache();
 		Main._logger.outputLog("Finish Flushing DBMS Cache");
 		
+<<<<<<< HEAD
 		//batchRunTime = 30;
+=======
+		batchRunTime = 30;
+>>>>>>> a756371c510c5b1e0c3656df41741581638ecbf1
 		int totalXacts = 0;
 		long sumOfBatchRunElapsedTime = 0;
 		long elapsedTimeMillis = 0;

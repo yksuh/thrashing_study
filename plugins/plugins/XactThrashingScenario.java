@@ -2247,7 +2247,8 @@ if(clientNum % 100 == 0)
 				insertTransactionRunResult(clientRunResID, xactID, 0, -1, -1, -1, -1);
 				// print out run stat
 				String strStat = String.format("[numXacts: 0]");
-				Main._logger.outputLog(str + "=>" + strStat);
+if(clientID % 100 == 0)
+	Main._logger.outputLog(str + "=>" + strStat);
 				return;
 			}
 
@@ -2287,7 +2288,8 @@ if(clientNum % 100 == 0)
 					.format("[numXacts: %d, min: %d(ms), max: %d(ms), sum: %d(ms), lw: %d(ms)]",
 							numExecXacts, minXactProcTime,
 							maxXactProcTime, sumXactProcTime, sumLockWaitTime);
-			Main._logger.outputLog(str + "=>" + strStat);
+if(clientID % 100 == 0)
+	Main._logger.outputLog(str + "=>" + strStat);
 //			Main._logger.outputLog("###<End>INSERT " + str + " run result => " + strStat);
 		} // end for
 	}

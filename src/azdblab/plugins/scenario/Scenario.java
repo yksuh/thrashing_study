@@ -294,9 +294,22 @@ public abstract class Scenario extends Plugin{
 		}
 		lastPercentage = percentage;
 		
-		Run tempRun = User.getUser(userName).getNotebook(notebookName).getExperiment(
-				experimentName).getRun(startTime);
-		RunStatus rs = tempRun.getRunProgress();
+		Run tempRun = null;
+		RunStatus rs = null;
+		int i = 0;
+		do{
+			i++;
+			try{
+				tempRun = User.getUser(userName).getNotebook(notebookName).getExperiment(
+						experimentName).getRun(startTime);
+				rs = tempRun.getRunProgress();
+				break;
+			}catch(Exception ex){
+				if(i > 10)
+					return;
+			}
+		}while(true);
+		
 		if(rs.current_stage_.contains("Paused")){
 			paused = true;
 		}
@@ -304,8 +317,16 @@ public abstract class Scenario extends Plugin{
 		SimpleDateFormat sdf = new SimpleDateFormat(Constants.TIMEFORMAT);
 		String transactionTime = sdf
 				.format(new Date(System.currentTimeMillis()));
-		exp_run_.insertRunLog(transactionTime, current_status, percentage);
-		exp_run_.updateRunProgress(transactionTime, current_status, percentage);
+		
+		do{
+			try{
+				exp_run_.insertRunLog(transactionTime, current_status, percentage);
+				exp_run_.updateRunProgress(transactionTime, current_status, percentage);
+				break;
+			}catch(Exception ex){
+			}
+		}while(true);
+		
 		Main._logger.outputLog(current_status + ": " + percentage
 				+ "% is done.");
 
@@ -693,21 +714,21 @@ public abstract class Scenario extends Plugin{
 	/**
 	 * transaction size minimum, maximum, increments
 	 */
-	protected double xactSizeMin;
-	protected double xactSizeMax;
+	protected double minReadSel;
+	protected double maxReadSel;
 	protected double xactSizeIncr;
 	/**
 	 * eXclusive lock minimum, maximum, increments
 	 */
-	protected double xLocksMin;
-	protected double xLocksMax;
-	protected double xLocksIncr;
+	protected double minUpdateSel;
+	protected double maxUpdateSel;
+	protected double updateSelIncr;
 	/**
 	 * effective database minimum, maximum, increments
 	 */
-	protected double edbSizeMin;
-	protected double edbSizeMax;
-	protected double edbSizeIncr;
+	protected double minActRowPoolSz;
+	protected double maxActRowPoolSz;
+	protected double actRowPoolSzIncr;
 	/**
 	 * batch run time
 	 */
@@ -758,15 +779,15 @@ public abstract class Scenario extends Plugin{
 		/***
 		 * Transaction Size
 		 */
-		xactSizeMin = xsMin;
-		xactSizeMax = xsMax;
+		minReadSel = xsMin;
+		maxReadSel = xsMax;
 		xactSizeIncr = xsIncr;
 		/***
 		 * Exclusive Locks
 		 */
-		xLocksMin = xlcksMin;
-		xLocksMax = xlcksMax;
-		xLocksIncr = xlcksIncr;
+		minUpdateSel = xlcksMin;
+		maxUpdateSel = xlcksMax;
+		updateSelIncr = xlcksIncr;
 		/***
 		 * Terminal configuration
 		 */
@@ -776,8 +797,8 @@ public abstract class Scenario extends Plugin{
 		/***
 		 * Effective DB size
 		 */
-		edbSizeMin = edbMin;
-		edbSizeMax = edbMax;
-		edbSizeIncr = edbIncr;
+		minActRowPoolSz = edbMin;
+		maxActRowPoolSz = edbMax;
+		actRowPoolSzIncr = edbIncr;
 	}
 }

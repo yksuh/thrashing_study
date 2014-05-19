@@ -643,42 +643,42 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 		int maxTaskNum = -1;
 		// generate batchsets
 		int batchSetNumToRun = 0;
-		int totalXactSz = (int)Math.log10(xactSizeMax/xactSizeMin)+1;
-		int totalExLcks = (int)((xLocksMax-xLocksMin)/xLocksIncr)+1;
-		int totalEDBSize = (int)((edbSizeMax-edbSizeMin)/edbSizeIncr)+1;
-		int totalBatchSets = totalXactSz*totalExLcks*totalEDBSize;
+		int totalNumRealSel = (int)Math.log10(maxReadSel/minReadSel)+1;
+		int totalNumUpdateSel = (int)((maxUpdateSel-minUpdateSel)/updateSelIncr)+1;
+		int totalActiveRowPools = (int)((maxActRowPoolSz-minActRowPoolSz)/actRowPoolSzIncr)+1;
+		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
 //		double xactSz=xactSizeMin, xlcks=xLocksMin;
 		// transactio size
-		for(double xactSz=xactSizeMin;xactSz<=xactSizeMax;xactSz*=xactSizeIncr){
+		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
 //		for(double xactSz=xactSizeMin;xactSz<=xactSizeMin;xactSz*=xactSizeIncr){
 			// exclusive locks
-			for(double xlcks=xLocksMin;xlcks<=xLocksMax;xlcks+=xLocksIncr){
+			for(double currUS=minUpdateSel;currUS<=maxUpdateSel;currUS+=updateSelIncr){
 			//for(double xlcks=xLocksMin;xlcks<=xLocksMin;xlcks+=xLocksIncr){
 				// effective db size
-				for(double edbSz=edbSizeMin;edbSz<=edbSizeMax;edbSz+=edbSizeIncr){
+				for(double currARPS=minActRowPoolSz;currARPS<=maxActRowPoolSz;currARPS+=actRowPoolSzIncr){
 					batchSetNumToRun++;
 					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, edbSz: %d%%)", 
-							batchSetNumToRun, xactSz*100, (int)(xlcks*100), (int)(edbSz*100));
+							batchSetNumToRun, currRS*100, (int)(currUS*100), (int)(currARPS*100));
 					Main._logger.outputLog(str);
 					// get task number 
 					maxTaskNum = getMaxTaskNum(runID);
 					if(batchSetNumToRun <= maxTaskNum-1){
 						Main._logger.outputLog("batchSet #" + batchSetNumToRun +" studied already" );
 					}else{
-						int lastStageCnt = 1, lastStageWaitTime = Constants.WAIT_TIME;
+						int currTrialCnt = 1, currExpBackoffWaitTime = Constants.WAIT_TIME;
 					
 						// initialize experiment tables 
 						preStep();
 						
 						// analyze this batch set
 						analyzeBatchSet(runID,
-										xactSz,
-										xlcks,
-										edbSz);
+										currRS,
+										currUS,
+										currARPS);
 						
 						// insert a completed task associated with the query number
 						Main._logger.outputLog("before the insertion of the next task number");
-						while(lastStageCnt <= Constants.TRY_COUNTS){	
+						while(currTrialCnt <= Constants.TRY_COUNTS){	
 							try {
 								// record progress
 								recordRunProgress(100, String.format("Analyzed #%d BatchSet (total: %d)", batchSetNumToRun, totalBatchSets));
@@ -688,17 +688,17 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 							}catch(Exception ex){
 								ex.printStackTrace();
 								Main._logger.reportError(ex.getMessage());
-								lastStageCnt++;
-								lastStageWaitTime *= 2;
-								Main._logger.outputLog("Exponential backoff for last stage is performed for : " + lastStageWaitTime + " (ms)");
+								currTrialCnt++;
+								currExpBackoffWaitTime *= 2;
+								Main._logger.outputLog("Exponential backoff for last stage is performed for : " + currExpBackoffWaitTime + " (ms)");
 								try {
-									Thread.sleep(lastStageWaitTime);
+									Thread.sleep(currExpBackoffWaitTime);
 								} catch (InterruptedException e) {}
 							}
 						}
 						// if we fail after 10 times, then an exception is eventually made.
-						if(lastStageCnt > Constants.TRY_COUNTS) throw new Exception("JDBC in the last stage is not stable.");
-						lastStageCnt = 1; lastStageWaitTime = Constants.WAIT_TIME;
+						if(currTrialCnt > Constants.TRY_COUNTS) throw new Exception("JDBC in the last stage is not stable.");
+						currTrialCnt = 1; currExpBackoffWaitTime = Constants.WAIT_TIME;
 						Main._logger.outputLog("after the insertion  of the next task number");
 					}
 				}
@@ -799,18 +799,18 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 //Main._logger.outputDebug(insertSQL);			
 		} catch (SQLException e) {
 //			Main._logger.reportError(e.getMessage());
-			e.printStackTrace();
-			String updateSQL = "UPDATE " + Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " " + 
-							   "SET BufferSpace = " + paramVal[2] + 
-							   ", NumCores = " + paramVal[3] + 
-							   ",  BatchSzIncr = " + paramVal[4] + 
-							   ",  Duration = " + paramVal[5] + 
-							   ",  XactSz = " + paramVal[6] + 
-							   ",  XLockRatio = " + paramVal[7] + 
-							   ",  EffectiveDBSz = " + paramVal[8] +
-							   " WHERE BatchSetID = " + paramVal[0];
-Main._logger.outputDebug(updateSQL);			
-			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+//			e.printStackTrace();
+//			String updateSQL = "UPDATE " + Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " " + 
+//							   "SET BufferSpace = " + paramVal[2] + 
+//							   ", NumCores = " + paramVal[3] + 
+//							   ",  BatchSzIncr = " + paramVal[4] + 
+//							   ",  Duration = " + paramVal[5] + 
+//							   ",  XactSz = " + paramVal[6] + 
+//							   ",  XLockRatio = " + paramVal[7] + 
+//							   ",  EffectiveDBSz = " + paramVal[8] +
+//							   " WHERE BatchSetID = " + paramVal[0];
+//Main._logger.outputDebug(updateSQL);			
+//			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 		}
 	}
 
@@ -871,15 +871,15 @@ Main._logger.outputDebug(updateSQL);
 		mplMin   = bszMin;
 		mplMax   = bszMax;
 		mplIncr  = bszIncr;
-		xactSizeMin   = xactSzMin;
-		xactSizeMax   = xactSzMax;
+		minReadSel   = xactSzMin;
+		maxReadSel   = xactSzMax;
 		xactSizeIncr  = xactSzIncr;
-		xLocksMin   = xlcksMin;
-		xLocksMax   = xlcksMax;
-		xLocksIncr  = xlcksIncr;
-		edbSizeMin   = edbSzMin;
-		edbSizeMax   = edbSzMax;
-		edbSizeIncr  = edbSzIncr;
+		minUpdateSel   = xlcksMin;
+		maxUpdateSel   = xlcksMax;
+		updateSelIncr  = xlcksIncr;
+		minActRowPoolSz   = edbSzMin;
+		maxActRowPoolSz   = edbSzMax;
+		actRowPoolSzIncr  = edbSzIncr;
 	}
 	/****
 	 * Drop experiment tables for clean up

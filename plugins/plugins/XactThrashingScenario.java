@@ -133,12 +133,17 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 					// LabShelfManager.getShelf().commitlabshelf();
 					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
 							+ Constants.TABLE_BATCHSET
-							+ " MODIFY XactSz NUMBER(10, 2)";
+							+ " MODIFY bufferSpace NUMBER(10, 2)";
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 					LabShelfManager.getShelf().commitlabshelf();
 					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
 							+ Constants.TABLE_BATCHSET
-							+ " MODIFY XLockRatio NUMBER(10, 4)";
+							+ " MODIFY XactSz NUMBER(10, 4)";
+					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
+					LabShelfManager.getShelf().commitlabshelf();
+					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
+							+ Constants.TABLE_BATCHSET
+							+ " MODIFY XLockRatio NUMBER(10, 2)";
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 					LabShelfManager.getShelf().commitlabshelf();
 					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
@@ -838,20 +843,21 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 				// Main._logger.outputLog("login details: " + strConnectString +
 				// ", " + strUserName + ", " + strPassword + ", " + strdrvname);
 				Class.forName(drvName);
-//				int j = 1;
-//				while(_conn == null){
+				int j = 1;
+				while(true){
 					_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
-//					if(j++ % 10 == 0){
-//						Thread.sleep(10000);
-//						Main._logger.outputLog(j+"th connection trial...");
-//						throw new Exception("Client " + _clientID + " cannot have a connection!");
-//					}
-//				}
+					if(_conn != null) break;
+					if(j++ % 10 == 0){
+						throw new Exception("Client " + _clientNum + " cannot have a connection!");
+					}
+					Thread.sleep(10000);
+					Main._logger.outputLog(j+"th connection trial...");
+				}
 				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_UPDATABLE);
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
-				sqlex.printStackTrace();
+//				sqlex.printStackTrace();
 				// Main._logger.outputLog("login details: " + strConnStr + ", "
 				// + strUserName + ", " + strPassword);
 			}
@@ -1504,7 +1510,7 @@ Main._logger.outputLog(sql);
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			// e1.printStackTrace();
-			System.err.println(e1.getMessage());
+//			System.err.println(e1.getMessage());
 		}
 
 		// when not existing ...
@@ -1526,7 +1532,7 @@ Main._logger.outputDebug(insertSQL);
 				LabShelfManager.getShelf().commit();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				System.err.println(e.getMessage());
+//				System.err.println(e.getMessage());
 			}
 		}
 Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
@@ -1609,7 +1615,7 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 				+ " and BatchSzIncr = " + this.mplIncr + " and XactSz = "
 				+ transactionSize + " and XLockRatio = " + exclusiveLockRatio
 				+ " and EffectiveDBSz = " + effectiveDBRatio;
-//Main._logger.outputDebug(batchSetQuery);
+Main._logger.outputDebug(batchSetQuery);
 		ResultSet rs = LabShelfManager.getShelf()
 				.executeQuerySQL(batchSetQuery);
 		try {
@@ -1845,7 +1851,7 @@ try {
 				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASRESULT + " "
 				+ "WHERE BatchSetRunResID = " + batchSetRunResID
 				+ " and BatchID = " + batchID + " and IterNum = " + iterNum;
-//Main._logger.outputDebug(batchSetQuery);
+Main._logger.outputDebug(batchSetQuery);
 		ResultSet rs = LabShelfManager.getShelf()
 				.executeQuerySQL(batchSetQuery);
 		try {

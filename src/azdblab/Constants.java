@@ -857,7 +857,7 @@ public class Constants {
 	public static int NumIDs    = 5;
 	public static int NumValues = 2;
 	
-	public static int MAX_ITERS = 2;
+	public static int MAX_ITERS = 3;
 	public static final String TABLE_TPSRESULT_NAME = "AZDBLAB_XACTRUNSTAT";
 	public static final long MAX_EXECUTIONTIME = 9999999;
 	public static final String FIGURE_DIR = "work_docs/";

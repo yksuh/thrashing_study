@@ -1,6 +1,8 @@
 package azdblab.plugins.scenario;
 
 import java.sql.SQLException;
+
+import plugins.XactThrashingScenario.TransactionGenerator;
 import azdblab.Constants;
 import azdblab.exception.sanitycheck.SanityCheckException;
 import azdblab.executable.Main;
@@ -647,13 +649,14 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 		int totalNumUpdateSel = (int)((maxUpdateSel-minUpdateSel)/updateSelIncr)+1;
 		int totalActiveRowPools = (int)((maxActRowPoolSz-minActRowPoolSz)/actRowPoolSzIncr)+1;
 		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
-//		double xactSz=xactSizeMin, xlcks=xLocksMin;
-		// transactio size
-		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
-//		for(double xactSz=xactSizeMin;xactSz<=xactSizeMin;xactSz*=xactSizeIncr){
+		double currRS = 0;
+		// transaction size
+//		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
+		while(currRS <= maxReadSel){
+			if(currRS == 0) // update only
+				Constants.DEFAULT_UPDATE_SEL = maxReadSel; // set maximum selectivity for update only
 			// exclusive locks
 			for(double currUS=minUpdateSel;currUS<=maxUpdateSel;currUS+=updateSelIncr){
-			//for(double xlcks=xLocksMin;xlcks<=xLocksMin;xlcks+=xLocksIncr){
 				// effective db size
 				for(double currARPS=minActRowPoolSz;currARPS<=maxActRowPoolSz;currARPS+=actRowPoolSzIncr){
 					batchSetNumToRun++;
@@ -664,7 +667,8 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					maxTaskNum = getMaxTaskNum(runID);
 					if(batchSetNumToRun <= maxTaskNum-1){
 						Main._logger.outputLog("batchSet #" + batchSetNumToRun +" studied already" );
-					}else{
+					} // end if
+					else{
 						int currTrialCnt = 1, currExpBackoffWaitTime = Constants.WAIT_TIME;
 					
 						// initialize experiment tables 
@@ -700,10 +704,15 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 						if(currTrialCnt > Constants.TRY_COUNTS) throw new Exception("JDBC in the last stage is not stable.");
 						currTrialCnt = 1; currExpBackoffWaitTime = Constants.WAIT_TIME;
 						Main._logger.outputLog("after the insertion  of the next task number");
-					}
-				}
-			}
-		}
+					} // else
+				} // effective db 
+			} // write selectivity
+			
+			if(currRS == 0) 
+				currRS = minReadSel;
+			else
+				currRS*= xactSizeIncr;
+		} // read selectivity
 	}
 
 //	/****
@@ -842,9 +851,9 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 			populateXactTable(curr_table);
 			// (int)((double)(i + 1) / (double)myVariableTables.length * 100) =
 			// % completed
-			recordRunProgress((int) ((double) (i + 1)
-					/ (double) myXactTables.length * 100),
-					"Populating Transaction Tables");
+//			recordRunProgress((int) ((double) (i + 1)
+//					/ (double) myXactTables.length * 100),
+//					"Populating Transaction Tables");
 		}
 	}
 	/****

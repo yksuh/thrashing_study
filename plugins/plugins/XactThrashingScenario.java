@@ -355,17 +355,25 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		static String buildWHEREForSelect(Table tbl) {
 			// control lock range with the first column
 			String idxCol = "id1";
+			int numChosenRows = 0;
 			// determine the number of requested locks using transaction size
-			int numReqLocks = (int) (xactSize * (double) tbl.hy_min_card);
-			// determine end range using effective db size
+			if(xactSize == 0){
+				if(Constants.DEFAULT_UPDATE_SEL == 0){
+					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPDATE_SEL);
+					System.exit(-1);
+				}
+				numChosenRows = (int) (Constants.DEFAULT_UPDATE_SEL * (double) tbl.hy_min_card);
+			}else{
+				numChosenRows = (int) (xactSize * (double) tbl.hy_min_card);
+			}
 			int start = 0;
 			// determine end range using effective db size
 			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
 			// compute low key
 			loKey = (long) ((double) getRandomNumber(repRandForWhereInSELECT,
-					start, end - numReqLocks));
+					start, end - numChosenRows));
 			// set high key
-			hiKey = (loKey + numReqLocks);
+			hiKey = (loKey + numChosenRows);
 			String str = "WHERE " + idxCol + " >= " + loKey + " and " + idxCol
 					+ " < " + hiKey;
 			return str;
@@ -424,10 +432,13 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 		 */
 		static String buildSETForUpdate(Table tbl) {
 			Column[] cols = tbl.columns;
-			int chosenCol = getRandomNumber(repRandForSET, 0, cols.length - 1);
-			int newValue = getRandomNumber(repRandForVal, 0,
-					(int) tbl.hy_max_card);
+			int chosenCol = getRandomNumber(repRandForSET, 1, cols.length - 1);
+			int newValue = getRandomNumber(repRandForVal, 0, (int) tbl.hy_max_card);
 			String colName = cols[chosenCol].myName;
+			if(colName.contains("id1")) {
+				Main._logger.reportError(cols[chosenCol].myName + " was selected for update.");
+				System.exit(-1);
+			}
 			String str = "";
 			// if integer column, set a random value
 			if (colName.contains("val")) {
@@ -500,31 +511,45 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			int chosenTblNum = getRandomNumber(repRandForTable, 0,	myXactTables.length - 1);
 			Table tbl = myXactTables[chosenTblNum];
 
-			// build select clause
-			String strSELECT = buildSELECTForSelect(tbl);
-			// build from clause
-			String strFROM = buildFROMForSelect(tbl);
-			// build where clause
-			String strWHERE = buildWHEREForSelect(tbl);
-			// add this select statement in this transaction
-			String strSQLStmt = String.format("%s %s %s", strSELECT, strFROM,
-					strWHERE);
-			// Main._logger.outputLog(strSQLStmt);
-			transaction.add(strSQLStmt);
-			// if exclusive lock ratio is greater than zero
-			if (xLocks > 0) {
+			if(xactSize == 0){
+				// update only
 				// construct update clause
 				String strUPDATE = buildUPDATEForUpdate(tbl);
 				// construct set clause
 				String strSET = buildSETForUpdate(tbl);
 				// construct where clause
-				String strWHERE2 = buildWhereForUpdate(tbl);
+				String strWHERE = buildWHEREForSelect(tbl);
 				// add this update statement in this transaction
-				String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
-						strSET, strWHERE2);
+				String strSQLStmt = String.format("%s %s %s", strUPDATE, strSET, strWHERE);
 				// Main._logger.outputLog(strSQLStmt2);
-				transaction.add(strSQLStmt2);
+				transaction.add(strSQLStmt);
+			}else{
+				// build select clause
+				String strSELECT = buildSELECTForSelect(tbl);
+				// build from clause
+				String strFROM = buildFROMForSelect(tbl);
+				// build where clause
+				String strWHERE = buildWHEREForSelect(tbl);
+				// add this select statement in this transaction
+				String strSQLStmt = String.format("%s %s %s", strSELECT, strFROM, strWHERE);
+				// Main._logger.outputLog(strSQLStmt);
+				transaction.add(strSQLStmt);
+				// if exclusive lock ratio is greater than zero
+				if (xLocks > 0) {
+					// construct update clause
+					String strUPDATE = buildUPDATEForUpdate(tbl);
+					// construct set clause
+					String strSET = buildSETForUpdate(tbl);
+					// construct where clause
+					String strWHERE2 = buildWhereForUpdate(tbl);
+					// add this update statement in this transaction
+					String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
+							strSET, strWHERE2);
+					// Main._logger.outputLog(strSQLStmt2);
+					transaction.add(strSQLStmt2);
+				}
 			}
+			
 			// Insert this client's transaction and its statements while setting 
 			// number to ID maps
 			long xactID = insertTransaction(clientID, xactNum, transaction);
@@ -1658,8 +1683,7 @@ Main._logger.outputDebug(batchSetQuery);
 		// number of clients
 //		int numClients = MPL;
 		// set transaction size
-		TransactionGenerator
-				.setXactSize((double) (transactionSize / (double) 100));
+		TransactionGenerator.setXactSize(transactionSize);
 		// set exclusive locks
 		TransactionGenerator.setXLocks(eXclusiveLcks);
 		// set effective db size

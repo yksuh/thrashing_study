@@ -443,7 +443,7 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 			// if integer column, set a random value
 			if (colName.contains("val")) {
 				String newStrVal = RandomAlphaNumericString((int) cols[chosenCol].mySize);
-				str += "SET " + colName + " = '" + newStrVal + "' ";
+				str += "SET " + colName + " = \"" + newStrVal + "\" ";
 			} else {
 				str += "SET " + colName + " = " + newValue + " ";
 			}

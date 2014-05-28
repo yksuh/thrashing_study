@@ -190,7 +190,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_VARCHAR
 			}, 
-			new int[] {10, 10, 10, 1000}, 
+			new int[] {10, 10, 10, 2000}, 
 			new int[] { 0, 0, 0, 0}, 
 			new String[] { "ClientID", "TransactionNum"}, // unique
 			new String[] { "TransactionID"}, 	// primary key

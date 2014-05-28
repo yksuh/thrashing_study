@@ -606,7 +606,8 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 							new String[] { String.valueOf(xactID),
 									String.valueOf(clientID),
 									String.valueOf(xactNum),
-									String.valueOf(xactStr), },
+									String.valueOf(xactStr)
+							},
 							TRANSACTION.columnDataTypes);
 					LabShelfManager.getShelf().commit();
 				} catch (SQLException e) {

@@ -647,8 +647,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 		int totalNumUpdateSel = (int)((maxUpdateSel-minUpdateSel)/updateSelIncr)+1;
 		int totalActiveRowPools = (int)((maxActRowPoolSz-minActRowPoolSz)/actRowPoolSzIncr)+1;
 		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
-//		double currRS = 0;
-		double currRS = minReadSel;
+		double currRS = 0;
 		// transaction size
 //		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
 		while(currRS <= maxReadSel){

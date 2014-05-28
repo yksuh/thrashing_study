@@ -2,9 +2,7 @@ package azdblab.plugins.scenario;
 
 import java.sql.SQLException;
 
-import plugins.XactThrashingScenario.TransactionGenerator;
 import azdblab.Constants;
-import azdblab.exception.sanitycheck.SanityCheckException;
 import azdblab.executable.Main;
 import azdblab.labShelf.GeneralDBMS;
 import azdblab.labShelf.InternalTable;

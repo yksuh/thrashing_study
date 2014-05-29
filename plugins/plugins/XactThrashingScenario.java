@@ -133,11 +133,6 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 					// LabShelfManager.getShelf().commitlabshelf();
 					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
 							+ Constants.TABLE_BATCHSET
-							+ " MODIFY bufferSpace NUMBER(10, 2)";
-					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
-					LabShelfManager.getShelf().commitlabshelf();
-					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
-							+ Constants.TABLE_BATCHSET
 							+ " MODIFY XactSz NUMBER(10, 4)";
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 					LabShelfManager.getShelf().commitlabshelf();
@@ -158,6 +153,11 @@ public class XactThrashingScenario extends ScenarioBasedOnTransaction {
 							+ Constants.TABLE_PREFIX
 							+ Constants.TABLE_BATCHSETHASRESULT
 							+ " MODIFY AvgXactProcTime NUMBER(10, 2)";
+					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
+					LabShelfManager.getShelf().commitlabshelf();
+					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
+							+ Constants.TABLE_BATCHSET
+							+ " MODIFY bufferSpace NUMBER(10, 2)";
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 					LabShelfManager.getShelf().commitlabshelf();
 				}
@@ -1412,11 +1412,14 @@ if(_clientNum % 100 == 0){
 
 	/*****
 	 * Analyze a batch set
-	 * 
-	 * @param batchSetID
-	 *            batch set ID
-	 * @param transactionSize
-	 *            transaction size
+	 * @param runID
+	 *            runID
+	 * @param numCores
+	 *            # of cores
+	 * @param bufferSpace
+	 *            buffer space ratio
+	 * @param duration
+	 *            duration
 	 * @param eXclusiveLocks
 	 *            exclusive locks
 	 * @param effectiveDBSize
@@ -1426,8 +1429,14 @@ if(_clientNum % 100 == 0){
 	 * @throws Exception
 	 */
 	@Override
-	protected void analyzeBatchSet(int runID, double transactionSize,
-			double eXclusiveLocks, double effectiveDBSize) throws Exception {
+	protected void analyzeBatchSet(
+			int runID, 
+			int numCores,
+			double bufferSpace,
+			int duration,
+			double transactionSize,
+			double eXclusiveLocks, 
+			double effectiveDBSize) throws Exception {
 		// insert batchset into database
 		int batchSetID = stepA(transactionSize, eXclusiveLocks, effectiveDBSize);
 		Main._logger.outputLog(String.format(
@@ -1436,7 +1445,7 @@ if(_clientNum % 100 == 0){
 				(int)(effectiveDBSize*100)));
 
 		// make a batchset run result
-		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID);
+		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, numCores, bufferSpace, duration);
 		
 		// prepare for transaction generation
 		stepB(transactionSize, eXclusiveLocks, effectiveDBSize);
@@ -1517,7 +1526,7 @@ if(_clientNum % 100 == 0){
 	 * @param batchSetID
 	 * @return
 	 */
-	private int insertBatchSetRunResult(int runID, int batchSetID) {
+	private int insertBatchSetRunResult(int runID, int batchSetID, int numCores, double bufferSpace, int duration) {
 		Main._logger.outputLog("###<BEGIN>Make a batchsetrun record ################");
 		// get batchset run result id
 		int batchSetRunResID = -1;
@@ -1550,9 +1559,15 @@ Main._logger.outputLog(sql);
 						Constants.TABLE_PREFIX
 								+ Constants.TABLE_BATCHSETHASRESULT,
 						BATCHSETHASRESULT.columns,
-						new String[] { String.valueOf(batchSetRunResID),
+						new String[] { 
+								String.valueOf(batchSetRunResID),
 								String.valueOf(runID),
-								String.valueOf(batchSetID), null, null, },
+								String.valueOf(batchSetID), 
+								String.valueOf(numCores), 
+								String.valueOf(String.format("%.2f", bufferSpace)), 
+								String.valueOf(duration), 
+								null, 
+								null, },
 						BATCHSETHASRESULT.columnDataTypes);
 Main._logger.outputDebug(insertSQL);
 				LabShelfManager.getShelf().commit();
@@ -1638,8 +1653,9 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " "
 				+ "WHERE ExperimentID = "
 				+ this.getExperimentRun().getMyExperiment().getExperimentID()
-				+ " and BatchSzIncr = " + this.mplIncr + " and XactSz = "
-				+ transactionSize + " and XLockRatio = " + exclusiveLockRatio
+				+ " and BatchSzIncr = " + this.mplIncr 
+				+ " and XactSz = " + transactionSize 
+				+ " and XLockRatio = " + exclusiveLockRatio
 				+ " and EffectiveDBSz = " + effectiveDBRatio;
 Main._logger.outputDebug(batchSetQuery);
 		ResultSet rs = LabShelfManager.getShelf()
@@ -1664,10 +1680,10 @@ Main._logger.outputDebug(batchSetQuery);
 			paramVal[i++] = String.format("%d", batchSetID);
 			paramVal[i++] = String.format("%d", this.getExperimentRun()
 					.getMyExperiment().getExperimentID());
-			paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
-			paramVal[i++] = String.format("%d", numCores);
+//			paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
+//			paramVal[i++] = String.format("%d", numCores);
 			paramVal[i++] = String.format("%d", mplIncr);
-			paramVal[i++] = String.format("%d", batchRunTime);
+//			paramVal[i++] = String.format("%d", batchRunTime);
 			paramVal[i++] = String.format("%.4f", transactionSize);
 			paramVal[i++] = String.format("%.2f", exclusiveLockRatio);
 			paramVal[i++] = String.format("%.2f", effectiveDBRatio);

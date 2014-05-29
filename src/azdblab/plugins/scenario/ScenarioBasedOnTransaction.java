@@ -85,10 +85,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 			new String[] { 
 					"BatchSetID", 
 					"ExperimentID",		// experiment id 
-					"BufferSpace", 		// buffer space
-					"NumCores", 		// number of cores
 					"BatchSzIncr", 		// batch size increments
-					"Duration", 		// run duration
 					"XactSz", 			// # of rows for reads
 					"XLockRatio", 		// # of rows for writes
 					"EffectiveDBSz"	// effective database size (active row pool)
@@ -99,13 +96,10 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
-					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER
 			}, 
-			new int[] {10,10, 10, 10,10,10,10,10,10}, 
-			new int[] {0,0, 0, 0,0,0,0,0,0}, 
+			new int[] {10,10, 10,10,10,10}, 
+			new int[] {0,0, 0,0,0,0}, 
 			new String[] {"ExperimentID", "BatchSzIncr", "XactSz", "XLockRatio", "EffectiveDBSz"}, // unique
 			new String[] {"BatchSetID" }, 	// primary key
 			new ForeignKey[] { 
@@ -213,7 +207,7 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 			new String[] { 
 					"RunID", 
 					"TaskNumber", 
-					"TRANSACTIONTIME"
+					"TransactionTime"
 			}, 
 			new int[] { 
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
@@ -275,6 +269,9 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					"BatchSetRunResID", // batchset run result identifier
 					"RunID", 			// runID
 					"BatchSetID",		// batchset identifier
+					"NumCores", 		// number of cores
+					"BufferSpace", 		// buffer space
+					"Duration", 		// run duration
 					"AvgXactProcTime", 	// average xact processing time
 					"MaxMPL"			// maximum MPL
 			},
@@ -283,10 +280,13 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER
 			}, 
-			new int[] {10, 10, 10,10,10}, 
-			new int[] { 0, 0, 0,1,1}, 
+			new int[] {10, 10, 10,10,10,10,10,10}, 
+			new int[] { 0,  0, 0,0,0, 0,1,1}, 
 			new String[] { "BatchSetID", "RunID"}, // unique
 			new String[] { "BatchSetRunResID" }, 	// primary key
 			new ForeignKey[] { 
@@ -592,16 +592,21 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 		initializeExperimentTables();
 	}
 	
-	/*****
+	/******
 	 * Analyze a batch set
-	 * @param BatchSetID batch set ID
+	 * @param runID runID
+	 * @param numCores number of cores
+	 * @param bufferSpace buffer space ratio
+	 * @param duration duration
 	 * @param transactionSize transaction size
 	 * @param eXclusiveLocks exclusive locks
 	 * @param effectiveDBSize effective DB size
-	 * @param totalBatchSets number of batch sets
 	 * @throws Exception
 	 */
 	protected abstract void analyzeBatchSet(int runID,
+											int numCores,
+											double bufferSpace,
+											int duration,
 											double transactionSize, 
 											double eXclusiveLocks, 
 											double effectiveDBSize)  throws Exception;
@@ -674,6 +679,9 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 						
 						// analyze this batch set
 						analyzeBatchSet(runID,
+										numCores,
+										dbmsBuffCacheSizeMin, // min buffer cache
+										duration,
 										currRS,
 										currUS,
 										currARPS);
@@ -790,16 +798,24 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 						LabShelfManager.getShelf().NewInsertTuple(
 						Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET, 
 						BATCHSET.columns, 
+//						new String[] {
+//								paramVal[0], // BatchSetID
+//								paramVal[1], // experimentID
+//								paramVal[2], // DBMS Buffer Cache Size
+//								paramVal[3], // Number of Cores
+//								paramVal[4], // BatchSize Increments
+//								paramVal[5], // Batch Run Time (duration)
+//								paramVal[6], // Transaction Size (# of locks)
+//								paramVal[7], // Exclusive ratio (# of write locks)
+//								paramVal[8], // Effective DB size 
+//						},
 						new String[] {
 								paramVal[0], // BatchSetID
 								paramVal[1], // experimentID
-								paramVal[2], // DBMS Buffer Cache Size
-								paramVal[3], // Number of Cores
-								paramVal[4], // BatchSize Increments
-								paramVal[5], // Batch Run Time (duration)
-								paramVal[6], // Transaction Size (# of locks)
-								paramVal[7], // Exclusive ratio (# of write locks)
-								paramVal[8], // Effective DB size 
+								paramVal[2], // BatchSize Increments
+								paramVal[3], // Transaction Size (# of locks)
+								paramVal[4], // Exclusive ratio (# of write locks)
+								paramVal[5], // Effective DB size 
 						},
 						BATCHSET.columnDataTypes);
 			LabShelfManager.getShelf().commit();
@@ -854,40 +870,40 @@ public abstract class ScenarioBasedOnTransaction extends Scenario {
 //					"Populating Transaction Tables");
 		}
 	}
-	/****
-	 * Set parameters specified in the spec
-	 */
-	protected final void setParameters(double dbmsCacheBuffSz,
-									   int nCores,
-									   int duration,
-									   int bszMin,
-									   int bszMax,
-									   int bszIncr,
-									   double xactSzMin,
-									   double xactSzMax,
-									   double xactSzIncr,
-									   double xlcksMin,
-									   double xlcksMax,
-									   double xlcksIncr,
-									   double edbSzMin,
-									   double edbSzMax,
-									   double edbSzIncr){
-		dbmsCacheBufferSize = dbmsCacheBuffSz;
-		numCores = 	nCores;
-		batchRunTime = duration;
-		mplMin   = bszMin;
-		mplMax   = bszMax;
-		mplIncr  = bszIncr;
-		minReadSel   = xactSzMin;
-		maxReadSel   = xactSzMax;
-		xactSizeIncr  = xactSzIncr;
-		minUpdateSel   = xlcksMin;
-		maxUpdateSel   = xlcksMax;
-		updateSelIncr  = xlcksIncr;
-		minActRowPoolSz   = edbSzMin;
-		maxActRowPoolSz   = edbSzMax;
-		actRowPoolSzIncr  = edbSzIncr;
-	}
+//	/****
+//	 * Set parameters specified in the spec
+//	 */
+//	protected final void setParameters(double dbmsCacheBuffSz,
+//									   int nCores,
+//									   int duration,
+//									   int bszMin,
+//									   int bszMax,
+//									   int bszIncr,
+//									   double xactSzMin,
+//									   double xactSzMax,
+//									   double xactSzIncr,
+//									   double xlcksMin,
+//									   double xlcksMax,
+//									   double xlcksIncr,
+//									   double edbSzMin,
+//									   double edbSzMax,
+//									   double edbSzIncr){
+//		dbmsCacheBufferSize = dbmsCacheBuffSz;
+//		numCores = 	nCores;
+//		batchRunTime = duration;
+//		mplMin   = bszMin;
+//		mplMax   = bszMax;
+//		mplIncr  = bszIncr;
+//		minReadSel   = xactSzMin;
+//		maxReadSel   = xactSzMax;
+//		xactSizeIncr  = xactSzIncr;
+//		minUpdateSel   = xlcksMin;
+//		maxUpdateSel   = xlcksMax;
+//		updateSelIncr  = xlcksIncr;
+//		minActRowPoolSz   = edbSzMin;
+//		maxActRowPoolSz   = edbSzMax;
+//		actRowPoolSzIncr  = edbSzIncr;
+//	}
 	/****
 	 * Drop experiment tables for clean up
 	 */

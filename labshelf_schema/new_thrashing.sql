@@ -10,13 +10,10 @@ DROP TABLE AZDBLAB_BATCHSET CASCADE CONSTRAINTS;
 CREATE TABLE AZDBLAB_BATCHSET(
 	BatchSetID 	NUMBER(10) NOT NULL PRIMARY KEY, -- batch set identifier
 	ExperimentID	NUMBER(10) NOT NULL,   -- experiment id
-	BufferSpace 	NUMBER(10,2) NOT NULL, -- buffer space
-	NumCores	NUMBER(10) NOT NULL,   -- number of cores
 	BatchSzIncr 	NUMBER(10) NOT NULL,   -- batch size increments
-	Duration	NUMBER(10) NOT NULL,   -- session duration 
-	XactSz      	NUMBER(10,2) NOT NULL,--# of rows for reads
-	XLockRatio 	NUMBER(10,4) NOT NULL,--# of rows for updates
-	EffectiveDBSz 	NUMBER(10,2) NOT NULL,--active row pool
+	XactSz      	NUMBER(10,4) NOT NULL,--# of rows for reads (NumRowsFromSelect)
+	XLockRatio 	NUMBER(10,2) NOT NULL,--# of rows for updates (NumRowsFromUpdate)
+	EffectiveDBSz 	NUMBER(10,2) NOT NULL,--active row pool (ActiveRowPoolSz)
 	UNIQUE (ExperimentID, BatchSzIncr, XactSz, XLockRatio, EffectiveDBSz), -- as generated transactions will depend on these
 	FOREIGN KEY (ExperimentID) REFERENCES AZDBLAB_Experiment(ExperimentID) ON DELETE CASCADE
 );
@@ -47,7 +44,7 @@ CREATE TABLE AZDBLAB_TRANSACTION(
 	TransactionID NUMBER(10) NOT NULL PRIMARY KEY, -- transaction identifier
 	ClientID NUMBER(10) NOT NULL,		 -- for identifying this transaction of the defined client
 	TransactionNum NUMBER(10) NOT NULL,      -- for transaction number
-	TransactionStr VARCHAR(1000) NOT NULL,   -- for actual string 
+	TransactionStr VARCHAR(2000) NOT NULL,   -- for actual string 
 	FOREIGN KEY (ClientID) REFERENCES AZDBLAB_CLIENT(ClientID) ON DELETE CASCADE,
 	UNIQUE (ClientID, TransactionNum)
 );
@@ -77,8 +74,11 @@ CREATE TABLE AZDBLAB_COMPLETEDBATCHSETTASK(
 DROP TABLE AZDBLAB_BATCHSETHASRESULT CASCADE CONSTRAINTS;
 CREATE TABLE AZDBLAB_BATCHSETHASRESULT(
 	BatchSetRunResID NUMBER(10) NOT NULL PRIMARY KEY,
-	RunID NUMBER(10) NOT NULL,  	-- experiment run on a specific DBMS
-	BatchSetID NUMBER(10) NOT NULL, -- defined existing batchset
+	RunID 		NUMBER(10) NOT NULL,  	-- experiment run on a specific DBMS
+	BatchSetID 	NUMBER(10) NOT NULL, -- defined existing batchset
+	NumCores	NUMBER(10) NOT NULL,   -- number of cores
+	BufferSpace 	NUMBER(10,2) NOT NULL, -- buffer space
+	Duration	NUMBER(10) NOT NULL,   -- session duration 
 	AvgXactProcTime NUMBER(10,2), 	-- avg of xact processing time for all batches in this set
 	MaxMPL 		NUMBER(10), 	-- max MPL
 	UNIQUE(BatchSetID, RunID),	-- per batchset per run
@@ -95,7 +95,7 @@ CREATE TABLE AZDBLAB_BATCHHASRESULT(
 	IterNum NUMBER(10) NOT NULL, -- iteration number
 	ElapsedTime NUMBER(10) NOT NULL, -- actual elapsed tiem	
 	SumExecXacts NUMBER(10) NOT NULL, -- number of executed transactions
-	SumXactProcTime Number(10), 	 -- sum of xact elapsed time of each client
+	SumXactProcTime Number(10) NOT NULL, 	 -- sum of xact elapsed time of each client
 	UNIQUE(BatchSetRunResID, BatchID, IterNum),
 	FOREIGN KEY (BatchSetRunResID) REFERENCES AZDBLAB_BATCHSETHASRESULT(BatchSetRunResID) ON DELETE CASCADE,
 	FOREIGN KEY (BatchID) REFERENCES AZDBLAB_BATCH(BatchID) ON DELETE CASCADE
@@ -109,7 +109,7 @@ CREATE TABLE AZDBLAB_CLIENTHASRESULT(
 	ClientID NUMBER(10) NOT NULL,
 	IterNum NUMBER(10)  NOT NULL,
 	NumExecXacts NUMBER(10)  NOT NULL,
-	SumXactProcTime Number(10), -- sum of (lock wait time: elapsed time - min(elaped time))
+	SumXactProcTime Number(10) NOT NULL, 
 	UNIQUE(BatchRunResID, ClientID, IterNum), -- same as batch's IterNum
 	FOREIGN KEY (BatchRunResID) REFERENCES AZDBLAB_BATCHHASRESULT(BatchRunResID) ON DELETE CASCADE,
 	FOREIGN KEY (ClientID) REFERENCES AZDBLAB_CLIENT(ClientID) ON DELETE CASCADE
@@ -118,7 +118,7 @@ CREATE TABLE AZDBLAB_CLIENTHASRESULT(
 -- Record a transaction's result
 DROP TABLE AZDBLAB_TRANSACTIONHASRESULT CASCADE CONSTRAINTS;
 CREATE TABLE AZDBLAB_TRANSACTIONHASRESULT(
-	TransactionRunResID NUMBER(10) NOT NULL,
+	TransactionRunResID NUMBER(10) NOT NULL PRIMARY KEY,
 	ClientRunResID NUMBER(10)  NOT NULL,
 	TransactionID NUMBER(10) NOT NULL,
 	--XACTIterNum NUMBER(10) NOT NULL,

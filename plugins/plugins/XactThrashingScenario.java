@@ -156,7 +156,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 					LabShelfManager.getShelf().commitlabshelf();
 					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
-							+ Constants.TABLE_BATCHSET
+							+ Constants.TABLE_BATCHSETHASRESULT
 							+ " MODIFY bufferSpace NUMBER(10, 2)";
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 					LabShelfManager.getShelf().commitlabshelf();

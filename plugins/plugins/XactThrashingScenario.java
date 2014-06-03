@@ -26,7 +26,7 @@ import azdblab.plugins.scenario.ScenarioBasedOnBatchSet;
  */
 
 public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
-	public static final boolean refreshTable = true;
+	public static final boolean refreshTable = false;
 
 	public XactThrashingScenario(ExperimentRun expRun) {
 		super(expRun);

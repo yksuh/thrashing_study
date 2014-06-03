@@ -12,7 +12,7 @@ import azdblab.labShelf.RepeatableRandom;
 import azdblab.model.experiment.Column;
 import azdblab.model.experiment.ExperimentRun;
 import azdblab.model.experiment.Table;
-import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
+import azdblab.plugins.scenario.ScenarioBasedOnBatchSet;
 
 /**
  * We study DBMS thrashing
@@ -23,7 +23,7 @@ import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
  */
 
 //public class OldTPSScenario extends ScenarioBasedOnTransaction {
-public class OldTPSScenario extends ScenarioBasedOnTransaction {
+public class OldTPSScenario extends ScenarioBasedOnBatchSet {
 //	protected class TimeoutTerminals extends TimerTask{
 //		ArrayList<Client> clients = null; 
 //	    public TimeoutTerminals(ArrayList<Client> cls) { 

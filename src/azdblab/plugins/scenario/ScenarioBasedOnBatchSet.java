@@ -17,12 +17,12 @@ import azdblab.model.experiment.Table;
  *
  */
 
-public abstract class ScenarioBasedOnTransaction extends Scenario {
+public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	/**
 	 * @param expRun
 	 *            experiment run instance
 	 */
-	public ScenarioBasedOnTransaction(ExperimentRun expRun) {
+	public ScenarioBasedOnBatchSet(ExperimentRun expRun) {
 		super(expRun);
 	}
 	/***

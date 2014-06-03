@@ -19,7 +19,7 @@ import azdblab.model.dataDefinition.ForeignKey;
 import azdblab.model.experiment.Column;
 import azdblab.model.experiment.ExperimentRun;
 import azdblab.model.experiment.Table;
-import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
+import azdblab.plugins.scenario.ScenarioBasedOnBatchSet;
 
 /**
  * We study DBMS thrashing
@@ -29,7 +29,7 @@ import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
  * Default Setting: read committed, a single core, MPL=100
  */
 
-public class ThrashingScenario extends ScenarioBasedOnTransaction {
+public class ThrashingScenario extends ScenarioBasedOnBatchSet {
 //	protected class TimeoutTerminals extends TimerTask{
 //		ArrayList<Client> clients = null; 
 //	    public TimeoutTerminals(ArrayList<Client> cls) { 

@@ -16,7 +16,7 @@ import azdblab.labShelf.dataModel.LabShelfManager;
 import azdblab.model.experiment.Column;
 import azdblab.model.experiment.ExperimentRun;
 import azdblab.model.experiment.Table;
-import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
+import azdblab.plugins.scenario.ScenarioBasedOnBatchSet;
 
 /**
  * We study DBMS thrashing
@@ -25,8 +25,8 @@ import azdblab.plugins.scenario.ScenarioBasedOnTransaction;
  * 
  */
 
-public class XactThrashingScenario extends ScenarioBasedOnTransaction {
-	public static final boolean refreshTable = false;
+public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
+	public static final boolean refreshTable = true;
 
 	public XactThrashingScenario(ExperimentRun expRun) {
 		super(expRun);

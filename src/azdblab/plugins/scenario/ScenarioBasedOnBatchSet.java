@@ -681,7 +681,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						analyzeBatchSet(runID,
 										numCores,
 										dbmsBuffCacheSizeMin, // min buffer cache
-										duration,
+										batchRunTime,
 										currRS,
 										currUS,
 										currARPS);
@@ -710,6 +710,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						if(currTrialCnt > Constants.TRY_COUNTS) throw new Exception("JDBC in the last stage is not stable.");
 						currTrialCnt = 1; currExpBackoffWaitTime = Constants.WAIT_TIME;
 						Main._logger.outputLog("after the insertion  of the next task number");
+						
+						// reset experiment subject
+						experimentSubject.reset();
 					} // else
 				} // effective db 
 			} // write selectivity

@@ -649,19 +649,6 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 //	
 
 	@Override
-//	protected void analyzeBatchSet(int batchSetID, double transactionSize,
-//			double eXclusiveLocks, double effectiveDBSize, int totalBatchSets)
-//			throws Exception {
-//		// TODO Auto-generated method stub
-//		
-//	}
-	protected void analyzeBatchSet(int runID, double transactionSize, double eXclusiveLocks, double effectiveDBSize)
-			throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 //	protected void stepA(int batchSetID, double transactionSize,
 //			double exclusiveLockRatio, double effectiveDBRatio)
 //			throws Exception {
@@ -846,6 +833,14 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 
 	@Override
 	protected void stepB(double transactionSize, double eXclusiveLcks,
+			double effectiveDBSize) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void analyzeBatchSet(int runID, int numCores, double bufferSpace,
+			int duration, double transactionSize, double eXclusiveLocks,
 			double effectiveDBSize) throws Exception {
 		// TODO Auto-generated method stub
 		

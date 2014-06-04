@@ -740,9 +740,9 @@ public abstract class Scenario extends Plugin{
 	/**
 	 * MPL minimum, maximum, increments
 	 */
-	protected int mplMin;
-	protected int mplMax;
-	protected int mplIncr;
+	protected int minMPL;
+	protected int maxMPL;
+	protected int incrMPL;
 	
 	public void setConfigParamters(
 		double dbcszMin,
@@ -791,9 +791,9 @@ public abstract class Scenario extends Plugin{
 		/***
 		 * Terminal configuration
 		 */
-		mplMin = mlMin;
-		mplMax = mlMax;
-		mplIncr = mlIncr;
+		minMPL = mlMin;
+		maxMPL = mlMax;
+		incrMPL = mlIncr;
 		/***
 		 * Effective DB size
 		 */

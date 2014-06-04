@@ -1414,15 +1414,15 @@ if(_clientNum % 100 == 0){
 	 * Analyze a batch set
 	 * @param runID
 	 *            runID
-	 * @param numCores
+	 * @param nCores
 	 *            # of cores
-	 * @param bufferSpace
+	 * @param buffCacheSz
 	 *            buffer space ratio
 	 * @param duration
 	 *            duration
-	 * @param eXclusiveLocks
+	 * @param nRwsFrmUPT
 	 *            exclusive locks
-	 * @param effectiveDBSize
+	 * @param actvRwPlSz
 	 *            effective DB size
 	 * @param totalBatchSets
 	 *            number of batch sets
@@ -1431,29 +1431,29 @@ if(_clientNum % 100 == 0){
 	@Override
 	protected void studyBatchSet(
 			int runID, 
-			int numCores,
-			double bufferSpace,
+			int nCores,
+			double buffCacheSz,
 			int duration,
-			double transactionSize,
-			double eXclusiveLocks, 
-			double effectiveDBSize) throws Exception {
+			double nRwsFrmSLCT,
+			double nRwsFrmUPT, 
+			double actvRwPlSz) throws Exception {
 		// insert batchset into database
-		int batchSetID = stepA(transactionSize, eXclusiveLocks, effectiveDBSize);
+		int batchSetID = stepA(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz);
 		Main._logger.outputLog(String.format(
 				"Start the batchSet #%d(runID:%d,xactSz:%.2f%%/xLcks:%d%%/effDBSz:%d%%) analysis!",
-				batchSetID, runID, transactionSize*100, (int)(eXclusiveLocks*100),
-				(int)(effectiveDBSize*100)));
+				batchSetID, runID, nRwsFrmSLCT*100, (int)(nRwsFrmUPT*100),
+				(int)(actvRwPlSz*100)));
 
 		// make a batchset run result
-		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, numCores, bufferSpace, duration);
+		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, nCores, buffCacheSz, duration);
 		
 		// prepare for transaction generation
-		stepB(transactionSize, eXclusiveLocks, effectiveDBSize);
+		stepB(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz);
 				
 		// initialize and run this batch set atomically
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
-		for (int MPL = mplMin; MPL <= mplMax; MPL += mplIncr) {
+		for (int MPL = minMPL; MPL <= maxMPL; MPL += incrMPL) {
 			int batchID = insertBatch(batchSetID, MPL);
 
 			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
@@ -1483,7 +1483,7 @@ if(_clientNum % 100 == 0){
 				"Update the batchset #%d(runID:%d) analysis!", batchSetID,
 				runID));
 		// Analyze if this batchset thrashes...
-		updateBatchSetRunRecord(batchSetRunResID);
+		computeMaximumMPL(batchSetRunResID);
 	}
 
 	@Override
@@ -1502,7 +1502,7 @@ if(_clientNum % 100 == 0){
 		}
 	}
 
-	private void updateBatchSetRunRecord(int batchSetRunResID) {
+	private void computeMaximumMPL(int batchSetRunResID) {
 		int maxMPL = 0;
 		double avgXactProcTime = 0;
 		/*****
@@ -1653,7 +1653,7 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " "
 				+ "WHERE ExperimentID = "
 				+ this.getExperimentRun().getMyExperiment().getExperimentID()
-				+ " and BatchSzIncr = " + this.mplIncr 
+				+ " and BatchSzIncr = " + this.incrMPL 
 				+ " and XactSz = " + transactionSize 
 				+ " and XLockRatio = " + exclusiveLockRatio
 				+ " and EffectiveDBSz = " + effectiveDBRatio;
@@ -1682,7 +1682,7 @@ Main._logger.outputDebug(batchSetQuery);
 					.getMyExperiment().getExperimentID());
 //			paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
 //			paramVal[i++] = String.format("%d", numCores);
-			paramVal[i++] = String.format("%d", mplIncr);
+			paramVal[i++] = String.format("%d", incrMPL);
 //			paramVal[i++] = String.format("%d", batchRunTime);
 			paramVal[i++] = String.format("%.4f", transactionSize);
 			paramVal[i++] = String.format("%.2f", exclusiveLockRatio);

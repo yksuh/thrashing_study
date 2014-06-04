@@ -714,21 +714,21 @@ public abstract class Scenario extends Plugin{
 	/**
 	 * transaction size minimum, maximum, increments
 	 */
-	protected double minReadSel;
-	protected double maxReadSel;
-	protected double xactSizeIncr;
+	protected double mnNmRwsFrmSLCT;
+	protected double mxNumRowsFromSELECT;
+	protected double incrNmRwsFrmSLCT;
 	/**
 	 * eXclusive lock minimum, maximum, increments
 	 */
-	protected double minUpdateSel;
-	protected double maxUpdateSel;
-	protected double updateSelIncr;
+	protected double mnNmRwsFrmUPT;
+	protected double mxNmRwsFrmUPT;
+	protected double incrNmRwsFrmUPT;
 	/**
 	 * effective database minimum, maximum, increments
 	 */
-	protected double minActRowPoolSz;
-	protected double maxActRowPoolSz;
-	protected double actRowPoolSzIncr;
+	protected double mnActRwPlSz;
+	protected double mxActRowPlSz;
+	protected double actRwPlSzIncr;
 	/**
 	 * batch run time
 	 */
@@ -779,15 +779,15 @@ public abstract class Scenario extends Plugin{
 		/***
 		 * Transaction Size
 		 */
-		minReadSel = xsMin;
-		maxReadSel = xsMax;
-		xactSizeIncr = xsIncr;
+		mnNmRwsFrmSLCT = xsMin;
+		mxNumRowsFromSELECT = xsMax;
+		incrNmRwsFrmSLCT = xsIncr;
 		/***
 		 * Exclusive Locks
 		 */
-		minUpdateSel = xlcksMin;
-		maxUpdateSel = xlcksMax;
-		updateSelIncr = xlcksIncr;
+		mnNmRwsFrmUPT = xlcksMin;
+		mxNmRwsFrmUPT = xlcksMax;
+		incrNmRwsFrmUPT = xlcksIncr;
 		/***
 		 * Terminal configuration
 		 */
@@ -797,8 +797,8 @@ public abstract class Scenario extends Plugin{
 		/***
 		 * Effective DB size
 		 */
-		minActRowPoolSz = edbMin;
-		maxActRowPoolSz = edbMax;
-		actRowPoolSzIncr = edbIncr;
+		mnActRwPlSz = edbMin;
+		mxActRowPlSz = edbMax;
+		actRwPlSzIncr = edbIncr;
 	}
 }

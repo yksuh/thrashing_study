@@ -839,7 +839,7 @@ Main._logger.outputLog("Client " + (i+1) + " is being initialized...");
 	}
 
 	@Override
-	protected void analyzeBatchSet(int runID, int numCores, double bufferSpace,
+	protected void studyBatchSet(int runID, int numCores, double bufferSpace,
 			int duration, double transactionSize, double eXclusiveLocks,
 			double effectiveDBSize) throws Exception {
 		// TODO Auto-generated method stub

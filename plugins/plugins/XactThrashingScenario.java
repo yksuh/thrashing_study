@@ -1429,7 +1429,7 @@ if(_clientNum % 100 == 0){
 	 * @throws Exception
 	 */
 	@Override
-	protected void analyzeBatchSet(
+	protected void studyBatchSet(
 			int runID, 
 			int numCores,
 			double bufferSpace,
@@ -2236,7 +2236,7 @@ if(clientNum % 100 == 0)
 //Main._logger.outputLog(insertSQL);
 				String updateSQL = "Update " + Constants.TABLE_PREFIX
 						+ Constants.TABLE_TRANSACTIONHASRESULT + " SET "
-						+ " NumExecXacts = " + numExecXacts
+						+ " NumExecs = " + numExecXacts
 						+ ", minXactProcTime = " + minXactProcTime
 						+ ", maxXactProcTime = " + maxXactProcTime
 						+ ", sumXactProcTime = " + sumXactProcTime

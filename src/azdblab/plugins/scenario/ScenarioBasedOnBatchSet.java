@@ -593,7 +593,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	}
 	
 	/******
-	 * Analyze a batch set
+	 * Study a batch set
 	 * @param runID runID
 	 * @param numCores number of cores
 	 * @param bufferSpace buffer space ratio
@@ -603,7 +603,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	 * @param effectiveDBSize effective DB size
 	 * @throws Exception
 	 */
-	protected abstract void analyzeBatchSet(int runID,
+	protected abstract void studyBatchSet(int runID,
 											int numCores,
 											double bufferSpace,
 											int duration,
@@ -648,23 +648,23 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 		int maxTaskNum = -1;
 		// generate batchsets
 		int batchSetNumToRun = 0;
-		int totalNumRealSel = (int)Math.log10(maxReadSel/minReadSel)+1;
-		int totalNumUpdateSel = (int)((maxUpdateSel-minUpdateSel)/updateSelIncr)+1;
-		int totalActiveRowPools = (int)((maxActRowPoolSz-minActRowPoolSz)/actRowPoolSzIncr)+1;
+		int totalNumRealSel = (int)Math.log10(mxNumRowsFromSELECT/mnNmRwsFrmSLCT)+1;
+		int totalNumUpdateSel = (int)((mxNmRwsFrmUPT-mnNmRwsFrmUPT)/incrNmRwsFrmUPT)+1;
+		int totalActiveRowPools = (int)((mxActRowPlSz-mnActRwPlSz)/actRwPlSzIncr)+1;
 		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
-		double currRS = 0;
+		double dNmRwsFrmSLCT = 0;
 		// transaction size
 //		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
-		while(currRS <= maxReadSel){
-			if(currRS == 0) // update only
-				Constants.DEFAULT_UPDATE_SEL = maxReadSel; // set maximum selectivity for update only
+		while(dNmRwsFrmSLCT <= mxNumRowsFromSELECT){
+			if(dNmRwsFrmSLCT == 0) // update only
+				Constants.DEFAULT_UPDATE_SEL = mxNumRowsFromSELECT; // set maximum selectivity for update only
 			// exclusive locks
-			for(double currUS=minUpdateSel;currUS<=maxUpdateSel;currUS+=updateSelIncr){
+			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT+=incrNmRwsFrmUPT){
 				// effective db size
-				for(double currARPS=minActRowPoolSz;currARPS<=maxActRowPoolSz;currARPS+=actRowPoolSzIncr){
+				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=dActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
 					batchSetNumToRun++;
 					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, edbSz: %d%%)", 
-							batchSetNumToRun, currRS*100, (int)(currUS*100), (int)(currARPS*100));
+							batchSetNumToRun, dNmRwsFrmSLCT*100, (int)(dNmRwsFrmUPT*100), (int)(dActRowPlSz*100));
 					Main._logger.outputLog(str);
 					// get task number 
 					maxTaskNum = getMaxTaskNum(runID);
@@ -678,13 +678,13 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						preStep();
 						
 						// analyze this batch set
-						analyzeBatchSet(runID,
+						studyBatchSet(runID,
 										numCores,
 										dbmsBuffCacheSizeMin, // min buffer cache
 										batchRunTime,
-										currRS,
-										currUS,
-										currARPS);
+										dNmRwsFrmSLCT,
+										dNmRwsFrmUPT,
+										dActRowPlSz);
 						
 						// insert a completed task associated with the query number
 						Main._logger.outputLog("before the insertion of the next task number");
@@ -717,10 +717,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				} // effective db 
 			} // write selectivity
 			
-			if(currRS == 0) 
-				currRS = minReadSel;
+			if(dNmRwsFrmSLCT == 0) 
+				dNmRwsFrmSLCT = mnNmRwsFrmSLCT;
 			else
-				currRS*= xactSizeIncr;
+				dNmRwsFrmSLCT*= incrNmRwsFrmSLCT;
 		} // read selectivity
 	}
 

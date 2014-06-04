@@ -570,31 +570,31 @@ _logger.outputLog(line);
 		/***
 		 * BatchRunTime
 		 */
-		int batchRunTime = 0;
+		int sessionDuration = 0;
 		/***
 		 * Transaction Size
 		 */
-		double xactSizeMin = 0;
-		double xactSizeMax = 0;
-		int xactSizeIncr = 0;
+		double minNumRowsFromSELECT = 0;
+		double maxNumRowsFromSELECT = 0;
+		int incrNumRowsFromSELECT = 0;
 		/***
 		 * Exclusive Locks
 		 */
-		double eXclusiveLockPctMin = 0;
-		double eXclusiveLockPctMax = 0;
-		double eXclusiveLockPctIncr = 0;
+		double minNumRowsFromUPDATE = 0;
+		double maxNumRowsFromUPDATE = 0;
+		double incrNumRowsFromUPDATE = 0;
 		/***
 		 * Terminal configuration
 		 */
-		int MPLMin = 0;
-		int MPLMax = 0;
-		int MPLIncr = 0;
+		int minMPL = 0;
+		int maxMPL = 0;
+		int incrMPL = 0;
 		/***
 		 * Effective DB size
 		 */
-		double EffDBMin = 0;
-		double EffDBMax = 0;
-		double EffDBIncr = 0;
+		double minActiveRowPool = 0;
+		double maxActiveRowPool = 0;
+		double incrActiveRowPool = 0;
 		
 		// LabShelf.getShelf().printTableSchema();
 		Experiment experiment = User.getUser(lab_user_name).getNotebook(
@@ -627,19 +627,19 @@ _logger.outputLog(line);
 		dbmsBuffCacheSizeMax = experiment.getDBMSBufferCacheMax();
 		dbmsBuffCacheSizeIncr = experiment.getDBMSBufferCacheIncr();
 		numCores = experiment.getNumCores();
-		batchRunTime = experiment.getBatchRunTime();
-		xactSizeMin = experiment.getTransactionSizeMin();
-		xactSizeMax = experiment.getTransactionSizeMax();
-		xactSizeIncr = experiment.getTransactionSizeIncr();
-		eXclusiveLockPctMin = experiment.getExclusiveLockPctMin();
-		eXclusiveLockPctMax = experiment.getExclusiveLockPctMax();
-		eXclusiveLockPctIncr  = experiment.getExclusiveLockPctIncr();
-		MPLMin = experiment.getMPLMin();
-		MPLMax = experiment.getMPLMax();
-		MPLIncr  = experiment.getMPLIncr();
-		EffDBMin = experiment.getEffectiveDBMin();
-		EffDBMax = experiment.getEffectiveDBMax();
-		EffDBIncr  = experiment.getEffectiveDBIncr();	
+		sessionDuration = experiment.getBatchRunTime();
+		minNumRowsFromSELECT = experiment.getTransactionSizeMin();
+		maxNumRowsFromSELECT = experiment.getTransactionSizeMax();
+		incrNumRowsFromSELECT = experiment.getTransactionSizeIncr();
+		minNumRowsFromUPDATE = experiment.getExclusiveLockPctMin();
+		maxNumRowsFromUPDATE = experiment.getExclusiveLockPctMax();
+		incrNumRowsFromUPDATE  = experiment.getExclusiveLockPctIncr();
+		minMPL = experiment.getMPLMin();
+		maxMPL = experiment.getMPLMax();
+		incrMPL  = experiment.getMPLIncr();
+		minActiveRowPool = experiment.getEffectiveDBMin();
+		maxActiveRowPool = experiment.getEffectiveDBMax();
+		incrActiveRowPool  = experiment.getEffectiveDBIncr();	
 		/*
 		 * Logging information containing user name, notebook name, experiment
 		 * name, scenario, logging time
@@ -665,22 +665,22 @@ _logger.outputLog(line);
 		_logger.outputLog(str);
 		str = String.format("Number of Cores: %d", numCores);
 		_logger.outputLog(str);
-		str = String.format("Batch Run Time: %d", batchRunTime);
+		str = String.format("Batch Run Time: %d", sessionDuration);
 		_logger.outputLog(str);
-		str = String.format("Transaction Size: %.2f%%, x%d, %.2f%%", xactSizeMin*100, xactSizeIncr, xactSizeMax*100);
+		str = String.format("Transaction Size: %.2f%%, x%d, %.2f%%", minNumRowsFromSELECT*100, incrNumRowsFromSELECT, maxNumRowsFromSELECT*100);
 		_logger.outputLog(str);
-		str = String.format("Exclusive Lock Pct: %d%%, %d%%, %d%%", (int)(eXclusiveLockPctMin*100), (int)(eXclusiveLockPctIncr*100), (int)(eXclusiveLockPctMax*100));
+		str = String.format("Exclusive Lock Pct: %d%%, %d%%, %d%%", (int)(minNumRowsFromUPDATE*100), (int)(incrNumRowsFromUPDATE*100), (int)(maxNumRowsFromUPDATE*100));
 		_logger.outputLog(str);
-		str = String.format("Multiprogramming Level: %d, %d, %d", MPLMin, MPLIncr, MPLMax);
+		str = String.format("Multiprogramming Level: %d, %d, %d", minMPL, incrMPL, maxMPL);
 		_logger.outputLog(str);
-		str = String.format("Effective DB: %d%%, %d%%, %d%%", (int)(EffDBMin*100), (int)(EffDBIncr*100), (int)(EffDBMax*100));
+		str = String.format("Effective DB: %d%%, %d%%, %d%%", (int)(minActiveRowPool*100), (int)(incrActiveRowPool*100), (int)(maxActiveRowPool*100));
 		_logger.outputLog(str);
-		MPLMin = experiment.getMPLMin();
-		MPLMax = experiment.getMPLMax();
-		MPLIncr  = experiment.getMPLIncr();
-		EffDBMin = experiment.getEffectiveDBMin();
-		EffDBMax = experiment.getEffectiveDBMax();
-		EffDBIncr  = experiment.getEffectiveDBIncr();
+		minMPL = experiment.getMPLMin();
+		maxMPL = experiment.getMPLMax();
+		incrMPL  = experiment.getMPLIncr();
+		minActiveRowPool = experiment.getEffectiveDBMin();
+		maxActiveRowPool = experiment.getEffectiveDBMax();
+		incrActiveRowPool  = experiment.getEffectiveDBIncr();
 		_logger.outputLog("connectString: " + connectString);
 		_logger.outputLog("logging time: [" + transactionTime2 + "]");
 		_logger
@@ -862,11 +862,11 @@ _logger.outputLog(line);
 //			scen.setEffectiveDBSz(effDBSz);
 			scen.setConfigParamters(dbmsBuffCacheSizeMin, dbmsBuffCacheSizeMax, dbmsBuffCacheSizeIncr, 
 					numCores, 
-					batchRunTime, 
-					xactSizeMin, xactSizeMax, xactSizeIncr,
-					eXclusiveLockPctMin,  eXclusiveLockPctMax, eXclusiveLockPctIncr,
-					MPLMin, MPLMax, MPLIncr,
-					EffDBMin, EffDBMax, EffDBMin);
+					sessionDuration, 
+					minNumRowsFromSELECT, maxNumRowsFromSELECT, incrNumRowsFromSELECT,
+					minNumRowsFromUPDATE,  maxNumRowsFromUPDATE, incrNumRowsFromUPDATE,
+					minMPL, maxMPL, incrMPL,
+					minActiveRowPool, maxActiveRowPool, incrActiveRowPool);
 			scen.executeExperiment();
 			
 		} catch (InvalidExperimentRunException e) {

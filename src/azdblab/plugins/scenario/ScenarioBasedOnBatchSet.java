@@ -657,7 +657,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
 		while(dNmRwsFrmSLCT <= mxNumRowsFromSELECT){
 			if(dNmRwsFrmSLCT == 0) // update only
-				Constants.DEFAULT_UPDATE_SEL = mxNumRowsFromSELECT; // set maximum selectivity for update only
+				Constants.DEFAULT_UPT_ROWS = mxNumRowsFromSELECT; // set maximum selectivity for update only
 			// exclusive locks
 			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT+=incrNmRwsFrmUPT){
 				// effective db size

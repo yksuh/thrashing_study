@@ -358,11 +358,11 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			int numChosenRows = 0;
 			// determine the number of requested locks using transaction size
 			if(xactSize == 0){
-				if(Constants.DEFAULT_UPDATE_SEL == 0){
-					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPDATE_SEL);
+				if(Constants.DEFAULT_UPT_ROWS == 0){
+					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
 					System.exit(-1);
 				}
-				numChosenRows = (int) (Constants.DEFAULT_UPDATE_SEL * (double) tbl.hy_min_card);
+				numChosenRows = (int) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card);
 			}else{
 				numChosenRows = (int) (xactSize * (double) tbl.hy_min_card);
 			}
@@ -1453,7 +1453,7 @@ if(_clientNum % 100 == 0){
 		// initialize and run this batch set atomically
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
-		for (int MPL = minMPL; MPL <= maxMPL; MPL += incrMPL) {
+		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
 			int batchID = insertBatch(batchSetID, MPL);
 
 			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper

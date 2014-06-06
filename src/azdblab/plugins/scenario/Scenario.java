@@ -740,8 +740,8 @@ public abstract class Scenario extends Plugin{
 	/**
 	 * MPL minimum, maximum, increments
 	 */
-	protected int minMPL;
-	protected int maxMPL;
+	protected int smallestMPL;
+	protected int largestMPL;
 	protected int incrMPL;
 	
 	public void setConfigParamters(
@@ -791,8 +791,8 @@ public abstract class Scenario extends Plugin{
 		/***
 		 * Terminal configuration
 		 */
-		minMPL = mlMin;
-		maxMPL = mlMax;
+		smallestMPL = mlMin;
+		largestMPL = mlMax;
 		incrMPL = mlIncr;
 		/***
 		 * Effective DB size

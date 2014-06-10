@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import azdblab.Constants;
@@ -33,6 +35,30 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		// TODO Auto-generated constructor stub
 		installTables();
 	}
+	
+	  protected class BatchRunTimeOut extends TimerTask{
+	        private Statement statement;
+	        private Connection connection;
+	        public BatchRunTimeOut(Connection conn, Statement st) {
+	        	statement = st;
+	        	connection = conn;
+	        }
+
+	        public void run() {
+	          try {
+	        	  if(connection != null) {
+	        		  connection.close();
+	        		  new SQLException("Batch run timeout");
+	        	  }
+	              if(statement != null) {
+	            	  statement.cancel();
+	            	  new SQLException("Batch run timeout");
+	              }
+	          } catch (Exception ex) {
+	            	new SQLException("Batch run timeout");
+	          }
+	        }
+	      }
 
 	/****
 	 * Get tables to be installed for this thrashing study
@@ -746,6 +772,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		private String _password;
 		private boolean _timeOut;
 		private long _startTime;
+		private boolean _fail;
 
 		/****
 		 * Map of statement number to its runtime vector
@@ -1057,16 +1084,22 @@ if(_clientNum % 100 == 0){
 			// */
 			// Vector<Vector<Long>> stmtRunTimeVec = new Vector<Vector<Long>>();
 			// long minTime = -1;
-			while (true) {
-				if (_timeOut) {
-					long elapsedTime = System.currentTimeMillis()-_startTime;
-if(_clientNum % 100 == 0){
-	String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, elapsedTime, _numExecXacts);
-	Main._logger.outputLog(str);
-}
-					_timeOut = false;
-					return;
-				}
+//			while (true) {
+			long startTime = System.currentTimeMillis();
+			long runTime = 0;
+			BatchRunTimeOut brt = new BatchRunTimeOut(_conn, _stmt);
+			Timer batchRunTimer = new Timer();
+			batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
+			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
+//				if (_timeOut) {
+//					long elapsedTime = System.currentTimeMillis()-_startTime;
+//if(_clientNum % 100 == 0){
+//	String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, elapsedTime, _numExecXacts);
+//	Main._logger.outputLog(str);
+//}
+//					_timeOut = false;
+//					return;
+//				}
 				try {
 					// run time vector for each statement
 					// Vector<Long> stmtRunTimePerXactVec = new Vector<Long>();
@@ -1134,6 +1167,9 @@ if(_clientNum % 100 == 0){
 					// + "stmt run size => " + xactRunTimeVec.size()
 					// + "xact run size => " + stmtRunTimeVec.size());
 				} catch (SQLException e) {
+					if(e.getMessage().contains("timeout")){
+						break;
+					}
 					// e.printStackTrace();
 					// String msg = e.getMessage().toLowerCase();
 					// // Main._logger.outputLog("Client #"+_id+"> : " + msg);
@@ -1178,6 +1214,16 @@ if(_clientNum % 100 == 0){
 				// Main._logger.outputLog("Client #"+_id+"> # of current transactions: "
 				// + numTrans);
 				// }
+			} // while
+		
+			if(_clientNum % 100 == 0){
+				String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
+				Main._logger.outputLog(str);
+			}
+			
+			// Check if runTime surpasses batch run time
+			if((runTime/1000) > batchRunTime){
+				_fail = true;
 			}
 			// close();
 		}
@@ -1761,7 +1807,7 @@ Main._logger.outputDebug(batchSetQuery);
 		while ((elapsedTimeMillis = (System.currentTimeMillis() - startTime)) < batchRunTime * 1000) {// global timer
 			if (!runStarted){
 				for (Client c : clients) {
-					c.setStartTime(startTime);
+//					c.setStartTime(startTime);
 					c.start();
 				}
 				runStarted = true;
@@ -1774,9 +1820,12 @@ Main._logger.outputDebug(batchSetQuery);
 		if (elapsedTimeInSec > batchRunTime) {
 			runAgain = true;
 		}
+		
 		for (Client c : clients) {
 			// locally set timeOut 
 			c.setTimeOut();
+			if(c._fail)
+				runAgain = true;
 			c.terminate();
 		}
 		

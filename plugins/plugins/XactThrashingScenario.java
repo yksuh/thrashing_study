@@ -773,6 +773,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		private boolean _timeOut;
 		private long _startTime;
 		private boolean _fail;
+		private long _clientRunTime = 0;
 
 		/****
 		 * Map of statement number to its runtime vector
@@ -1224,6 +1225,9 @@ if(_clientNum % 100 == 0){
 			// Check if runTime surpasses batch run time
 			if((runTime/1000) > batchRunTime){
 				_fail = true;
+				_clientRunTime  = (runTime/1000);
+			}else{
+				_fail = false;
 			}
 			// close();
 		}
@@ -1824,8 +1828,10 @@ Main._logger.outputDebug(batchSetQuery);
 		for (Client c : clients) {
 			// locally set timeOut 
 			c.setTimeOut();
-			if(c._fail)
+			if(c._fail){
+				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), batchRunTime: %d(ms)", c._clientRunTime, batchRunTime));
 				runAgain = true;
+			}
 			c.terminate();
 		}
 		

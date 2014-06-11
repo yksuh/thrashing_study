@@ -909,6 +909,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				}
 				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_UPDATABLE);
+				_fail = false;
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
 //				sqlex.printStackTrace();
@@ -1801,6 +1802,9 @@ Main._logger.outputDebug(batchSetQuery);
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");
 		experimentSubject.flushOSCache();
 		Main._logger.outputLog("Finish Flushing OS Cache");
+		if(experimentSubject == null){
+			
+		}
 		experimentSubject.flushDBMSCache();
 		Main._logger.outputLog("Finish Flushing DBMS Cache");
 		
@@ -1823,7 +1827,7 @@ Main._logger.outputDebug(batchSetQuery);
 		boolean runAgain = false;
 		// inspect elapsed time
 		long elapsedTimeInSec = elapsedTimeMillis / 1000;
-		if (elapsedTimeInSec*1.05 > batchRunTime) {
+		if (elapsedTimeInSec > batchRunTime*1.10) {
 			runAgain = true;
 		}
 		

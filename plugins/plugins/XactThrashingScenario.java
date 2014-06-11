@@ -1224,7 +1224,7 @@ if(_clientNum % 100 == 0){
 			}
 			
 			// Check if runTime surpasses batch run time
-			if((runTime/1000) > batchRunTime){
+			if((runTime/1000)*1.05 > batchRunTime){
 				_fail = true;
 				_clientRunTime  = (runTime/1000);
 			}
@@ -1504,13 +1504,14 @@ if(_clientNum % 100 == 0){
 		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
 			int batchID = insertBatch(batchSetID, MPL);
 
-			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
+			int k = 1;
+			while(k <= Constants.MAX_ITERS){
+//			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
 				Main._logger.outputLog(String.format("<<<<<< %d(/%d) iteration start!", k, Constants.MAX_ITERS));
 				
 				// run this batch for X times
 				int retry = stepC(batchSetRunResID, batchID, MPL, k);
-				if(retry != k){
-					k--;
+				if(retry == Constants.FAILED_ITER){
 					continue;
 				}
 
@@ -1521,7 +1522,8 @@ if(_clientNum % 100 == 0){
 					Thread.sleep(Constants.THINK_TIME);
 				}catch(Exception ex){
 					ex.printStackTrace();
-				}				
+				}	
+				k++;
 			}
 			
 			// close this batch
@@ -1819,7 +1821,7 @@ Main._logger.outputDebug(batchSetQuery);
 		boolean runAgain = false;
 		// inspect elapsed time
 		long elapsedTimeInSec = elapsedTimeMillis / 1000;
-		if (elapsedTimeInSec > batchRunTime) {
+		if (elapsedTimeInSec*1.05 > batchRunTime) {
 			runAgain = true;
 		}
 		
@@ -1827,16 +1829,17 @@ Main._logger.outputDebug(batchSetQuery);
 			// locally set timeOut 
 //			c.setTimeOut();
 			if(c._fail){
-				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), batchRunTime: %d(ms)", c._clientNum, c._clientRunTime, batchRunTime));
+				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(sec), batchRunTime: %d(sec)", c._clientNum, c._clientRunTime, batchRunTime));
 				runAgain = true;
 			}
 			c.terminate();
 		}
 		
 		if(runAgain){
-			Main._logger.outputLog(String.format("Elapsed Time: %d(ms), batchRunTime: %d(ms)", elapsedTimeInSec, batchRunTime));
+			Main._logger.outputLog(String.format("Elapsed Time: %d(sec), batchRunTime: %d(sec)", elapsedTimeInSec, batchRunTime));
 			Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
-			return iterNum--; // reiteration this 
+//			return iterNum--; // reiteration this 
+			return Constants.FAILED_ITER;
 		}
 		
 		// Collect transaction run stat

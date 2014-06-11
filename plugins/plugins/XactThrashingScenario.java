@@ -1106,7 +1106,7 @@ if(_clientNum % 100 == 0){
 					// run time vector for each statement
 					// Vector<Long> stmtRunTimePerXactVec = new Vector<Long>();
 					// open a connection to an experiment subject
-					if (_stmt == null) {
+					if (_conn == null) {
 						// Main._logger.reportError("Statement is null...");
 //						while(_conn == null) {
 							// Main._logger.reportError("Connection is null...");
@@ -1116,10 +1116,12 @@ if(_clientNum % 100 == 0){
 //								break;
 //							}
 //						}
-						_stmt = _conn.createStatement(
-								ResultSet.TYPE_FORWARD_ONLY,
-								ResultSet.CONCUR_UPDATABLE);
 					}
+					if(_stmt == null)
+						_stmt = _conn.createStatement(
+							ResultSet.TYPE_FORWARD_ONLY,
+							ResultSet.CONCUR_UPDATABLE);
+					
 					_conn.setAutoCommit(false);
 					long xactStartTime = System.currentTimeMillis();
 					// run transaction

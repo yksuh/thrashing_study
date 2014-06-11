@@ -1218,13 +1218,13 @@ if(_clientNum % 100 == 0){
 				// }
 			} // while
 		
-			if(_clientNum % 100 == 0){
+			if(_clientNum % 10 == 0){
 				String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
 				Main._logger.outputLog(str);
 			}
 			
 			// Check if runTime surpasses batch run time
-			if((runTime/1000)*1.05 > batchRunTime){
+			if((double)(runTime/1000) > (double)(batchRunTime*1.10)){
 				_fail = true;
 				_clientRunTime  = (runTime/1000);
 			}

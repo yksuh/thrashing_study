@@ -1984,7 +1984,7 @@ Main._logger.outputDebug(insertSQL);
 					+ " SumXactProcTime = " + sumXactRunTime
 					+ " WHERE BatchSetRunResID = " + batchSetRunResID
 					+ " and batchID = " + batchID + " and iterNum = " + iterNum;
-Main._logger.outputLog(updateSQL);
+//Main._logger.outputLog(updateSQL);
 			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 		}
 		Main._logger.outputLog("==============================================");
@@ -2057,7 +2057,7 @@ if(clientNum % 100 == 0)
 						+ " WHERE batchRunResID = " + batchRunResID
 						+ " and clientID = " + clientID
 						+ " and iterNum = " + iterNum;
-				Main._logger.outputLog(updateSQL);
+//Main._logger.outputLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 				LabShelfManager.getShelf().commit();
 			}
@@ -2295,7 +2295,7 @@ if(clientNum % 100 == 0)
 						+ ", sumXactProcTime = " + sumXactProcTime
 						+ ", sumLockWaitTime = " + sumLockWaitTime
 						+ " WHERE TransactionRunResID = " + xactRunResID;
-				Main._logger.outputLog(updateSQL);
+//				Main._logger.outputLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 				LabShelfManager.getShelf().commit();
 			}

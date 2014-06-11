@@ -1070,6 +1070,7 @@ if(_clientNum % 100 == 0){
 			
 			// reset time out
 			_timeOut = false;
+			_fail = false;
 			int transactionNum = 0;
 			Long xactNum = new Long(transactionNum);
 			Vector<String> transactionToRun = _transactionMap.get(xactNum);
@@ -1226,10 +1227,7 @@ if(_clientNum % 100 == 0){
 			if((runTime/1000) > batchRunTime){
 				_fail = true;
 				_clientRunTime  = (runTime/1000);
-			}else{
-				_fail = false;
 			}
-			// close();
 		}
 
 		// private long getStatementID(int stmtNum) {
@@ -1516,7 +1514,7 @@ if(_clientNum % 100 == 0){
 					continue;
 				}
 
-				Main._logger.outputLog(String.format("<<<<<<<<<< Done!\n", k, Constants.MAX_ITERS));
+				Main._logger.outputLog(String.format("<<<<<<<<<< Done!\n"));
 				
 				// wait for a minute to clean up any remaining transactions
 				try{
@@ -1827,9 +1825,9 @@ Main._logger.outputDebug(batchSetQuery);
 		
 		for (Client c : clients) {
 			// locally set timeOut 
-			c.setTimeOut();
+//			c.setTimeOut();
 			if(c._fail){
-				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), batchRunTime: %d(ms)", c._clientRunTime, batchRunTime));
+				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), batchRunTime: %d(ms)", c._clientNum, c._clientRunTime, batchRunTime));
 				runAgain = true;
 			}
 			c.terminate();

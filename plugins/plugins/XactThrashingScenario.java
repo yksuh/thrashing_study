@@ -64,6 +64,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 	        	conn = cn;
 	        	startTime = sTime;
 	        	batchRunTime = brTime;
+	        	client = c;
 	        }
 
 	        public void run() {

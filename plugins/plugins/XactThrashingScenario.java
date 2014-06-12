@@ -1309,6 +1309,8 @@ if(_clientNum % 100 == 0){
 //			}
 			_clientRunStats[_clientNum].runTime = runTime;
 			_clientRunStats[_clientNum].numFinalExecXacts = _numExecXacts;
+			
+			batchRunTimer.cancel();
 		}
 
 		// private long getStatementID(int stmtNum) {

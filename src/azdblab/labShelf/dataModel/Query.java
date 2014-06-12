@@ -562,7 +562,7 @@ public class Query extends TableDefinition {
 	 * @param testNumber
 	 * @param queryNumber
 	 * @param queryexecution_number
-	 * @param runTime
+	 * @param sumOfElapsedTime
 	 * @param rootnode
 	 */
 	public long insertPlan(	int queryNumber,

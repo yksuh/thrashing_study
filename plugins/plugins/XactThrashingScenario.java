@@ -36,24 +36,68 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		installTables();
 	}
 	
-	  protected class BatchRunTimeOut extends TimerTask{
-	        private Statement statement;
-	        private Connection connection;
-	        public BatchRunTimeOut(Connection conn, Statement st) {
-	        	statement = st;
-	        	connection = conn;
+	// Collect transaction run stat
+	class XactRunStatPerClient{
+		long numXactsToHave;
+		long id;
+		long num;
+		long numExecXacts;
+		long sumOfElapsedTime;
+		long clientRunTime;
+		HashMap<Long, Long> xactNumToIDMap;
+		HashMap<Long, Vector<Long>> xactNumToRunTimeVecMap;
+		boolean valid;
+		long numExtraXacts;
+	}
+	
+	public XactRunStatPerClient[] _stats;
+	
+	protected class BatchRunTimeOut extends TimerTask{
+	        public Connection conn;
+	        public Statement stmt;
+			public Client client;
+			public long startTime;
+			public long batchRunTime;
+			
+	        public BatchRunTimeOut(Client c, Connection cn, Statement st, long sTime, long brTime) {
+	        	stmt = st;
+	        	conn = cn;
+	        	startTime = sTime;
+	        	batchRunTime = brTime;
 	        }
 
 	        public void run() {
 	          try {
-	        	  if(connection != null) {
-	        		  connection.close();
-	        		  new SQLException("Batch run timeout");
+	        	  int cNum = client.getClientNumber();
+	        	  _stats[cNum].num = cNum;
+	        	  _stats[cNum].id = client.getId();
+	        	  _stats[cNum].clientRunTime 	= System.currentTimeMillis() - startTime;
+	        	  _stats[cNum].xactNumToRunTimeVecMap = client.getXactNumToRunTimeVecMap();
+	        	  _stats[cNum].numExecXacts 	= client.getNumExecXacts();
+	        	  Vector<Long> runTimeVec = (_stats[cNum].xactNumToRunTimeVecMap.values()).iterator().next();
+	        	  if(runTimeVec.size() == _stats[cNum].numExecXacts){
+	        		  _stats[cNum].valid = true;
+	        		  _stats[cNum].numExtraXacts = 0;
+	        	  }else{
+	        		  _stats[cNum].valid = false;
+	        		  _stats[cNum].numExtraXacts = _stats[cNum].numExecXacts-(long)(runTimeVec.size());
 	        	  }
-	              if(statement != null) {
-	            	  statement.cancel();
-	            	  new SQLException("Batch run timeout");
+	        	  
+	        	  _stats[cNum].sumOfElapsedTime = client.getSumOfElapsedTime();
+	        	  _stats[cNum].xactNumToIDMap   = client.getXactNumToIDMap();
+	        	  if((long)((_stats[cNum].clientRunTime)/(long)1000) > batchRunTime){
+	        		  _stats[cNum].valid = false;
+	        	  }else{
+	        		  _stats[cNum].valid = true;
+	        	  }
+	        	  if(conn != null) {
+	        		  conn.close();
+	        		  
+	        	  }
+	              if(stmt != null) {
+	            	  stmt.cancel(); 
 	              }
+	              new SQLException("Batch run timeout");
 	          } catch (Exception ex) {
 	            	new SQLException("Batch run timeout");
 	          }
@@ -739,10 +783,10 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * Connection object
 		 */
 		private Connection _conn = null;
-		/***
-		 * Number of executed transactions
-		 */
-		private int _numExecXacts = 0;
+//		/***
+//		 * Number of measured executed transactions
+//		 */
+//		public int _numRealExecXacts = 0;
 		/****
 		 * Number of transactions that this client has For now, we use only one
 		 * transaction
@@ -763,17 +807,28 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		/****
 		 * Map of transaction number to its runtime vector
 		 */
-		private HashMap<Long, Vector<Long>> _xactNumToRunTimeVecMap = null;
-		private long _sumRunTime = 0;
+		public HashMap<Long, Vector<Long>> _xactNumToRunTimeVecMap = null;
+//		private HashMap<Long, Vector<Long>> _xactNumToRealRunTimeVecMap = null;
+		/***
+		 * Number of cumulative executed transactions
+		 */
+		public int _numExecXacts = 0;
+		/****
+		 * Sum of elapsed time
+		 */
+		public long _sumRunTime = 0;
+//		private long _sumRealRunTime = 0;
 		private Statement _stmt;
-		private String _driverName;
+//		private String _driverName;
 		private String _connStr;
 		private String _userName;
 		private String _password;
-		private boolean _timeOut;
-		private long _startTime;
-		private boolean _fail;
-		private long _clientRunTime = 0;
+//		private boolean _timeOut;
+//		private long _startTime;
+//		private boolean _fail;
+//		public long _clientRunTime = 0;
+//		private long _clientRealRunTime = 0;
+		
 
 		/****
 		 * Map of statement number to its runtime vector
@@ -781,6 +836,14 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		// private HashMap<Long, Vector<Vector<Long>>>
 		// _xactNumToStmtRunTimeVecMap = null;
 
+		public Client(Client c) {
+			_batchID = c.getBatchID();
+			_clientNum = c.getClientNumber();
+			_transactionMap = c.getTransactionMap();
+			_xactNumToIDMap = c.getXactNumToIDMap();
+			_xactNumToRunTimeVecMap = c.getXactNumToRunTimeVecMap();
+		}
+		
 		public Client(int batchID, int clientNum) {
 			_batchID = batchID;
 			_clientNum = clientNum;
@@ -788,11 +851,15 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			_xactNumToIDMap = new HashMap<Long, Long>();
 			// _stmtNumToIDMap = new HashMap<Long, Long>();
 			_xactNumToRunTimeVecMap = new HashMap<Long, Vector<Long>>();
-			_timeOut = false;
+//			_timeOut = false;
 			// _xactNumToStmtRunTimeVecMap = new HashMap<Long,
 			// Vector<Vector<Long>>>();
 		}
 
+		public HashMap<Long, Vector<String>> getTransactionMap() {
+			return _transactionMap;
+		}
+		
 		public int getBatchID() {
 			return _batchID;
 		}
@@ -890,7 +957,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// Main._logger.outputLog("login details: " + strConnStr + ", " +
 			// strUserName + ", " + strPassword);
 			try {
-				_driverName = drvName;
+//				_driverName = drvName;
 				_connStr = strConnStr;
 				_userName = strUserName;
 				_password = strPassword;
@@ -909,7 +976,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				}
 				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_UPDATABLE);
-				_fail = false;
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
 //				sqlex.printStackTrace();
@@ -1070,8 +1136,8 @@ if(_clientNum % 100 == 0){
 //				transactionToRun = _transactionMap.get(new Long(xactNum));
 			
 			// reset time out
-			_timeOut = false;
-			_fail = false;
+//			_timeOut = false;
+//			_fail = false;
 			int transactionNum = 0;
 			Long xactNum = new Long(transactionNum);
 			Vector<String> transactionToRun = _transactionMap.get(xactNum);
@@ -1090,7 +1156,9 @@ if(_clientNum % 100 == 0){
 //			while (true) {
 			long startTime = System.currentTimeMillis();
 			long runTime = 0;
-			BatchRunTimeOut brt = new BatchRunTimeOut(_conn, _stmt);
+			// conn, stmt for quickly getting out of the loop
+			// timeout thread for getting number of transactions and sumElapsedTime
+			BatchRunTimeOut brt = new BatchRunTimeOut(this, _conn, _stmt, startTime, batchRunTime);
 			Timer batchRunTimer = new Timer();
 			batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
 			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
@@ -1226,11 +1294,11 @@ if(_clientNum % 100 == 0){
 				Main._logger.outputLog(str);
 			}
 			
-			// Check if runTime surpasses batch run time
-			if((double)(runTime/1000) > (double)(batchRunTime*1.10)){
-				_fail = true;
-				_clientRunTime  = (runTime/1000);
-			}
+//			// Check if runTime surpasses batch run time
+//			if((double)(runTime/1000) > (double)(batchRunTime*1.10)){
+//				_fail = true;
+//				_clientRunTime  = (runTime/1000);
+//			}
 		}
 
 		// private long getStatementID(int stmtNum) {
@@ -1304,13 +1372,13 @@ if(_clientNum % 100 == 0){
 			return _numExecXacts;
 		}
 
-		public long getTotalRunTime() {
+		public long getSumOfElapsedTime() {
 			return _sumRunTime;
 		}
 
-		public void setStartTime(long startTime) {
-			_startTime = startTime;			
-		}
+//		public void setStartTime(long startTime) {
+//			_startTime = startTime;			
+//		}
 		
 		public void destroyed(){
 			if (this != null) {
@@ -1324,9 +1392,9 @@ if(_clientNum % 100 == 0){
 	        }
 		}
 
-		public void setTimeOut() {
-			_timeOut = true;
-		}
+//		public void setTimeOut() {
+//			_timeOut = true;
+//		}
 
 		/*****
 		 * Obtain client id
@@ -1778,7 +1846,11 @@ Main._logger.outputDebug(batchSetQuery);
 		// "Before running the batch for specified duration");
 		// timeOut = false;
 		clients = new Client[numClients];
+		// initialize transaction run stat
+		_stats = new XactRunStatPerClient[numClients];		
 		for (int i = 0; i < numClients; i++) {
+			_stats[i] = new XactRunStatPerClient();
+					
 			// assign client number
 			int clientNum = i + 1;
 			// ready for open connection
@@ -1802,9 +1874,6 @@ Main._logger.outputDebug(batchSetQuery);
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");
 		experimentSubject.flushOSCache();
 		Main._logger.outputLog("Finish Flushing OS Cache");
-		if(experimentSubject == null){
-			
-		}
 		experimentSubject.flushDBMSCache();
 		Main._logger.outputLog("Finish Flushing DBMS Cache");
 		
@@ -1824,71 +1893,79 @@ Main._logger.outputDebug(batchSetQuery);
 			}
 		}
 		
-		boolean runAgain = false;
+//		boolean runAgain = false;
 		// inspect elapsed time
-		long elapsedTimeInSec = elapsedTimeMillis / 1000;
-		if (elapsedTimeInSec > batchRunTime*1.10) {
-			runAgain = true;
-		}
+//		long elapsedTimeInSec = elapsedTimeMillis / 1000;
+//		if (elapsedTimeInSec > batchRunTime*1.10) {
+//			runAgain = true;
+//		}
 		
 		for (Client c : clients) {
 			// locally set timeOut 
 //			c.setTimeOut();
-			if(c._fail){
-				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(sec), batchRunTime: %d(sec)", c._clientNum, c._clientRunTime, batchRunTime));
-				runAgain = true;
-			}
+//			if(c._fail){
+//			if(c._numExecXacts-c._numRealExecXacts > 1){
+//				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(sec), batchRunTime: %d(sec)", 
+//						c._clientNum, 
+//						c._clientRunTime, 
+//						c._clientRealRunTime,
+//						c._numExecXacts, 
+//						c._numRealExecXacts, 
+//						batchRunTime));
+////				runAgain = true;
+//			}
 			c.terminate();
 		}
 		
-		if(runAgain){
-			Main._logger.outputLog(String.format("Elapsed Time: %d(sec), batchRunTime: %d(sec)", elapsedTimeInSec, batchRunTime));
-			Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
-//			return iterNum--; // reiteration this 
-			return Constants.FAILED_ITER;
-		}
+//		if(runAgain){
+//			Main._logger.outputLog(String.format("Elapsed Time: %d(sec), batchRunTime: %d(sec)", elapsedTimeInSec, batchRunTime));
+//			Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
+////			return iterNum--; // reiteration this 
+//			return Constants.FAILED_ITER;
+//		}
 		
-		// Collect transaction run stat
-		class XactRunStatPerClient{
-			long numXactsToHave;
-			long id;
-			long num;
-			long numExecXacts;
-			long runTime;
-			HashMap<Long, Long> xactNumToIDMap;
-			HashMap<Long, Vector<Long>> xactNumToRunTimeVecMap;
-		}
+//		XactRunStatPerClient[] stats = new XactRunStatPerClient[clients.length];
+//		int i=0;
+//		for (Client c : clients) {
+//			stats[i] 				= new XactRunStatPerClient();
+//			stats[i].numRealExecXacts 	= c.getNumExecXacts(); // timeout
+//			stats[i].sumOfElapsedTime 		= c.getSumOfElapsedTime();
+//			stats[i].xactNumToRunTimeVecMap = c.getXactNumToRunTimeVecMap();
+//			i++;
+//		}
+//		i = 0;
+//		// record number of transactions successfully executed
+//		for (Client c : clients) {
+//			stats[i].id 			= c.getClientID();
+//			stats[i].num 			= c.getClientNumber();
+//			stats[i].numXactsToHave = c.getNumXactsToHave();
+//			stats[i].xactNumToIDMap =  c.getXactNumToIDMap();
+//			totalXacts += stats[i].numRealExecXacts;
+//			sumOfBatchRunElapsedTime += stats[i].sumOfElapsedTime;
+//			i++;
+//		}
 		
-		XactRunStatPerClient[] stats = new XactRunStatPerClient[clients.length];
-		int i=0;
-		for (Client c : clients) {
-			stats[i] 				= new XactRunStatPerClient();
-			stats[i].numExecXacts 	= c.getNumExecXacts(); // timeout
-			stats[i].runTime 		= c.getTotalRunTime();
-			stats[i].xactNumToRunTimeVecMap = c.getXactNumToRunTimeVecMap();
-			i++;
-		}
-		i = 0;
-		// record number of transactions successfully executed
-		for (Client c : clients) {
-			stats[i].id 			= c.getClientID();
-			stats[i].num 			= c.getClientNumber();
-			stats[i].numXactsToHave = c.getNumXactsToHave();
-			stats[i].xactNumToIDMap =  c.getXactNumToIDMap();
-			totalXacts += stats[i].numExecXacts;
-			sumOfBatchRunElapsedTime += stats[i].runTime;
-			i++;
+		for (XactRunStatPerClient stat : _stats) {
+			if(stat.valid == false){
+				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), batchRunTime: %d(ms), # of execs: %d", 
+						stat.num, 
+						stat.clientRunTime, 
+						batchRunTime*1000,
+						stat.numExecXacts));
+			}
+			totalXacts 				 += stat.numExecXacts;
+			sumOfBatchRunElapsedTime += stat.sumOfElapsedTime;
 		}
 		
 		// insert batch run results
 		long batchRunResID = insertBatchRunResult(batchSetRunResID, batchID, iterNum, totalXacts, sumOfBatchRunElapsedTime,
 				elapsedTimeMillis);
 		// insert per-client and transaction run results
-		for (XactRunStatPerClient stat : stats) {
+		for (XactRunStatPerClient stat : _stats) {
 //String str = String.format("client %d's ", stat.id);
 //Main._logger.outputLog("###<BEGIN>INSERT " + str + " run result ################");
 //Main._logger.outputDebug("executed transactions at Client "	+ stat.num + ": " + stat.numExecXacts);
-			long clientRunResID = insertClientRunResult(batchRunResID, stat.id, stat.num, iterNum, stat.runTime, stat.numExecXacts);
+			long clientRunResID = insertClientRunResult(batchRunResID, stat.id, stat.num, iterNum, stat.sumOfElapsedTime, stat.numExecXacts);
 //Main._logger.outputLog("###<End>INSERT " + str + " run result ################");
 			
 			// insert transaction results

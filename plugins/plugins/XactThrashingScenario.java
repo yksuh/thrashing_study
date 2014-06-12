@@ -1930,26 +1930,27 @@ Main._logger.outputDebug(batchSetQuery);
 		int i=0;
 		for (Client c : clients) {
 			int cNum = c.getClientNumber();
-			if(_clientRunStats[cNum].timeOut == false 
-			|| _clientRunStats[cNum].numExecXacts != _clientRunStats[cNum].numFinalExecXacts 
-			|| (_clientRunStats[cNum].runTime/1000) > batchRunTime*1.05){
-				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), batchRunTime: %d(ms), # of execs: %d, # of final execs: %d", 
-						cNum, 
-						_clientRunStats[cNum].runTime, 
-						batchRunTime*1000,
-						_clientRunStats[cNum].numExecXacts,
-						_clientRunStats[cNum].numFinalExecXacts));
-//				if(runAgain){
-//				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
-				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));
-//				return Constants.FAILED_ITER;
-			}
 			_clientRunStats[i].id					 = c.getClientID();
 			_clientRunStats[i].numExecXacts 		 = c.getNumExecXacts(); // timeout
 			_clientRunStats[i].sumOfElapsedTime 	 = c.getSumOfElapsedTime();
 			_clientRunStats[i].numXactsToHave 		 = c.getNumXactsToHave();
 			_clientRunStats[i].xactNumToIDMap 		 =  c.getXactNumToIDMap();
 			_clientRunStats[i].xactNumToRunTimeVecMap = c.getXactNumToRunTimeVecMap();
+			if(_clientRunStats[cNum].timeOut == false 
+			|| _clientRunStats[cNum].numExecXacts != _clientRunStats[cNum].numFinalExecXacts 
+			|| (_clientRunStats[cNum].runTime/1000) > batchRunTime*1.05){
+				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), " +
+						"batchRunTime: %d(ms), # of execs: %d, # of final execs: %d", 
+						cNum, 
+						_clientRunStats[cNum].runTime, 
+						batchRunTime*1000,
+						_clientRunStats[cNum].numExecXacts,
+						_clientRunStats[cNum].numFinalExecXacts));
+//						if(runAgain){
+//						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
+				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));
+//						return Constants.FAILED_ITER;
+			}
 			totalXacts				 += _clientRunStats[i].numExecXacts;
 			sumOfBatchRunElapsedTime += _clientRunStats[i].sumOfElapsedTime;
 			i++;

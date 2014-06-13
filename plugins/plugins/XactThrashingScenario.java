@@ -1931,6 +1931,7 @@ Main._logger.outputDebug(batchSetQuery);
 //		XactRunStatPerClient[] stats = new XactRunStatPerClient[clients.length];
 		for (Client c : clients) {
 			int cNum = c.getClientNumber();
+			Main._logger.outputLog(String.format("Client #%d stat result", cNum));
 			_clientRunStats[cNum].id					 = c.getClientID();
 			_clientRunStats[cNum].numExecXacts 		 = c.getNumExecXacts(); // timeout
 			_clientRunStats[cNum].sumOfElapsedTime 	 = c.getSumOfElapsedTime();
@@ -1987,8 +1988,8 @@ Main._logger.outputDebug(batchSetQuery);
 				elapsedTimeMillis);
 		// insert per-client and transaction run results
 		for (XactRunStatPerClient stat : _clientRunStats) {
-//String str = String.format("client %d's ", stat.id);
-//Main._logger.outputLog("###<BEGIN>INSERT " + str + " run result ################");
+String str = String.format("client %d's ", stat.id);
+Main._logger.outputLog("###<BEGIN>INSERT " + str + " run result ################");
 //Main._logger.outputDebug("executed transactions at Client "	+ stat.num + ": " + stat.numExecXacts);
 			long clientRunResID = insertClientRunResult(batchRunResID, stat.id, stat.num, iterNum, stat.sumOfElapsedTime, stat.numExecXacts);
 //Main._logger.outputLog("###<End>INSERT " + str + " run result ################");

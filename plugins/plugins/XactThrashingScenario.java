@@ -1942,12 +1942,12 @@ Main._logger.outputDebug(batchSetQuery);
 			|| _clientRunStats[cNum].numExecXacts != _clientRunStats[cNum].numFinalExecXacts 
 			|| (_clientRunStats[cNum].runTime/1000) > batchRunTime*1.05){
 				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), " +
-						"batchRunTime: %d(ms), # of execs: %d, # of final execs: %d", 
+						"batchRunTime: %d(ms), # of execs: %d, # of final execs: %d, timeOut: %d", 
 						cNum, 
 						_clientRunStats[cNum].runTime, 
 						batchRunTime*1000,
 						_clientRunStats[cNum].numExecXacts,
-						_clientRunStats[cNum].numFinalExecXacts));
+						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
 //						if(runAgain){
 //						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
 				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));
@@ -1986,13 +1986,16 @@ Main._logger.outputDebug(batchSetQuery);
 		// insert batch run results
 		long batchRunResID = insertBatchRunResult(batchSetRunResID, batchID, iterNum, totalXacts, sumOfBatchRunElapsedTime,
 				elapsedTimeMillis);
+		Main._logger.outputLog("batch run result: "+batchRunResID);
 		// insert per-client and transaction run results
-		for (XactRunStatPerClient stat : _clientRunStats) {
+//		for (XactRunStatPerClient stat : _clientRunStats) {
+		for (int i=1;i<= clients.length; i++) {	
+			XactRunStatPerClient stat = _clientRunStats[i];
 String str = String.format("client %d's ", stat.id);
 Main._logger.outputLog("###<BEGIN>INSERT " + str + " run result ################");
-//Main._logger.outputDebug("executed transactions at Client "	+ stat.num + ": " + stat.numExecXacts);
+Main._logger.outputDebug("executed transactions at Client "	+ stat.num + ": " + stat.numExecXacts);
 			long clientRunResID = insertClientRunResult(batchRunResID, stat.id, stat.num, iterNum, stat.sumOfElapsedTime, stat.numExecXacts);
-//Main._logger.outputLog("###<End>INSERT " + str + " run result ################");
+Main._logger.outputLog("###<End>INSERT " + str + " run result ################");
 			
 			// insert transaction results
 			computeAndInsertXactRunStat(clientRunResID, 		// client run result id

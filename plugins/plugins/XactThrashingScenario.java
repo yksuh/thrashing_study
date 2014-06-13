@@ -1956,7 +1956,8 @@ Main._logger.outputDebug(batchSetQuery);
 						_clientRunStats[cNum].runTime, 
 						batchRunTime*1000,
 						_clientRunStats[cNum].numExecXacts,
-						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
+//						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
+						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 1 : 0));
 //						if(runAgain){
 //						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
 //				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));

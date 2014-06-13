@@ -5,14 +5,14 @@
 	<target name="compile">
 		<echo>Compiling AZDBLAB classes </echo>
 		<mkdir dir="dist" />
-		<javac srcdir="src" includeantruntime="false" executable="/javac" destdir="dist" compiler="javac1.6">
+		<javac srcdir="src" includeantruntime="false" executable="/javac" destdir="dist" debug="on" compiler="javac1.6">
 			<classpath>
 				<pathelement location="dist" />
 				<pathelement location="libs/**" />
 			</classpath>
 			<classpath refid="classpath.lib"/>
 		</javac>
-		<javac srcdir="plugins" includeantruntime="false" executable="/javac" destdir="dist" compiler="javac1.6" excludes="plugins/unit_testing/*.* plugins/expired/*.*">
+		<javac srcdir="plugins" includeantruntime="false" executable="/javac" destdir="dist" debug="on" compiler="javac1.6" excludes="plugins/unit_testing/*.* plugins/expired/*.*">
 			<classpath>
 				<pathelement location="libs/**" />
 				<pathelement location="dist" />

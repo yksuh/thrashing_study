@@ -1297,7 +1297,7 @@ if(_clientNum % 100 == 0){
 				// }
 			} // while
 		
-			if(_clientNum % 10 == 0){
+			if(_clientNum % 50 == 0){
 				String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
 				Main._logger.outputLog(str);
 			}

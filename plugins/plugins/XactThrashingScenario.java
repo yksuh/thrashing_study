@@ -1950,18 +1950,20 @@ Main._logger.outputDebug(batchSetQuery);
 			if(_clientRunStats[cNum].timeOut == false 
 			|| _clientRunStats[cNum].numExecXacts != _clientRunStats[cNum].numFinalExecXacts 
 			|| (_clientRunStats[cNum].runTime/1000) > batchRunTime*1.05){
-				Main._logger.outputLog(String.format("Bad Client #%d => ClientRunTime: %d(ms), " +
-						"batchRunTime: %d(ms), # of execs: %d, # of final execs: %d, timeOut: %d", 
-						cNum, 
-						_clientRunStats[cNum].runTime, 
-						batchRunTime*1000,
-						_clientRunStats[cNum].numExecXacts,
-//						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
-						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 1 : 0));
-//						if(runAgain){
-//						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
-//				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));
-//						return Constants.FAILED_ITER;
+				if(cNum % 25 == 0){
+					Main._logger.outputLog(String.format("Bad Client #%d => ClientRunTime: %d(ms), " +
+							"batchRunTime: %d(ms), # of execs: %d, # of final execs: %d, timeOut: %d", 
+							cNum, 
+							_clientRunStats[cNum].runTime, 
+							batchRunTime*1000,
+							_clientRunStats[cNum].numExecXacts,
+	//						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
+							_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 1 : 0));
+	//						if(runAgain){
+	//						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
+	//				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));
+	//						return Constants.FAILED_ITER;
+				}
 			}
 			totalXacts				 += _clientRunStats[cNum].numExecXacts;
 			sumOfBatchRunElapsedTime += _clientRunStats[cNum].sumOfElapsedTime;

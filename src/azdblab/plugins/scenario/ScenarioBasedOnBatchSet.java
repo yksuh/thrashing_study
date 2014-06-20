@@ -648,7 +648,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 		int maxTaskNum = -1;
 		// generate batchsets
 		int batchSetNumToRun = 0;
-		int totalNumRealSel = (int)Math.log10(mxNumRowsFromSELECT/mnNmRwsFrmSLCT)+1;
+		int totalNumRealSel = (int)Math.log10(mxNumRowsFromSELECT/mnNmRwsFrmSLCT)+1+1; //The last 1 for update only.
 		int totalNumUpdateSel = (int)((mxNmRwsFrmUPT-mnNmRwsFrmUPT)/incrNmRwsFrmUPT)+1;
 		int totalActiveRowPools = (int)((mxActRowPlSz-mnActRwPlSz)/actRwPlSzIncr)+1;
 		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;

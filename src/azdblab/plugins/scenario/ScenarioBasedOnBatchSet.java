@@ -661,7 +661,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 			// exclusive locks
 			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT+=incrNmRwsFrmUPT){
 				// effective db size
-				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=dActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
+				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
 					batchSetNumToRun++;
 					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, edbSz: %d%%)", 
 							batchSetNumToRun, dNmRwsFrmSLCT*100, (int)(dNmRwsFrmUPT*100), (int)(dActRowPlSz*100));

@@ -2057,11 +2057,12 @@ try {
 } catch (Exception ex) {
 	ex.printStackTrace();
 }
-		System.out.format(
+		String tpsResult = String.format(
 				"============== <BatchSet(%d)-MPL(%d)> TPS RESULTS (%d) =====================\n",
 				batchSetID,
 				MPL,
 				iterNum);
+		Main._logger.outputLog(tpsResult);
 		Main._logger.outputLog("Time: " + batchRunTimeMillis + " ms");
 		Main._logger.outputLog("Total transactions: " + totalXacts);
 		Main._logger.outputLog("Transactions per second: "	+ String.format("%.2f", tps));

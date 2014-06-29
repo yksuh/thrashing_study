@@ -660,6 +660,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				Constants.DEFAULT_UPT_ROWS = mxNumRowsFromSELECT; // set maximum selectivity for update only
 			// exclusive locks
 			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT+=incrNmRwsFrmUPT){
+				// skip this
+				if(dNmRwsFrmSLCT == 0 && dNmRwsFrmUPT == 0){
+					continue;
+				}
 				// effective db size
 				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
 					batchSetNumToRun++;

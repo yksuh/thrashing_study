@@ -69,7 +69,7 @@ public class ExperimentSubjectPluginManager {
 				String version_tag = myPlugins.get(i).pluginFileName.substring(
 						myPlugins.get(i).pluginFileName.indexOf("_") + 1,
 						myPlugins.get(i).pluginFileName.indexOf("."));
-				System.out.println(myPlugins.get(i).pluginFileName);
+//				System.out.println(myPlugins.get(i).pluginFileName);
 //				Method method = null;
 //				try {
 //					Class[] params = new Class[0];
@@ -100,8 +100,9 @@ public class ExperimentSubjectPluginManager {
 				arglist[3] = strMachineName;
 				declarePlugin(subjectName, (ExperimentSubject) constructor
 						.newInstance(arglist));
-				System.out.println(strDbmsName + ":" + subjectName + "/");// + subject.getDBMSName());
-				
+				if(subjectName.toLowerCase().contains(strDbmsName.toLowerCase())){
+					System.out.println(strDbmsName + ":" + subjectName + "/");// + subject.getDBMSName());
+				}
 			}
 			//
 			ExperimentSubject expsubject = null;

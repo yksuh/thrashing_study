@@ -1,4 +1,85 @@
-select runID, batchSetID, MPL, numExecXacts, round(proctime, 2), tps
+
+
+absr.version,	    -- labshelf version
+absr.experimentid,
+absr.experimentname,
+absr.dbms,
+absr.runid,
+absr.batchSetID,
+absr.numCores,
+absr.bufferSpace,
+absr.duration as session_duration,
+bs.XACTSZ,
+bs.XLOCKRATIO,
+bs.EFFECTIVEDBSZ,
+s3.avgProcTime,
+s3.maxMPL
+
+select version as ver,
+       experimentname as expName,
+       dbms,
+       runID,
+       numCores as nCores,
+       bufferSpace as bs,
+       session_duration as brLen,
+       (xactsz*100) as rPct,
+       (XLOCKRATIO*100) as uPct,
+       (effectiveDBSz*100) as hsr,
+       avgProcTime as pt,
+       maxMPL
+from analysis_s4
+order by dbms, runID, batchsetID
+        
+
+
+-- How to represent no thrashing?
+-- Complete the thrashing condition by checking the highest TPS at the thrashing point still lower than any other MPL
+
+-- Collect transactions in a batchset
+-- Analysis_BatchSet:  Analysis_BatchSet
+DROP TABLE Analysis_BatchSet CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_BatchSet  AS
+	SELECT  bs.experimentid,
+		ex.experimentname,
+		bs.batchSetID,
+		b.MPL,
+		c.clientnum,
+		t.transactionnum,
+		t.transactionstr
+	FROM AZDBLab_Experiment ex,
+	     AZDBLab_BatchSet bs,
+	     AZDBLab_Batch b,
+	     AZDBLab_Client c,
+	     AZDBLab_Transaction t
+	WHERE ex.experimentid = bs.experimentid AND
+	      bs.batchsetID   = b.batchSetID AND 
+	      b.batchID = c.batchID AND 
+	      c.clientid = t.clientID AND
+	      MPL = 100 AND
+	      batchSetID = 1
+	order by experimentid, batchsetID, MPL, clientnum, transactionnum;
+ALTER TABLE Analysis_BatchSet  ADD PRIMARY KEY (experimentid, batchSetID, MPL, clientnum, transactionnum);
+
+
+
+
+delete from azdblab_experiment
+where experimentid IN
+(SELECT ex.experimentid
+FROM AZDBLab_Notebook nb,
+     AZDBLab_Experiment ex
+WHERE nb.userName = ex.username
+  and nb.notebookname = ex.notebookname
+  and nb.notebookname = 'PhDThesis'
+  and ex.experimentname like 'xt-%');
+
+select dbms,
+       runid,
+       batchSetID
+from Analysis_S4 
+order by dbms, runid, batchsetID
+
+select runID, batchSetID, MPL, numExecXacts, round(proctime, 2) as pt, tps
 from analysis_s0_dbr
 order by runID, batchSetID, MPL asc
 

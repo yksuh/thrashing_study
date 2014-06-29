@@ -32,7 +32,7 @@ DROP TABLE Analysis_Runs CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_Runs AS
 	SELECT runid 
 	FROM AZDBLab_ExperimentRun
-	WHERE runid IN (549,551,552) 
+	WHERE runid IN (609,610,611) 
 	ORDER BY runid;
 ALTER TABLE Analysis_Runs ADD PRIMARY KEY (runid);
 
@@ -104,7 +104,18 @@ CREATE TABLE Analysis_S0_DBR AS
 	FROM Analysis_S0_ABR abr
 	GROUP BY BatchSetID, runid, dbms, batchSzIncr, MPL
 	ORDER BY BatchSetID, runid, dbms, batchSzIncr, MPL asc;
-ALTER TABLE Analysis_S0_DBR ADD PRIMARY KEY (batchSetID, runID, dbms, MPL);
+ALTER TABLE Analysis_S0_DBR ADD PRIMARY KEY (batchSetID, runID, MPL);
+
+-- Collect the last MPL tried
+-- Analysis_S0_MPLEnd:  Analysis_Step0_MPLEnd
+DROP TABLE Analysis_S0_MPLEnd CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S0_MPLEnd  AS
+	SELECT batchSetID, 	  -- batchSetID
+	       runid,   	  -- runID    (key)
+	       max(MPL+batchSzIncr) as endMPL -- MPL
+	FROM Analysis_S0_ABR
+	GROUP BY BatchSetID, runid;
+ALTER TABLE Analysis_S0_MPLEnd ADD PRIMARY KEY (batchSetID, runID);
 
 -- Prepare for analysis data
 -- Analysis_S0: Analysis_Step0
@@ -122,7 +133,7 @@ CREATE TABLE Analysis_S0  AS
 		bs.XACTSZ*100 as readRowPct,
 		bs.XLOCKRATIO*100 as updateRowPct,
 		bs.EFFECTIVEDBSZ,
-		absr.MPL,
+		dbr.MPL,
 		dbr.numExecXacts,
 		dbr.procTime,
 		dbr.tps
@@ -130,10 +141,10 @@ CREATE TABLE Analysis_S0  AS
 	     AZDBLab_BatchSet bs,
 	     Analysis_S0_DBR dbr
 	WHERE absr.batchsetID = bs.batchsetID AND
-	      absr.runID      = s3.runID AND 
-	      absr.batchSetID = s3.batchSetID;
-ALTER TABLE Analysis_S4  ADD PRIMARY KEY (runID, batchSetID);
-
+	      absr.batchsetID = dbr.batchsetID AND
+	      absr.runID      = dbr.runID
+	Order by batchSetID, runID, MPL;
+ALTER TABLE Analysis_S0 ADD PRIMARY KEY (batchSetID, runID, MPL);
 
 -- Get the average values on # of executed xacts and processing time
 -- Analysis_S0_DBR:  Analysis_S0_Derived_Batch_Runs
@@ -157,45 +168,89 @@ CREATE TABLE Analysis_S2_I  AS
 	SELECT  prev.batchSetID,
 		prev.runID,
 		prev.dbms,
-	        prev.MPL as thrashingPoint,
-		prev.tps
+	        prev.MPL
 	FROM Analysis_S0_DBR prev,
 	     Analysis_S0_DBR next
         WHERE prev.runID      = next.runID
 	  and prev.batchSetID = next.batchSetID
 	  and prev.MPL 	      = next.MPL-next.batchSzIncr
-	  and prev.tps > 1.1*next.tps 
+	  and prev.tps > 1.2*next.tps 
 	  and prev.tps > (SELECT max(TPS)
-			  FROM Analysis_S0_DBR 
-			  WHERE next.MPL < MPL);
-ALTER TABLE Analysis_S2_I ADD PRIMARY KEY (batchSetID, runID);
+			  FROM Analysis_S0_DBR t0
+			  WHERE t0.runID = next.runID
+			   AND t0.batchsetID = next.batchSetID
+			   AND t0.MPL > next.MPL);
+ALTER TABLE Analysis_S2_I ADD PRIMARY KEY (batchSetID, runID, MPL);
 
--- Find the maximum MPL in a batchset
+-- Find the minimum MPL in a batchset
+-- Paradoxically, this minimum MPL gets treated as the maximum MPL tolerated by a DBMS.
 -- Analysis_S2_II:  Analysis_Step2_II
 DROP TABLE Analysis_S2_II CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_S2_II  AS
 	SELECT  batchSetID,
 		runID,
 		dbms,
-		max(thrashingPoint) as maxMPL
+		min(MPL) as maxMPL
 	FROM Analysis_S2_I s2i
 	GROUP BY batchSetID, runID, dbms;
 ALTER TABLE Analysis_S2_II ADD PRIMARY KEY (batchSetID, runID);
 
--- Combine the derived values
--- Analysis_S3:  Analysis_Step3
-DROP TABLE Analysis_S3 CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S3  AS
+-- Step3: Determine the maximum MPL in each batchset
+
+-- Find a batchset that encountered thrashing
+-- Analysis_S3_I:  Analysis_Step3_I
+DROP TABLE Analysis_S3_I CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S3_I  AS
 	SELECT  s1i.batchSetID,
 		s1i.runID,
-		s1i.dbms,
-		s1i.avgProcTime,
 		s2ii.maxMPL
 	FROM Analysis_S1_I s1i,
 	     Analysis_S2_II s2ii
 	WHERE s1i.runID = s2ii.runID AND 
 	      s1i.batchSetID = s2ii.batchSetID;
-ALTER TABLE Analysis_S3  ADD PRIMARY KEY (batchSetID, runID);
+ALTER TABLE Analysis_S3_I  ADD PRIMARY KEY (batchSetID, runID);
+
+-- Find a batchset that showed no thrashing
+-- Analysis_S3_II:  Analysis_Step3_II
+DROP TABLE Analysis_S3_II CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S3_II  AS
+	SELECT  t0.batchSetID,
+		t0.runID,
+		--s1i.dbms,
+		--s1i.avgProcTime,
+		t3.endMPL as maxMPL
+	FROM
+		(SELECT  t1.batchSetID,
+			 t1.runID
+		FROM Analysis_S1_I t1
+		MINUS
+		SELECT  t2.batchSetID,
+			t2.runID
+		FROM Analysis_S2_II t2) t0, -- Batchsets no thrashing
+		Analysis_S0_MPLEnd t3
+	WHERE t0.batchSetID = t3.batchSetID
+	  AND t0.runID = t3.runID;
+ALTER TABLE Analysis_S3_II ADD PRIMARY KEY (batchSetID, runID);
+
+-- Gather batchsets with/without thrashing 
+-- Analysis_S3_III:  Analysis_Step3_II
+DROP TABLE Analysis_S3_III CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S3_III  AS
+	SELECT  t0.batchSetID,
+		t0.runID,
+		t1.dbms,
+		t1.avgProcTime,
+		t0.maxMPL
+	FROM	
+		(SELECT *
+		 FROM Analysis_S3_I
+		 UNION
+		 SELECT *
+		 FROM Analysis_S3_II) t0,
+		Analysis_S1_I t1
+	WHERE t0.batchSetID = t1.batchSetID
+	  AND t0.runID	    = t1.runID;
+ALTER TABLE Analysis_S3_III ADD PRIMARY KEY (batchSetID, runID);
 
 -- Generate final table
 -- Analysis_S4:  Analysis_Step4
@@ -218,13 +273,8 @@ CREATE TABLE Analysis_S4  AS
 		s3.maxMPL
 	FROM Analysis_S0_ABSR absr,
 	     AZDBLab_BatchSet bs,
-	     Analysis_S3 s3
+	     Analysis_S3_III s3
 	WHERE absr.batchsetID = bs.batchsetID AND
 	      absr.runID      = s3.runID AND 
 	      absr.batchSetID = s3.batchSetID;
 ALTER TABLE Analysis_S4  ADD PRIMARY KEY (runID, batchSetID);
-
--- How to represent no thrashing?
--- Complete the thrashing condition by checking the highest TPS at the thrashing point still lower than any other MPL
-
-

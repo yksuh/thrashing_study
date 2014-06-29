@@ -2058,7 +2058,7 @@ try {
 	ex.printStackTrace();
 }
 		String tpsResult = String.format(
-				"============== <BatchSet(%d)-MPL(%d)> TPS RESULTS (%d) =====================\n",
+				"============== <BatchSet(%d)-MPL(%d)> TPS RESULTS (%d) =====================",
 				batchSetID,
 				MPL,
 				iterNum);

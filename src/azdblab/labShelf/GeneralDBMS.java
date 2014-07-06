@@ -175,7 +175,7 @@ public abstract class GeneralDBMS extends Plugin{
 		do {
 			try{
 				String strdrvname = getDBMSDriverClassName();
-				Main._logger.outputLog("login details: " + strConnectString +  ", " +  strUserName + ", " + strPassword + ", " + strdrvname);
+				// Main._logger.outputLog("login details: " + strConnectString +  ", " +  strUserName + ", " + strPassword + ", " + strdrvname);
 				Class.forName(strdrvname);
 				_connection = DriverManager.getConnection(strConnectString,
 						strUserName, strPassword);
@@ -189,7 +189,7 @@ public abstract class GeneralDBMS extends Plugin{
 				isOpened = true;
 				return;
 			} catch (SQLException sqlex) {
-				sqlex.printStackTrace();
+				//sqlex.printStackTrace();
 				isOpened = false;
 //				Main._logger.outputLog("login details: " + strConnectString + ", " + strUserName + ", " + strPassword);
 			} catch (ClassNotFoundException e) {

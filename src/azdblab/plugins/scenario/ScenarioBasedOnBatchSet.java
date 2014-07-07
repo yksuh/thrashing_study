@@ -3,6 +3,8 @@ package azdblab.plugins.scenario;
 import java.sql.SQLException;
 
 import azdblab.Constants;
+import azdblab.exception.PausedExecutor.PausedExecutorException;
+import azdblab.exception.PausedRun.PausedRunException;
 import azdblab.executable.Main;
 import azdblab.labShelf.GeneralDBMS;
 import azdblab.labShelf.InternalTable;
@@ -676,10 +678,34 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						Main._logger.outputLog("batchSet #" + batchSetNumToRun +" studied already" );
 					} // end if
 					else{
+						boolean pausedExecutorByUserRequest = false;
+						boolean pausedRunByUserRequest = false;
+						
+						// check if this run has been paused 
+						if (checkToBePaused()){
+							pausedRunByUserRequest = true;
+						}
+						
+						// check if this executor has been paused 
+						if (checkExecutorOnPause()) {
+							pausedExecutorByUserRequest = true;
+						}
+						
+						// if the pause by user request took place, then an exception is thrown.
+						if(pausedRunByUserRequest || pausedExecutorByUserRequest){
+							Main._logger.outputLog("paused by user request !!!");
+							if(pausedRunByUserRequest){
+								throw new PausedRunException("Run paused by user request");
+							}else{
+								throw new PausedExecutorException("Executor paused by user request");	
+							}
+						}
+						
 						int currTrialCnt = 1, currExpBackoffWaitTime = Constants.WAIT_TIME;
-					
+						
 						// initialize experiment tables 
 						preStep();
+						
 						
 						// analyze this batch set
 						studyBatchSet(runID,

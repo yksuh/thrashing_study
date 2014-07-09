@@ -1419,7 +1419,7 @@ if(_clientNum % 100 == 0){
 			int clientID = -1;
 			String query = "SELECT clientID from azdblab_client where batchID = "
 					+ _batchID + " and clientNum = " + clientNum;
-			// Main._logger.outputLog(query);
+			Main._logger.writeIntoLog(query);
 			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
 			try {
 				while (rs.next()) {

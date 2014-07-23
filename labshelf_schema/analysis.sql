@@ -32,7 +32,7 @@ DROP TABLE Analysis_Runs CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_Runs AS
 	SELECT runid 
 	FROM AZDBLab_ExperimentRun
-	WHERE runid IN (609,610,611) 
+	WHERE runid IN (609,610,611,669,689,709,749,789,790,809) 
 	ORDER BY runid;
 ALTER TABLE Analysis_Runs ADD PRIMARY KEY (runid);
 
@@ -278,3 +278,19 @@ CREATE TABLE Analysis_S4  AS
 	      absr.runID      = s3.runID AND 
 	      absr.batchSetID = s3.batchSetID;
 ALTER TABLE Analysis_S4  ADD PRIMARY KEY (runID, batchSetID);
+
+-- Final results
+select version as ver,
+       experimentname as expName,
+       dbms,
+       runID,
+       numCores as nCores,
+       bufferSpace as bs,
+       session_duration as brLen,
+       (xactsz*100) as rPct,
+       (XLOCKRATIO*100) as uPct,
+       (effectiveDBSz*100) as hsr,
+       avgProcTime as pt,
+       maxMPL
+from analysis_s4
+order by dbms, runID, batchsetID;

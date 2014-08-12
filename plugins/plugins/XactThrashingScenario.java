@@ -2093,12 +2093,13 @@ Main._logger.outputDebug(batchSetQuery);
 			if (!runStarted){
 				for (Client c : clients) {
 //					c.setStartTime(startTime);
-					c.start();
+					//c.start();
+					c.run();
 				}
 				runStarted = true;
 			}
 			long msec = System.currentTimeMillis() - startTime;
-			if(msec % 10000 == 0){
+			if(msec % 30000 == 0){
 				Main._logger.outputLog("elapsed time: " + msec + " (secs)"); 
 			}
 		}

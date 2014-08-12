@@ -1906,7 +1906,8 @@ Main._logger.outputDebug(batchSetQuery);
 			if (!runStarted){
 				for (Client c : clients) {
 //					c.setStartTime(startTime);
-					c.start();
+					//c.start();
+					c.run();
 				}
 				runStarted = true;
 			}

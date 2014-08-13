@@ -578,7 +578,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * @param clientNum
 		 * @return a list of SQL statements
 		 */
-		public static HashMap<Long, Vector<String>> buildTransaction(int clientID, long xactNum) {
+		public static HashMap<Long, Vector<String>> buildTransaction(int clientID, long xactNum) 
+		throws Exception {
 			HashMap<Long, Vector<String>> recMap = new HashMap<Long, Vector<String>>();
 			// vector for SQL statements for this transaction
 			Vector<String> transaction = new Vector<String>();
@@ -641,7 +642,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * @param transaction actual statements
 		 * @return transaction ID
 		 */
-		private static long insertTransaction(int clientID, long xactNum, Vector<String> transaction) {
+		private static long insertTransaction(int clientID, long xactNum, Vector<String> transaction) 
+		throws Exception{
 			// get transaction string
 			String xactStr = "";
 			for (int i = 0; i < transaction.size(); i++) {
@@ -688,6 +690,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					throw new Exception(e.getMessage());
 				}
 //			} else { // update transaction string
 //				String updateSQL = "UPDATE azdblab_transaction "
@@ -1472,7 +1475,7 @@ if(_clientNum % 100 == 0){
 		/*****
 		 * Set transactions of clients
 		 */
-		public void setTransaction() {
+		public void setTransaction() throws Exception {
 			// generating transactions
 			for (int xactNum = 0; xactNum < _numXactsToHave; xactNum++) {
 				Vector<String> transaction = retrieveTransaction(_clientID, xactNum);
@@ -1495,7 +1498,7 @@ if(_clientNum % 100 == 0){
 		 * @param xactNum
 		 * @return
 		 */
-		public Vector<String> retrieveTransaction(int clientID, int xactNum) {
+		public Vector<String> retrieveTransaction(int clientID, int xactNum) throws Exception {
 			Vector<String> retXact = null;
 			// get transaction id
 			long xactID = -1;
@@ -2120,12 +2123,13 @@ Main._logger.outputDebug(batchSetQuery);
 //			try {
 			int trials = 0;
 			boolean success = false;
+			String selectSQL = "";
 			do{
 				try{
-					rs = LabShelfManager.getShelf().executeQuerySQL(
-							"SELECT TransactionID, TransactionStr from azdblab_transaction"
-									+ " where clientid = " + clientID
-									+ " and TransactionNum = " + xactNum);
+					selectSQL = "SELECT TransactionID, TransactionStr from azdblab_transaction"
+							+ " where clientid = " + clientID
+							+ " and TransactionNum = " + xactNum;
+					rs = LabShelfManager.getShelf().executeQuerySQL(selectSQL);
 					while (rs.next()) {
 						xactID = rs.getInt(1);
 						xactStatements = rs.getString(2);
@@ -3040,7 +3044,7 @@ Main._logger.outputLog(updateSQL);
 											long minXactProcTime,
 											long maxXactProcTime,
 											long sumXactProcTime,
-											long sumLockWaitTime){
+											long sumLockWaitTime) throws Exception{
 		// get transaction run result identifier
 		long xactRunResID = -1;
 		try {
@@ -3111,6 +3115,8 @@ Main._logger.outputLog(updateSQL);
 //				Main._logger.outputLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 				LabShelfManager.getShelf().commit();
+			}else{
+				throw new Exception(e.getMessage());
 			}
 		}
 	}
@@ -3130,7 +3136,7 @@ Main._logger.outputLog(updateSQL);
 											 HashMap<Long, Long> xactNumToIDMap,
 											 long numExecXacts,
 											 HashMap<Long, Vector<Long>> xactNumToRunTimeVecMap,
-											 int iterNum) {
+											 int iterNum) throws Exception {
 		// HashMap<Long, Long> stmtNumToIDMap = c.getStmtNumToIDMap();
 		// HashMap<Long, Vector<Vector<Long>>> stmtRunTimeVecPerXactMap =
 		// c.getXactNumToStmtRunTimeVecMap();

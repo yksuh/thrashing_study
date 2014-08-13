@@ -1192,10 +1192,12 @@ public class Run extends TableDefinition {
 			return result;
 
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			if(!ex.getMessage().contains("Exhausted")){
+				ex.printStackTrace();
+			}
 			return null;
 		}
-
+		
 	}
 
 	/**

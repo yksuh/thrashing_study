@@ -196,12 +196,14 @@ public class Executor extends NotificationBroadcasterSupport implements
 	public void loadRunningRuns() {
 		vecRunningRuns.clear();
 		Vector<Run> runs = Run.getSpecificRuns(Run.TYPE_RUNNING);
-		for (Run r : runs) {
-			RunStatusNode rsn = new RunningRunNode(r.getUserName(),
-					r.getNotebookName(), r.getExperimentName(),
-					r.getScenario(), r.getMachineName(), r.getDBMS(),
-					r.getStartTime());
-			vecRunningRuns.add(rsn);
+		if(runs != null){
+			for (Run r : runs) {
+				RunStatusNode rsn = new RunningRunNode(r.getUserName(),
+						r.getNotebookName(), r.getExperimentName(),
+						r.getScenario(), r.getMachineName(), r.getDBMS(),
+						r.getStartTime());
+				vecRunningRuns.add(rsn);
+			}
 		}
 	}
 

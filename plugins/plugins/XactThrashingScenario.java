@@ -2048,69 +2048,85 @@ Main._logger.outputDebug(batchSetQuery);
 	
 	private ClientData[] cliArray; 
 	
-	void setClientData(int i, int batchID, int clientNum, long numXactsToHave, HashMap<Long, Long> xactNumToIDMap){
-		cliArray[i] = new ClientData();
-				
-		// set client id
-		int clientID = -1;
-		String query = "SELECT clientID from azdblab_client where batchID = "
-				+ batchID + " and clientNum = " + clientNum;
-		Main._logger.writeIntoLog(query);
-		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
-		try {
-			while (rs.next()) {
-				clientID = rs.getInt(1);
-			}
-			rs.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// not existing ...
-		if (clientID == -1) {
-			// obtain a new batch set id
-			clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
-			try {
-				String insertSQL = LabShelfManager.getShelf()
-						.NewInsertTuple(
-								Constants.TABLE_PREFIX
-										+ Constants.TABLE_CLIENT,
-								CLIENT.columns,
-								new String[] { String.valueOf(clientID),
-										String.valueOf(batchID),
-										String.valueOf(clientNum) },
-								CLIENT.columnDataTypes);
-				// Main._logger.outputLog(insertSQL);
-				LabShelfManager.getShelf().commit();
-				// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
-				// _clientNum, _batchID));
-			} catch (SQLException e) {
-				// // TODO Auto-generated catch block
-				e.printStackTrace();
-				Main._logger.reportError(e.getMessage());
-				System.exit(-1);
+	void fetchClientIDs(int batchID, int numClients){
+		String clientNumList = "(";
+		for(int i=0;i<numClients;i++){
+			cliArray[i] = new ClientData();
+			clientNumList += (i+1);
+			if(i<numClients-1){
+				clientNumList += ",";
 			}
 		}
-		// set client ID found in DB
-		cliArray[i].clientID = clientID;
+		clientNumList += ")";
 		
+		String query = "SELECT clientNum, clientID " +
+				"from azdblab_client " +
+				"where batchID = " + batchID + " and clientNum IN " + clientNumList + " order by clientNum asc";
+		
+		Main._logger.writeIntoLog(query);
+		
+		ResultSet rs = null;
+		try{
+			rs = LabShelfManager.getShelf().executeQuerySQL(query);
+			if(rs != null){
+				while(rs.next()){
+					int clientNum = rs.getInt(1);
+					int clientID = rs.getInt(2);
+					// set client ID found in DB
+					cliArray[clientNum-1].clientID = clientID;
+				}
+				rs.close();
+			}else{
+				for(int i=0;i<numClients;i++){
+					int clientNum = i+1;
+					// obtain a new batch set id
+					int clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
+					try {
+						String insertSQL = LabShelfManager.getShelf()
+								.NewInsertTuple(
+										Constants.TABLE_PREFIX
+												+ Constants.TABLE_CLIENT,
+										CLIENT.columns,
+										new String[] { String.valueOf(clientID),
+												String.valueOf(batchID),
+												String.valueOf(clientNum) },
+										CLIENT.columnDataTypes);
+						// Main._logger.outputLog(insertSQL);
+						LabShelfManager.getShelf().commit();
+						// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
+						// _clientNum, _batchID));
+					} catch (SQLException e) {
+						// // TODO Auto-generated catch block
+						e.printStackTrace();
+						Main._logger.reportError(e.getMessage());
+						System.exit(-1);
+					}
+				}
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+			
+		}
+	}
+	
+	void fetchClientXact(int i, int clientID, long numXactsToHave, HashMap<Long, Long> xactNumToIDMap){
 		// generating transactions
 		for (int xactNum = 0; xactNum < numXactsToHave; xactNum++) {
 			Vector<String> transaction = null;
 			// get transaction id
 			long xactID = -1;
 			String xactStatements = "";
-			ResultSet rs2 = null;
+			ResultSet rs = null;
 			try {
-				rs2 = LabShelfManager.getShelf().executeQuerySQL(
+				rs = LabShelfManager.getShelf().executeQuerySQL(
 						"SELECT TransactionID, TransactionStr from azdblab_transaction"
 								+ " where clientid = " + clientID
 								+ " and TransactionNum = " + xactNum);
-				while (rs2.next()) {
-					xactID = rs2.getInt(1);
-					xactStatements = rs2.getString(2);
+				while (rs.next()) {
+					xactID = rs.getInt(1);
+					xactStatements = rs.getString(2);
 				}
-				rs2.close();
+				rs.close();
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				// e1.printStackTrace();
@@ -2145,6 +2161,102 @@ Main._logger.outputDebug(batchSetQuery);
 			cliArray[i].xactMap.put(new Long(xactNum), transaction);
 		}
 	}
+	
+//	void setClientData(int i, int batchID, int clientNum, long numXactsToHave, HashMap<Long, Long> xactNumToIDMap){
+//		// set client id
+//		int clientID = -1;
+//		String query = "SELECT clientID from azdblab_client where batchID = "
+//				+ batchID + " and clientNum = " + clientNum;
+//		Main._logger.writeIntoLog(query);
+//		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
+//		try {
+//			while (rs.next()) {
+//				clientID = rs.getInt(1);
+//			}
+//			rs.close();
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		// not existing ...
+//		if (clientID == -1) {
+//			// obtain a new batch set id
+//			clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
+//			try {
+//				String insertSQL = LabShelfManager.getShelf()
+//						.NewInsertTuple(
+//								Constants.TABLE_PREFIX
+//										+ Constants.TABLE_CLIENT,
+//								CLIENT.columns,
+//								new String[] { String.valueOf(clientID),
+//										String.valueOf(batchID),
+//										String.valueOf(clientNum) },
+//								CLIENT.columnDataTypes);
+//				// Main._logger.outputLog(insertSQL);
+//				LabShelfManager.getShelf().commit();
+//				// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
+//				// _clientNum, _batchID));
+//			} catch (SQLException e) {
+//				// // TODO Auto-generated catch block
+//				e.printStackTrace();
+//				Main._logger.reportError(e.getMessage());
+//				System.exit(-1);
+//			}
+//		}
+//		// set client ID found in DB
+//		cliArray[i].clientID = clientID;
+//		
+//		// generating transactions
+//		for (int xactNum = 0; xactNum < numXactsToHave; xactNum++) {
+//			Vector<String> transaction = null;
+//			// get transaction id
+//			long xactID = -1;
+//			String xactStatements = "";
+//			ResultSet rs2 = null;
+//			try {
+//				rs2 = LabShelfManager.getShelf().executeQuerySQL(
+//						"SELECT TransactionID, TransactionStr from azdblab_transaction"
+//								+ " where clientid = " + clientID
+//								+ " and TransactionNum = " + xactNum);
+//				while (rs2.next()) {
+//					xactID = rs2.getInt(1);
+//					xactStatements = rs2.getString(2);
+//				}
+//				rs2.close();
+//			} catch (SQLException e1) {
+//				// TODO Auto-generated catch block
+//				// e1.printStackTrace();
+//			}
+//
+//			// not existing ...
+//			if (xactID == -1) {
+//				// generation transaction for this client
+//				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(clientID, xactNum);
+//				xactID = xactMap.keySet().iterator().next();
+//				transaction = xactMap.values().iterator().next();
+//			}else{
+//				transaction = new Vector<String>();
+//				String[] stmts = xactStatements.split(";");
+//				for(int j=0;j<stmts.length;j++){
+//					transaction.add(stmts[j]);
+//				}
+//			}
+//			
+//			// build transaction number to ID map
+//			Long xtNum = new Long(xactNum);
+//			Long xtID = new Long(xactID);
+//			
+//			xactNumToIDMap.put(xtNum, xtID);
+//			Long xID = xactNumToIDMap.get(xtNum);
+//			if (xID != xtID) {
+//				Main._logger.outputLog("Transaction ID is different!");
+//				System.exit(-1);
+//			}
+//			cliArray[i].tNumToIDMap = xactNumToIDMap;
+//			cliArray[i].xactMap = new HashMap<Long, Vector<String>>();
+//			cliArray[i].xactMap.put(new Long(xactNum), transaction);
+//		}
+//	}
 	
 	/***
 	 * Runs transactions per client in a batch
@@ -2188,15 +2300,16 @@ Main._logger.outputDebug(batchSetQuery);
 		// initialize transaction run stat
 		_clientRunStats = new XactRunStatPerClient[numClients+1];
 		if(iterNum == 1){
-			cliArray = new ClientData[numClients];
+			cliArray = new ClientData[numClients];	
+			// set client ID
+			fetchClientIDs(batchID, numClients);
 		}
+		
 		for (int i = 0; i < numClients; i++) {
 			// assign client number
 			int clientNum = i + 1;
 			clients[i] = new Client(batchID, clientNum);
 			_clientRunStats[clientNum] = new XactRunStatPerClient();
-			if(iterNum == 1) // fetch data from labshelf for the first iteration
-				setClientData(i, batchID, i+1, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
 			clients[i].init(experimentSubject.getDBMSDriverClassName(), 
 							experimentSubject.getConnectionString(), 
 							experimentSubject.getUserName(), 
@@ -2205,6 +2318,9 @@ Main._logger.outputDebug(batchSetQuery);
 			clients[i].resetRunTimeVec();
 			// set client id
 			clients[i]._clientID = cliArray[i].clientID;
+			if(iterNum == 1){ // fetch data from labshelf for the first iteration
+				fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
+			}
 			clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);
 		}
 		

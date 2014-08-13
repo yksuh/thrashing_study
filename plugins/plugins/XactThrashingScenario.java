@@ -2393,11 +2393,10 @@ Main._logger.outputDebug(batchSetQuery);
 			int cNum = c.getClientNumber();
 			if(cNum % 50 == 0){
 				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), " +
-						"batchRunTime: %d(ms), # of execs: %d, # of final execs: %d, timeOut: %d", 
+						"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
 						cNum, 
 						_clientRunStats[cNum].runTime, 
 						batchRunTime*1000,
-						_clientRunStats[cNum].numExecXacts,
 						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
 			}
 			_clientRunStats[cNum].num				 = cNum;
@@ -2847,6 +2846,21 @@ if(clientNum % 100 == 0)
 		} catch (Exception e) {
 			e.printStackTrace();
 			Main._logger.reportError(e.getMessage());
+			// in case that client run result record is already in the db
+			if(e.getMessage().contains("unique")){
+				String updateSQL = "Update " + Constants.TABLE_PREFIX
+						+ Constants.TABLE_CLIENTHASRESULT
+						+ " SET NumExecXacts = " + numExecXacts
+						+ ", SumXactProcTime = " + sumXactElapsedTime
+						+ " WHERE batchRunResID = " + batchRunResID
+						+ " and clientID = " + clientID
+						+ " and iterNum = " + iterNum;
+Main._logger.outputLog(updateSQL);
+				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+				LabShelfManager.getShelf().commit();
+			}else{
+				throw new SQLException("Labshelf connection is not robust.");
+			}
 		}
 		return clientRunResID;
 	}
@@ -3085,6 +3099,19 @@ if(clientNum % 100 == 0)
 		} catch (Exception e) {
 			e.printStackTrace();
 			Main._logger.reportError(e.getMessage());
+			if(e.getMessage().contains("unique")){
+				String updateSQL = "Update " + Constants.TABLE_PREFIX
+						+ Constants.TABLE_TRANSACTIONHASRESULT + " SET "
+						+ " NumExecs = " + numExecXacts
+						+ ", minXactProcTime = " + minXactProcTime
+						+ ", maxXactProcTime = " + maxXactProcTime
+						+ ", sumXactProcTime = " + sumXactProcTime
+						+ ", sumLockWaitTime = " + sumLockWaitTime
+						+ " WHERE clientRunResID = " + clientRunResID + " and TransactionID = " + xactID;
+//				Main._logger.outputLog(updateSQL);
+				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+				LabShelfManager.getShelf().commit();
+			}
 		}
 	}
 	

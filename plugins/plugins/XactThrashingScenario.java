@@ -2186,32 +2186,17 @@ Main._logger.outputDebug(batchSetQuery);
 		
 		clients = new Client[numClients];
 		// initialize transaction run stat
-		_clientRunStats = new XactRunStatPerClient[numClients+1];		
-		// only once
+		_clientRunStats = new XactRunStatPerClient[numClients+1];
 		if(iterNum == 1){
 			cliArray = new ClientData[numClients];
-			for (int i = 0; i < numClients; i++) {
-				// assign client number
-				int clientNum = i + 1;
-				clients[i] = new Client(batchID, clientNum);
-				
-				setClientData(i, batchID, clientNum, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
-				// set client ID
-				//clients[i].setClientID(batchID, clientNum);
-				// configure this client
-				//clients[i].setTransaction();
-			}
 		}
-		
-//		// everytime we should do this
-//		// initialize transaction run stat
-//		clients = new Client[numClients];
-//		_clientRunStats = new XactRunStatPerClient[numClients+1];
 		for (int i = 0; i < numClients; i++) {
 			// assign client number
 			int clientNum = i + 1;
+			clients[i] = new Client(batchID, clientNum);
 			_clientRunStats[clientNum] = new XactRunStatPerClient();
-			// set up client (i+1)
+			if(iterNum == 1) // fetch data from labshelf for the first iteration
+				setClientData(i, batchID, i+1, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
 			clients[i].init(experimentSubject.getDBMSDriverClassName(), 
 							experimentSubject.getConnectionString(), 
 							experimentSubject.getUserName(), 

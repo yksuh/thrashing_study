@@ -2396,12 +2396,10 @@ Main._logger.outputDebug(batchSetQuery);
 			|| (_clientRunStats[cNum].runTime/1000) > batchRunTime*1.05){
 				if(cNum % 25 == 0){
 					Main._logger.outputLog(String.format("Bad Client #%d => ClientRunTime: %d(ms), " +
-							"batchRunTime: %d(ms), # of execs: %d, # of final execs: %d, timeOut: %d", 
+							"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
 							cNum, 
 							_clientRunStats[cNum].runTime, 
 							batchRunTime*1000,
-							_clientRunStats[cNum].numExecXacts,
-	//						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
 							_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 1 : 0));
 	//						if(runAgain){
 	//						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));

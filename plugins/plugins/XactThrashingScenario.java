@@ -2862,6 +2862,17 @@ if(clientNum % 100 == 0)
 Main._logger.outputLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 				LabShelfManager.getShelf().commit();
+				String sql = "SELECT ClientRunResID " + "FROM "
+						+ Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT
+						+ " WHERE BatchRunResID = " + batchRunResID
+						+ " and ClientID = " + clientID + " and IterNum = " + iterNum;
+	//Main._logger.outputDebug(sql);
+				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+				while (rs.next()) {
+					clientRunResID = rs.getInt(1);
+				}
+				rs.close();
+				
 			}else{
 				throw new SQLException("Labshelf connection is not robust.");
 			}

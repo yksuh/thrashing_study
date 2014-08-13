@@ -2109,7 +2109,7 @@ Main._logger.outputDebug(batchSetQuery);
 		}
 	}
 	
-	void fetchClientXact(int i, int clientID, long numXactsToHave, HashMap<Long, Long> xactNumToIDMap){
+	void fetchClientXact(int i, int clientID, long numXactsToHave, HashMap<Long, Long> xactNumToIDMap) throws Exception{
 		// generating transactions
 		for (int xactNum = 0; xactNum < numXactsToHave; xactNum++) {
 			Vector<String> transaction = null;
@@ -2117,20 +2117,36 @@ Main._logger.outputDebug(batchSetQuery);
 			long xactID = -1;
 			String xactStatements = "";
 			ResultSet rs = null;
-			try {
-				rs = LabShelfManager.getShelf().executeQuerySQL(
-						"SELECT TransactionID, TransactionStr from azdblab_transaction"
-								+ " where clientid = " + clientID
-								+ " and TransactionNum = " + xactNum);
-				while (rs.next()) {
-					xactID = rs.getInt(1);
-					xactStatements = rs.getString(2);
+//			try {
+			int trials = 0;
+			boolean success = false;
+			do{
+				try{
+					rs = LabShelfManager.getShelf().executeQuerySQL(
+							"SELECT TransactionID, TransactionStr from azdblab_transaction"
+									+ " where clientid = " + clientID
+									+ " and TransactionNum = " + xactNum);
+					while (rs.next()) {
+						xactID = rs.getInt(1);
+						xactStatements = rs.getString(2);
+					}
+					rs.close();
+					success = true;
+					break;
+				}catch(Exception ex){
+					ex.printStackTrace();
+					trials++;
+					Main._logger.writeIntoLog("retry: " + trials + " <= " + ex.getMessage());
 				}
-				rs.close();
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				// e1.printStackTrace();
+			}while(trials < Constants.TRY_COUNTS);
+			
+			if(!success){
+				throw new Exception ("Labshelf connetion is not robust...");
 			}
+//			} catch (SQLException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
 
 			// not existing ...
 			if (xactID == -1) {

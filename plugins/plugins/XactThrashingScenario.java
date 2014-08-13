@@ -3100,6 +3100,11 @@ Main._logger.outputLog(updateSQL);
 					}
 					rs.close();
 					success = true;
+					if(xactID == -1){
+						Main._logger.writeIntoLog("query => " + selectSQL);
+						trials++;
+						continue;
+					}
 					break;
 				}catch(Exception ex){
 					ex.printStackTrace();

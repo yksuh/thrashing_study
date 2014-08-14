@@ -2070,20 +2070,21 @@ Main._logger.outputDebug(batchSetQuery);
 		
 		ResultSet rs = null;
 		try{
+			int clientID = -1;
 			rs = LabShelfManager.getShelf().executeQuerySQL(query);
-			if(rs != null){
-				while(rs.next()){
-					int clientNum = rs.getInt(1);
-					int clientID = rs.getInt(2);
-					// set client ID found in DB
-					cliArray[clientNum-1].clientID = clientID;
-				}
-				rs.close();
-			}else{
+			while(rs.next()){
+				int clientNum = rs.getInt(1);
+				clientID = rs.getInt(2);
+				// set client ID found in DB
+				cliArray[clientNum-1].clientID = clientID;
+			}
+			rs.close();
+			
+			if(clientID == -1){
 				for(int i=0;i<numClients;i++){
 					int clientNum = i+1;
 					// obtain a new batch set id
-					int clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
+					clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
 					try {
 						String insertSQL = LabShelfManager.getShelf()
 								.NewInsertTuple(
@@ -2104,6 +2105,8 @@ Main._logger.outputDebug(batchSetQuery);
 						Main._logger.reportError(e.getMessage());
 						System.exit(-1);
 					}
+					// set client ID found in DB
+					cliArray[clientNum-1].clientID = clientID;
 				}
 			}
 		}catch(Exception ex){
@@ -2122,6 +2125,7 @@ Main._logger.outputDebug(batchSetQuery);
 			ResultSet rs = null;
 //			try {
 			int trials = 0;
+			int succTrials = 0;
 			boolean success = false;
 			String selectSQL = "";
 			do{
@@ -2135,10 +2139,12 @@ Main._logger.outputDebug(batchSetQuery);
 						xactStatements = rs.getString(2);
 					}
 					if(xactID == -1){
-						trials++;
-						Main._logger.writeIntoLog("retry: " + trials + " <= " + selectSQL);
-						if(trials > Constants.TRY_COUNTS)
+						succTrials++;
+						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
+						if(succTrials > 5){
+							success = true; // not existing
 							break;
+						}
 						continue;
 					}
 					rs.close();
@@ -2147,12 +2153,12 @@ Main._logger.outputDebug(batchSetQuery);
 				}catch(Exception ex){
 					ex.printStackTrace();
 					trials++;
-					Main._logger.writeIntoLog("retry: " + trials + " <= " + ex.getMessage());
+					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
 				}
 			}while(trials < Constants.TRY_COUNTS);
 			
 			if(!success){
-				throw new Exception ("Labshelf connetion is not robust...");
+				throw new Exception ("Labshelf connection is not robust...");
 			}
 //			} catch (SQLException e1) {
 //				// TODO Auto-generated catch block

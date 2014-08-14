@@ -751,6 +751,7 @@ protected String getProcDiff(Socket procMonSock) throws ProcMonitorException {
       commit();
     } catch (SQLException sqlex){
       sqlex.printStackTrace();
+      throw new Exception(sqlex.getMessage());
     }
   }
     

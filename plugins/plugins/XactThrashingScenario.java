@@ -2893,13 +2893,14 @@ Main._logger.outputDebug(insertSQL);
 	 * @param numXacts
 	 *            number of transactions executed in this iteration
 	 * @return client run result
+	 * @throws Exception 
 	 */
 	private long insertClientRunResult(long batchRunResID, 
 									   long clientID,
 									   long clientNum,
 									   int iterNum, 
 									   long sumXactElapsedTime, 
-									   long numExecXacts) throws SQLException {
+									   long numExecXacts) throws Exception {
 		// get client run result identifier
 		long clientRunResID = -1;
 		try {
@@ -2995,15 +2996,41 @@ Main._logger.outputLog(updateSQL);
 						+ Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT
 						+ " WHERE BatchRunResID = " + batchRunResID
 						+ " and ClientID = " + clientID + " and IterNum = " + iterNum;
-	//Main._logger.outputDebug(sql);
-				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-				while (rs.next()) {
-					clientRunResID = rs.getInt(1);
+	Main._logger.outputDebug(sql);
+				clientRunResID = -1;
+				int trials = 0;
+				int succTrials = 0;
+				boolean success = false;
+				do{
+					try{
+						ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+						while (rs.next()) {
+							clientRunResID = rs.getInt(1);
+						}
+						rs.close();
+						if(clientRunResID == -1){
+							succTrials++;
+							Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+							if(succTrials > 5){
+								success = true; // not existing
+								break;
+							}
+							continue;
+						}
+						success = true;
+						break;
+					}catch(Exception ex){
+						ex.printStackTrace();
+						trials++;
+						Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
+					}
+				}while(trials < Constants.TRY_COUNTS);
+				if(!success){
+					throw new Exception ("Labshelf connection is not robust...");
 				}
-				rs.close();
-				
+				return clientRunResID;
 			}else{
-				throw new SQLException("Labshelf connection is not robust.");
+				throw new SQLException("Labshelf connection has some unknown problem.");
 			}
 		}
 		return clientRunResID;

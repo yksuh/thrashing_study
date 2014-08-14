@@ -2134,6 +2134,13 @@ Main._logger.outputDebug(batchSetQuery);
 						xactID = rs.getInt(1);
 						xactStatements = rs.getString(2);
 					}
+					if(xactID == -1){
+						trials++;
+						Main._logger.writeIntoLog("retry: " + trials + " <= " + selectSQL);
+						if(trials > Constants.TRY_COUNTS)
+							break;
+						continue;
+					}
 					rs.close();
 					success = true;
 					break;

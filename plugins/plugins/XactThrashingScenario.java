@@ -2138,6 +2138,7 @@ Main._logger.outputDebug(batchSetQuery);
 						xactID = rs.getInt(1);
 						xactStatements = rs.getString(2);
 					}
+					rs.close();
 					if(xactID == -1){
 						succTrials++;
 						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
@@ -2147,7 +2148,6 @@ Main._logger.outputDebug(batchSetQuery);
 						}
 						continue;
 					}
-					rs.close();
 					success = true;
 					break;
 				}catch(Exception ex){
@@ -3072,6 +3072,9 @@ Main._logger.outputLog(updateSQL);
 		// get transaction run result identifier
 		long xactRunResID = -1;
 		try {
+			int trials = 0;
+			int succTrials = 0;
+			boolean success = false;
 			// get client run result id
 			String sql = "SELECT TransactionRunResID " + "FROM "
 					+ Constants.TABLE_PREFIX
@@ -3079,12 +3082,36 @@ Main._logger.outputLog(updateSQL);
 					+ "WHERE ClientRunResID = " + clientRunResID
 					+ " and TransactionID = " + xactID;
 //Main._logger.outputDebug(sql);
-			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-			while (rs.next()) {
-				xactRunResID = rs.getInt(1);
-			}
-			rs.close();
+			do{
+				try{
+					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+					while (rs.next()) {
+						xactRunResID = rs.getInt(1);
+					}
+					rs.close();
+					if(xactRunResID == -1){
+						succTrials++;
+						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+						if(succTrials > 5){
+							success = true; // not existing
+							break;
+						}
+						continue;
+					}
+					rs.close();
+					success = true;
+					break;
+				}catch(Exception ex){
+					ex.printStackTrace();
+					trials++;
+					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
+				}
+			}while(trials < Constants.TRY_COUNTS);
 
+			if(!success){
+				throw new Exception ("Labshelf connection is not robust...");
+			}
+			
 			String insertSQL = "";
 			// when not existing ...
 			if (xactRunResID == -1) {

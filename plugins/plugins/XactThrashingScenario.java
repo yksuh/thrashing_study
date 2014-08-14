@@ -2843,9 +2843,9 @@ Main._logger.outputDebug(insertSQL);
 								String.valueOf(numExecXacts),
 								String.valueOf(sumXactElapsedTime) },
 						CLIENTHASRESULT.columnDataTypes);
-if(clientNum % 100 == 0)
-	Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);
-				LabShelfManager.getShelf().commit();
+//if(clientNum % 100 == 0)
+//	Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);
+//				LabShelfManager.getShelf().commit();
 			} else {
 if(clientNum % 100 == 0)
 	Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);

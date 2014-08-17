@@ -2095,94 +2095,97 @@ Main._logger.outputDebug(batchSetQuery);
 	private ClientData[] cliArray; 
 	
 	void fetchClientIDs(int batchID, int numClients){
-		String clientNumList = "(";
-		for(int i=0;i<numClients;i++){
-			cliArray[i] = new ClientData();
-			clientNumList += (i+1);
-			if(i<numClients-1){
-				clientNumList += ",";
+		int iters = numClients / incrMPL;
+		for(int j=1;j<=iters;j++){
+			String clientNumList = "(";
+			for(int i=(j-1)*incrMPL;i<j*incrMPL;i++){
+				cliArray[i] = new ClientData();
+				clientNumList += (i+1);
+				if(i<numClients-1){
+					clientNumList += ",";
+				}
 			}
-		}
-		clientNumList += ")";
-		
-		String query = "SELECT clientNum, clientID " +
-				"from azdblab_client " +
-				"where batchID = " + batchID + " and clientNum IN " + clientNumList + " order by clientNum asc";
-		
-		Main._logger.writeIntoLog(query);
-		
-		ResultSet rs = null;
-		try{
-			int clientID = -1;
+			clientNumList += ")";
 			
-			int trials = 0;
-			int succTrials = 0;
-			boolean success = false;
+			String query = "SELECT clientNum, clientID " +
+					"from azdblab_client " +
+					"where batchID = " + batchID + " and clientNum IN " + clientNumList + " order by clientNum asc";
 			
-			do{
-				try{
-					rs = LabShelfManager.getShelf().executeQuerySQL(query);
-					while(rs.next()){
-						int clientNum = rs.getInt(1);
-						clientID = rs.getInt(2);
+			Main._logger.writeIntoLog(query);
+			
+			ResultSet rs = null;
+			try{
+				int clientID = -1;
+				
+				int trials = 0;
+				int succTrials = 0;
+				boolean success = false;
+				
+				do{
+					try{
+						rs = LabShelfManager.getShelf().executeQuerySQL(query);
+						while(rs.next()){
+							int clientNum = rs.getInt(1);
+							clientID = rs.getInt(2);
+							// set client ID found in DB
+							cliArray[clientNum-1].clientID = clientID;
+						}
+						rs.close();
+						if(clientID == -1){
+							succTrials++;
+							Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + query);
+							if(succTrials > 5){
+								success = true; // not existing
+								break;
+							}
+							continue;
+						}
+						success = true;
+						break;
+					}catch(Exception ex){
+						ex.printStackTrace();
+						trials++;
+						Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
+					}
+				}while(trials < Constants.TRY_COUNTS);
+				
+				if(!success){
+					throw new Exception ("Labshelf connection is not robust...");
+				}
+				
+				if(clientID == -1){
+					for(int i=0;i<numClients;i++){
+						int clientNum = i+1;
+						// obtain a new batch set id
+						clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
+						try {
+							String insertSQL = LabShelfManager.getShelf()
+									.NewInsertTuple(
+											Constants.TABLE_PREFIX
+													+ Constants.TABLE_CLIENT,
+											CLIENT.columns,
+											new String[] { String.valueOf(clientID),
+													String.valueOf(batchID),
+													String.valueOf(clientNum) },
+											CLIENT.columnDataTypes);
+							// Main._logger.outputLog(insertSQL);
+							LabShelfManager.getShelf().commit();
+							// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
+							// _clientNum, _batchID));
+						} catch (SQLException e) {
+							// // TODO Auto-generated catch block
+							e.printStackTrace();
+							Main._logger.reportError(e.getMessage());
+							System.exit(-1);
+						}
 						// set client ID found in DB
 						cliArray[clientNum-1].clientID = clientID;
 					}
-					rs.close();
-					if(clientID == -1){
-						succTrials++;
-						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + query);
-						if(succTrials > 5){
-							success = true; // not existing
-							break;
-						}
-						continue;
-					}
-					success = true;
-					break;
-				}catch(Exception ex){
-					ex.printStackTrace();
-					trials++;
-					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
 				}
-			}while(trials < Constants.TRY_COUNTS);
-			
-			if(!success){
-				throw new Exception ("Labshelf connection is not robust...");
+			}catch(Exception ex){
+				ex.printStackTrace();
+				
 			}
-			
-			if(clientID == -1){
-				for(int i=0;i<numClients;i++){
-					int clientNum = i+1;
-					// obtain a new batch set id
-					clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
-					try {
-						String insertSQL = LabShelfManager.getShelf()
-								.NewInsertTuple(
-										Constants.TABLE_PREFIX
-												+ Constants.TABLE_CLIENT,
-										CLIENT.columns,
-										new String[] { String.valueOf(clientID),
-												String.valueOf(batchID),
-												String.valueOf(clientNum) },
-										CLIENT.columnDataTypes);
-						// Main._logger.outputLog(insertSQL);
-						LabShelfManager.getShelf().commit();
-						// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
-						// _clientNum, _batchID));
-					} catch (SQLException e) {
-						// // TODO Auto-generated catch block
-						e.printStackTrace();
-						Main._logger.reportError(e.getMessage());
-						System.exit(-1);
-					}
-					// set client ID found in DB
-					cliArray[clientNum-1].clientID = clientID;
-				}
-			}
-		}catch(Exception ex){
-			ex.printStackTrace();
-			
 		}
 	}
 	

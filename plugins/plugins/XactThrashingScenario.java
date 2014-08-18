@@ -1216,7 +1216,8 @@ if(_clientNum % 100 == 0){
 						// select
 						// long startTime = System.currentTimeMillis();
 						try {
-							_stmt.execute(sql);
+							_stmt.addBatch(sql); // for confirmatory
+//							_stmt.execute(sql); // for exploratory
 						} catch (Exception ex) {
 							continue;
 						}
@@ -1226,6 +1227,7 @@ if(_clientNum % 100 == 0){
 						// Main._logger.outputLog("SQL: " + sql + " => " +
 						// elapsedTime + " (msec)");
 					}
+					_stmt.executeBatch(); // for confirmatory
 					NewCommit();
 					// NewClose();
 					long elapsedTime = System.currentTimeMillis()- xactStartTime;

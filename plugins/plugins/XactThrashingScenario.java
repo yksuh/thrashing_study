@@ -2125,9 +2125,9 @@ Main._logger.outputDebug(batchSetQuery);
 	
 	void fetchClientIDs(int batchID, int numClients){
 		int iters = numClients / incrMPL;
-		Main._logger.writeIntoLog("maxIters: " + iters + " <= numClients: " + numClients + ", incrMPL:"+incrMPL);
+//		Main._logger.writeIntoLog("maxIters: " + iters + " <= numClients: " + numClients + ", incrMPL:"+incrMPL);
 		for(int j=1;j<=iters;j++){
-			Main._logger.writeIntoLog("("+j+"/"+iters+") labshelf accesss");
+//			Main._logger.writeIntoLog("("+j+"/"+iters+") labshelf accesss");
 			String clientNumList = "(";
 			for(int i=(j-1)*incrMPL;i<j*incrMPL;i++){
 				cliArray[i] = new ClientData();
@@ -2463,7 +2463,9 @@ Main._logger.outputDebug(batchSetQuery);
 		}
 		
 		// flush caches
-		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
+		if(!experimentSubject.getDBMSName().toLowerCase().contains("teradata")){
+			experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
+		}
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");
 		experimentSubject.flushOSCache();
 		Main._logger.outputLog("Finish Flushing OS Cache");

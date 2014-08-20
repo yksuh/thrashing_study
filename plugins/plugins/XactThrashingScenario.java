@@ -2129,10 +2129,10 @@ Main._logger.outputDebug(batchSetQuery);
 		for(int j=1;j<=iters;j++){
 			Main._logger.writeIntoLog("("+j+"/"+iters+") labshelf accesss");
 			String clientNumList = "(";
-			for(int i=(j-1)*incrMPL;i<j*incrMPL;i+=incrMPL){
+			for(int i=(j-1)*incrMPL;i<j*incrMPL;i++){
 				cliArray[i] = new ClientData();
 				clientNumList += (i+1);
-				if(i<numClients-1){
+				if(i<(j*incrMPL)-1){
 					clientNumList += ",";
 				}
 			}

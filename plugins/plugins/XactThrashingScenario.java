@@ -782,7 +782,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				if (_stmt != null) {
 					try {
 						_stmt.cancel();
-						Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
+						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
 						new SQLException("Batch run timeout");
 					} catch (SQLException e) {
 						e.printStackTrace();
@@ -1243,8 +1243,8 @@ if(_clientNum % 100 == 0){
 						// select
 						// long startTime = System.currentTimeMillis();
 						try {
-							_stmt.addBatch(sql); // for confirmatory
-//							_stmt.execute(sql); // for exploratory
+							//_stmt.addBatch(sql); // for confirmatory
+							_stmt.execute(sql); // for exploratory
 						} catch (Exception ex) {
 							continue;
 						}
@@ -1254,7 +1254,7 @@ if(_clientNum % 100 == 0){
 						// Main._logger.outputLog("SQL: " + sql + " => " +
 						// elapsedTime + " (msec)");
 					}
-					_stmt.executeBatch(); // for confirmatory
+					//_stmt.executeBatch(); // for confirmatory
 					NewCommit();
 					// NewClose();
 					long elapsedTime = System.currentTimeMillis()- xactStartTime;

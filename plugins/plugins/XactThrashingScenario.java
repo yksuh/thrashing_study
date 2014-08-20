@@ -2068,7 +2068,7 @@ Main._logger.outputDebug(batchSetQuery);
 ////		i = 0;
 ////		// record number of transactions successfully executed
 ////		for (Client c : clients) {
-////			_stats[i].id 				= c.getClientID();
+////			_stats[i].id 				= c.getClientID();I
 ////			_stats[i].num 				= c.getClientNumber();
 ////			_stats[i].numXactsToHave 	= c.getNumXactsToHave();
 ////			_stats[i].xactNumToIDMap 	=  c.getXactNumToIDMap();
@@ -2125,9 +2125,11 @@ Main._logger.outputDebug(batchSetQuery);
 	
 	void fetchClientIDs(int batchID, int numClients){
 		int iters = numClients / incrMPL;
+		Main._logger.writeIntoLog("maxIters: " + iters + " <= numClients: " + numClients + ", incrMPL:"+incrMPL);
 		for(int j=1;j<=iters;j++){
+			Main._logger.writeIntoLog("("+j+"/"+iters+") labshelf accesss");
 			String clientNumList = "(";
-			for(int i=(j-1)*incrMPL;i<j*incrMPL;i++){
+			for(int i=(j-1)*incrMPL;i<j*incrMPL;i+=incrMPL){
 				cliArray[i] = new ClientData();
 				clientNumList += (i+1);
 				if(i<numClients-1){

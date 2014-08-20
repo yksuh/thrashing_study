@@ -2463,9 +2463,7 @@ Main._logger.outputDebug(batchSetQuery);
 		}
 		
 		// flush caches
-		if(!experimentSubject.getDBMSName().toLowerCase().contains("teradata")){
-			experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
-		}
+		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");
 		experimentSubject.flushOSCache();
 		Main._logger.outputLog("Finish Flushing OS Cache");

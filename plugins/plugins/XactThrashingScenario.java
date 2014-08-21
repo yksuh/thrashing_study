@@ -781,11 +781,13 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				_clientRunStats[_clientNum].timeOut = true;
 				if (_stmt != null) {
 					try {
-						_stmt.cancel();
+//						_stmt.cancel();
+						_stmt.close();
+						_stmt = null;
 						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
 						new SQLException("Batch run timeout");
 					} catch (SQLException e) {
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 				}
 			}

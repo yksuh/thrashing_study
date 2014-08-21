@@ -2151,6 +2151,7 @@ Main._logger.outputDebug(batchSetQuery);
 				int trials = 0;
 				int succTrials = 0;
 				boolean success = false;
+				long waitTime = 1000;
 				
 				do{
 					try{
@@ -2164,11 +2165,13 @@ Main._logger.outputDebug(batchSetQuery);
 						rs.close();
 						if(clientID == -1){
 							succTrials++;
+							Thread.sleep(waitTime);
 							Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + query);
 							if(succTrials > 5){
 								success = true; // not existing
 								break;
 							}
+							waitTime *= 2;
 							continue;
 						}
 						success = true;
@@ -2232,6 +2235,7 @@ Main._logger.outputDebug(batchSetQuery);
 			int trials = 0;
 			int succTrials = 0;
 			boolean success = false;
+			long waitTime = 1000;
 			String selectSQL = "";
 			do{
 				try{
@@ -2246,11 +2250,13 @@ Main._logger.outputDebug(batchSetQuery);
 					rs.close();
 					if(xactID == -1){
 						succTrials++;
+						Thread.sleep(waitTime);
 						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
 						if(succTrials > 5){
 							success = true; // not existing
 							break;
 						}
+						waitTime *= 2;
 						continue;
 					}
 					success = true;
@@ -2396,6 +2402,47 @@ Main._logger.outputDebug(batchSetQuery);
 //		}
 //	}
 	
+	/*****
+	 * Obtain client id
+	 * @param batchID batch ID
+	 * @param clientNum client number
+	 */
+	public int fetchClientOneID(int batchID, int clientNum) {
+		// set client id
+		int clientID = -1;
+		long waittime = 1000;
+		String query = "SELECT clientID from azdblab_client where batchID = "
+				+ batchID + " and clientNum = " + clientNum;
+		Main._logger.writeIntoLog(query);
+		int trials = 0;
+		do{
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
+			try {
+				while (rs.next()) {
+					clientID = rs.getInt(1);
+				}
+				rs.close();
+				if(clientID == -1){
+					trials++;
+					Thread.sleep(waittime);
+					waittime*=2;
+					if(trials > 5)
+						break;
+					continue;
+				}else{
+					break;
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}while(trials < Constants.TRY_COUNTS);
+		return clientID;
+	}
+	
 	/***
 	 * Runs transactions per client in a batch
 	 * 
@@ -2403,37 +2450,7 @@ Main._logger.outputDebug(batchSetQuery);
 	 * @throws Exception
 	 */
 	@Override
-	protected int stepC(int batchSetRunResID, int batchID, int numClients, int iterNum) throws Exception {
-		// TimeoutTerminals terminalTimeOuter = new TimeoutTerminals(clients);
-		// Timer xactRunTimer = new Timer();
-		// xactRunTimer.scheduleAtFixedRate(terminalTimeOuter, duration*1000,
-		// duration*1000);
-		// recordRunProgress(0,
-		// "Before running the batch for specified duration");
-		// timeOut = false;
-//		clients = new Client[numClients];
-//		// initialize transaction run stat
-//		_clientRunStats = new XactRunStatPerClient[numClients+1];		
-//		for (int i = 0; i < numClients; i++) {
-//			// assign client number
-//			int clientNum = i + 1;
-//			_clientRunStats[clientNum] = new XactRunStatPerClient();
-//			// ready for open connection
-//			String strDrvName = experimentSubject.getDBMSDriverClassName();
-//			String strConnStr = experimentSubject.getConnectionString();
-//			String strUserName = experimentSubject.getUserName();
-//			String strPassword = experimentSubject.getPassword();
-//			// Main._logger.outputLog("Client " + (clientNum) +
-//			// " is being initialized...");
-//			clients[i] = new Client(batchID, clientNum);
-//			// set client ID
-//			clients[i].setClientID(batchID, clientNum);
-//			// set up client (i+1)
-//			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
-//			// configure this client
-//			clients[i].setTransaction();
-//		}
-		
+	protected int stepC(int batchSetRunResID, int batchID, int numClients, int iterNum) throws Exception {		
 		clients = new Client[numClients];
 		// initialize transaction run stat
 		_clientRunStats = new XactRunStatPerClient[numClients+1];
@@ -2457,6 +2474,10 @@ Main._logger.outputDebug(batchSetQuery);
 			// set client id
 			clients[i]._clientID = cliArray[i].clientID;
 			if(iterNum == 1){ // fetch data from labshelf for the first iteration
+				if(clients[i]._clientID == -1){
+					clients[i]._clientID = fetchClientOneID(batchID, clientNum);
+					if(clients[i]._clientID == -1) throw new Exception("labshelf access is not robust");
+				}
 				fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
 			}
 			clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);

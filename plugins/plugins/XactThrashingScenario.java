@@ -2208,9 +2208,29 @@ Main._logger.outputDebug(batchSetQuery);
 							// _clientNum, _batchID));
 						} catch (SQLException e) {
 							// // TODO Auto-generated catch block
-							e.printStackTrace();
-							Main._logger.reportError(e.getMessage());
-							System.exit(-1);
+							if(e.getMessage().contains("unique")){
+								long wait = 1000;
+								trials = 1;
+								do{
+									try {
+										// wait for 10 seconds
+										Thread.sleep(wait);
+										rs = LabShelfManager.getShelf().executeQuerySQL(query);
+										while (rs.next()) {
+											clientID = rs.getInt(1);
+										}
+										rs.close();
+										if(clientID != -1) break;
+										else {wait *= 2; continue;}
+									} catch (Exception e1) {
+										throw new Exception("labshelf access is not robust");
+									}
+								}while(trials++ <= Constants.TRY_COUNTS);
+							}else{
+								e.printStackTrace();
+								Main._logger.reportError(e.getMessage());
+								//System.exit(-1);
+							}
 						}
 						// set client ID found in DB
 						cliArray[clientNum-1].clientID = clientID;
@@ -2223,88 +2243,91 @@ Main._logger.outputDebug(batchSetQuery);
 		}
 	}
 	
-	void fetchClientXact(int i, int clientID, long numXactsToHave, HashMap<Long, Long> xactNumToIDMap) throws Exception{
-		// generating transactions
-		for (int xactNum = 0; xactNum < numXactsToHave; xactNum++) {
-			Vector<String> transaction = null;
-			// get transaction id
-			long xactID = -1;
-			String xactStatements = "";
-			ResultSet rs = null;
-//			try {
-			int trials = 0;
-			int succTrials = 0;
-			boolean success = false;
-			long waitTime = 1000;
-			String selectSQL = "";
-			do{
-				try{
-					selectSQL = "SELECT TransactionID, TransactionStr from azdblab_transaction"
-							+ " where clientid = " + clientID
-							+ " and TransactionNum = " + xactNum;
-					rs = LabShelfManager.getShelf().executeQuerySQL(selectSQL);
-					while (rs.next()) {
-						xactID = rs.getInt(1);
-						xactStatements = rs.getString(2);
-					}
-					rs.close();
-					if(xactID == -1){
-						succTrials++;
-						Thread.sleep(waitTime);
-						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
-						if(succTrials > 5){
-							success = true; // not existing
-							break;
-						}
-						waitTime *= 2;
-						continue;
-					}
-					success = true;
-					break;
-				}catch(Exception ex){
-					ex.printStackTrace();
-					trials++;
-					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
-				}
-			}while(trials < Constants.TRY_COUNTS);
-			
-			if(!success){
-				throw new Exception ("Labshelf connection is not robust...");
-			}
-//			} catch (SQLException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
+//	void fetchClientXact(int i, int clientID, long numXactsToHave, HashMap<Long, Long> xactNumToIDMap) throws Exception{
+//		// generating transactions
+//		for (int xactNum = 0; xactNum < numXactsToHave; xactNum++) {
+//			Vector<String> transaction = null;
+//			// get transaction id
+//			long xactID = -1;
+//			String xactStatements = "";
+//			ResultSet rs = null;
+////			try {
+//			int trials = 0;
+//			int succTrials = 0;
+//			boolean success = false;
+//			long waitTime = 1000;
+//			String selectSQL = "";
+//			do{
+//				try{
+//					selectSQL = "SELECT TransactionID, TransactionStr from azdblab_transaction"
+//							+ " where clientid = " + clientID
+//							+ " and TransactionNum = " + xactNum;
+//					Main._logger.outputLog(selectSQL);
+//					rs = LabShelfManager.getShelf().executeQuerySQL(selectSQL);
+//					while (rs.next()) {
+//						xactID = rs.getInt(1);
+//						xactStatements = rs.getString(2);
+//					}
+//					rs.close();
+//					if(xactID == -1){
+//						succTrials++;
+//						Thread.sleep(waitTime);
+//						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
+//						if(succTrials > 5){
+//							success = true; // not existing
+//							break;
+//						}
+//						waitTime *= 2;
+//						continue;
+//					}
+//					success = true;
+//					break;
+//				}catch(Exception ex){
+//					ex.printStackTrace();
+//					trials++;
+//					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
+//				}
+//			}while(trials < Constants.TRY_COUNTS);
+//			
+//			if(!success){
+//				throw new Exception ("Labshelf connection is not robust...");
 //			}
+////			} catch (SQLException e1) {
+////				// TODO Auto-generated catch block
+////				e1.printStackTrace();
+////			}
+//
+//			// not existing ...
+//			if (xactID == -1) {
+//				// generation transaction for this client
+//				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(clientID, xactNum);
+//				xactID = xactMap.keySet().iterator().next();
+//				transaction = xactMap.values().iterator().next();
+//			}else{
+//				transaction = new Vector<String>();
+//				String[] stmts = xactStatements.split(";");
+//				for(int j=0;j<stmts.length;j++){
+//					transaction.add(stmts[j]);
+//				}
+//			}
+//			
+//			// build transaction number to ID map
+//			Long xtNum = new Long(xactNum);
+//			Long xtID = new Long(xactID);
+//			
+//			xactNumToIDMap.put(xtNum, xtID);
+//			Long xID = xactNumToIDMap.get(xtNum);
+//			if (xID != xtID) {
+//				Main._logger.outputLog("Transaction ID is different!");
+//				System.exit(-1);
+//			}
+//			cliArray[i].tNumToIDMap = xactNumToIDMap;
+//			cliArray[i].xactMap = new HashMap<Long, Vector<String>>();
+//			cliArray[i].xactMap.put(new Long(xactNum), transaction);
+//		}
+//	}
+	
 
-			// not existing ...
-			if (xactID == -1) {
-				// generation transaction for this client
-				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(clientID, xactNum);
-				xactID = xactMap.keySet().iterator().next();
-				transaction = xactMap.values().iterator().next();
-			}else{
-				transaction = new Vector<String>();
-				String[] stmts = xactStatements.split(";");
-				for(int j=0;j<stmts.length;j++){
-					transaction.add(stmts[j]);
-				}
-			}
-			
-			// build transaction number to ID map
-			Long xtNum = new Long(xactNum);
-			Long xtID = new Long(xactID);
-			
-			xactNumToIDMap.put(xtNum, xtID);
-			Long xID = xactNumToIDMap.get(xtNum);
-			if (xID != xtID) {
-				Main._logger.outputLog("Transaction ID is different!");
-				System.exit(-1);
-			}
-			cliArray[i].tNumToIDMap = xactNumToIDMap;
-			cliArray[i].xactMap = new HashMap<Long, Vector<String>>();
-			cliArray[i].xactMap.put(new Long(xactNum), transaction);
-		}
-	}
 	
 //	void setClientData(int i, int batchID, int clientNum, long numXactsToHave, HashMap<Long, Long> xactNumToIDMap){
 //		// set client id
@@ -2402,6 +2425,7 @@ Main._logger.outputDebug(batchSetQuery);
 //		}
 //	}
 	
+	
 	/*****
 	 * Obtain client id
 	 * @param batchID batch ID
@@ -2460,7 +2484,7 @@ Main._logger.outputDebug(batchSetQuery);
 			fetchClientIDs(batchID, numClients);
 		}
 		
-		for (int i = 0; i < numClients; i++) {
+		/*for (int i = 0; i < numClients; i++) {
 			// assign client number
 			int clientNum = i + 1;
 			clients[i] = new Client(batchID, clientNum);
@@ -2478,10 +2502,134 @@ Main._logger.outputDebug(batchSetQuery);
 					clients[i]._clientID = fetchClientOneID(batchID, clientNum);
 					if(clients[i]._clientID == -1) throw new Exception("labshelf access is not robust");
 				}
-				fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
+				//fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
 			}
 			clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);
-		}
+		}*/
+		
+//		for (int i = 0; i < numClients; i++) {
+//			// assign client number
+//			int clientNum = i + 1;
+//			clients[i] = new Client(batchID, clientNum);
+//			_clientRunStats[clientNum] = new XactRunStatPerClient();
+//			clients[i].init(experimentSubject.getDBMSDriverClassName(), 
+//							experimentSubject.getConnectionString(), 
+//							experimentSubject.getUserName(), 
+//							experimentSubject.getPassword());
+//			// reset measured data
+//			clients[i].resetRunTimeVec();
+//			// set client id
+//			clients[i]._clientID = cliArray[i].clientID;
+//			if(iterNum == 1){ // fetch data from labshelf for the first iteration
+//				if(clients[i]._clientID == -1){
+//					clients[i]._clientID = fetchClientOneID(batchID, clientNum);
+//					if(clients[i]._clientID == -1) throw new Exception("labshelf access is not robust");
+//				}
+//				//fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
+//			}
+//			clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);
+//		}
+		
+		int iters = numClients / incrMPL;
+		for(int j=1;j<=iters;j++){
+			String clientIDList = "(";
+			for(int i=(j-1)*incrMPL;i<j*incrMPL;i++){
+				// assign client number
+				int clientNum = i + 1;
+				clients[i] = new Client(batchID, clientNum);
+				_clientRunStats[clientNum] = new XactRunStatPerClient();
+				clients[i].init(experimentSubject.getDBMSDriverClassName(), 
+								experimentSubject.getConnectionString(), 
+								experimentSubject.getUserName(), 
+								experimentSubject.getPassword());
+				// reset measured data
+				clients[i].resetRunTimeVec();
+				// set client id
+				clients[i]._clientID = cliArray[i].clientID;
+				if(iterNum == 1){ // fetch data from labshelf for the first iteration
+					if(clients[i]._clientID == -1){
+						clients[i]._clientID = fetchClientOneID(batchID, clientNum);
+						if(clients[i]._clientID == -1) throw new Exception("labshelf access is not robust");
+					}
+//					//fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
+					clientIDList += clients[i]._clientID;
+					if(i<(j*incrMPL)-1){
+						clientIDList += ",";
+					}
+				}
+			}
+			clientIDList += ")";
+			int base = (j-1)*incrMPL;
+			
+			// only for the first iteration
+			if(iterNum == 1){
+				long succTrials = 1;
+				long waitTime = 1000;
+				boolean failure = false;
+				do{
+					failure = false;
+					// retrieve transactions
+					String selectSQL = "SELECT clientID, TransactionNum, TransactionID, TransactionStr from azdblab_transaction"
+							//+ " where clientid = " + clientID
+							+ " where clientid IN " + clientIDList 
+							+ " order by clientID, TransactionNum, TransactionID";
+					Main._logger.outputLog(selectSQL);
+					ResultSet rs = null;
+					long xactID = -1;
+					long xactNum = -1;
+					String xactStatements = "";
+					try{
+						int i = base;
+						rs = LabShelfManager.getShelf().executeQuerySQL(selectSQL);
+						while (rs.next()) {
+							xactNum = rs.getInt(2);
+							xactID = rs.getInt(3);
+							xactStatements = rs.getString(4);
+							
+							if(xactID == -1){
+								succTrials++;
+								Thread.sleep(waitTime);
+								Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
+								waitTime *= 2;
+								failure = true;
+								break;
+							}
+							
+							// build transaction number to ID map
+							Long xtNum = new Long(xactNum);
+							Long xtID = new Long(xactID);
+							cliArray[i].tNumToIDMap = new HashMap<Long, Long>();
+							cliArray[i].tNumToIDMap.put(xtNum, xtID);
+							
+							Vector<String> transaction = new Vector<String>();
+							String[] stmts = xactStatements.split(";");
+							for(int k=0;j<stmts.length;k++){
+								transaction.add(stmts[k]);
+							}
+							cliArray[i].xactMap = new HashMap<Long, Vector<String>>();
+							cliArray[i].xactMap.put(new Long(xactNum), transaction);	
+							i++;
+						}
+						rs.close();
+					}catch(Exception ex){
+						succTrials++;
+						Thread.sleep(waitTime);
+						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
+						waitTime *= 2;
+						failure = true;
+					}
+				}while(succTrials < Constants.TRY_COUNTS);
+				
+				if(failure) {
+					if(succTrials < Constants.TRY_COUNTS) continue;
+					else throw new Exception("labshelf connection is not robust");
+				}
+			} // end iternum == 1
+			
+			for(int i=(j-1)*incrMPL;i<j*incrMPL;i++){
+				clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);
+			} // end another for 
+		} // end for
 		
 		// flush caches
 		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);

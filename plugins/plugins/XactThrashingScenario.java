@@ -1457,7 +1457,7 @@ if(_clientNum % 100 == 0){
 		 * @param clientNum client number
 		 * @param iterNum iteration number
 		 */
-		public void setClientID(int batchID, int clientNum) {
+		public void setClientID(int batchID, int clientNum) throws Exception{
 			// set client id
 			int clientID = -1;
 			String query = "SELECT clientID from azdblab_client where batchID = "
@@ -1493,9 +1493,28 @@ if(_clientNum % 100 == 0){
 					// _clientNum, _batchID));
 				} catch (SQLException e) {
 					// // TODO Auto-generated catch block
+					if(e.getMessage().contains("unique")){
+						long wait = 1000;
+						int trials = 1;
+						do{
+							try {
+								// wait for 10 seconds
+								Thread.sleep(wait);
+								rs = LabShelfManager.getShelf().executeQuerySQL(query);
+								while (rs.next()) {
+									clientID = rs.getInt(1);
+								}
+								rs.close();
+								if(clientID != -1) break;
+								else {wait *= 2; continue;}
+							} catch (Exception e1) {
+								throw new Exception("labshelf access is not robust");
+							}
+						}while(trials++ <= Constants.TRY_COUNTS);
+					}
 					e.printStackTrace();
 					Main._logger.reportError(e.getMessage());
-					System.exit(-1);
+					//System.exit(-1);
 				}
 			}
 			// set client ID found in DB

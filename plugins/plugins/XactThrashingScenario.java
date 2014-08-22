@@ -2567,13 +2567,11 @@ Main._logger.outputDebug(batchSetQuery);
 				long waitTime = 1000;
 				boolean failure = false;
 				do{
-					failure = false;
 					// retrieve transactions
 					String selectSQL = "SELECT clientID, TransactionNum, TransactionID, TransactionStr from azdblab_transaction"
 							//+ " where clientid = " + clientID
 							+ " where clientid IN " + clientIDList 
 							+ " order by clientID, TransactionNum, TransactionID";
-					Main._logger.outputLog(selectSQL);
 					ResultSet rs = null;
 					long xactID = -1;
 					long xactNum = -1;
@@ -2589,12 +2587,10 @@ Main._logger.outputDebug(batchSetQuery);
 							if(xactID == -1){
 								succTrials++;
 								Thread.sleep(waitTime);
-								Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
 								waitTime *= 2;
 								failure = true;
 								break;
 							}
-							
 							// build transaction number to ID map
 							Long xtNum = new Long(xactNum);
 							Long xtID = new Long(xactID);
@@ -2612,18 +2608,14 @@ Main._logger.outputDebug(batchSetQuery);
 						}
 						rs.close();
 					}catch(Exception ex){
+						ex.printStackTrace();
 						succTrials++;
 						Thread.sleep(waitTime);
-						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
-						waitTime *= 2;
 						failure = true;
 					}
 				}while(succTrials < Constants.TRY_COUNTS);
-				
-				if(failure) {
-					if(succTrials < Constants.TRY_COUNTS) continue;
-					else throw new Exception("labshelf connection is not robust");
-				}
+				if(failure) 
+					throw new Exception("labshelf not robust");
 			} // end iternum == 1
 			
 			for(int i=(j-1)*incrMPL;i<j*incrMPL;i++){

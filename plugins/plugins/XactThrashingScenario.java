@@ -1511,10 +1511,11 @@ if(_clientNum % 100 == 0){
 								throw new Exception("labshelf access is not robust");
 							}
 						}while(trials++ <= Constants.TRY_COUNTS);
+					}else{
+						e.printStackTrace();
+						Main._logger.reportError(e.getMessage());
+						//System.exit(-1);
 					}
-					e.printStackTrace();
-					Main._logger.reportError(e.getMessage());
-					//System.exit(-1);
 				}
 			}
 			// set client ID found in DB

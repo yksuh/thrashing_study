@@ -1,5 +1,6 @@
 package plugins;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -2443,6 +2444,10 @@ Main._logger.outputDebug(batchSetQuery);
 		return clientID;
 	}
 	
+	
+	
+	
+	
 	/***
 	 * Runs transactions per client in a batch
 	 * 
@@ -2460,29 +2465,83 @@ Main._logger.outputDebug(batchSetQuery);
 			fetchClientIDs(batchID, numClients);
 		}
 		
-		for (int i = 0; i < numClients; i++) {
-			// assign client number
-			int clientNum = i + 1;
-			clients[i] = new Client(batchID, clientNum);
-			_clientRunStats[clientNum] = new XactRunStatPerClient();
-			clients[i].init(experimentSubject.getDBMSDriverClassName(), 
-							experimentSubject.getConnectionString(), 
-							experimentSubject.getUserName(), 
-							experimentSubject.getPassword());
-			// reset measured data
-			clients[i].resetRunTimeVec();
-			// set client id
-			clients[i]._clientID = cliArray[i].clientID;
-			if(iterNum == 1){ // fetch data from labshelf for the first iteration
-				if(clients[i]._clientID == -1){
-					clients[i]._clientID = fetchClientOneID(batchID, clientNum);
-					if(clients[i]._clientID == -1) throw new Exception("labshelf access is not robust");
+		Thread[] thArray = new Thread[numClients];
+		//for (int i = 0; i < numClients; i++) {
+		for (int k = 0; k < numClients; k++) {
+			final int i = k;
+			final int bID = batchID;
+			final int itNum = iterNum;
+			
+			Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler(){
+			    public void uncaughtException(Thread th, Throwable ex) {
+			        ex.printStackTrace();
+			    }
+			};
+			
+			//try{
+			Thread t = new Thread(new Runnable(){
+				public void run(){
+					// assign client number
+					int clientNum = i + 1;
+					clients[i] = new Client(bID, clientNum);
+					_clientRunStats[clientNum] = new XactRunStatPerClient();
+					try {
+						clients[i].init(experimentSubject.getDBMSDriverClassName(), 
+										experimentSubject.getConnectionString(), 
+										experimentSubject.getUserName(), 
+										experimentSubject.getPassword());
+					} catch (Exception e1) {
+						throw new RuntimeException(e1.getMessage());
+					}
+					// reset measured data
+					clients[i].resetRunTimeVec();
+					// set client id
+					clients[i]._clientID = cliArray[i].clientID;
+					if(itNum == 1){ // fetch data from labshelf for the first iteration
+						if(clients[i]._clientID == -1){
+							clients[i]._clientID = fetchClientOneID(bID, clientNum);
+							if(clients[i]._clientID == -1) throw new RuntimeException("labshelf access is not robust");
+						}
+						try {
+							fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
+						} catch (Exception e) {
+							throw new RuntimeException(e.getMessage());
+						}
+					}
+					clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);	
 				}
-				fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
-			}
-			clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);
+			});
+			t.setUncaughtExceptionHandler(h);
+			t.start();
+			thArray[k] = t;
+			
+//			// assign client number
+//			int clientNum = i + 1;
+//			clients[i] = new Client(batchID, clientNum);
+//			_clientRunStats[clientNum] = new XactRunStatPerClient();
+//			clients[i].init(experimentSubject.getDBMSDriverClassName(), 
+//							experimentSubject.getConnectionString(), 
+//							experimentSubject.getUserName(), 
+//							experimentSubject.getPassword());
+//			// reset measured data
+//			clients[i].resetRunTimeVec();
+//			// set client id
+//			clients[i]._clientID = cliArray[i].clientID;
+//			if(iterNum == 1){ // fetch data from labshelf for the first iteration
+//				if(clients[i]._clientID == -1){
+//					clients[i]._clientID = fetchClientOneID(batchID, clientNum);
+//					if(clients[i]._clientID == -1) throw new Exception("labshelf access is not robust");
+//				}
+//				fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
+//			}
+//			clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);
 		}
 		
+		// wait for each client is done
+		for (int k = 0; k < numClients; k++) {
+			thArray[k].join();
+		}
+		Main._logger.outputLog("Start Flushing caches");
 		// flush caches
 		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");

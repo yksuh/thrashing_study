@@ -781,13 +781,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				_clientRunStats[_clientNum].timeOut = true;
 				if (_stmt != null) {
 					try {
-//						_stmt.cancel();
+						//_stmt.cancel();
 						_stmt.close();
-						_stmt = null;
 						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
 						new SQLException("Batch run timeout");
 					} catch (SQLException e) {
-						//e.printStackTrace();
+						e.printStackTrace();
 					}
 				}
 			}
@@ -1246,7 +1245,7 @@ if(_clientNum % 100 == 0){
 						// long startTime = System.currentTimeMillis();
 						try {
 							//_stmt.addBatch(sql); // for confirmatory
-							_stmt.execute(sql); // for exploratory or confirmatory
+							_stmt.execute(sql); // for exploratory
 						} catch (Exception ex) {
 							continue;
 						}
@@ -1463,16 +1462,35 @@ if(_clientNum % 100 == 0){
 			String query = "SELECT clientID from azdblab_client where batchID = "
 					+ _batchID + " and clientNum = " + clientNum;
 			Main._logger.writeIntoLog(query);
-			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
-			try {
-				while (rs.next()) {
-					clientID = rs.getInt(1);
+			
+			int succTrials = 0;
+			long wait = 1000;
+			do{
+				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
+				try {
+					while (rs.next()) {
+						clientID = rs.getInt(1);
+					}
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				rs.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				
+				if(clientID == -1){
+					succTrials++;
+					try {
+						Thread.sleep(wait);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					wait *= 2;
+				}else{
+					break;
+				}
+			}while(succTrials < Constants.TRY_COUNTS);
+			
 			// not existing ...
 			if (clientID == -1) {
 				// obtain a new batch set id
@@ -1493,29 +1511,10 @@ if(_clientNum % 100 == 0){
 					// _clientNum, _batchID));
 				} catch (SQLException e) {
 					// // TODO Auto-generated catch block
-					if(e.getMessage().contains("unique")){
-						long wait = 1000;
-						int trials = 1;
-						do{
-							try {
-								// wait for 10 seconds
-								Thread.sleep(wait);
-								rs = LabShelfManager.getShelf().executeQuerySQL(query);
-								while (rs.next()) {
-									clientID = rs.getInt(1);
-								}
-								rs.close();
-								if(clientID != -1) break;
-								else {wait *= 2; continue;}
-							} catch (Exception e1) {
-								throw new Exception("labshelf access is not robust");
-							}
-						}while(trials++ <= Constants.TRY_COUNTS);
-					}else{
-						e.printStackTrace();
-						Main._logger.reportError(e.getMessage());
-						//System.exit(-1);
-					}
+					e.printStackTrace();
+					Main._logger.reportError(e.getMessage());
+					throw new Exception("labshelf not robust");
+//					System.exit(-1);
 				}
 			}
 			// set client ID found in DB
@@ -1553,21 +1552,36 @@ if(_clientNum % 100 == 0){
 			// get transaction id
 			long xactID = -1;
 			String xactStatements = "";
-			ResultSet rs = null;
-			try {
-				rs = LabShelfManager.getShelf().executeQuerySQL(
-						"SELECT TransactionID, TransactionStr from azdblab_transaction"
-								+ " where clientid = " + clientID
-								+ " and TransactionNum = " + xactNum);
-				while (rs.next()) {
-					xactID = rs.getInt(1);
-					xactStatements = rs.getString(2);
+			
+			long succTrials = 0;
+			long waitTime = 1000;
+			do{
+				ResultSet rs = null;
+				try {
+					rs = LabShelfManager.getShelf().executeQuerySQL(
+							"SELECT TransactionID, TransactionStr from azdblab_transaction"
+									+ " where clientid = " + clientID
+									+ " and TransactionNum = " + xactNum);
+					while (rs.next()) {
+						xactID = rs.getInt(1);
+						xactStatements = rs.getString(2);
+					}
+					rs.close();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					// e1.printStackTrace();
 				}
-				rs.close();
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				// e1.printStackTrace();
-			}
+				if(xactID == -1){
+					succTrials++;
+					try{
+						Thread.sleep(waitTime);
+					}catch(Exception ex){
+						ex.printStackTrace();
+					}
+					waitTime *= 2;
+				}else
+					break;
+			}while(succTrials <= Constants.TRY_COUNTS);
 
 			// not existing ...
 			if (xactID == -1) {

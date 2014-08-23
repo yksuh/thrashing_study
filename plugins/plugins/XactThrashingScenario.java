@@ -2490,6 +2490,8 @@ Main._logger.outputDebug(batchSetQuery);
 										experimentSubject.getConnectionString(), 
 										experimentSubject.getUserName(), 
 										experimentSubject.getPassword());
+						if(i % 50 == 0)
+							Main._logger.outputLog("Client #"+i+" has been initialized...");
 					} catch (Exception e1) {
 						throw new RuntimeException(e1.getMessage());
 					}

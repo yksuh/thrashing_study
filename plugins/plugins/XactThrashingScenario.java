@@ -1052,16 +1052,20 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					if(j++ % 10 == 0){
 						throw new Exception("Client " + _clientNum + " cannot have a connection!");
 					}
-					Thread.sleep(10000);
+					//Thread.sleep(10000);
 					Main._logger.outputLog(j+"th connection trial...");
 				}
 				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_UPDATABLE);
+				if(_conn != null && _clientNum % 20 == 0)
+					Main._logger.outputLog("Client #"+_clientNum+" initialized ...");
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
 //				sqlex.printStackTrace();
 				// Main._logger.outputLog("login details: " + strConnStr + ", "
 				// + strUserName + ", " + strPassword);
+				if(_conn == null && _clientNum % 20 == 0)
+					Main._logger.outputLog("Client #"+_clientNum+" uninitialized: " + sqlex.getMessage());
 			}
 		}
 

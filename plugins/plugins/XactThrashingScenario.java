@@ -2248,7 +2248,8 @@ Main._logger.outputDebug(batchSetQuery);
 							// // TODO Auto-generated catch block
 							e.printStackTrace();
 							Main._logger.reportError(e.getMessage());
-							System.exit(-1);
+							//System.exit(-1);
+							throw new Exception(e.getMessage());
 						}
 						// set client ID found in DB
 						cliArray[clientNum-1].clientID = clientID;

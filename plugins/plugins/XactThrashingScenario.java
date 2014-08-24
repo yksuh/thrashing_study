@@ -996,6 +996,43 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		// // }
 		// }
 		
+//		public void init(String drvName, String strConnStr, String strUserName,
+//				String strPassword) throws Exception {
+//			// Main._logger.outputLog("login details: " + strConnStr + ", " +
+//			// strUserName + ", " + strPassword);
+//			try {
+////				_driverName = drvName;
+//				_connStr = strConnStr;
+//				_userName = strUserName;
+//				_password = strPassword;
+//				// Main._logger.outputLog("login details: " + strConnectString +
+//				// ", " + strUserName + ", " + strPassword + ", " + strdrvname);
+//				Class.forName(drvName);
+//				int j = 1;
+//				while(true){
+//					try{
+//						_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
+//					}catch(Exception ex){
+//						Main._logger.outputLog(String.format("Client #%d initialization failed due to unavailable connection", _clientNum));
+//						if(j++ % 10 == 0){
+//							throw new Exception("Client " + _clientNum + " cannot have a connection!");
+//						}
+//						Thread.sleep(10000);
+//						//Main._logger.outputLog(j+"th connection trial...");
+//						continue;
+//					}
+//					if(_conn != null) break;
+//				}
+//				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+//						ResultSet.CONCUR_UPDATABLE);
+//				return;
+//			} catch (SQLException | ClassNotFoundException sqlex) {
+////				sqlex.printStackTrace();
+//				// Main._logger.outputLog("login details: " + strConnStr + ", "
+//				// + strUserName + ", " + strPassword);
+//			}
+//		}
+		
 		public void init(String drvName, String strConnStr, String strUserName,
 				String strPassword) throws Exception {
 			// Main._logger.outputLog("login details: " + strConnStr + ", " +
@@ -1010,18 +1047,13 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				Class.forName(drvName);
 				int j = 1;
 				while(true){
-					try{
-						_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
-					}catch(Exception ex){
-						Main._logger.outputLog(String.format("Client #%d initialization failed due to unavailable connection", _clientNum));
-						if(j++ % 10 == 0){
-							throw new Exception("Client " + _clientNum + " cannot have a connection!");
-						}
-						Thread.sleep(10000);
-						//Main._logger.outputLog(j+"th connection trial...");
-						continue;
-					}
+					_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
 					if(_conn != null) break;
+					if(j++ % 10 == 0){
+						throw new Exception("Client " + _clientNum + " cannot have a connection!");
+					}
+					Thread.sleep(10000);
+					Main._logger.outputLog(j+"th connection trial...");
 				}
 				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_UPDATABLE);
@@ -2470,84 +2502,86 @@ Main._logger.outputDebug(batchSetQuery);
 			fetchClientIDs(batchID, numClients);
 		}
 		
-		Thread[] thArray = new Thread[numClients];
-		//for (int i = 0; i < numClients; i++) {
-		for (int k = 0; k < numClients; k++) {
-			final int i = k;
-			final int bID = batchID;
-			final int itNum = iterNum;
-			
-			Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler(){
-			    public void uncaughtException(Thread th, Throwable ex) {
-			        ex.printStackTrace();
-			    }
-			};
-			
-			//try{
-			Thread t = new Thread(new Runnable(){
-				public void run(){
-					// assign client number
-					int clientNum = i + 1;
-					clients[i] = new Client(bID, clientNum);
-					_clientRunStats[clientNum] = new XactRunStatPerClient();
-					try {
-						clients[i].init(experimentSubject.getDBMSDriverClassName(), 
-										experimentSubject.getConnectionString(), 
-										experimentSubject.getUserName(), 
-										experimentSubject.getPassword());
-						//if(i % 50 == 0)
-						Main._logger.outputLog("Client #"+i+ " has been initialized...");
-					} catch (Exception e1) {
-						throw new RuntimeException(e1.getMessage());
-					}
-					// reset measured data
-					clients[i].resetRunTimeVec();
-					// set client id
-					clients[i]._clientID = cliArray[i].clientID;
-					if(itNum == 1){ // fetch data from labshelf for the first iteration
-						if(clients[i]._clientID == -1){
-							clients[i]._clientID = fetchClientOneID(bID, clientNum);
-							if(clients[i]._clientID == -1) throw new RuntimeException("labshelf access is not robust");
-						}
-						try {
-							fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
-						} catch (Exception e) {
-							throw new RuntimeException(e.getMessage());
-						}
-					}
-					clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);	
-				}
-			});
-			t.setUncaughtExceptionHandler(h);
-			t.start();
-			thArray[k] = t;
-			
-//			// assign client number
-//			int clientNum = i + 1;
-//			clients[i] = new Client(batchID, clientNum);
-//			_clientRunStats[clientNum] = new XactRunStatPerClient();
-//			clients[i].init(experimentSubject.getDBMSDriverClassName(), 
-//							experimentSubject.getConnectionString(), 
-//							experimentSubject.getUserName(), 
-//							experimentSubject.getPassword());
-//			// reset measured data
-//			clients[i].resetRunTimeVec();
-//			// set client id
-//			clients[i]._clientID = cliArray[i].clientID;
-//			if(iterNum == 1){ // fetch data from labshelf for the first iteration
-//				if(clients[i]._clientID == -1){
-//					clients[i]._clientID = fetchClientOneID(batchID, clientNum);
-//					if(clients[i]._clientID == -1) throw new Exception("labshelf access is not robust");
+		Main._logger.outputLog("Start Client Initialization");
+//		Thread[] thArray = new Thread[numClients];
+		for (int i = 0; i < numClients; i++) {
+//		for (int k = 0; k < numClients; k++) {
+//			final int i = k;
+//			final int bID = batchID;
+//			final int itNum = iterNum;
+//			
+//			Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler(){
+//			    public void uncaughtException(Thread th, Throwable ex) {
+//			        ex.printStackTrace();
+//			    }
+//			};
+//			
+//			//try{
+//			Thread t = new Thread(new Runnable(){
+//				public void run(){
+//					// assign client number
+//					int clientNum = i + 1;
+//					clients[i] = new Client(bID, clientNum);
+//					_clientRunStats[clientNum] = new XactRunStatPerClient();
+//					try {
+//						clients[i].init(experimentSubject.getDBMSDriverClassName(), 
+//										experimentSubject.getConnectionString(), 
+//										experimentSubject.getUserName(), 
+//										experimentSubject.getPassword());
+//						//if(i % 50 == 0)
+//						Main._logger.outputLog("Client #"+i+ " has been initialized...");
+//					} catch (Exception e1) {
+//						throw new RuntimeException(e1.getMessage());
+//					}
+//					// reset measured data
+//					clients[i].resetRunTimeVec();
+//					// set client id
+//					clients[i]._clientID = cliArray[i].clientID;
+//					if(itNum == 1){ // fetch data from labshelf for the first iteration
+//						if(clients[i]._clientID == -1){
+//							clients[i]._clientID = fetchClientOneID(bID, clientNum);
+//							if(clients[i]._clientID == -1) throw new RuntimeException("labshelf access is not robust");
+//						}
+//						try {
+//							fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
+//						} catch (Exception e) {
+//							throw new RuntimeException(e.getMessage());
+//						}
+//					}
+//					clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);	
 //				}
-//				fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
-//			}
-//			clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);
+//			});
+//			t.setUncaughtExceptionHandler(h);
+//			t.start();
+//			thArray[k] = t;
+			
+			// assign client number
+			int clientNum = i + 1;
+			clients[i] = new Client(batchID, clientNum);
+			_clientRunStats[clientNum] = new XactRunStatPerClient();
+			clients[i].init(experimentSubject.getDBMSDriverClassName(), 
+							experimentSubject.getConnectionString(), 
+							experimentSubject.getUserName(), 
+							experimentSubject.getPassword());
+			// reset measured data
+			clients[i].resetRunTimeVec();
+			// set client id
+			clients[i]._clientID = cliArray[i].clientID;
+			if(iterNum == 1){ // fetch data from labshelf for the first iteration
+				if(clients[i]._clientID == -1){
+					clients[i]._clientID = fetchClientOneID(batchID, clientNum);
+					if(clients[i]._clientID == -1) throw new Exception("labshelf access is not robust");
+				}
+				fetchClientXact(i, clients[i]._clientID, clients[i].getNumXactsToHave(), clients[i].getXactNumToIDMap());
+			}
+			clients[i].setTransaction2(cliArray[i].tNumToIDMap, cliArray[i].xactMap);
 		}
 		
-		// wait for each client is done
-		for (int k = 0; k < numClients; k++) {
-			thArray[k].join();
-		}
+//		// wait for each client is done
+//		for (int k = 0; k < numClients; k++) {
+//			thArray[k].join();
+//		}
+		
 		Main._logger.outputLog("Start Flushing caches");
 		// flush caches
 		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);

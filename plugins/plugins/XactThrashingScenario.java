@@ -1527,6 +1527,8 @@ if(_clientNum % 100 == 0){
 						if(clientID == -1){
 							throw new Exception("labshelf not robust");
 						}
+						_clientID = clientID;
+						return;
 					}else{
 						e.printStackTrace();
 						Main._logger.reportError(e.getMessage());

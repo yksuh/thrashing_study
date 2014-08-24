@@ -1010,13 +1010,18 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				Class.forName(drvName);
 				int j = 1;
 				while(true){
-					_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
-					if(_conn != null) break;
-					if(j++ % 10 == 0){
-						throw new Exception("Client " + _clientNum + " cannot have a connection!");
+					try{
+						_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
+					}catch(Exception ex){
+						Main._logger.outputLog(String.format("Client #%d initialization failed due to unavailable connection", _clientNum));
+						if(j++ % 10 == 0){
+							throw new Exception("Client " + _clientNum + " cannot have a connection!");
+						}
+						Thread.sleep(10000);
+						//Main._logger.outputLog(j+"th connection trial...");
+						continue;
 					}
-					Thread.sleep(10000);
-					Main._logger.outputLog(j+"th connection trial...");
+					if(_conn != null) break;
 				}
 				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_UPDATABLE);
@@ -2490,8 +2495,8 @@ Main._logger.outputDebug(batchSetQuery);
 										experimentSubject.getConnectionString(), 
 										experimentSubject.getUserName(), 
 										experimentSubject.getPassword());
-						if(i % 50 == 0)
-							Main._logger.outputLog("Client #"+i+" has been initialized...");
+						//if(i % 50 == 0)
+						Main._logger.outputLog("Client #"+i+ " has been initialized...");
 					} catch (Exception e1) {
 						throw new RuntimeException(e1.getMessage());
 					}

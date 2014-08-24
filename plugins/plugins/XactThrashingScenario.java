@@ -1511,9 +1511,27 @@ if(_clientNum % 100 == 0){
 					// _clientNum, _batchID));
 				} catch (SQLException e) {
 					// // TODO Auto-generated catch block
-					e.printStackTrace();
-					Main._logger.reportError(e.getMessage());
-					throw new Exception("labshelf not robust");
+					if(e.getMessage().toLowerCase().contains("unique")){
+						Main._logger.outputLog("retry => " + query);
+						clientID = -1;
+						ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
+						try {
+							while (rs.next()) {
+								clientID = rs.getInt(1);
+							}
+							rs.close();
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						if(clientID == -1){
+							throw new Exception("labshelf not robust");
+						}
+					}else{
+						e.printStackTrace();
+						Main._logger.reportError(e.getMessage());
+						throw new Exception("labshelf not robust");
+					}
 //					System.exit(-1);
 				}
 			}

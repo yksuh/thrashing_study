@@ -1464,7 +1464,7 @@ if(_clientNum % 100 == 0){
 			Main._logger.writeIntoLog(query);
 			
 			int succTrials = 0;
-			long wait = 1000;
+			long wait = 10000;
 			do{
 				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
 				try {
@@ -1486,6 +1486,7 @@ if(_clientNum % 100 == 0){
 						e.printStackTrace();
 					}
 					wait *= 2;
+					Main._logger.outputLog("clientID: " + clientID + ", retrial #" + succTrials + ", wait: " + wait);
 				}else{
 					break;
 				}

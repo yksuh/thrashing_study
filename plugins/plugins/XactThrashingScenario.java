@@ -1513,6 +1513,7 @@ if(_clientNum % 100 == 0){
 					// // TODO Auto-generated catch block
 					if(e.getMessage().toLowerCase().contains("unique")){
 						Main._logger.outputLog("retry => " + query);
+						Thread.sleep(10000);
 						clientID = -1;
 						ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
 						try {
@@ -1526,6 +1527,8 @@ if(_clientNum % 100 == 0){
 						}
 						if(clientID == -1){
 							throw new Exception("labshelf not robust");
+						}else{
+							Main._logger.outputLog("obtained clientID: " + clientID);
 						}
 						_clientID = clientID;
 						return;

@@ -1477,19 +1477,19 @@ if(_clientNum % 100 == 0){
 					e.printStackTrace();
 				}
 				
-				if(clientID == -1){
-					succTrials++;
-					try {
-						Thread.sleep(wait);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					wait *= 2;
-					Main._logger.outputLog("clientID: " + clientID + ", retrial #" + succTrials + ", wait: " + wait);
-				}else{
-					break;
-				}
+//				if(clientID == -1){
+//					succTrials++;
+//					try {
+//						Thread.sleep(wait);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					wait *= 2;
+//					Main._logger.outputLog("clientID: " + clientID + ", retrial #" + succTrials + ", wait: " + wait);
+//				}else{
+//					break;
+//				}
 			}while(succTrials < Constants.TRY_COUNTS);
 			
 			// not existing ...
@@ -1577,9 +1577,9 @@ if(_clientNum % 100 == 0){
 			long xactID = -1;
 			String xactStatements = "";
 			
-			long succTrials = 0;
-			long waitTime = 1000;
-			do{
+//			long succTrials = 0;
+//			long waitTime = 1000;
+//			do{
 				ResultSet rs = null;
 				try {
 					rs = LabShelfManager.getShelf().executeQuerySQL(
@@ -1595,17 +1595,17 @@ if(_clientNum % 100 == 0){
 					// TODO Auto-generated catch block
 					// e1.printStackTrace();
 				}
-				if(xactID == -1){
-					succTrials++;
-					try{
-						Thread.sleep(waitTime);
-					}catch(Exception ex){
-						ex.printStackTrace();
-					}
-					waitTime *= 2;
-				}else
-					break;
-			}while(succTrials <= Constants.TRY_COUNTS);
+//				if(xactID == -1){
+//					succTrials++;
+//					try{
+//						Thread.sleep(waitTime);
+//					}catch(Exception ex){
+//						ex.printStackTrace();
+//					}
+//					waitTime *= 2;
+//				}else
+//					break;
+//			}while(succTrials <= Constants.TRY_COUNTS);
 
 			// not existing ...
 			if (xactID == -1) {

@@ -31,8 +31,8 @@ ALTER TABLE Analysis_LabShelf ADD PRIMARY KEY (version);
 DROP TABLE Analysis_Runs CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_Runs AS
 	SELECT runid 
-	FROM AZDBLab_ExperimentRun
-	WHERE runid IN (609,610,611,669,689,709,749,789,809,829,849,869, 889,909,929,949,969,989) 
+	FROM AZDBLab_ExperimentRun -- 14 runs (8 runs per DBMS) 64 runs = 20% done
+	WHERE runid IN (609,610,611,689,709,749,809,829,849,869,889,929,969,989,1110,1109,949,1129,1169) 
 	ORDER BY runid;
 ALTER TABLE Analysis_Runs ADD PRIMARY KEY (runid);
 
@@ -282,15 +282,17 @@ ALTER TABLE Analysis_S4  ADD PRIMARY KEY (runID, batchSetID);
 -- Final results
 select version as ver,
        experimentname as expName,
-       dbms,
+       (case 
+       	when experimentname like  '%pk%' then 1
+        	else 0
+       END ) pk,
+         dbms,
        runID,
        numCores as nCores,
-       bufferSpace as bs,
-       session_duration as brLen,
        (xactsz*100) as rPct,
        (XLOCKRATIO*100) as uPct,
        (effectiveDBSz*100) as hsr,
        avgProcTime as pt,
        maxMPL
 from analysis_s4
-order by dbms, runID, batchsetID;
+order by expName asc, dbms asc, runID, nCores, rPct, uPct, hsr;

@@ -93,47 +93,31 @@ public class Executor extends TableDefinition {
 	 * @return
 	 */
 	public ExecutorState getExecutorState(String machineName, String DBMS) {
-		int trials = 0;
-		long wait = 1000;
-		while(++trials <= Constants.TRY_COUNTS){
-			try {
-				String state_sql = 
-					"SELECT CurrentStatus, Command " +
-					"FROM " + TableDefinition.EXECUTOR.TableName + " " +
-					"WHERE MachineName='" + machineName +
-					"' AND CurrentDBMSName='" + DBMS + "'";
-				// Queries the DBMS for the test results of an experiment.
-				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(state_sql);
-	
-				String status = "";
-				String command = "";
-	
-				if (rs.next()) {
-					status = rs.getString(1);
-					command = rs.getString(2);
-				}
-	
-				rs.close();
-	
-				return new ExecutorState(status, command);
-	
-			} catch (Exception ex) {
-//				ex.printStackTrace();
-//				return null;
-				if(ex.getMessage().toLowerCase().contains("exhausted")){
-					System.out.println("trial: " + trials + ", max: " + Constants.TRY_COUNTS);
-					try {
-						Thread.sleep(wait);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					wait*=2;
-					continue;
-				}
+		try {
+			String state_sql = 
+				"SELECT CurrentStatus, Command " +
+				"FROM " + TableDefinition.EXECUTOR.TableName + " " +
+				"WHERE MachineName='" + machineName +
+				"' AND CurrentDBMSName='" + DBMS + "'";
+			// Queries the DBMS for the test results of an experiment.
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(state_sql);
+
+			String status = "";
+			String command = "";
+
+			if (rs.next()) {
+				status = rs.getString(1);
+				command = rs.getString(2);
 			}
+
+			rs.close();
+
+			return new ExecutorState(status, command);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 
 	/**

@@ -1456,7 +1456,7 @@ if(_clientNum % 100 == 0){
 		 * @param clientNum client number
 		 * @param iterNum iteration number
 		 */
-		public void setClientID(int batchID, int clientNum) throws Exception{
+		public void setClientID(int batchID, int clientNum) {
 			// set client id
 			int clientID = -1;
 			String query = "SELECT clientID from azdblab_client where batchID = "
@@ -1464,7 +1464,7 @@ if(_clientNum % 100 == 0){
 			Main._logger.writeIntoLog(query);
 			
 			int succTrials = 0;
-			long wait = 10000;
+			long wait = 1000;
 			do{
 				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
 				try {
@@ -1477,19 +1477,18 @@ if(_clientNum % 100 == 0){
 					e.printStackTrace();
 				}
 				
-//				if(clientID == -1){
-//					succTrials++;
-//					try {
-//						Thread.sleep(wait);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//					wait *= 2;
-//					Main._logger.outputLog("clientID: " + clientID + ", retrial #" + succTrials + ", wait: " + wait);
-//				}else{
-//					break;
-//				}
+				if(clientID == -1){
+					succTrials++;
+					try {
+						Thread.sleep(wait);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					wait *= 2;
+				}else{
+					break;
+				}
 			}while(succTrials < Constants.TRY_COUNTS);
 			
 			// not existing ...
@@ -1512,33 +1511,9 @@ if(_clientNum % 100 == 0){
 					// _clientNum, _batchID));
 				} catch (SQLException e) {
 					// // TODO Auto-generated catch block
-					if(e.getMessage().toLowerCase().contains("unique")){
-						Main._logger.outputLog("retry => " + query);
-						Thread.sleep(10000);
-						clientID = -1;
-						ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
-						try {
-							while (rs.next()) {
-								clientID = rs.getInt(1);
-							}
-							rs.close();
-						} catch (SQLException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						if(clientID == -1){
-							throw new Exception("labshelf not robust");
-						}else{
-							Main._logger.outputLog("obtained clientID: " + clientID);
-						}
-						_clientID = clientID;
-						return;
-					}else{
-						e.printStackTrace();
-						Main._logger.reportError(e.getMessage());
-						throw new Exception("labshelf not robust");
-					}
-//					System.exit(-1);
+					e.printStackTrace();
+					Main._logger.reportError(e.getMessage());
+					System.exit(-1);
 				}
 			}
 			// set client ID found in DB
@@ -1577,9 +1552,9 @@ if(_clientNum % 100 == 0){
 			long xactID = -1;
 			String xactStatements = "";
 			
-//			long succTrials = 0;
-//			long waitTime = 1000;
-//			do{
+			long succTrials = 0;
+			long waitTime = 1000;
+			do{
 				ResultSet rs = null;
 				try {
 					rs = LabShelfManager.getShelf().executeQuerySQL(
@@ -1595,17 +1570,17 @@ if(_clientNum % 100 == 0){
 					// TODO Auto-generated catch block
 					// e1.printStackTrace();
 				}
-//				if(xactID == -1){
-//					succTrials++;
-//					try{
-//						Thread.sleep(waitTime);
-//					}catch(Exception ex){
-//						ex.printStackTrace();
-//					}
-//					waitTime *= 2;
-//				}else
-//					break;
-//			}while(succTrials <= Constants.TRY_COUNTS);
+				if(xactID == -1){
+					succTrials++;
+					try{
+						Thread.sleep(waitTime);
+					}catch(Exception ex){
+						ex.printStackTrace();
+					}
+					waitTime *= 2;
+				}else
+					break;
+			}while(succTrials <= Constants.TRY_COUNTS);
 
 			// not existing ...
 			if (xactID == -1) {

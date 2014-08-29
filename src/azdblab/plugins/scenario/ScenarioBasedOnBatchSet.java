@@ -674,7 +674,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				// effective db size
 				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
 					batchSetNumToRun++;
-					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, edbSz: %d%%)", 
+					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, hotspot ratio: %d%%)", 
 							batchSetNumToRun, dNmRwsFrmSLCT*100, (int)(dNmRwsFrmUPT*100), (int)(dActRowPlSz*100));
 					Main._logger.outputLog(str);
 					// get task number 

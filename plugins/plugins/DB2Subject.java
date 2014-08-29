@@ -128,16 +128,18 @@ public class DB2Subject extends ExperimentSubject {
 		          }
 		          strupdate = "INSERT INTO " + tableName + " VALUES(" + i + "," +
 		                      strdata + ")";
-		          _statement.addBatch(strupdate);
-		          if((i + 1) % 30000 == 0){
-		        	  _statement.executeBatch();
-		        	  commit();
-		          }
+		          _statement.executeUpdate(strupdate);
+//		          _statement.addBatch(strupdate);
+//		          if((i + 1) % 30000 == 0){
+//		        	  _statement.executeBatch();
+//		        	  commit();
+//		          }
 		        }
-		      _statement.executeBatch();
+//		      _statement.executeBatch();
 		      commit();
 		    } catch (SQLException sqlex){
 		      sqlex.printStackTrace();
+		      throw new Exception("Table population terminated with an exception");
 		    }
 		  }
 	 

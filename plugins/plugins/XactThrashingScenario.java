@@ -2008,7 +2008,7 @@ Main._logger.outputDebug(batchSetQuery);
 			// configure this client
 			clients[i].setTransaction();
 		}
-		
+		if(iterNum == 1) return iterNum;
 		// flush caches
 		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");

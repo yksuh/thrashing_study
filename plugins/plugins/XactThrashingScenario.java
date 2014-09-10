@@ -1462,10 +1462,10 @@ if(_clientNum % 100 == 0){
 			String query = "SELECT clientID from azdblab_client where batchID = "
 					+ _batchID + " and clientNum = " + clientNum;
 			Main._logger.writeIntoLog(query);
-			
-			int succTrials = 0;
-			long wait = 1000;
-			do{
+//			
+//			int succTrials = 0;
+//			long wait = 1000;
+//			do{
 				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
 				try {
 					while (rs.next()) {
@@ -1477,19 +1477,19 @@ if(_clientNum % 100 == 0){
 					e.printStackTrace();
 				}
 				
-				if(clientID == -1){
-					succTrials++;
-					try {
-						Thread.sleep(wait);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					wait *= 2;
-				}else{
-					break;
-				}
-			}while(succTrials < Constants.TRY_COUNTS);
+//				if(clientID == -1){
+//					succTrials++;
+//					try {
+//						Thread.sleep(wait);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					wait *= 2;
+//				}else{
+//					break;
+//				}
+//			}while(succTrials < Constants.TRY_COUNTS);
 			
 			// not existing ...
 			if (clientID == -1) {

@@ -1673,7 +1673,7 @@ if(_clientNum % 100 == 0){
 			int batchID = insertBatch(batchSetID, MPL);
 
 			int k = 1;
-			while(k <= Constants.MAX_ITERS){
+//			while(k <= Constants.MAX_ITERS){
 //			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
 				Main._logger.outputLog(String.format("<<<<<< %d(/%d) iteration start!", k, Constants.MAX_ITERS));
 				
@@ -1685,17 +1685,17 @@ if(_clientNum % 100 == 0){
 
 				Main._logger.outputLog(String.format("<<<<<<<<<< Done!\n"));
 				
-				// wait for a minute to clean up any remaining transactions
-				try{
-					Thread.sleep(Constants.THINK_TIME);
-				}catch(Exception ex){
-					ex.printStackTrace();
-				}	
-				k++;
-			}
+//				// wait for a minute to clean up any remaining transactions
+//				try{
+//					Thread.sleep(Constants.THINK_TIME);
+//				}catch(Exception ex){
+//					ex.printStackTrace();
+//				}	
+//				k++;
+//			}
 			
 			// close this batch
-			stepD();
+//			stepD();
 		}
 		Main._logger.outputLog(String.format(
 				"Update the batchset #%d(runID:%d) analysis!", batchSetID,

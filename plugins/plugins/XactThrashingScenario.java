@@ -545,39 +545,64 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 */
 		static String buildWhereForUpdate(Table tbl) {
 			// control lock range with the first column
-			String idxCol = "id1";
-			// low key for update
-			long loKeyForUpdate = 0;
-			// high key for update
-			long hiKeyForUpdate = 0;
-			if (xLocks == 1.0) {
-				// determine the number of requested locks using transaction
-				// size
-//				int numReqLocks = (int) (xactSize * (double) tbl.hy_min_card);
+//			String idxCol = "id1";
+//			// low key for update
+//			long loKeyForUpdate = 0;
+//			// high key for update
+//			long hiKeyForUpdate = 0;
+//			if (xLocks == 1.0) {
+//				// determine the number of requested locks using transaction
+//				// size
+////				int numReqLocks = (int) (xactSize * (double) tbl.hy_min_card);
+////				// determine end range using effective db size
+////				int start = 0;
+////				// determine end range using effective db size
+////				int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
+//				// compute low key
+////				loKeyForUpdate = (long) ((double) getRandomNumber(
+////						repRandForWhereInUpdate, start, end - numReqLocks));
+//				// set high key
+////				hiKeyForUpdate = (loKeyForUpdate + numReqLocks);
+//				loKeyForUpdate = loKey; 
+//				hiKeyForUpdate = hiKey;
+//			} else {
+//				// determine the number of requested locks using transaction
+//				// size
+//				//int numXLocks = (int) (((double) (xactSize * (double) tbl.hy_min_card)) * xLocks);
+//				int numXLocks = (int) (((double) (xactSize * (double) tbl.hy_min_card)) * xLocks);
 //				// determine end range using effective db size
-//				int start = 0;
+//				long start = loKey;
 //				// determine end range using effective db size
-//				int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
-				// compute low key
+//				long end = hiKey;
 //				loKeyForUpdate = (long) ((double) getRandomNumber(
-//						repRandForWhereInUpdate, start, end - numReqLocks));
-				// set high key
-//				hiKeyForUpdate = (loKeyForUpdate + numReqLocks);
-				loKeyForUpdate = loKey; 
-				hiKeyForUpdate = hiKey;
-			} else {
-				// determine the number of requested locks using transaction
-				// size
-				int numXLocks = (int) (((double) (xactSize * (double) tbl.hy_min_card)) * xLocks);
-				// determine end range using effective db size
-				long start = loKey;
-				// determine end range using effective db size
-				long end = hiKey;
-				loKeyForUpdate = (long) ((double) getRandomNumber(
-						repRandForWhereInUpdate, (int) start,
-						(int) (end - numXLocks)));
-				hiKeyForUpdate = (loKeyForUpdate + numXLocks);
+//						repRandForWhereInUpdate, (int) start,
+//						(int) (end - numXLocks)));
+//				hiKeyForUpdate = (loKeyForUpdate + numXLocks);
+//			}
+//			String str = "WHERE " + idxCol + " >= " + loKeyForUpdate + " and "
+//					+ idxCol + " < " + hiKeyForUpdate;
+//			return str;
+			
+			String idxCol = "id1";
+			int numChosenRows = 0;
+			// determine the number of requested locks using transaction size
+			if(xactSize == 0){
+				if(Constants.DEFAULT_UPT_ROWS == 0){
+					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
+					System.exit(-1);
+				}
+				numChosenRows = (int) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card);
+			}else{
+				numChosenRows = (int) (xactSize * (double) tbl.hy_min_card);
 			}
+			int numXLocks = (int) (((double) (xactSize * (double) tbl.hy_min_card)) * xLocks);
+			int start = 0;
+			// determine end range using effective db size
+			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
+			long loKeyForUpdate = (long) ((double) getRandomNumber(
+					repRandForWhereInUpdate, (int) start,
+					(int) (end - numXLocks)));
+			long hiKeyForUpdate = (loKeyForUpdate + numXLocks);
 			String str = "WHERE " + idxCol + " >= " + loKeyForUpdate + " and "
 					+ idxCol + " < " + hiKeyForUpdate;
 			return str;
@@ -1491,6 +1516,7 @@ if(_clientNum % 100 == 0){
 						clientID = rs.getInt(1);
 					}
 					rs.close();
+					_clientID = clientID;
 					return;
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block

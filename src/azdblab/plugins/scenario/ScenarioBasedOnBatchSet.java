@@ -670,6 +670,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				if(dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
 					continue;
 				}
+				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == 0){
+					continue;
+				}
 				
 				// effective db size
 				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){

@@ -599,17 +599,28 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			Table tbl = myXactTables[chosenTblNum];
 
 			if(xactSize == 0){
-				// update only
+//				// update only
+//				// construct update clause
+//				String strUPDATE = buildUPDATEForUpdate(tbl);
+//				// construct set clause
+//				String strSET = buildSETForUpdate(tbl);
+//				// construct where clause
+//				String strWHERE = buildWHEREForSelect(tbl);
+//				// add this update statement in this transaction
+//				String strSQLStmt = String.format("%s %s %s", strUPDATE, strSET, strWHERE);
+//				// Main._logger.outputLog(strSQLStmt2);
+//				transaction.add(strSQLStmt);
 				// construct update clause
 				String strUPDATE = buildUPDATEForUpdate(tbl);
 				// construct set clause
 				String strSET = buildSETForUpdate(tbl);
 				// construct where clause
-				String strWHERE = buildWHEREForSelect(tbl);
+				String strWHERE2 = buildWhereForUpdate(tbl);
 				// add this update statement in this transaction
-				String strSQLStmt = String.format("%s %s %s", strUPDATE, strSET, strWHERE);
+				String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
+						strSET, strWHERE2);
 				// Main._logger.outputLog(strSQLStmt2);
-				transaction.add(strSQLStmt);
+				transaction.add(strSQLStmt2);
 			}else{
 				// build select clause
 				String strSELECT = buildSELECTForSelect(tbl);
@@ -621,20 +632,20 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				String strSQLStmt = String.format("%s %s %s", strSELECT, strFROM, strWHERE);
 				// Main._logger.outputLog(strSQLStmt);
 				transaction.add(strSQLStmt);
-				// if exclusive lock ratio is greater than zero
-				if (xLocks > 0) {
-					// construct update clause
-					String strUPDATE = buildUPDATEForUpdate(tbl);
-					// construct set clause
-					String strSET = buildSETForUpdate(tbl);
-					// construct where clause
-					String strWHERE2 = buildWhereForUpdate(tbl);
-					// add this update statement in this transaction
-					String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
-							strSET, strWHERE2);
-					// Main._logger.outputLog(strSQLStmt2);
-					transaction.add(strSQLStmt2);
-				}
+//				// if exclusive lock ratio is greater than zero
+//				if (xLocks > 0) {
+//					// construct update clause
+//					String strUPDATE = buildUPDATEForUpdate(tbl);
+//					// construct set clause
+//					String strSET = buildSETForUpdate(tbl);
+//					// construct where clause
+//					String strWHERE2 = buildWhereForUpdate(tbl);
+//					// add this update statement in this transaction
+//					String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
+//							strSET, strWHERE2);
+//					// Main._logger.outputLog(strSQLStmt2);
+//					transaction.add(strSQLStmt2);
+//				}
 			}
 			
 			// Insert this client's transaction and its statements while setting 
@@ -700,8 +711,15 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					LabShelfManager.getShelf().commit();
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
-					throw new Exception(e.getMessage());
+//					e.printStackTrace();
+//					throw new Exception(e.getMessage());
+					if(e.getMessage().toLowerCase().contains("unique")){
+						String updateSQL = "UPDATE azdblab_transaction "
+								+ "SET TransactionStr = '" + xactStr + "' "
+								+ "WHERE TransactionID = " + xactID;
+						Main._logger.outputLog(updateSQL);
+						LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+					}
 				}
 //			} else { // update transaction string
 //				String updateSQL = "UPDATE azdblab_transaction "
@@ -1669,7 +1687,8 @@ if(_clientNum % 100 == 0){
 		// initialize and run this batch set atomically
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
-		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
+		//for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
+		for (int MPL = smallestMPL; MPL <= 300; MPL += incrMPL) {
 			int batchID = insertBatch(batchSetID, MPL);
 
 			int k = 1;

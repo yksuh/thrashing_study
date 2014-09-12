@@ -1026,9 +1026,12 @@ public abstract class LabShelfManager extends ExperimentSubject {
 				+ Constants.TABLE_PREFIX
 				+ Constants.TABLE_EXECUTOR
 				+ " exe "
-				+ "WHERE exp.ExperimentID = exr.ExperimentID AND (exr.MachineName = exe.MachineName AND exr.DBMSName = exe.CurrentDBMSName) order by exr.runid";
+				+ "WHERE exp.ExperimentID = exr.ExperimentID AND (exr.MachineName = exe.MachineName AND exr.DBMSName = exe.CurrentDBMSName) order by " 
+				+ Constants.TABLE_PREFIX
+				+ Constants.TABLE_EXPERIMENTRUN + ".runid asc"
+				;
 
-		// System.out.println(sql);
+		System.out.println(sql);
 		int stageCnt = 1, stageWaitTime  = Constants.WAIT_TIME; 
 		while(stageCnt <= Constants.TRY_COUNTS){	
 			try {

@@ -737,7 +737,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						String updateSQL = "UPDATE azdblab_transaction "
 								+ "SET TransactionStr = '" + xactStr + "' "
 								+ "WHERE TransactionID = " + xactID;
-						Main._logger.outputDebug(updateSQL);
+						Main._logger.writeIntoLog(updateSQL);
 						LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 					}
 				}
@@ -745,7 +745,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				String updateSQL = "UPDATE azdblab_transaction "
 						+ "SET TransactionStr = '" + xactStr + "' "
 						+ "WHERE TransactionID = " + xactID;
-				Main._logger.outputDebug(updateSQL);
+				Main._logger.writeIntoLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 			}
 
@@ -1733,8 +1733,7 @@ if(_clientNum % 100 == 0){
 		// initialize and run this batch set atomically
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
-		//for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
-		for (int MPL = smallestMPL; MPL <= 300; MPL += incrMPL) {
+		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
 			int batchID = insertBatch(batchSetID, MPL);
 
 			int k = 1;

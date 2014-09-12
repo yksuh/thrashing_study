@@ -1514,8 +1514,6 @@ if(_clientNum % 100 == 0){
 						clientID = rs.getInt(1);
 					}
 					rs.close();
-					_clientID = clientID;
-					return;
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

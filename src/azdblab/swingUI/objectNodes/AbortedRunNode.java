@@ -46,8 +46,10 @@ public class AbortedRunNode extends RunStatusNode {
 		super(userName, notebookName, experimentName, scenario, machineName,
 				dbms, startTime, 4);
 		willHaveChildren = false;
-		strNodeName = "Aborted Run of [" + experimentName + "," + dbms + ","
-		+ startTime + "," + userName + "," + notebookName + "]";
+//		strNodeName = "Aborted Run of [" + experimentName + "," + dbms + ","
+//		+ startTime + "," + userName + "," + notebookName + "]";
+		strNodeName = experimentName + ":" + dbms + ":" + getRunID() + ":" 
+				+ startTime + ":" + userName + ":" + notebookName + "]";
 		
 	}
 

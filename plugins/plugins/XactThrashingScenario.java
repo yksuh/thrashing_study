@@ -739,6 +739,9 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 								+ "WHERE TransactionID = " + xactID;
 						Main._logger.writeIntoLog(updateSQL);
 						LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+					}else{
+						e.printStackTrace();
+						throw new Exception(e.getMessage());
 					}
 				}
 			} else { // update transaction string
@@ -1558,26 +1561,25 @@ if(_clientNum % 100 == 0){
 						e.printStackTrace();
 						Main._logger.reportError(e.getMessage());
 					}
-//					if (e.getMessage().toLowerCase().contains("unique")) {
-//						generated = true;
-//						query = "SELECT clientID from azdblab_client where batchID = "
-//								+ _batchID + " and clientNum = " + clientNum;
-//						Main._logger.writeIntoLog(query);
-//						rs = LabShelfManager.getShelf()
-//								.executeQuerySQL(query);
-//						try {
-//							while (rs.next()) {
-//								clientID = rs.getInt(1);
-//							}
-//							rs.close();
-//						} catch (SQLException ex) {
-//							// TODO Auto-generated catch block
-//							ex.printStackTrace();
-//						}
-//					} else {
-//						e.printStackTrace();
-//						Main._logger.reportError(e.getMessage());
-//					}
+					else{
+						generated = true;
+						query = "SELECT clientID from azdblab_client where batchID = "
+								+ _batchID + " and clientNum = " + clientNum;
+						Main._logger.writeIntoLog(query);
+						rs = LabShelfManager.getShelf()
+								.executeQuerySQL(query);
+						try {
+							while (rs.next()) {
+								clientID = rs.getInt(1);
+							}
+							rs.close();
+							_clientID = clientID;
+							return;
+						} catch (SQLException ex) {
+							// TODO Auto-generated catch block
+							ex.printStackTrace();
+						}
+					}
 				}
 			}
 			// set client ID found in DB

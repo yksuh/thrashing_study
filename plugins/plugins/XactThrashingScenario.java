@@ -1532,7 +1532,7 @@ if(_clientNum % 100 == 0){
 				else{
 					break;
 				}
-			}while(succTrials < Constants.TRY_COUNTS);
+			}while(succTrials <= 3);
 			
 			// not existing ...
 			if (clientID == -1) {
@@ -1564,7 +1564,7 @@ if(_clientNum % 100 == 0){
 						query = "SELECT clientID from azdblab_client where batchID = "
 								+ _batchID + " and clientNum = " + clientNum;
 						Main._logger.writeIntoLog(query);
-						rs = LabShelfManager.getShelf()
+						ResultSet rs = LabShelfManager.getShelf()
 								.executeQuerySQL(query);
 						try {
 							while (rs.next()) {

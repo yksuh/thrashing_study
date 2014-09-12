@@ -742,7 +742,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						String updateSQL = "UPDATE azdblab_transaction "
 								+ "SET TransactionStr = '" + xactStr + "' "
 								+ "WHERE TransactionID = " + xactID;
-						Main._logger.outputLog(updateSQL);
+						Main._logger.outputDebug(updateSQL);
 						LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 					}
 				}
@@ -750,7 +750,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				String updateSQL = "UPDATE azdblab_transaction "
 						+ "SET TransactionStr = '" + xactStr + "' "
 						+ "WHERE TransactionID = " + xactID;
-				Main._logger.outputLog(updateSQL);
+				Main._logger.outputDebug(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 			}
 

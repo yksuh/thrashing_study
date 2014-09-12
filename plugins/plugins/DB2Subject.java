@@ -108,19 +108,57 @@ public class DB2Subject extends ExperimentSubject {
 		        commit();
 		        String  strupdate  = "";
 		        Main._logger.outputLog("Populating Table to actual cardinality: " + tableName);
+//		        String strUpdate = "INSERT INTO " + tableName + "(";
+//       		Column[] column2 = table.getColumns();
+//		        // Assume all data fields are of integer data type
+//		        for ( int j = 0; j < columnnum; j++ ) {
+//		        	strUpdate += column2[j].myName;
+//		        	if(j < columnnum -1){
+//		        		strUpdate += ",";  
+//		        	}
+//		        }
+//		        strUpdate += ")";  
+//		        strUpdate += " VALUES (";
+//		        for ( int j = 0; j < columnnum; j++ ) {
+//		        	strUpdate += "?";
+//		        	if(j < columnnum -1){
+//		        		strUpdate += ",";  
+//		        	}
+//		        }
+//		        strUpdate += ")";
+//		        PreparedStatement pstmt = _connection.prepareStatement(strUpdate);
+//		        Main._logger.outputLog(strUpdate);
+		        final int BATCHSZ = 30000;
 		        for ( long i = 0; i < actual_cardinality; i++ ){
-		          if ((i + 1) % 10000 == 0){
+		          if ((i + 1) == actual_cardinality){
 		            Main._logger.outputLog("\t Inserted " + (i + 1) + " Rows");
 //		            commit();
 		          }
+//		          int pos = 1;
+//		          pstmt.setLong(pos, i);
+//		          System.out.println(String.format("<%d, %d>", pos++, i));
 		          String  strdata  = "";
 		          Column[] column = table.getColumns();
 		          // Assume all data fields are of integer data type
 		          for ( int j = 1; j < columnnum; j++ ) {
+//		        	  if(column[j].myName.contains("val")){
+//		        		  strdata += "'Dallas, long scarred by the guilt and shame of being the place Pres. JFK was assassinated.'";
+//		        	  }else{
+//		        		  strdata += repRand.getNextRandomInt();
+//		        	  }
+//		        	  if(j < columnnum -1){
+//		        		  strdata += ",";  
+//		        	  }
 		        	  if(column[j].myName.contains("val")){
-		        		  strdata += "'Dallas, long scarred by the guilt and shame of being the place Pres. JFK was assassinated.'";
+		        		  String str = "'Dallas, long scarred by the guilt and shame of being the place Pres. JFK was assassinated.'";
+		        		  strdata += str;
+//		        		  pstmt.setString(pos, str);
+//		        		  System.out.println(String.format("<%d, %s>", pos++, str));
 		        	  }else{
-		        		  strdata += repRand.getNextRandomInt();
+		        		  long val = repRand.getNextRandomInt();
+		        		  strdata += val;
+//		        		  pstmt.setLong(pos, val);
+//		        		  System.out.println(String.format("<%d, %d>", pos++, val));
 		        	  }
 		        	  if(j < columnnum -1){
 		        		  strdata += ",";  
@@ -128,14 +166,25 @@ public class DB2Subject extends ExperimentSubject {
 		          }
 		          strupdate = "INSERT INTO " + tableName + " VALUES(" + i + "," +
 		                      strdata + ")";
-//		          _statement.executeUpdate(strupdate);
+//		          System.out.println(strupdate);
+////		          _statement.executeUpdate(strupdate);
 		          _statement.addBatch(strupdate);
-		          if((i + 1) % 30000 == 0){
+//		          if((i + 1) % 30000 == 0){
+//		        	  _statement.executeBatch();
+//		        	  commit();
+//		          }
+//		          pstmt.execute();
+		          //pstmt.addBatch();
+		          if((i + 1) % BATCHSZ == 0){
 		        	  _statement.executeBatch();
+		        	  //pstmt.executeBatch();
+		        	  Main._logger.outputLog("\t Inserted " + (i + 1) + " Rows");
 		        	  commit();
 		          }
 		        }
 		      _statement.executeBatch();
+//			  pstmt.execute();
+		      //pstmt.executeBatch();
 		      commit();
 		    } catch (SQLException sqlex){
 		      sqlex.printStackTrace();

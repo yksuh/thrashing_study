@@ -584,18 +584,13 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //			return str;
 			
 			String idxCol = "id1";
-			int numChosenRows = 0;
-			// determine the number of requested locks using transaction size
 			if(xactSize == 0){
 				if(Constants.DEFAULT_UPT_ROWS == 0){
 					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
 					System.exit(-1);
 				}
-				numChosenRows = (int) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card);
-			}else{
-				numChosenRows = (int) (xactSize * (double) tbl.hy_min_card);
-			}
-			int numXLocks = (int) (((double) (xactSize * (double) tbl.hy_min_card)) * xLocks);
+			}	
+			int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * xLocks);
 			int start = 0;
 			// determine end range using effective db size
 			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);

@@ -1501,9 +1501,9 @@ if(_clientNum % 100 == 0){
 		public void setClientID(int batchID, int clientNum) {
 			// set client id
 			int clientID = -1;
-			String query = "SELECT clientID from azdblab_client where batchID = "
-					+ _batchID + " and clientNum = " + clientNum;
-			Main._logger.writeIntoLog(query);
+//			String query = "SELECT clientID from azdblab_client where batchID = "
+//					+ _batchID + " and clientNum = " + clientNum;
+//			Main._logger.writeIntoLog(query);
 //			
 //			int succTrials = 0;
 //			long wait = 1000;
@@ -1548,10 +1548,8 @@ if(_clientNum % 100 == 0){
 											String.valueOf(batchID),
 											String.valueOf(clientNum) },
 									CLIENT.columnDataTypes);
-					// Main._logger.outputLog(insertSQL);
+					Main._logger.outputLog(insertSQL);
 					LabShelfManager.getShelf().commit();
-					// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
-					// _clientNum, _batchID));
 					generated = false;
 				} catch (SQLException e) {
 					// // TODO Auto-generated catch block
@@ -1561,11 +1559,11 @@ if(_clientNum % 100 == 0){
 					}
 					else{
 						generated = true;
-						query = "SELECT clientID from azdblab_client where batchID = "
+						String query2 = "SELECT clientID from azdblab_client where batchID = "
 								+ _batchID + " and clientNum = " + clientNum;
-						Main._logger.writeIntoLog(query);
+						Main._logger.writeIntoLog(query2);
 						ResultSet rs = LabShelfManager.getShelf()
-								.executeQuerySQL(query);
+								.executeQuerySQL(query2);
 						try {
 							while (rs.next()) {
 								clientID = rs.getInt(1);

@@ -1548,7 +1548,7 @@ if(_clientNum % 100 == 0){
 											String.valueOf(batchID),
 											String.valueOf(clientNum) },
 									CLIENT.columnDataTypes);
-					Main._logger.outputLog(insertSQL);
+					Main._logger.writeIntoLog(insertSQL);
 					LabShelfManager.getShelf().commit();
 					generated = false;
 				} catch (SQLException e) {

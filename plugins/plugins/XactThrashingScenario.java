@@ -1505,34 +1505,34 @@ if(_clientNum % 100 == 0){
 					+ _batchID + " and clientNum = " + clientNum;
 			Main._logger.writeIntoLog(query);
 //			
-			int succTrials = 0;
-			long wait = 1000;
-			do{
-				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
-				try {
-					while (rs.next()) {
-						clientID = rs.getInt(1);
-					}
-					rs.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				if(clientID == -1){
-					succTrials++;
-					try {
-						Thread.sleep(wait);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					wait *= 2;
-				}
-				else{
-					break;
-				}
-			}while(succTrials <= 3);
+//			int succTrials = 0;
+//			long wait = 1000;
+//			do{
+//				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
+//				try {
+//					while (rs.next()) {
+//						clientID = rs.getInt(1);
+//					}
+//					rs.close();
+//				} catch (SQLException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				
+//				if(clientID == -1){
+//					succTrials++;
+//					try {
+//						Thread.sleep(wait);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					wait *= 2;
+//				}
+//				else{
+//					break;
+//				}
+//			}while(succTrials <= 3);
 			
 			// not existing ...
 			if (clientID == -1) {
@@ -2064,7 +2064,7 @@ Main._logger.outputDebug(batchSetQuery);
 			String strPassword = experimentSubject.getPassword();
 			// Main._logger.outputLog("Client " + (clientNum) +
 			// " is being initialized...");
-			//if(batchID <= 12802 && clientNum <= 90) continue;
+			if(batchID <= 12872 && clientNum <= 121) continue;
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);

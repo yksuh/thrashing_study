@@ -537,6 +537,52 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			return str;
 		}
 
+//		/*****
+//		 * Assume that this gets invoked when xLocks are greater than zero
+//		 * 
+//		 * @param tbl
+//		 * @return
+//		 */
+//		static String buildWhereForUpdate(Table tbl) {
+//			// control lock range with the first column
+//			String idxCol = "id1";
+//			// low key for update
+//			long loKeyForUpdate = 0;
+//			// high key for update
+//			long hiKeyForUpdate = 0;
+//			if (xLocks == 1.0) {
+//				// determine the number of requested locks using transaction
+//				// size
+////				int numReqLocks = (int) (xactSize * (double) tbl.hy_min_card);
+////				// determine end range using effective db size
+////				int start = 0;
+////				// determine end range using effective db size
+////				int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
+//				// compute low key
+////				loKeyForUpdate = (long) ((double) getRandomNumber(
+////						repRandForWhereInUpdate, start, end - numReqLocks));
+//				// set high key
+////				hiKeyForUpdate = (loKeyForUpdate + numReqLocks);
+//				loKeyForUpdate = loKey; 
+//				hiKeyForUpdate = hiKey;
+//			} else {
+//				// determine the number of requested locks using transaction
+//				// size
+//				int numXLocks = (int) (((double) (xactSize * (double) tbl.hy_min_card)) * xLocks);
+//				// determine end range using effective db size
+//				long start = loKey;
+//				// determine end range using effective db size
+//				long end = hiKey;
+//				loKeyForUpdate = (long) ((double) getRandomNumber(
+//						repRandForWhereInUpdate, (int) start,
+//						(int) (end - numXLocks)));
+//				hiKeyForUpdate = (loKeyForUpdate + numXLocks);
+//			}
+//			String str = "WHERE " + idxCol + " >= " + loKeyForUpdate + " and "
+//					+ idxCol + " < " + hiKeyForUpdate;
+//			return str;
+//		}
+
 		/*****
 		 * Assume that this gets invoked when xLocks are greater than zero
 		 * 
@@ -544,45 +590,26 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * @return
 		 */
 		static String buildWhereForUpdate(Table tbl) {
-			// control lock range with the first column
 			String idxCol = "id1";
-			// low key for update
-			long loKeyForUpdate = 0;
-			// high key for update
-			long hiKeyForUpdate = 0;
-			if (xLocks == 1.0) {
-				// determine the number of requested locks using transaction
-				// size
-//				int numReqLocks = (int) (xactSize * (double) tbl.hy_min_card);
-//				// determine end range using effective db size
-//				int start = 0;
-//				// determine end range using effective db size
-//				int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
-				// compute low key
-//				loKeyForUpdate = (long) ((double) getRandomNumber(
-//						repRandForWhereInUpdate, start, end - numReqLocks));
-				// set high key
-//				hiKeyForUpdate = (loKeyForUpdate + numReqLocks);
-				loKeyForUpdate = loKey; 
-				hiKeyForUpdate = hiKey;
-			} else {
-				// determine the number of requested locks using transaction
-				// size
-				int numXLocks = (int) (((double) (xactSize * (double) tbl.hy_min_card)) * xLocks);
-				// determine end range using effective db size
-				long start = loKey;
-				// determine end range using effective db size
-				long end = hiKey;
-				loKeyForUpdate = (long) ((double) getRandomNumber(
-						repRandForWhereInUpdate, (int) start,
-						(int) (end - numXLocks)));
-				hiKeyForUpdate = (loKeyForUpdate + numXLocks);
-			}
+			if(xactSize == 0){
+				if(Constants.DEFAULT_UPT_ROWS == 0){
+					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
+					System.exit(-1);
+				}
+			}	
+			int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * xLocks);
+			int start = 0;
+			// determine end range using effective db size
+			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
+			long loKeyForUpdate = (long) ((double) getRandomNumber(
+					repRandForWhereInUpdate, (int) start,
+					(int) (end - numXLocks)));
+			long hiKeyForUpdate = (loKeyForUpdate + numXLocks);
 			String str = "WHERE " + idxCol + " >= " + loKeyForUpdate + " and "
 					+ idxCol + " < " + hiKeyForUpdate;
 			return str;
 		}
-
+		
 		/****
 		 * Build transaction
 		 * 
@@ -599,17 +626,28 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			Table tbl = myXactTables[chosenTblNum];
 
 			if(xactSize == 0){
-				// update only
+//				// update only
+//				// construct update clause
+//				String strUPDATE = buildUPDATEForUpdate(tbl);
+//				// construct set clause
+//				String strSET = buildSETForUpdate(tbl);
+//				// construct where clause
+//				String strWHERE = buildWHEREForSelect(tbl);
+//				// add this update statement in this transaction
+//				String strSQLStmt = String.format("%s %s %s", strUPDATE, strSET, strWHERE);
+//				// Main._logger.outputLog(strSQLStmt2);
+//				transaction.add(strSQLStmt);
 				// construct update clause
 				String strUPDATE = buildUPDATEForUpdate(tbl);
 				// construct set clause
 				String strSET = buildSETForUpdate(tbl);
 				// construct where clause
-				String strWHERE = buildWHEREForSelect(tbl);
+				String strWHERE2 = buildWhereForUpdate(tbl);
 				// add this update statement in this transaction
-				String strSQLStmt = String.format("%s %s %s", strUPDATE, strSET, strWHERE);
+				String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
+						strSET, strWHERE2);
 				// Main._logger.outputLog(strSQLStmt2);
-				transaction.add(strSQLStmt);
+				transaction.add(strSQLStmt2);
 			}else{
 				// build select clause
 				String strSELECT = buildSELECTForSelect(tbl);
@@ -621,20 +659,20 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				String strSQLStmt = String.format("%s %s %s", strSELECT, strFROM, strWHERE);
 				// Main._logger.outputLog(strSQLStmt);
 				transaction.add(strSQLStmt);
-				// if exclusive lock ratio is greater than zero
-				if (xLocks > 0) {
-					// construct update clause
-					String strUPDATE = buildUPDATEForUpdate(tbl);
-					// construct set clause
-					String strSET = buildSETForUpdate(tbl);
-					// construct where clause
-					String strWHERE2 = buildWhereForUpdate(tbl);
-					// add this update statement in this transaction
-					String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
-							strSET, strWHERE2);
-					// Main._logger.outputLog(strSQLStmt2);
-					transaction.add(strSQLStmt2);
-				}
+//				// if exclusive lock ratio is greater than zero
+//				if (xLocks > 0) {
+//					// construct update clause
+//					String strUPDATE = buildUPDATEForUpdate(tbl);
+//					// construct set clause
+//					String strSET = buildSETForUpdate(tbl);
+//					// construct where clause
+//					String strWHERE2 = buildWhereForUpdate(tbl);
+//					// add this update statement in this transaction
+//					String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
+//							strSET, strWHERE2);
+//					// Main._logger.outputLog(strSQLStmt2);
+//					transaction.add(strSQLStmt2);
+//				}
 			}
 			
 			// Insert this client's transaction and its statements while setting 
@@ -645,6 +683,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			recMap.put(new Long(xactID), transaction);
 			return recMap;
 		}
+
 
 		/*****
 		 * Insert a given transaction into DB

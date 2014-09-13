@@ -2064,7 +2064,7 @@ Main._logger.outputDebug(batchSetQuery);
 			String strPassword = experimentSubject.getPassword();
 			// Main._logger.outputLog("Client " + (clientNum) +
 			// " is being initialized...");
-			if(batchID <= 12872 && clientNum <= 121) continue;
+			if(batchID <= 12951 && clientNum <= 656) continue;
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);

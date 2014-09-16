@@ -722,7 +722,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //					}catch(Exception ex){
 //						ex.printStackTrace();
 //					}
-//					succTrials++;
+					succTrials++;
 				}
 				else break;
 			} while(succTrials <= 3);
@@ -1564,7 +1564,6 @@ if(_clientNum % 100 == 0){
 											String.valueOf(batchID),
 											String.valueOf(clientNum) },
 									CLIENT.columnDataTypes);
-					Main._logger.writeIntoLog(insertSQL);
 					LabShelfManager.getShelf().commit();
 					generated = false;
 				} catch (SQLException e) {
@@ -2081,7 +2080,8 @@ Main._logger.outputDebug(batchSetQuery);
 			String strPassword = experimentSubject.getPassword();
 			// Main._logger.outputLog("Client " + (clientNum) +
 			// " is being initialized...");
-			if(batchID <= 12652 && clientNum <= 168) continue;
+			if(batchID <= 12652) continue;
+			if(clientNum <= 168) continue;
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);

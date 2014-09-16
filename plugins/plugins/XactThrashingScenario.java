@@ -1494,18 +1494,19 @@ if(_clientNum % 100 == 0){
 		 * @param batchID batch ID
 		 * @param clientNum client number
 		 * @param iterNum iteration number
+		 * @throws Exception 
 		 */
-		public void setClientID(int batchID, int clientNum) {
+		public void setClientID(int batchID, int clientNum) throws Exception {
 			// set client id
 			int clientID = -1;
 			String query = "SELECT clientID from azdblab_client where batchID = "
 					+ _batchID + " and clientNum = " + clientNum;
 			Main._logger.writeIntoLog(query);
 			
-			int succTrials = 0;
-			long wait = 1000;
+			int succTrials = 1;
+			long wait = 10000;
 			do{
-				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(query);
+				ResultSet rs = LabShelfManager.getShelf().executeQuerySQLOnce(query);
 				try {
 					while (rs.next()) {
 						clientID = rs.getInt(1);
@@ -1515,8 +1516,8 @@ if(_clientNum % 100 == 0){
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
 				if(clientID == -1){
+					Main._logger.reportError("azdblab_client inaccessible <= retry (" + succTrials+")");
 					succTrials++;
 					try {
 						Thread.sleep(wait);
@@ -1524,37 +1525,42 @@ if(_clientNum % 100 == 0){
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					wait *= 2;
 				}else{
 					break;
 				}
-			}while(succTrials < Constants.TRY_COUNTS);
+			}while(succTrials <= 3);
+			
+			if(clientID == -1){
+				Main._logger.reportError("Tried more than ("+succTrials+") times. Gave up.");
+				new Exception("azdblab_client not accessible");
+			}
 			
 			// not existing ...
-			if (clientID == -1) {
-				// obtain a new batch set id
-				clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
-				try {
-					String insertSQL = LabShelfManager.getShelf()
-							.NewInsertTuple(
-									Constants.TABLE_PREFIX
-											+ Constants.TABLE_CLIENT,
-									CLIENT.columns,
-									new String[] { String.valueOf(clientID),
-											String.valueOf(batchID),
-											String.valueOf(clientNum) },
-									CLIENT.columnDataTypes);
-					// Main._logger.outputLog(insertSQL);
-					LabShelfManager.getShelf().commit();
-					// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
-					// _clientNum, _batchID));
-				} catch (SQLException e) {
-					// // TODO Auto-generated catch block
-					e.printStackTrace();
-					Main._logger.reportError(e.getMessage());
-					System.exit(-1);
-				}
-			}
+//			if (clientID == -1) {
+//				// obtain a new batch set id
+//				clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
+//				try {
+//					String insertSQL = LabShelfManager.getShelf()
+//							.NewInsertTuple(
+//									Constants.TABLE_PREFIX
+//											+ Constants.TABLE_CLIENT,
+//									CLIENT.columns,
+//									new String[] { String.valueOf(clientID),
+//											String.valueOf(batchID),
+//											String.valueOf(clientNum) },
+//									CLIENT.columnDataTypes);
+//					// Main._logger.outputLog(insertSQL);
+//					LabShelfManager.getShelf().commit();
+//					// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
+//					// _clientNum, _batchID));
+//				} catch (SQLException e) {
+//					// // TODO Auto-generated catch block
+//					e.printStackTrace();
+////					Main._logger.reportError(e.getMessage());
+////					System.exit(-1);
+//					throw new Exception(e.getMessage());
+//				}
+//			}
 			// set client ID found in DB
 			_clientID = clientID;
 		}
@@ -1592,12 +1598,13 @@ if(_clientNum % 100 == 0){
 			String xactStatements = "";
 			
 			long succTrials = 0;
-			long waitTime = 1000;
+			long waitTime = 10000;
 			do{
 				ResultSet rs = null;
 				try {
-					rs = LabShelfManager.getShelf().executeQuerySQL(
-							"SELECT TransactionID, TransactionStr from azdblab_transaction"
+//					rs = LabShelfManager.getShelf().executeQuerySQL(
+					rs = LabShelfManager.getShelf().executeQuerySQLOnce(
+									"SELECT TransactionID, TransactionStr from azdblab_transaction"
 									+ " where clientid = " + clientID
 									+ " and TransactionNum = " + xactNum);
 					while (rs.next()) {
@@ -1607,33 +1614,39 @@ if(_clientNum % 100 == 0){
 					rs.close();
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
-					// e1.printStackTrace();
+					e1.printStackTrace();
 				}
 				if(xactID == -1){
+					Main._logger.reportError("transaction record is unaccessible for unknown reason ("+succTrials+")");
 					succTrials++;
 					try{
 						Thread.sleep(waitTime);
 					}catch(Exception ex){
 						ex.printStackTrace();
 					}
-					waitTime *= 2;
+//					waitTime *= 2;
 				}else
 					break;
-			}while(succTrials <= Constants.TRY_COUNTS);
+			}while(succTrials <= 3);
 
-			// not existing ...
 			if (xactID == -1) {
-				// generation transaction for this client
-				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(_clientID, xactNum);
-				xactID = xactMap.keySet().iterator().next();
-				retXact = xactMap.values().iterator().next();
-			}else{
+				Main._logger.reportError("Tried more than ("+succTrials+") times. Gave up.");
+				new Exception("azdblab_transaction not accessible");
+			}
+			
+			// not existing ...
+//			if (xactID == -1) {
+//				// generation transaction for this client
+//				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(_clientID, xactNum);
+//				xactID = xactMap.keySet().iterator().next();
+//				retXact = xactMap.values().iterator().next();
+//			}else{
 				retXact = new Vector<String>();
 				String[] stmts = xactStatements.split(";");
 				for(int i=0;i<stmts.length;i++){
 					retXact.add(stmts[i]);
 				}
-			}
+//			}
 			
 			// build transaction number to ID map
 			Long xtNum = new Long(xactNum);
@@ -2047,7 +2060,7 @@ Main._logger.outputDebug(batchSetQuery);
 			// configure this client
 			clients[i].setTransaction();
 		}
-		if(iterNum == 1) return iterNum;
+
 		// flush caches
 		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");

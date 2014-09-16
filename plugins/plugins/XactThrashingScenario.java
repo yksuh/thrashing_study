@@ -698,34 +698,19 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// get transaction id
 			int xactID = -1;
 			ResultSet rs = null;
-			int succTrials = 1;
-//			long wait = 10000;
-			do{
-				try {
-					rs = LabShelfManager.getShelf().executeQuerySQL(
-							"SELECT TransactionID " + "from azdblab_transaction"
-									+ " where clientid = " + clientID
-									+ " and TransactionNum = " + xactNum);
-					while (rs.next()) {
-						xactID = rs.getInt(1);
-					}
-					rs.close();
-				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-					new Exception(e1.getMessage());
+			try {
+				rs = LabShelfManager.getShelf().executeQuerySQL(
+						"SELECT TransactionID " + "from azdblab_transaction"
+								+ " where clientid = " + clientID
+								+ " and TransactionNum = " + xactNum);
+				while (rs.next()) {
+					xactID = rs.getInt(1);
 				}
-				if(xactID == -1){
-	Main._logger.outputDebug("azdblab_transaction neither accessible nor no record <= retry ("+succTrials+")");
-//					try{
-//						Thread.sleep(wait);
-//					}catch(Exception ex){
-//						ex.printStackTrace();
-//					}
-//					succTrials++;
-				}
-				else break;
-			} while(succTrials <= 3);
+				rs.close();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				// e1.printStackTrace();
+			}
 
 			// not existing ...
 			if (xactID == -1) {
@@ -759,8 +744,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						throw new Exception(e.getMessage());
 					}
 				}
-			} 
-			else { // update transaction string
+			} else { // update transaction string
 				String updateSQL = "UPDATE azdblab_transaction "
 						+ "SET TransactionStr = '" + xactStr + "' "
 						+ "WHERE TransactionID = " + xactID;
@@ -1572,7 +1556,6 @@ if(_clientNum % 100 == 0){
 					if (!e.getMessage().toLowerCase().contains("unique")) {
 						e.printStackTrace();
 						Main._logger.reportError(e.getMessage());
-						new Exception(e.getMessage());
 					}
 					else{
 						generated = true;
@@ -1591,7 +1574,6 @@ if(_clientNum % 100 == 0){
 						} catch (SQLException ex) {
 							// TODO Auto-generated catch block
 							ex.printStackTrace();
-							new Exception(e.getMessage());
 						}
 					}
 				}
@@ -1668,14 +1650,13 @@ if(_clientNum % 100 == 0){
 				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(_clientID, xactNum);
 				xactID = xactMap.keySet().iterator().next();
 				retXact = xactMap.values().iterator().next();
+			}else{
+				retXact = new Vector<String>();
+				String[] stmts = xactStatements.split(";");
+				for(int i=0;i<stmts.length;i++){
+					retXact.add(stmts[i]);
+				}
 			}
-//			else{
-//				retXact = new Vector<String>();
-//				String[] stmts = xactStatements.split(";");
-//				for(int i=0;i<stmts.length;i++){
-//					retXact.add(stmts[i]);
-//				}
-//			}
 			
 			// build transaction number to ID map
 			Long xtNum = new Long(xactNum);
@@ -2081,7 +2062,7 @@ Main._logger.outputDebug(batchSetQuery);
 			String strPassword = experimentSubject.getPassword();
 			// Main._logger.outputLog("Client " + (clientNum) +
 			// " is being initialized...");
-			if(batchID <= 12652 && clientNum <= 168) continue;
+			if(batchID <= 12869 && clientNum <= 38) continue;
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);

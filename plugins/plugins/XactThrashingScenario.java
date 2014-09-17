@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Timer;
@@ -816,11 +817,34 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		// }
 
 		protected class BatchRunTimeOut extends TimerTask {
+			public int cn = 0;
+			public Connection co = null;
+			public Statement st = null;
+			
+			public BatchRunTimeOut(int clientNumber, Connection conn,
+					Statement stmt) {
+				st = stmt;
+				co = conn;
+				clientNumber = cn;
+			}
+
+			public BatchRunTimeOut() {
+			}
+
 			public void run() {
 				_clientRunStats[_clientNum].timeOut = true;
+				if (st != null) {
+					try {
+						st.cancel();
+						new SQLException("Batch run timeout");
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+				}
+				
+//				_clientRunStats[_clientNum].timeOut = true;
 				if (_stmt != null) {
 					try {
-						//_stmt.cancel();
 						_stmt.close();
 						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
 						new SQLException("Batch run timeout");
@@ -1259,10 +1283,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			long runTime = 0;
 			// conn, stmt for quickly getting out of the loop
 			// timeout thread for getting number of transactions and sumElapsedTime
-//			BatchRunTimeOut brt = new BatchRunTimeOut(this._clientNum, _conn, _stmt/*, startTime, batchRunTime*/);
 			BatchRunTimeOut brt = new BatchRunTimeOut();
+			BatchRunTimeOut brt2 = new BatchRunTimeOut(this._clientNum, _conn, _stmt);
 			Timer batchRunTimer = new Timer();
+			Timer batchRunTimer2 = new Timer();
 			batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
+			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
 			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
 //				if (_timeOut) {
 //					long elapsedTime = System.currentTimeMillis()-_startTime;
@@ -1292,7 +1318,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						_stmt = _conn.createStatement(
 							ResultSet.TYPE_FORWARD_ONLY,
 							ResultSet.CONCUR_UPDATABLE);
-					
+					if(_stmt != null)
+						_stmt.setQueryTimeout(batchRunTime * 1000);
 					_conn.setAutoCommit(false);
 					long xactStartTime = System.currentTimeMillis();
 					// run transaction
@@ -1346,7 +1373,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					// + "stmt run size => " + xactRunTimeVec.size()
 					// + "xact run size => " + stmtRunTimeVec.size());
 					}
-				} catch (SQLException e) {
+				} 
+				catch(SQLTimeoutException ste){
+					Main._logger.reportErrorNotOnConsole(ste.getMessage());
+					break;
+				}
+				catch (Exception e) {
 					if(e.getMessage().contains("timeout")){
 						break;
 					}
@@ -1396,10 +1428,10 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				// }
 			} // while
 		
-			if(_clientNum % 50 == 0){
+			//if(_clientNum % 10 == 0){
 				String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
 				Main._logger.outputLog(str);
-			}
+			//}
 			
 //			// Check if runTime surpasses batch run time
 //			if((double)(runTime/1000) > (double)(batchRunTime*1.10)){
@@ -1410,6 +1442,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			_clientRunStats[_clientNum].numFinalExecXacts = _numExecXacts;
 			
 			batchRunTimer.cancel();
+			batchRunTimer2.cancel();
 		}
 
 		// private long getStatementID(int stmtNum) {

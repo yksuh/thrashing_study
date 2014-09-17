@@ -832,7 +832,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			}
 
 			public void run() {
-				_clientRunStats[_clientNum].timeOut = true;
+				if(_clientRunStats[_clientNum] != null)
+					_clientRunStats[_clientNum].timeOut = true;
 				if (st != null) {
 					try {
 						st.cancel();
@@ -2097,6 +2098,8 @@ Main._logger.outputDebug(batchSetQuery);
 			// assign client number
 			int clientNum = i + 1;
 			_clientRunStats[clientNum] = new XactRunStatPerClient();
+			assert(_clientRunStats[clientNum] != null);
+			
 			// ready for open connection
 			String strDrvName = experimentSubject.getDBMSDriverClassName();
 			String strConnStr = experimentSubject.getConnectionString();

@@ -1,0 +1,33 @@
+<transactionExperiment name="xt-1M-1000-120-1" scenario="xactthrashing">
+  <description>
+    The baseline test of transaction thrashing scenario.
+  </description>
+  <dataDefinitionReference href="TestDataDef1M.xml"/>
+  <tableConfiguration>
+    <tableSet>
+      <table name="HT1" seed="1999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT2" seed="2999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT3" seed="3999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT4" seed="4999">
+        <cardinality hypothetical="actual"/>
+      </table>
+      <table name="HT5" seed="5999">
+        <cardinality hypothetical="actual"/>
+      </table>
+    </tableSet>
+  </tableConfiguration>
+  <dbmsBufferCacheSize min="1" max="1" increment="0"/>
+  <multiCoreConfiguration numberCores="1"/>
+  <duration seconds="20"/>
+  <xactSize min="0.0001" max="0.0001" increment="10"/><!-- selectivity in (%)-->
+  <xLocks min="0" max="0" increment="0.25"/> <!-- exclusive lock ratio -->
+  <terminalConfiguration numberTerminals="1000" increment="100"/><!-- for compatibility test -->
+  <multiProgrammingLevel min="1000" max="1000" increment="100"/>
+  <effectiveDB min="1" max="1" increment="0.25"/>
+</transactionExperiment>

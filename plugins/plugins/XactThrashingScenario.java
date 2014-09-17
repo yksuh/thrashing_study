@@ -1162,38 +1162,56 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		// return;
 		// }
 
-		/**
-		 * Closes the DBMS connection that was opened by the open call.
-		 */
-		public void terminate() {
-//			long elapsedTime = System.currentTimeMillis()-_startTime;
-//if(_clientNum % 10 == 0){
-//	String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, elapsedTime, _numExecXacts);
-//	Main._logger.outputLog(str);
-//}
-			try {
-				if (_stmt != null)
-					_stmt.close();
-			} catch (SQLException ex) {
-				// Main._logger.reportError("Statement Close failed");
-				// Main._logger.reportErrorNotOnConsole(ex.getMessage());
-				// ex.printStackTrace();
-			}
-			_stmt = null;
-			try {
-				if (_conn != null)
-					_conn.close();
-			} catch (SQLException e) {
-				// Main._logger.reportError("Connection Close failed");
-				// Main._logger.reportErrorNotOnConsole(e.getMessage());
-				// e.printStackTrace();
-			}
-			_conn = null;
-if(_clientNum % 100 == 0){
-	Main._logger.outputLog("\tDone with closing Client #" + _clientNum);
-}
-		}
+//		/**
+//		 * Closes the DBMS connection that was opened by the open call.
+//		 */
+//		public void terminate() {
+//			long stmtClosingTime=0, connClosingTime=0;
+//			try {
+//				long start = System.currentTimeMillis();
+//				Main._logger.outputLog(String.format("\tTerminated Client #%d",_clientNum));
+//				if (_stmt != null)
+//					_stmt.close();
+//				stmtClosingTime = System.currentTimeMillis()-start;
+//			} catch (SQLException ex) {
+//				// Main._logger.reportError("Statement Close failed");
+//				// Main._logger.reportErrorNotOnConsole(ex.getMessage());
+//				// ex.printStackTrace();
+//			}
+//			_stmt = null;
+//			try {
+//				long start = System.currentTimeMillis();
+//				if (_conn != null)
+//					_conn.close();
+//				connClosingTime = System.currentTimeMillis()-start;
+//			} catch (SQLException e) {
+//				// Main._logger.reportError("Connection Close failed");
+//				// Main._logger.reportErrorNotOnConsole(e.getMessage());
+//				// e.printStackTrace();
+//			}
+//			_conn = null;
+////if(_clientNum % 100 == 0){
+//	Main._logger.outputLog(String.format("\tTerminated Client #%d(stmt: %d(ms), conn: %d(ms)",_clientNum, 
+//			stmtClosingTime, connClosingTime));
+////}
+//		}
 
+		/***
+		 * Return the current connection object
+		 * @return
+		 */
+		public Connection getConnection(){
+			return _conn;
+		}
+		
+		/***
+		 * Return the current statement
+		 * @return
+		 */
+		public Statement getStatement(){
+			return _stmt;
+		}
+		
 		/**
 		 * Commits all update operations made to the dbms. This must be called
 		 * for inserts statements to be seen.
@@ -2023,6 +2041,7 @@ Main._logger.outputDebug(batchSetQuery);
 //				+ ") initialization (MPL=" + MPL + ")");
 	}
 
+	private boolean[] barrier;
 	/***
 	 * Runs transactions per client in a batch
 	 * 
@@ -2090,6 +2109,12 @@ Main._logger.outputDebug(batchSetQuery);
 //			runAgain = true;
 //		}
 		
+		// barrier implementation
+		barrier = new boolean[clients.length];
+		for(int i=0;i<clients.length;i++){
+			barrier[i] = false;
+		}
+				
 		for (Client c : clients) {
 			// locally set timeOut 
 //			c.setTimeOut();
@@ -2104,8 +2129,23 @@ Main._logger.outputDebug(batchSetQuery);
 //						batchRunTime));
 ////				runAgain = true;
 //			}
-			c.terminate();
+//			c.terminate();
+			new CloseConnection(c.getClientNumber(), 
+							    c.getConnection(),
+							    c.getStatement()).terminate();
 		}
+		
+		Main._logger.outputLog("------ Barrier Start! -----");
+		// Check if every thread reaches the barrier
+		boolean done = false;
+		while(!done){
+			for(int i=0;i<clients.length;i++){
+				if(!barrier[i])
+					continue;
+			}
+			done = true;
+		}
+		Main._logger.outputLog("------ Barrier Exit! -----");
 		
 		int totalXacts = 0;
 		long sumOfBatchRunElapsedTime = 0;
@@ -2198,6 +2238,53 @@ Main._logger.outputDebug(batchSetQuery);
 										iterNum); // iteration number
 		}
 		return iterNum;
+	}
+	
+	private class CloseConnection implements Runnable{
+		public Connection _conn;
+		public Statement _stmt;
+		public int _clientNum;
+		
+		public CloseConnection(int cNum, Connection co, Statement st){
+			_conn = co;
+			_stmt = st;
+			_clientNum = cNum;
+		}
+		
+		@Override
+		public void run() {
+			terminate();
+		}
+		
+		public void terminate(){
+			// TODO Auto-generated method stub
+			long stmtClosingTime=0, connClosingTime=0;
+			try {
+				long start = System.currentTimeMillis();
+				if (_stmt != null)
+					_stmt.close();
+				stmtClosingTime = System.currentTimeMillis()-start;
+			} catch (SQLException ex) {
+				Main._logger.reportErrorNotOnConsole(ex.getMessage());
+			}
+			_stmt = null;
+			try {
+				long start = System.currentTimeMillis();
+				if (_conn != null)
+					_conn.close();
+				connClosingTime = System.currentTimeMillis()-start;
+			} catch (SQLException e) {
+				Main._logger.reportErrorNotOnConsole(e.getMessage());
+			}
+			_conn = null;
+			//if(_clientNum % 100 == 0){
+			Main._logger.outputLog(
+					String.format("\tTerminated Client #%d(stmt: %d(ms), conn: %d(ms)",
+							_clientNum, 
+							stmtClosingTime, 
+							connClosingTime));
+			barrier[_clientNum-1] = true;
+		}
 	}
 	
 //	class ClientData{

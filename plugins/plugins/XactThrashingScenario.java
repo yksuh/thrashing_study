@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Timer;
@@ -42,7 +43,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		long id;
 		long num = 0;
 		long numExecXacts = 0;
-		long numFinalExecXacts = 0;
+		long numMeasuredExecXacts = 0;
 		long sumOfElapsedTime = 0;
 		long runTime = 0;
 		HashMap<Long, Long> xactNumToIDMap;
@@ -816,16 +817,42 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		// }
 
 		protected class BatchRunTimeOut extends TimerTask {
+			public int cn = 0;
+			public Connection co = null;
+			public Statement st = null;
+			
+			public BatchRunTimeOut(int clientNumber, Connection conn,
+					Statement stmt) {
+				st = stmt;
+				co = conn;
+				clientNumber = cn;
+			}
+
+			public BatchRunTimeOut() {
+			}
+
 			public void run() {
-				_clientRunStats[_clientNum].timeOut = true;
+				if(_clientRunStats[_clientNum] != null)
+					_clientRunStats[_clientNum].timeOut = true;
+				if (st != null) {
+					try {
+						st.cancel();
+						new SQLException("Batch run timeout");
+					} catch (SQLException e) {
+						//e.printStackTrace();
+						Main._logger.reportError(e.getMessage());
+					}
+				}
+				
+//				_clientRunStats[_clientNum].timeOut = true;
 				if (_stmt != null) {
 					try {
-						//_stmt.cancel();
 						_stmt.close();
 						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
 						new SQLException("Batch run timeout");
 					} catch (SQLException e) {
-						e.printStackTrace();
+//						e.printStackTrace();
+						Main._logger.reportError(e.getMessage());
 					}
 				}
 			}
@@ -896,6 +923,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		private String _connStr;
 		private String _userName;
 		private String _password;
+		
+		public boolean finalExit = false;
 //		private boolean _timeOut;
 //		private long _startTime;
 //		private boolean _fail;
@@ -923,21 +952,17 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			_transactionMap = new HashMap<Long, Vector<String>>();
 			_xactNumToIDMap = new HashMap<Long, Long>();
 			_xactNumToRunTimeVecMap = new HashMap<Long, Vector<Long>>();
-			//resetRunTimeVec();
-//			_timeOut = false;
-			// _xactNumToStmtRunTimeVecMap = new HashMap<Long,
-			// Vector<Vector<Long>>>();
 		}
 
-		/***
-		 * Reset transaction execution runtime vector
-		 */
-		private void resetRunTimeVec() {
-			// TODO Auto-generated method stub
-			_xactNumToRunTimeVecMap = new HashMap<Long, Vector<Long>>();
-			_numExecXacts = 0;
-			_sumRunTime = 0;
-		}
+//		/***
+//		 * Reset transaction execution runtime vector
+//		 */
+//		private void resetRunTimeVec() {
+//			// TODO Auto-generated method stub
+//			_xactNumToRunTimeVecMap = new HashMap<Long, Vector<Long>>();
+//			_numExecXacts = 0;
+//			_sumRunTime = 0;
+//		}
 		
 		public HashMap<Long, Vector<String>> getTransactionMap() {
 			return _transactionMap;
@@ -1037,15 +1062,11 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		
 		public void init(String drvName, String strConnStr, String strUserName,
 				String strPassword) throws Exception {
-			// Main._logger.outputLog("login details: " + strConnStr + ", " +
-			// strUserName + ", " + strPassword);
 			try {
-//				_driverName = drvName;
 				_connStr = strConnStr;
 				_userName = strUserName;
 				_password = strPassword;
-				// Main._logger.outputLog("login details: " + strConnectString +
-				// ", " + strUserName + ", " + strPassword + ", " + strdrvname);
+
 				Class.forName(drvName);
 				int j = 1;
 				while(true){
@@ -1061,9 +1082,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						ResultSet.CONCUR_UPDATABLE);
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
-//				sqlex.printStackTrace();
-				// Main._logger.outputLog("login details: " + strConnStr + ", "
-				// + strUserName + ", " + strPassword);
+				Main._logger.reportError(sqlex.getMessage());
 			}
 		}
 
@@ -1162,38 +1181,56 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		// return;
 		// }
 
-		/**
-		 * Closes the DBMS connection that was opened by the open call.
-		 */
-		public void terminate() {
-//			long elapsedTime = System.currentTimeMillis()-_startTime;
-//if(_clientNum % 10 == 0){
-//	String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, elapsedTime, _numExecXacts);
-//	Main._logger.outputLog(str);
-//}
-			try {
-				if (_stmt != null)
-					_stmt.close();
-			} catch (SQLException ex) {
-				// Main._logger.reportError("Statement Close failed");
-				// Main._logger.reportErrorNotOnConsole(ex.getMessage());
-				// ex.printStackTrace();
-			}
-			_stmt = null;
-			try {
-				if (_conn != null)
-					_conn.close();
-			} catch (SQLException e) {
-				// Main._logger.reportError("Connection Close failed");
-				// Main._logger.reportErrorNotOnConsole(e.getMessage());
-				// e.printStackTrace();
-			}
-			_conn = null;
-if(_clientNum % 100 == 0){
-	Main._logger.outputLog("\tDone with closing Client #" + _clientNum);
-}
-		}
+//		/**
+//		 * Closes the DBMS connection that was opened by the open call.
+//		 */
+//		public void terminate() {
+//			long stmtClosingTime=0, connClosingTime=0;
+//			try {
+//				long start = System.currentTimeMillis();
+//				Main._logger.outputLog(String.format("\tTerminated Client #%d",_clientNum));
+//				if (_stmt != null)
+//					_stmt.close();
+//				stmtClosingTime = System.currentTimeMillis()-start;
+//			} catch (SQLException ex) {
+//				// Main._logger.reportError("Statement Close failed");
+//				// Main._logger.reportErrorNotOnConsole(ex.getMessage());
+//				// ex.printStackTrace();
+//			}
+//			_stmt = null;
+//			try {
+//				long start = System.currentTimeMillis();
+//				if (_conn != null)
+//					_conn.close();
+//				connClosingTime = System.currentTimeMillis()-start;
+//			} catch (SQLException e) {
+//				// Main._logger.reportError("Connection Close failed");
+//				// Main._logger.reportErrorNotOnConsole(e.getMessage());
+//				// e.printStackTrace();
+//			}
+//			_conn = null;
+////if(_clientNum % 100 == 0){
+//	Main._logger.outputLog(String.format("\tTerminated Client #%d(stmt: %d(ms), conn: %d(ms)",_clientNum, 
+//			stmtClosingTime, connClosingTime));
+////}
+//		}
 
+		/***
+		 * Return the current connection object
+		 * @return
+		 */
+		public Connection getConnection(){
+			return _conn;
+		}
+		
+		/***
+		 * Return the current statement
+		 * @return
+		 */
+		public Statement getStatement(){
+			return _stmt;
+		}
+		
 		/**
 		 * Commits all update operations made to the dbms. This must be called
 		 * for inserts statements to be seen.
@@ -1203,9 +1240,8 @@ if(_clientNum % 100 == 0){
 				if (_conn != null && !_conn.isClosed())
 					_conn.commit();
 			} catch (SQLException e) {
-				// Main._logger.reportError("Commit failed");
-				// Main._logger.reportErrorNotOnConsole(e.getMessage());
 				// e.printStackTrace();
+				Main._logger.reportErrorNotOnConsole(e.getMessage());
 			}
 		}
 
@@ -1214,13 +1250,6 @@ if(_clientNum % 100 == 0){
 		 */
 		public void run() {
 			// Get a transaction to run
-//			Vector<String> transactionToRun = new Vector<String>();
-//			for(int xactNum=0;xactNum<_transactionMap.size();xactNum++){
-//				transactionToRun = _transactionMap.get(new Long(xactNum));
-			
-			// reset time out
-//			_timeOut = false;
-//			_fail = false;
 			int transactionNum = 0;
 			Long xactNum = new Long(transactionNum);
 			Vector<String> transactionToRun = _transactionMap.get(xactNum);
@@ -1236,15 +1265,17 @@ if(_clientNum % 100 == 0){
 			// */
 			// Vector<Vector<Long>> stmtRunTimeVec = new Vector<Vector<Long>>();
 			// long minTime = -1;
-//			while (true) {
 			long startTime = System.currentTimeMillis();
 			long runTime = 0;
 			// conn, stmt for quickly getting out of the loop
 			// timeout thread for getting number of transactions and sumElapsedTime
-//			BatchRunTimeOut brt = new BatchRunTimeOut(this._clientNum, _conn, _stmt/*, startTime, batchRunTime*/);
 			BatchRunTimeOut brt = new BatchRunTimeOut();
+			BatchRunTimeOut brt2 = new BatchRunTimeOut(this._clientNum, _conn, _stmt);
 			Timer batchRunTimer = new Timer();
+			Timer batchRunTimer2 = new Timer();
 			batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
+			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
+
 			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
 //				if (_timeOut) {
 //					long elapsedTime = System.currentTimeMillis()-_startTime;
@@ -1260,21 +1291,14 @@ if(_clientNum % 100 == 0){
 					// Vector<Long> stmtRunTimePerXactVec = new Vector<Long>();
 					// open a connection to an experiment subject
 					if (_conn == null) {
-						// Main._logger.reportError("Statement is null...");
-//						while(_conn == null) {
-							// Main._logger.reportError("Connection is null...");
 							_conn = DriverManager.getConnection(_connStr,
 									_userName, _password);
-//							if (timeOut) {
-//								break;
-//							}
-//						}
 					}
-					if(_stmt == null)
+					if(_stmt == null){
 						_stmt = _conn.createStatement(
 							ResultSet.TYPE_FORWARD_ONLY,
 							ResultSet.CONCUR_UPDATABLE);
-					
+					}
 					_conn.setAutoCommit(false);
 					long xactStartTime = System.currentTimeMillis();
 					// run transaction
@@ -1283,8 +1307,17 @@ if(_clientNum % 100 == 0){
 						// select
 						// long startTime = System.currentTimeMillis();
 						try {
-							//_stmt.addBatch(sql); // for confirmatory
-							_stmt.execute(sql); // for exploratory
+							long elapsedTime = System.currentTimeMillis() - startTime;
+							if(elapsedTime > batchRunTime * 1000)
+								break;
+							else{
+								int remainingTimeout = (int)batchRunTime * 1000-(int)elapsedTime;
+								_stmt.setQueryTimeout(remainingTimeout);
+							}
+							_stmt.execute(sql); 	// for exploratory
+							// reset query timeout 
+							// before executing another transaction we will set the new timeout based on remaining time
+							_stmt.setQueryTimeout((int)batchRunTime * 1000);
 						} catch (Exception ex) {
 							continue;
 						}
@@ -1303,32 +1336,16 @@ if(_clientNum % 100 == 0){
 						_sumRunTime += elapsedTime;
 						// stmtRunTimeVec.add(stmtRunTimePerXactVec);
 						xactRunTimeVec.add(new Long(elapsedTime));
-						// synchronized(this){ // this variable could be accessed by
-						// multiple threads.
-						// localTimeOut = timeOut;
-						// }
-						// if(!localTimeOut)
 						_numExecXacts++;
-					
-					// else{
-					// Main._logger.outputLog("time out >> Client #"+_id+"> # of total transactions: "
-					// + numTrans);
-					// return;
-					// }
-					// if(numTrans%10000==0){
-					// Main._logger.outputLog("Client #"+_id+"> # of current transactions: "
-					// + numTrans);
-					// }
-					// put the current results into the below maps
+					   // put the current results into the below maps
 						_xactNumToRunTimeVecMap.put(xactNum, xactRunTimeVec);
-					// _xactNumToStmtRunTimeVecMap.put(xactNum, stmtRunTimeVec);
-					// Main._logger.outputLog("Client " + _clientID +
-					// ") executed xact(" + xactNum + ") " + _numExecXacts +
-					// " times, "
-					// + "stmt run size => " + xactRunTimeVec.size()
-					// + "xact run size => " + stmtRunTimeVec.size());
 					}
-				} catch (SQLException e) {
+				} 
+				catch(SQLTimeoutException ste){
+					Main._logger.reportErrorNotOnConsole(ste.getMessage());
+					break;
+				}
+				catch (Exception e) {
 					if(e.getMessage().contains("timeout")){
 						break;
 					}
@@ -1378,42 +1395,15 @@ if(_clientNum % 100 == 0){
 				// }
 			} // while
 		
-			if(_clientNum % 50 == 0){
-				String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
-				Main._logger.outputLog(str);
-			}
-			
-//			// Check if runTime surpasses batch run time
-//			if((double)(runTime/1000) > (double)(batchRunTime*1.10)){
-//				_fail = true;
-//				_clientRunTime  = (runTime/1000);
-//			}
+			String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
+Main._logger.outputLog(str);
 			_clientRunStats[_clientNum].runTime = runTime;
-			_clientRunStats[_clientNum].numFinalExecXacts = _numExecXacts;
-			
+			_clientRunStats[_clientNum].numMeasuredExecXacts = _numExecXacts;
+			finalExit = true;
 			batchRunTimer.cancel();
+			batchRunTimer2.cancel();
 		}
 
-		// private long getStatementID(int stmtNum) {
-		// ResultSet rs =
-		// LabShelfManager.getShelf().executeQuerySQL("select stmtID " +
-		// " from " + Constants.TABLE_PREFIX+Constants.TABLE_STATEMENT
-		// + " where xactID = " + _xactID + " and stmtNum = " + stmtNum);
-		// try {
-		// rs.next();
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// long stmtID = -1;
-		// try {
-		// stmtID = rs.getInt(1);
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// return stmtID;
-		// }
 		/****
 		 * Return a map of transaction number to ID
 		 * 
@@ -1423,13 +1413,6 @@ if(_clientNum % 100 == 0){
 			return _xactNumToIDMap;
 		}
 
-		// /****
-		// * Return a map of statement number to ID
-		// * @return map of statement number to ID
-		// */
-		// public HashMap<Long, Long> getStmtNumToIDMap() {
-		// return _stmtNumToIDMap;
-		// }
 		/****
 		 * Return number of transactions that this client has
 		 * 
@@ -1448,14 +1431,6 @@ if(_clientNum % 100 == 0){
 			return _xactNumToRunTimeVecMap;
 		}
 
-		// /****
-		// * Return a map of transaction number to statement runtime vector
-		// * @return map of transaction number to statement runtime vector
-		// */
-		// public HashMap<Long, Vector<Vector<Long>>>
-		// getXactNumToStmtRunTimeVecMap() {
-		// return _xactNumToStmtRunTimeVecMap;
-		// }
 		/****
 		 * Return number of executed transactions
 		 * 
@@ -1469,10 +1444,6 @@ if(_clientNum % 100 == 0){
 			return _sumRunTime;
 		}
 
-//		public void setStartTime(long startTime) {
-//			_startTime = startTime;			
-//		}
-		
 		public void destroyed(){
 			if (this != null) {
 				this.interrupt();
@@ -1484,10 +1455,6 @@ if(_clientNum % 100 == 0){
 				}
 	        }
 		}
-
-//		public void setTimeOut() {
-//			_timeOut = true;
-//		}
 
 		/*****
 		 * Obtain client id
@@ -1807,38 +1774,44 @@ if(_clientNum % 100 == 0){
 				+ " " + "WHERE BatchSetID = " + batchSetID + " and RunID = "
 				+ runID;
 Main._logger.outputLog(sql);
-		int trials = 0;
-		int succTrials = 0;
-		boolean success = false;
-		do{
-			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-			try {
-				while (rs.next()) {
-					batchSetRunResID = rs.getInt(1);
-				}
-				rs.close();
-				if(batchSetRunResID == -1){
-					succTrials++;
-					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-					if(succTrials > 5){
-						success = true; // not existing
-						break;
-					}
-					continue;
-				}
-				success = true;
-				break;
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-				trials++;
-				Main._logger.writeIntoLog("failed retry " + trials + " <= " + e1.getMessage());
-			}
-		}while(trials < Constants.TRY_COUNTS);
-		
-		if(!success){
-			throw new Exception ("Labshelf connection is not robust...");
-		}
+//		int trials = 0;
+//		int succTrials = 0;
+//		boolean success = false;
+//		do{
+//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+//			try {
+//				while (rs.next()) {
+//					batchSetRunResID = rs.getInt(1);
+//				}
+//				rs.close();
+//				if(batchSetRunResID == -1){
+//					succTrials++;
+//					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+//					if(succTrials > 5){
+//						success = true; // not existing
+//						break;
+//					}
+//					continue;
+//				}
+//				success = true;
+//				break;
+//			} catch (SQLException e1) {
+//				e1.printStackTrace();
+//				trials++;
+//				Main._logger.writeIntoLog("failed retry " + trials + " <= " + e1.getMessage());
+//			}
+//		}while(trials < Constants.TRY_COUNTS);
+//		
+//		if(!success){
+//			throw new Exception ("Labshelf connection is not robust...");
+//		}
 
+		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+		while (rs.next()) {
+			batchSetRunResID = rs.getInt(1);
+		}
+		rs.close();
+			
 		// when not existing ...
 		if (batchSetRunResID == -1) {
 			// obtain a new batch set id
@@ -1884,39 +1857,45 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 		String sql = "SELECT batchID from " + Constants.TABLE_PREFIX
 				+ Constants.TABLE_BATCH + " where batchSetID = " + batchSetID
 				+ " and MPL = " + MPL;
-		int trials = 0;
-		int succTrials = 0;
-		boolean success = false;
-		do{
-			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-	//Main._logger.outputLog(sql);
-			try {
-				while (rs.next()) {
-					batchID = rs.getInt(1);
-				}
-				rs.close();
-				if(batchID == -1){
-					succTrials++;
-					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-					if(succTrials > 5){
-						success = true; // not existing
-						break;
-					}
-					continue;
-				}
-				success = true;
-				break;
-			} catch (SQLException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-				trials++;
-				Main._logger.writeIntoLog("failed retry " + trials + " <= " + e2.getMessage());
-			}
-		}while(trials < Constants.TRY_COUNTS);
+//		int trials = 0;
+//		int succTrials = 0;
+//		boolean success = false;
+//		do{
+//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+//	//Main._logger.outputLog(sql);
+//			try {
+//				while (rs.next()) {
+//					batchID = rs.getInt(1);
+//				}
+//				rs.close();
+//				if(batchID == -1){
+//					succTrials++;
+//					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+//					if(succTrials > 5){
+//						success = true; // not existing
+//						break;
+//					}
+//					continue;
+//				}
+//				success = true;
+//				break;
+//			} catch (SQLException e2) {
+//				// TODO Auto-generated catch block
+//				e2.printStackTrace();
+//				trials++;
+//				Main._logger.writeIntoLog("failed retry " + trials + " <= " + e2.getMessage());
+//			}
+//		}while(trials < Constants.TRY_COUNTS);
+//		
+//		if(!success){
+//			throw new Exception ("Labshelf connection is not robust...");
+//		}
 		
-		if(!success){
-			throw new Exception ("Labshelf connection is not robust...");
+		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+		while (rs.next()) {
+			batchID = rs.getInt(1);
 		}
+		rs.close();
 		
 		// not existing ...
 		if (batchID == -1) {
@@ -2023,6 +2002,12 @@ Main._logger.outputDebug(batchSetQuery);
 //				+ ") initialization (MPL=" + MPL + ")");
 	}
 
+	private boolean[] barrier;
+	private Thread[] terminatingThreadArr;
+	
+	private long maxConnClosingTime = 0;
+	private long maxStmtClosingTime = 0;
+	
 	/***
 	 * Runs transactions per client in a batch
 	 * 
@@ -2045,6 +2030,8 @@ Main._logger.outputDebug(batchSetQuery);
 			// assign client number
 			int clientNum = i + 1;
 			_clientRunStats[clientNum] = new XactRunStatPerClient();
+			assert(_clientRunStats[clientNum] != null);
+			
 			// ready for open connection
 			String strDrvName = experimentSubject.getDBMSDriverClassName();
 			String strConnStr = experimentSubject.getConnectionString();
@@ -2090,36 +2077,70 @@ Main._logger.outputDebug(batchSetQuery);
 //			runAgain = true;
 //		}
 		
+		// barrier implementation
+		barrier = new boolean[clients.length];
+		terminatingThreadArr = new Thread[clients.length];
+		for(int i=0;i<clients.length;i++){
+			barrier[i] = false;
+		}
+		maxConnClosingTime = 0;
+		maxStmtClosingTime = 0;
+		
 		for (Client c : clients) {
 			// locally set timeOut 
-//			c.setTimeOut();
-//			if(c._fail){
-//			if(c._numExecXacts-c._numRealExecXacts > 1){
-//				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(sec), batchRunTime: %d(sec)", 
-//						c._clientNum, 
-//						c._clientRunTime, 
-//						c._clientRealRunTime,
-//						c._numExecXacts, 
-//						c._numRealExecXacts, 
-//						batchRunTime));
-////				runAgain = true;
-//			}
-			c.terminate();
+			final int clientNum = c.getClientNumber();
+			final Connection conn = c.getConnection();
+			final Statement st = c.getStatement();
+			terminatingThreadArr[clientNum-1] = 
+					new Thread(){
+				
+				public void run(){
+					CloseConnection cc = 
+							new CloseConnection(clientNum, 
+												conn,
+												st);
+					cc.terminate();
+				}
+			};
+			terminatingThreadArr[clientNum-1].start();
 		}
+		
+		long barrierStart = System.currentTimeMillis();
+		Main._logger.outputLog("------ Barrier Start! -----");
+		// Check if every thread reaches the barrier
+		boolean exitBarrier;
+		do{
+			exitBarrier = true;
+//			for(int i=0;i<clients.length;i++){
+			for(Client c : clients){
+				if(c.finalExit) continue; // if yet exit the run routine
+				int cNum = c.getClientNumber();
+				int i = cNum-1;
+				if(!barrier[i]) // ith client has not yet reached the barrier
+					exitBarrier = false;
+				else{
+					if(terminatingThreadArr[i] != null)
+						terminatingThreadArr[i].join();
+				}
+			}
+		}while(!exitBarrier);
+		long barrierExit = System.currentTimeMillis();
+		Main._logger.outputLog("------ Barrier Exit (time: "+ (barrierExit-barrierStart)+"(ms)) ! -----");
+		Main._logger.outputLog(String.format("[Conn Close Max Time: %d(ms), Stmt Close Max Time: %d(ms)\n", maxConnClosingTime, maxStmtClosingTime));
 		
 		int totalXacts = 0;
 		long sumOfBatchRunElapsedTime = 0;
 //		XactRunStatPerClient[] stats = new XactRunStatPerClient[clients.length];
 		for (Client c : clients) {
 			int cNum = c.getClientNumber();
-			if(cNum % 50 == 0){
-				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), " +
-						"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
-						cNum, 
-						_clientRunStats[cNum].runTime, 
-						batchRunTime*1000,
-						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
-			}
+//			if(cNum % 50 == 0){
+//				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), " +
+//						"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
+//						cNum, 
+//						_clientRunStats[cNum].runTime, 
+//						batchRunTime*1000,
+//						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
+//			}
 			_clientRunStats[cNum].num				 = cNum;
 			_clientRunStats[cNum].id			 	 = c.getClientID();
 			_clientRunStats[cNum].numExecXacts 		 = c.getNumExecXacts(); // timeout
@@ -2127,23 +2148,33 @@ Main._logger.outputDebug(batchSetQuery);
 			_clientRunStats[cNum].numXactsToHave 		 = c.getNumXactsToHave();
 			_clientRunStats[cNum].xactNumToIDMap 		 =  c.getXactNumToIDMap();
 			_clientRunStats[cNum].xactNumToRunTimeVecMap = c.getXactNumToRunTimeVecMap();
-			if(_clientRunStats[cNum].timeOut == false 
-			|| _clientRunStats[cNum].numExecXacts != _clientRunStats[cNum].numFinalExecXacts 
-			|| (_clientRunStats[cNum].runTime/1000) > batchRunTime*1.05){
-				if(cNum % 25 == 0){
-					Main._logger.outputLog(String.format("Bad Client #%d => ClientRunTime: %d(ms), " +
-							"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
-							cNum, 
-							_clientRunStats[cNum].runTime, 
-							batchRunTime*1000,
-							//_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
-							_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 1 : 0));
-	//						if(runAgain){
-	//						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
-	//				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));
-	//						return Constants.FAILED_ITER;
-				}
+//			if(_clientRunStats[cNum].timeOut == false 
+//			|| _clientRunStats[cNum].numExecXacts != _clientRunStats[cNum].numFinalExecXacts 
+//			|| (_clientRunStats[cNum].runTime/1000) > batchRunTime*1.05){
+//				if(cNum % 25 == 0){
+//					Main._logger.outputLog(String.format("Bad Client #%d => ClientRunTime: %d(ms), " +
+//							"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
+//							cNum, 
+//							_clientRunStats[cNum].runTime, 
+//							batchRunTime*1000,
+//							//_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
+//							_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 1 : 0));
+//	//						if(runAgain){
+//	//						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
+//	//				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));
+//	//						return Constants.FAILED_ITER;
+//				}
+//			}
+			if(_clientRunStats[cNum].runTime/1000 > batchRunTime){
+				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms)\n", cNum, 
+						_clientRunStats[cNum].runTime));
 			}
+			if(_clientRunStats[cNum].numMeasuredExecXacts != _clientRunStats[cNum].numExecXacts){
+				Main._logger.outputLog(String.format("Client #%d => numMeasured: %d, numCurrXacts: %d\n", cNum, 
+						_clientRunStats[cNum].numMeasuredExecXacts, 
+						_clientRunStats[cNum].numExecXacts));
+			}
+			
 			totalXacts				 += _clientRunStats[cNum].numExecXacts;
 			sumOfBatchRunElapsedTime += _clientRunStats[cNum].sumOfElapsedTime;
 		}
@@ -2198,6 +2229,60 @@ Main._logger.outputDebug(batchSetQuery);
 										iterNum); // iteration number
 		}
 		return iterNum;
+	}
+	
+	private class CloseConnection implements Runnable{
+		public Connection _conn;
+		public Statement _stmt;
+		public int _clientNum;
+		
+		public CloseConnection(int cNum, Connection co, Statement st){
+			_conn = co;
+			_stmt = st;
+			_clientNum = cNum;
+		}
+		
+		@Override
+		public void run() {
+			terminate();
+		}
+		
+		public void terminate(){
+			// TODO Auto-generated method stub
+			long stmtClosingTime=0, connClosingTime=0;
+			try {
+				long start = System.currentTimeMillis();
+				if (_stmt != null)
+					_stmt.close();
+				stmtClosingTime = System.currentTimeMillis()-start;
+			} catch (SQLException ex) {
+				Main._logger.reportErrorNotOnConsole(ex.getMessage());
+			}
+			_stmt = null;
+			try {
+				long start = System.currentTimeMillis();
+				if (_conn != null)
+					_conn.close();
+				connClosingTime = System.currentTimeMillis()-start;
+			} catch (SQLException e) {
+				Main._logger.reportErrorNotOnConsole(e.getMessage());
+			}
+			_conn = null;
+			
+			if(stmtClosingTime > maxStmtClosingTime){
+				maxStmtClosingTime = stmtClosingTime;
+			}
+			if(connClosingTime > maxConnClosingTime){
+				maxConnClosingTime = connClosingTime;
+			}
+			//if(_clientNum % 100 == 0){
+			Main._logger.outputLog(
+					String.format("\tTerminated Client #%d(stmt: %d(ms), conn: %d(ms)",
+							_clientNum, 
+							stmtClosingTime, 
+							connClosingTime));
+			barrier[_clientNum-1] = true;
+		}
 	}
 	
 //	class ClientData{
@@ -2936,35 +3021,41 @@ try {
 				+ " and BatchID = " + batchID + " and IterNum = " + iterNum;
 Main._logger.outputDebug(batchSetQuery);
 
-		int trials = 0;
-		int succTrials = 0;
-		boolean success = false;
-		String selectSQL = "";
-		do{
-			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(batchSetQuery);
-			try {
-				while (rs.next()) {
-					batchRunResID = rs.getInt(1);
-				}
-				rs.close();
-				if(batchRunResID == -1){
-					succTrials++;
-					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
-					if(succTrials > 5){
-						success = true; // not existing
-						break;
-					}
-					continue;
-				}
-				success = true;
-				break;
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				trials++;
-				Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
-			}
-		}while(trials < Constants.TRY_COUNTS);
+//		int trials = 0;
+//		int succTrials = 0;
+//		boolean success = false;
+//		String selectSQL = "";
+//		do{
+//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(batchSetQuery);
+////			try {
+//				while (rs.next()) {
+//					batchRunResID = rs.getInt(1);
+//				}
+//				rs.close();
+//				if(batchRunResID == -1){
+//					succTrials++;
+//					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
+//					if(succTrials > 5){
+//						success = true; // not existing
+//						break;
+//					}
+//					continue;
+//				}
+//				success = true;
+//				break;
+//			} catch (Exception ex) {
+//				ex.printStackTrace();
+//				trials++;
+//				Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
+//			}
+//		}while(trials < Constants.TRY_COUNTS);
 
+		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(batchSetQuery);
+		while (rs.next()) {
+			batchRunResID = rs.getInt(1);
+		}
+		rs.close();
+				
 		String insertSQL = "";
 		if (batchRunResID == -1) {
 			batchRunResID = LabShelfManager.getShelf().getSequencialIDToLong(
@@ -3029,38 +3120,44 @@ Main._logger.outputDebug(insertSQL);
 					+ " WHERE BatchRunResID = " + batchRunResID
 					+ " and ClientID = " + clientID + " and IterNum = " + iterNum;
 //Main._logger.outputDebug(sql);
-			int trials = 0;
-			int succTrials = 0;
-			boolean success = false;
-			do{
-				try{
-					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-					while (rs.next()) {
-						clientRunResID = rs.getInt(1);
-					}
-					rs.close();
-					if(clientRunResID == -1){
-						succTrials++;
-						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-						if(succTrials > 5){
-							success = true; // not existing
-							break;
-						}
-						continue;
-					}
-					success = true;
-					break;
-				}catch(Exception ex){
-					ex.printStackTrace();
-					trials++;
-					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
-				}
-			}while(trials < Constants.TRY_COUNTS);
+//			int trials = 0;
+//			int succTrials = 0;
+//			boolean success = false;
+//			do{
+//				try{
+//					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+//					while (rs.next()) {
+//						clientRunResID = rs.getInt(1);
+//					}
+//					rs.close();
+//					if(clientRunResID == -1){
+//						succTrials++;
+//						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+//						if(succTrials > 5){
+//							success = true; // not existing
+//							break;
+//						}
+//						continue;
+//					}
+//					success = true;
+//					break;
+//				}catch(Exception ex){
+//					ex.printStackTrace();
+//					trials++;
+//					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
+//				}
+//			}while(trials < Constants.TRY_COUNTS);
 
-			if(!success){
-				throw new Exception ("Labshelf connection is not robust...");
+//			if(!success){
+//				throw new Exception ("Labshelf connection is not robust...");
+//			}
+			
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+			while (rs.next()) {
+				clientRunResID = rs.getInt(1);
 			}
-				
+			rs.close();
+			
 			String insertSQL = "";
 			// when not existing ...
 			if (clientRunResID == -1) {
@@ -3117,36 +3214,41 @@ Main._logger.outputLog(updateSQL);
 						+ " and ClientID = " + clientID + " and IterNum = " + iterNum;
 	Main._logger.outputDebug(sql);
 				clientRunResID = -1;
-				int trials = 0;
-				int succTrials = 0;
-				boolean success = false;
-				do{
-					try{
-						ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-						while (rs.next()) {
-							clientRunResID = rs.getInt(1);
-						}
-						rs.close();
-						if(clientRunResID == -1){
-							succTrials++;
-							Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-							if(succTrials > 5){
-								success = true; // not existing
-								break;
-							}
-							continue;
-						}
-						success = true;
-						break;
-					}catch(Exception ex){
-						ex.printStackTrace();
-						trials++;
-						Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
-					}
-				}while(trials < Constants.TRY_COUNTS);
-				if(!success){
-					throw new Exception ("Labshelf connection is not robust...");
+//				int trials = 0;
+//				int succTrials = 0;
+//				boolean success = false;
+//				do{
+//					try{
+//						ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+//						while (rs.next()) {
+//							clientRunResID = rs.getInt(1);
+//						}
+//						rs.close();
+//						if(clientRunResID == -1){
+//							succTrials++;
+//							Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+//							if(succTrials > 5){
+//								success = true; // not existing
+//								break;
+//							}
+//							continue;
+//						}
+//						success = true;
+//						break;
+//					}catch(Exception ex){
+//						ex.printStackTrace();
+//						trials++;
+//						Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
+//					}
+//				}while(trials < Constants.TRY_COUNTS);
+//				if(!success){
+//					throw new Exception ("Labshelf connection is not robust...");
+//				}
+				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+				while (rs.next()) {
+					clientRunResID = rs.getInt(1);
 				}
+				rs.close();
 				return clientRunResID;
 			}else{
 				throw new SQLException("Labshelf connection has some unknown problem.");
@@ -3344,34 +3446,40 @@ Main._logger.outputLog(updateSQL);
 					+ "WHERE ClientRunResID = " + clientRunResID
 					+ " and TransactionID = " + xactID;
 //Main._logger.outputDebug(sql);
-			do{
-				try{
-					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-					while (rs.next()) {
-						xactRunResID = rs.getInt(1);
-					}
-					rs.close();
-					if(xactRunResID == -1){
-						succTrials++;
-						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-						if(succTrials > 5){
-							success = true; // not existing
-							break;
-						}
-						continue;
-					}
-					success = true;
-					break;
-				}catch(Exception ex){
-					ex.printStackTrace();
-					trials++;
-					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
-				}
-			}while(trials < Constants.TRY_COUNTS);
-
-			if(!success){
-				throw new Exception ("Labshelf connection is not robust...");
+//			do{
+//				try{
+//					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+//					while (rs.next()) {
+//						xactRunResID = rs.getInt(1);
+//					}
+//					rs.close();
+//					if(xactRunResID == -1){
+//						succTrials++;
+//						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+//						if(succTrials > 5){
+//							success = true; // not existing
+//							break;
+//						}
+//						continue;
+//					}
+//					success = true;
+//					break;
+//				}catch(Exception ex){
+//					ex.printStackTrace();
+//					trials++;
+//					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
+//				}
+//			}while(trials < Constants.TRY_COUNTS);
+//
+//			if(!success){
+//				throw new Exception ("Labshelf connection is not robust...");
+//			}
+			
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+			while (rs.next()) {
+				xactRunResID = rs.getInt(1);
 			}
+			rs.close();
 			
 			String insertSQL = "";
 			// when not existing ...

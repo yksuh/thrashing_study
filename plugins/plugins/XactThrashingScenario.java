@@ -950,21 +950,17 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			_transactionMap = new HashMap<Long, Vector<String>>();
 			_xactNumToIDMap = new HashMap<Long, Long>();
 			_xactNumToRunTimeVecMap = new HashMap<Long, Vector<Long>>();
-			//resetRunTimeVec();
-//			_timeOut = false;
-			// _xactNumToStmtRunTimeVecMap = new HashMap<Long,
-			// Vector<Vector<Long>>>();
 		}
 
-		/***
-		 * Reset transaction execution runtime vector
-		 */
-		private void resetRunTimeVec() {
-			// TODO Auto-generated method stub
-			_xactNumToRunTimeVecMap = new HashMap<Long, Vector<Long>>();
-			_numExecXacts = 0;
-			_sumRunTime = 0;
-		}
+//		/***
+//		 * Reset transaction execution runtime vector
+//		 */
+//		private void resetRunTimeVec() {
+//			// TODO Auto-generated method stub
+//			_xactNumToRunTimeVecMap = new HashMap<Long, Vector<Long>>();
+//			_numExecXacts = 0;
+//			_sumRunTime = 0;
+//		}
 		
 		public HashMap<Long, Vector<String>> getTransactionMap() {
 			return _transactionMap;
@@ -1064,15 +1060,11 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		
 		public void init(String drvName, String strConnStr, String strUserName,
 				String strPassword) throws Exception {
-			// Main._logger.outputLog("login details: " + strConnStr + ", " +
-			// strUserName + ", " + strPassword);
 			try {
-//				_driverName = drvName;
 				_connStr = strConnStr;
 				_userName = strUserName;
 				_password = strPassword;
-				// Main._logger.outputLog("login details: " + strConnectString +
-				// ", " + strUserName + ", " + strPassword + ", " + strdrvname);
+
 				Class.forName(drvName);
 				int j = 1;
 				while(true){
@@ -1088,9 +1080,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						ResultSet.CONCUR_UPDATABLE);
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
-//				sqlex.printStackTrace();
-				// Main._logger.outputLog("login details: " + strConnStr + ", "
-				// + strUserName + ", " + strPassword);
+				Main._logger.reportError(sqlex.getMessage());
 			}
 		}
 
@@ -1258,13 +1248,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 */
 		public void run() {
 			// Get a transaction to run
-//			Vector<String> transactionToRun = new Vector<String>();
-//			for(int xactNum=0;xactNum<_transactionMap.size();xactNum++){
-//				transactionToRun = _transactionMap.get(new Long(xactNum));
-			
-			// reset time out
-//			_timeOut = false;
-//			_fail = false;
 			int transactionNum = 0;
 			Long xactNum = new Long(transactionNum);
 			Vector<String> transactionToRun = _transactionMap.get(xactNum);
@@ -1280,7 +1263,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// */
 			// Vector<Vector<Long>> stmtRunTimeVec = new Vector<Vector<Long>>();
 			// long minTime = -1;
-//			while (true) {
 			long startTime = System.currentTimeMillis();
 			long runTime = 0;
 			// conn, stmt for quickly getting out of the loop
@@ -1291,13 +1273,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			Timer batchRunTimer2 = new Timer();
 			batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
 			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
-//			if(_stmt != null){
-//				try {
-//					_stmt.setQueryTimeout(batchRunTime * 1000);
-//				} catch (SQLException e1) {
-//					Main._logger.reportError(e1.getMessage());
-//				}
-//			}
+
 			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
 //				if (_timeOut) {
 //					long elapsedTime = System.currentTimeMillis()-_startTime;
@@ -1313,21 +1289,13 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					// Vector<Long> stmtRunTimePerXactVec = new Vector<Long>();
 					// open a connection to an experiment subject
 					if (_conn == null) {
-						// Main._logger.reportError("Statement is null...");
-//						while(_conn == null) {
-							// Main._logger.reportError("Connection is null...");
 							_conn = DriverManager.getConnection(_connStr,
 									_userName, _password);
-//							if (timeOut) {
-//								break;
-//							}
-//						}
 					}
 					if(_stmt == null){
 						_stmt = _conn.createStatement(
 							ResultSet.TYPE_FORWARD_ONLY,
 							ResultSet.CONCUR_UPDATABLE);
-							long elapsedTime = System.currentTimeMillis()-startTime;
 					}
 					_conn.setAutoCommit(false);
 					long xactStartTime = System.currentTimeMillis();
@@ -1366,30 +1334,9 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						_sumRunTime += elapsedTime;
 						// stmtRunTimeVec.add(stmtRunTimePerXactVec);
 						xactRunTimeVec.add(new Long(elapsedTime));
-						// synchronized(this){ // this variable could be accessed by
-						// multiple threads.
-						// localTimeOut = timeOut;
-						// }
-						// if(!localTimeOut)
 						_numExecXacts++;
-					
-					// else{
-					// Main._logger.outputLog("time out >> Client #"+_id+"> # of total transactions: "
-					// + numTrans);
-					// return;
-					// }
-					// if(numTrans%10000==0){
-					// Main._logger.outputLog("Client #"+_id+"> # of current transactions: "
-					// + numTrans);
-					// }
-					// put the current results into the below maps
+					   // put the current results into the below maps
 						_xactNumToRunTimeVecMap.put(xactNum, xactRunTimeVec);
-					// _xactNumToStmtRunTimeVecMap.put(xactNum, stmtRunTimeVec);
-					// Main._logger.outputLog("Client " + _clientID +
-					// ") executed xact(" + xactNum + ") " + _numExecXacts +
-					// " times, "
-					// + "stmt run size => " + xactRunTimeVec.size()
-					// + "xact run size => " + stmtRunTimeVec.size());
 					}
 				} 
 				catch(SQLTimeoutException ste){
@@ -1446,16 +1393,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				// }
 			} // while
 		
-			//if(_clientNum % 10 == 0){
-				String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
-				Main._logger.outputLog(str);
-			//}
-			
-//			// Check if runTime surpasses batch run time
-//			if((double)(runTime/1000) > (double)(batchRunTime*1.10)){
-//				_fail = true;
-//				_clientRunTime  = (runTime/1000);
-//			}
+			String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
+Main._logger.outputLog(str);
 			_clientRunStats[_clientNum].runTime = runTime;
 			_clientRunStats[_clientNum].numFinalExecXacts = _numExecXacts;
 			
@@ -1463,26 +1402,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			batchRunTimer2.cancel();
 		}
 
-		// private long getStatementID(int stmtNum) {
-		// ResultSet rs =
-		// LabShelfManager.getShelf().executeQuerySQL("select stmtID " +
-		// " from " + Constants.TABLE_PREFIX+Constants.TABLE_STATEMENT
-		// + " where xactID = " + _xactID + " and stmtNum = " + stmtNum);
-		// try {
-		// rs.next();
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// long stmtID = -1;
-		// try {
-		// stmtID = rs.getInt(1);
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// return stmtID;
-		// }
 		/****
 		 * Return a map of transaction number to ID
 		 * 
@@ -1492,13 +1411,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			return _xactNumToIDMap;
 		}
 
-		// /****
-		// * Return a map of statement number to ID
-		// * @return map of statement number to ID
-		// */
-		// public HashMap<Long, Long> getStmtNumToIDMap() {
-		// return _stmtNumToIDMap;
-		// }
 		/****
 		 * Return number of transactions that this client has
 		 * 
@@ -1517,14 +1429,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			return _xactNumToRunTimeVecMap;
 		}
 
-		// /****
-		// * Return a map of transaction number to statement runtime vector
-		// * @return map of transaction number to statement runtime vector
-		// */
-		// public HashMap<Long, Vector<Vector<Long>>>
-		// getXactNumToStmtRunTimeVecMap() {
-		// return _xactNumToStmtRunTimeVecMap;
-		// }
 		/****
 		 * Return number of executed transactions
 		 * 
@@ -1538,10 +1442,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			return _sumRunTime;
 		}
 
-//		public void setStartTime(long startTime) {
-//			_startTime = startTime;			
-//		}
-		
 		public void destroyed(){
 			if (this != null) {
 				this.interrupt();
@@ -1553,10 +1453,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				}
 	        }
 		}
-
-//		public void setTimeOut() {
-//			_timeOut = true;
-//		}
 
 		/*****
 		 * Obtain client id

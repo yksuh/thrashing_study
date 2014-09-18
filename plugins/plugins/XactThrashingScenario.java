@@ -923,6 +923,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		private String _connStr;
 		private String _userName;
 		private String _password;
+		
+		public boolean finalExit = false;
 //		private boolean _timeOut;
 //		private long _startTime;
 //		private boolean _fail;
@@ -1397,7 +1399,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 Main._logger.outputLog(str);
 			_clientRunStats[_clientNum].runTime = runTime;
 			_clientRunStats[_clientNum].numMeasuredExecXacts = _numExecXacts;
-			
+			finalExit = true;
 			batchRunTimer.cancel();
 			batchRunTimer2.cancel();
 		}
@@ -2103,12 +2105,17 @@ Main._logger.outputDebug(batchSetQuery);
 			terminatingThreadArr[clientNum-1].start();
 		}
 		
+		long barrierStart = System.currentTimeMillis();
 		Main._logger.outputLog("------ Barrier Start! -----");
 		// Check if every thread reaches the barrier
 		boolean exitBarrier;
 		do{
 			exitBarrier = true;
-			for(int i=0;i<clients.length;i++){
+//			for(int i=0;i<clients.length;i++){
+			for(Client c : clients){
+				if(c.finalExit) continue; // if yet exit the run routine
+				int cNum = c.getClientNumber();
+				int i = cNum-1;
 				if(!barrier[i]) // ith client has not yet reached the barrier
 					exitBarrier = false;
 				else{
@@ -2117,7 +2124,8 @@ Main._logger.outputDebug(batchSetQuery);
 				}
 			}
 		}while(!exitBarrier);
-		Main._logger.outputLog("------ Barrier Exit! -----");
+		long barrierExit = System.currentTimeMillis();
+		Main._logger.outputLog("------ Barrier Exit (time: "+ (barrierExit-barrierStart)+"(ms)) ! -----");
 		Main._logger.outputLog(String.format("[Conn Close Max Time: %d(ms), Stmt Close Max Time: %d(ms)\n", maxConnClosingTime, maxStmtClosingTime));
 		
 		int totalXacts = 0;

@@ -2105,6 +2105,8 @@ Main._logger.outputDebug(batchSetQuery);
 	}
 
 	private boolean[] barrier;
+	private Thread[] terminatingThreadArr;
+	
 	/***
 	 * Runs transactions per client in a batch
 	 * 
@@ -2176,6 +2178,7 @@ Main._logger.outputDebug(batchSetQuery);
 		
 		// barrier implementation
 		barrier = new boolean[clients.length];
+		terminatingThreadArr = new Thread[clients.length];
 		for(int i=0;i<clients.length;i++){
 			barrier[i] = false;
 		}
@@ -2195,22 +2198,44 @@ Main._logger.outputDebug(batchSetQuery);
 ////				runAgain = true;
 //			}
 //			c.terminate();
-			CloseConnection cc = new CloseConnection(c.getClientNumber(), 
-							    c.getConnection(),
-							    c.getStatement());
-			cc.run();
+			
+//			CloseConnection cc = 
+//					new CloseConnection(c.getClientNumber(), 
+//							c.getConnection(),
+//							c.getStatement());
+//			cc.terminate();
+			
+			final int clientNum = c.getClientNumber();
+			final Connection conn = c.getConnection();
+			final Statement st = c.getStatement();
+			terminatingThreadArr[clientNum-1] = 
+					new Thread(){
+				
+				public void run(){
+					CloseConnection cc = 
+							new CloseConnection(clientNum, 
+												conn,
+												st);
+					cc.terminate();
+				}
+			};
+			terminatingThreadArr[clientNum-1].start();
 		}
 		
 		Main._logger.outputLog("------ Barrier Start! -----");
 		// Check if every thread reaches the barrier
-		boolean done = false;
-		while(!done){
+		boolean exitBarrier;
+		do{
+			exitBarrier = true;
 			for(int i=0;i<clients.length;i++){
-				if(!barrier[i])
-					continue;
+				if(!barrier[i]) // ith client has not yet reached the barrier
+					exitBarrier = false;
+				else{
+					if(terminatingThreadArr[i] != null)
+						terminatingThreadArr[i].join();
+				}
 			}
-			done = true;
-		}
+		}while(!exitBarrier);
 		Main._logger.outputLog("------ Barrier Exit! -----");
 		
 		int totalXacts = 0;

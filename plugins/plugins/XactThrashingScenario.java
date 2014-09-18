@@ -2003,6 +2003,9 @@ Main._logger.outputDebug(batchSetQuery);
 	private boolean[] barrier;
 	private Thread[] terminatingThreadArr;
 	
+	private long maxConnClosingTime = 0;
+	private long maxStmtClosingTime = 0;
+	
 	/***
 	 * Runs transactions per client in a batch
 	 * 
@@ -2078,29 +2081,11 @@ Main._logger.outputDebug(batchSetQuery);
 		for(int i=0;i<clients.length;i++){
 			barrier[i] = false;
 		}
-				
+		maxConnClosingTime = 0;
+		maxStmtClosingTime = 0;
+		
 		for (Client c : clients) {
 			// locally set timeOut 
-//			c.setTimeOut();
-//			if(c._fail){
-//			if(c._numExecXacts-c._numRealExecXacts > 1){
-//				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(sec), batchRunTime: %d(sec)", 
-//						c._clientNum, 
-//						c._clientRunTime, 
-//						c._clientRealRunTime,
-//						c._numExecXacts, 
-//						c._numRealExecXacts, 
-//						batchRunTime));
-////				runAgain = true;
-//			}
-//			c.terminate();
-			
-//			CloseConnection cc = 
-//					new CloseConnection(c.getClientNumber(), 
-//							c.getConnection(),
-//							c.getStatement());
-//			cc.terminate();
-			
 			final int clientNum = c.getClientNumber();
 			final Connection conn = c.getConnection();
 			final Statement st = c.getStatement();
@@ -2133,6 +2118,7 @@ Main._logger.outputDebug(batchSetQuery);
 			}
 		}while(!exitBarrier);
 		Main._logger.outputLog("------ Barrier Exit! -----");
+		Main._logger.outputLog(String.format("[Conn Close Max Time: %d(ms), Stmt Close Max Time: %d(ms)\n", maxConnClosingTime, maxStmtClosingTime));
 		
 		int totalXacts = 0;
 		long sumOfBatchRunElapsedTime = 0;
@@ -2264,6 +2250,13 @@ Main._logger.outputDebug(batchSetQuery);
 				Main._logger.reportErrorNotOnConsole(e.getMessage());
 			}
 			_conn = null;
+			
+			if(stmtClosingTime > maxStmtClosingTime){
+				maxStmtClosingTime = stmtClosingTime;
+			}
+			if(connClosingTime > maxConnClosingTime){
+				maxConnClosingTime = connClosingTime;
+			}
 			//if(_clientNum % 100 == 0){
 			Main._logger.outputLog(
 					String.format("\tTerminated Client #%d(stmt: %d(ms), conn: %d(ms)",

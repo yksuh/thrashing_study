@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -804,17 +805,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 	 * 
 	 */
 	public class Client extends Thread {
-		// class TimeoutCloseThread extends TimerTask{
-		// public void run() {
-		// try {
-		// Main._logger.outputLog("\t>>Closing Client #"+_id+" is timeouted.");
-		//
-		// Main._logger.outputLog("\t>>Just return.");
-		// this.cancel();
-		// } catch (Exception ex) {
-		// }
-		// }
-		// }
 
 		protected class BatchRunTimeOut extends TimerTask {
 			public int cn = 0;
@@ -834,26 +824,56 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			public void run() {
 				if(_clientRunStats[_clientNum] != null)
 					_clientRunStats[_clientNum].timeOut = true;
+//				if (st != null) {
+//					try {
+//						st.cancel();
+//						new SQLException("Batch run timeout");
+//					} catch (SQLException e) {
+//						//e.printStackTrace();
+//						Main._logger.reportErrorNotOnConsole(e.getMessage());
+//						st = null;
+//					}
+//				}
+//				if (_stmt != null) {
+//					try {
+//						_stmt.close();
+//						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
+//						new SQLException("Batch run timeout");
+//					} catch (SQLException e) {
+////						e.printStackTrace();
+//						Main._logger.reportErrorNotOnConsole(e.getMessage());
+//						_stmt = null;
+//					}
+//				}
 				if (st != null) {
 					try {
-						st.cancel();
-						new SQLException("Batch run timeout");
-					} catch (SQLException e) {
-						//e.printStackTrace();
-						Main._logger.reportError(e.getMessage());
+						if(!st.isClosed()){
+							st.cancel();
+						}
+					} catch (SQLFeatureNotSupportedException e) {					
+					} catch(SQLException ex){
+						Main._logger.reportErrorNotOnConsole(ex.getMessage());
+						try{
+							st.cancel();
+						}catch(SQLException sqlex){}
 					}
+					st = null;
+					new SQLException("Batch run timeout");	
 				}
-				
-//				_clientRunStats[_clientNum].timeOut = true;
 				if (_stmt != null) {
 					try {
-						_stmt.close();
-						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
-						new SQLException("Batch run timeout");
-					} catch (SQLException e) {
-//						e.printStackTrace();
-						Main._logger.reportError(e.getMessage());
+						if(!_stmt.isClosed()){
+							_stmt.cancel();
+						}
+					} catch (SQLFeatureNotSupportedException e) {					
+					} catch(SQLException ex){
+						Main._logger.reportErrorNotOnConsole(ex.getMessage());
+						try{
+							_stmt.cancel();
+						}catch(SQLException sqlex){}
 					}
+					_stmt = null;
+					new SQLException("Batch run timeout");	
 				}
 			}
 		}
@@ -1317,7 +1337,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							_stmt.execute(sql); 	// for exploratory
 							// reset query timeout 
 							// before executing another transaction we will set the new timeout based on remaining time
-							_stmt.setQueryTimeout((int)batchRunTime * 1000);
+							//_stmt.setQueryTimeout((int)batchRunTime * 1000);
 						} catch (Exception ex) {
 							continue;
 						}

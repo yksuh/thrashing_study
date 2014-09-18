@@ -839,7 +839,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						st.cancel();
 						new SQLException("Batch run timeout");
 					} catch (SQLException e) {
-						e.printStackTrace();
+						//e.printStackTrace();
+						Main._logger.reportError(e.getMessage());
 					}
 				}
 				
@@ -850,7 +851,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
 						new SQLException("Batch run timeout");
 					} catch (SQLException e) {
-						e.printStackTrace();
+//						e.printStackTrace();
+						Main._logger.reportError(e.getMessage());
 					}
 				}
 			}
@@ -1246,9 +1248,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				if (_conn != null && !_conn.isClosed())
 					_conn.commit();
 			} catch (SQLException e) {
-				// Main._logger.reportError("Commit failed");
-				// Main._logger.reportErrorNotOnConsole(e.getMessage());
 				// e.printStackTrace();
+				Main._logger.reportErrorNotOnConsole(e.getMessage());
 			}
 		}
 
@@ -1290,6 +1291,13 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			Timer batchRunTimer2 = new Timer();
 			batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
 			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
+			if(_stmt != null){
+				try {
+					_stmt.setQueryTimeout(batchRunTime * 1000);
+				} catch (SQLException e1) {
+					Main._logger.reportError(e1.getMessage());
+				}
+			}
 			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
 //				if (_timeOut) {
 //					long elapsedTime = System.currentTimeMillis()-_startTime;
@@ -1315,12 +1323,18 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //							}
 //						}
 					}
-					if(_stmt == null)
+					if(_stmt == null){
 						_stmt = _conn.createStatement(
 							ResultSet.TYPE_FORWARD_ONLY,
 							ResultSet.CONCUR_UPDATABLE);
-					if(_stmt != null)
-						_stmt.setQueryTimeout(batchRunTime * 1000);
+							long elapsedTime = System.currentTimeMillis()-startTime;
+							if(elapsedTime > batchRunTime * 1000)
+								break;
+							else{
+								int remainingTimeout = (int)batchRunTime * 1000-(int)elapsedTime;
+								_stmt.setQueryTimeout(remainingTimeout);
+							}
+					}
 					_conn.setAutoCommit(false);
 					long xactStartTime = System.currentTimeMillis();
 					// run transaction
@@ -2178,9 +2192,10 @@ Main._logger.outputDebug(batchSetQuery);
 ////				runAgain = true;
 //			}
 //			c.terminate();
-			new CloseConnection(c.getClientNumber(), 
+			CloseConnection cc = new CloseConnection(c.getClientNumber(), 
 							    c.getConnection(),
-							    c.getStatement()).terminate();
+							    c.getStatement());
+			cc.run();
 		}
 		
 		Main._logger.outputLog("------ Barrier Start! -----");

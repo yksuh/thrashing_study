@@ -1414,9 +1414,11 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				// + numTrans);
 				// }
 			} // while
-		
-			String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
-Main._logger.outputLog(str);
+/************************************************************************************************************************************/		
+String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
+if(runTime > batchRunTime * 1000)
+	Main._logger.writeIntoLog(str);
+/************************************************************************************************************************************/
 			_clientRunStats[_clientNum].runTime = runTime;
 			_clientRunStats[_clientNum].numMeasuredExecXacts = _numExecXacts;
 			finalExit = true;
@@ -1488,7 +1490,7 @@ Main._logger.outputLog(str);
 			int clientID = -1;
 			String query = "SELECT clientID from azdblab_client where batchID = "
 					+ _batchID + " and clientNum = " + clientNum;
-			Main._logger.writeIntoLog(query);
+//			Main._logger.writeIntoLog(query);
 			
 			int succTrials = 1;
 			long wait = 10000;
@@ -1501,6 +1503,7 @@ Main._logger.outputLog(str);
 					rs.close();
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
+					Main._logger.reportError(query);
 					e.printStackTrace();
 				}
 				if(clientID == -1){
@@ -2125,13 +2128,12 @@ Main._logger.outputDebug(batchSetQuery);
 			terminatingThreadArr[clientNum-1].start();
 		}
 		
-		long barrierStart = System.currentTimeMillis();
 		Main._logger.outputLog("------ Barrier Start! -----");
 		// Check if every thread reaches the barrier
 		boolean exitBarrier;
+		long barrierStart = System.currentTimeMillis();
 		do{
 			exitBarrier = true;
-//			for(int i=0;i<clients.length;i++){
 			for(Client c : clients){
 				if(c.finalExit) continue; // if yet exit the run routine
 				int cNum = c.getClientNumber();
@@ -2186,11 +2188,11 @@ Main._logger.outputDebug(batchSetQuery);
 //				}
 //			}
 			if(_clientRunStats[cNum].runTime/1000 > batchRunTime){
-				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms)\n", cNum, 
+				Main._logger.writeIntoLog(String.format("Client #%d => ClientRunTime: %d(ms)\n", cNum, 
 						_clientRunStats[cNum].runTime));
 			}
 			if(_clientRunStats[cNum].numMeasuredExecXacts != _clientRunStats[cNum].numExecXacts){
-				Main._logger.outputLog(String.format("Client #%d => numMeasured: %d, numCurrXacts: %d\n", cNum, 
+				Main._logger.writeIntoLog(String.format("Client #%d => numMeasured: %d, numCurrXacts: %d\n", cNum, 
 						_clientRunStats[cNum].numMeasuredExecXacts, 
 						_clientRunStats[cNum].numExecXacts));
 			}
@@ -2295,12 +2297,15 @@ Main._logger.outputDebug(batchSetQuery);
 			if(connClosingTime > maxConnClosingTime){
 				maxConnClosingTime = connClosingTime;
 			}
-			//if(_clientNum % 100 == 0){
-			Main._logger.outputLog(
-					String.format("\tTerminated Client #%d(stmt: %d(ms), conn: %d(ms)",
-							_clientNum, 
-							stmtClosingTime, 
-							connClosingTime));
+/****************************************************************************/
+if(_clientNum % barrier.length == 0){ // last client
+	Main._logger.writeIntoLog(
+			String.format("\tTerminated Client #%d(stmt: %d(ms), conn: %d(ms)",
+					_clientNum, 
+					stmtClosingTime, 
+					connClosingTime));
+}
+/****************************************************************************/
 			barrier[_clientNum-1] = true;
 		}
 	}
@@ -3200,7 +3205,7 @@ Main._logger.outputDebug(insertSQL);
 //	Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);
 //				LabShelfManager.getShelf().commit();
 			} else {
-if(clientNum % 100 == 0)
+if(clientNum % barrier.length == 0)
 	Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);
 				String updateSQL = "Update " + Constants.TABLE_PREFIX
 						+ Constants.TABLE_CLIENTHASRESULT
@@ -3603,8 +3608,8 @@ Main._logger.outputLog(updateSQL);
 				insertTransactionRunResult(clientRunResID, xactID, 0, -1, -1, -1, -1);
 				// print out run stat
 				String strStat = String.format("[numXacts: 0]");
-if(clientID % 100 == 0)
-	Main._logger.outputLog(str + "=>" + strStat);
+				if(clientID % barrier.length == 0)
+					Main._logger.outputLog(str + "=>" + strStat);
 				return;
 			}
 
@@ -3644,8 +3649,8 @@ if(clientID % 100 == 0)
 					.format("[numXacts: %d, min: %d(ms), max: %d(ms), sum: %d(ms), lw: %d(ms)]",
 							numExecXacts, minXactProcTime,
 							maxXactProcTime, sumXactProcTime, sumLockWaitTime);
-if(clientID % 100 == 0)
-	Main._logger.outputLog(str + "=>" + strStat);
+			if(clientID % barrier.length == 0)
+				Main._logger.outputLog(str + "=>" + strStat);
 //			Main._logger.outputLog("###<End>INSERT " + str + " run result => " + strStat);
 		} // end for
 	}

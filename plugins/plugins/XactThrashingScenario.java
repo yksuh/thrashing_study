@@ -43,7 +43,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		long id;
 		long num = 0;
 		long numExecXacts = 0;
-		long numFinalExecXacts = 0;
+		long numMeasuredExecXacts = 0;
 		long sumOfElapsedTime = 0;
 		long runTime = 0;
 		HashMap<Long, Long> xactNumToIDMap;
@@ -1396,7 +1396,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
 Main._logger.outputLog(str);
 			_clientRunStats[_clientNum].runTime = runTime;
-			_clientRunStats[_clientNum].numFinalExecXacts = _numExecXacts;
+			_clientRunStats[_clientNum].numMeasuredExecXacts = _numExecXacts;
 			
 			batchRunTimer.cancel();
 			batchRunTimer2.cancel();
@@ -2125,14 +2125,14 @@ Main._logger.outputDebug(batchSetQuery);
 //		XactRunStatPerClient[] stats = new XactRunStatPerClient[clients.length];
 		for (Client c : clients) {
 			int cNum = c.getClientNumber();
-			if(cNum % 50 == 0){
-				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), " +
-						"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
-						cNum, 
-						_clientRunStats[cNum].runTime, 
-						batchRunTime*1000,
-						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
-			}
+//			if(cNum % 50 == 0){
+//				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms), " +
+//						"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
+//						cNum, 
+//						_clientRunStats[cNum].runTime, 
+//						batchRunTime*1000,
+//						_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
+//			}
 			_clientRunStats[cNum].num				 = cNum;
 			_clientRunStats[cNum].id			 	 = c.getClientID();
 			_clientRunStats[cNum].numExecXacts 		 = c.getNumExecXacts(); // timeout
@@ -2140,23 +2140,33 @@ Main._logger.outputDebug(batchSetQuery);
 			_clientRunStats[cNum].numXactsToHave 		 = c.getNumXactsToHave();
 			_clientRunStats[cNum].xactNumToIDMap 		 =  c.getXactNumToIDMap();
 			_clientRunStats[cNum].xactNumToRunTimeVecMap = c.getXactNumToRunTimeVecMap();
-			if(_clientRunStats[cNum].timeOut == false 
-			|| _clientRunStats[cNum].numExecXacts != _clientRunStats[cNum].numFinalExecXacts 
-			|| (_clientRunStats[cNum].runTime/1000) > batchRunTime*1.05){
-				if(cNum % 25 == 0){
-					Main._logger.outputLog(String.format("Bad Client #%d => ClientRunTime: %d(ms), " +
-							"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
-							cNum, 
-							_clientRunStats[cNum].runTime, 
-							batchRunTime*1000,
-							//_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
-							_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 1 : 0));
-	//						if(runAgain){
-	//						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
-	//				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));
-	//						return Constants.FAILED_ITER;
-				}
+//			if(_clientRunStats[cNum].timeOut == false 
+//			|| _clientRunStats[cNum].numExecXacts != _clientRunStats[cNum].numFinalExecXacts 
+//			|| (_clientRunStats[cNum].runTime/1000) > batchRunTime*1.05){
+//				if(cNum % 25 == 0){
+//					Main._logger.outputLog(String.format("Bad Client #%d => ClientRunTime: %d(ms), " +
+//							"batchRunTime: %d(ms), # of execs: %d, timeOut: %d", 
+//							cNum, 
+//							_clientRunStats[cNum].runTime, 
+//							batchRunTime*1000,
+//							//_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 0 : 1));
+//							_clientRunStats[cNum].numFinalExecXacts, _clientRunStats[cNum].timeOut ? 1 : 0));
+//	//						if(runAgain){
+//	//						Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d will re-run", iterNum, batchID));
+//	//				Main._logger.outputLog(String.format("Iteration #%d failed. Batch #%d may need to re-run", iterNum, batchID));
+//	//						return Constants.FAILED_ITER;
+//				}
+//			}
+			if(_clientRunStats[cNum].runTime/1000 > batchRunTime){
+				Main._logger.outputLog(String.format("Client #%d => ClientRunTime: %d(ms)\n", cNum, 
+						_clientRunStats[cNum].runTime));
 			}
+			if(_clientRunStats[cNum].numMeasuredExecXacts != _clientRunStats[cNum].numExecXacts){
+				Main._logger.outputLog(String.format("Client #%d => numMeasured: %d, numCurrXacts: %d\n", cNum, 
+						_clientRunStats[cNum].numMeasuredExecXacts, 
+						_clientRunStats[cNum].numExecXacts));
+			}
+			
 			totalXacts				 += _clientRunStats[cNum].numExecXacts;
 			sumOfBatchRunElapsedTime += _clientRunStats[cNum].sumOfElapsedTime;
 		}

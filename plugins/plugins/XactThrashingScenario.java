@@ -1291,13 +1291,13 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			Timer batchRunTimer2 = new Timer();
 			batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
 			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
-			if(_stmt != null){
-				try {
-					_stmt.setQueryTimeout(batchRunTime * 1000);
-				} catch (SQLException e1) {
-					Main._logger.reportError(e1.getMessage());
-				}
-			}
+//			if(_stmt != null){
+//				try {
+//					_stmt.setQueryTimeout(batchRunTime * 1000);
+//				} catch (SQLException e1) {
+//					Main._logger.reportError(e1.getMessage());
+//				}
+//			}
 			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
 //				if (_timeOut) {
 //					long elapsedTime = System.currentTimeMillis()-_startTime;
@@ -1328,12 +1328,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							ResultSet.TYPE_FORWARD_ONLY,
 							ResultSet.CONCUR_UPDATABLE);
 							long elapsedTime = System.currentTimeMillis()-startTime;
-							if(elapsedTime > batchRunTime * 1000)
-								break;
-							else{
-								int remainingTimeout = (int)batchRunTime * 1000-(int)elapsedTime;
-								_stmt.setQueryTimeout(remainingTimeout);
-							}
 					}
 					_conn.setAutoCommit(false);
 					long xactStartTime = System.currentTimeMillis();
@@ -1343,8 +1337,17 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						// select
 						// long startTime = System.currentTimeMillis();
 						try {
-							//_stmt.addBatch(sql); // for confirmatory
-							_stmt.execute(sql); // for exploratory
+							long elapsedTime = System.currentTimeMillis() - startTime;
+							if(elapsedTime > batchRunTime * 1000)
+								break;
+							else{
+								int remainingTimeout = (int)batchRunTime * 1000-(int)elapsedTime;
+								_stmt.setQueryTimeout(remainingTimeout);
+							}
+							_stmt.execute(sql); 	// for exploratory
+							// reset query timeout 
+							// before executing another transaction we will set the new timeout based on remaining time
+							_stmt.setQueryTimeout((int)batchRunTime * 1000);
 						} catch (Exception ex) {
 							continue;
 						}

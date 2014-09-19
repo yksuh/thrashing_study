@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -1797,43 +1798,36 @@ if(runTime > batchRunTime * 1000)
 				+ " " + "WHERE BatchSetID = " + batchSetID + " and RunID = "
 				+ runID;
 Main._logger.outputLog(sql);
-//		int trials = 0;
-//		int succTrials = 0;
-//		boolean success = false;
-//		do{
-//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-//			try {
-//				while (rs.next()) {
-//					batchSetRunResID = rs.getInt(1);
-//				}
-//				rs.close();
-//				if(batchSetRunResID == -1){
-//					succTrials++;
-//					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-//					if(succTrials > 5){
-//						success = true; // not existing
-//						break;
-//					}
-//					continue;
-//				}
-//				success = true;
-//				break;
-//			} catch (SQLException e1) {
-//				e1.printStackTrace();
-//				trials++;
-//				Main._logger.writeIntoLog("failed retry " + trials + " <= " + e1.getMessage());
-//			}
-//		}while(trials < Constants.TRY_COUNTS);
-//		
-//		if(!success){
-//			throw new Exception ("Labshelf connection is not robust...");
-//		}
-
-		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-		while (rs.next()) {
-			batchSetRunResID = rs.getInt(1);
-		}
-		rs.close();
+		int trials = 0;
+		int succTrials = 0;
+		boolean success = false;
+		do{
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+			try {
+				while (rs.next()) {
+					batchSetRunResID = rs.getInt(1);
+				}
+				rs.close();
+				if(batchSetRunResID == -1){
+					succTrials++;
+					//Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+					if(succTrials > 5){
+						success = true; // not existing
+						break;
+					}
+					continue;
+				}
+				success = true;
+				break;
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+				trials++;
+				//Main._logger.writeIntoLog("failed retry " + trials + " <= " + e1.getMessage());
+			}
+		}while(trials < Constants.TRY_COUNTS);
+		
+		if(!success)
+			throw new Exception ("Labshelf connection is not robust...");
 			
 		// when not existing ...
 		if (batchSetRunResID == -1) {
@@ -1858,9 +1852,29 @@ Main._logger.outputLog(sql);
 						BATCHSETHASRESULT.columnDataTypes);
 Main._logger.outputDebug(insertSQL);
 				LabShelfManager.getShelf().commit();
-			} catch (SQLException e) {
+			} catch(SQLIntegrityConstraintViolationException scvex){
+				Main._logger.reportError(scvex.getMessage());
+//				sql = "SELECT BatchSetRunResID " + "FROM "
+//						+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSETHASRESULT
+//						+ " " + "WHERE BatchSetID = " + batchSetID + " and RunID = "
+//						+ runID;
+//				
+//				ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+//				while (rs.next()) {
+//					batchSetRunResID = rs.getInt(1);
+//				}
+//				rs.close();
+//					
+//				String updateSQL = "Update " + Constants.TABLE_PREFIX
+//						+ Constants.TABLE_BATCHSETHASRESULT + " SET "
+//						+ " ElapsedTime = " + batchRunTimeMillis + ", "
+//						+ " SumExecXacts = " + totalXacts + ", "
+//						+ " SumXactProcTime = " + sumXactRunTime
+//						+ " WHERE batchSetRunResID = " + batchSetRunResID;
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 //				System.err.println(e.getMessage());
+				Main._logger.reportError(e.getMessage());
 			}
 		}
 Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
@@ -3046,61 +3060,78 @@ try {
 				+ " and BatchID = " + batchID + " and IterNum = " + iterNum;
 Main._logger.outputDebug(batchSetQuery);
 
-//		int trials = 0;
-//		int succTrials = 0;
-//		boolean success = false;
-//		String selectSQL = "";
-//		do{
-//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(batchSetQuery);
-////			try {
-//				while (rs.next()) {
-//					batchRunResID = rs.getInt(1);
-//				}
-//				rs.close();
-//				if(batchRunResID == -1){
-//					succTrials++;
+		int trials = 0;
+		int succTrials = 0;
+		boolean success = false;
+		String selectSQL = "";
+		do{
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(batchSetQuery);
+			try {
+				while (rs.next()) {
+					batchRunResID = rs.getInt(1);
+				}
+				rs.close();
+				if(batchRunResID == -1){
+					succTrials++;
 //					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
-//					if(succTrials > 5){
-//						success = true; // not existing
-//						break;
-//					}
-//					continue;
-//				}
-//				success = true;
-//				break;
-//			} catch (Exception ex) {
-//				ex.printStackTrace();
-//				trials++;
+					if(succTrials > 5){
+						success = true; // not existing
+						break;
+					}
+					continue;
+				}
+				success = true;
+				break;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				trials++;
 //				Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
-//			}
-//		}while(trials < Constants.TRY_COUNTS);
+			}
+		}while(trials < Constants.TRY_COUNTS);
 
-		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(batchSetQuery);
-		while (rs.next()) {
-			batchRunResID = rs.getInt(1);
-		}
-		rs.close();
+		if(!success)
+			new Exception("labshelf server is not robust");
+//		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(batchSetQuery);
+//		while (rs.next()) {
+//			batchRunResID = rs.getInt(1);
+//		}
+//		rs.close();
 				
 		String insertSQL = "";
 		if (batchRunResID == -1) {
 			batchRunResID = LabShelfManager.getShelf().getSequencialIDToLong(
 					Constants.SEQUENCE_BATCHHASRESULT);
 			assert (batchRunResID < 1) : "Batch result ID is less than 0. So weird...";
-			insertSQL = LabShelfManager.getShelf().NewInsertTuple(
-					Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASRESULT,
-					BATCHHASRESULT.columns,
-					new String[] { String.valueOf(batchRunResID),
-							String.valueOf(batchSetRunResID),
-							String.valueOf(batchID), String.valueOf(iterNum),
-							String.valueOf(batchRunTimeMillis),
-							String.valueOf(totalXacts),
-							String.valueOf(sumXactRunTime) },
-					BATCHHASRESULT.columnDataTypes);
+			try{
+				insertSQL = LabShelfManager.getShelf().NewInsertTuple(
+						Constants.TABLE_PREFIX + Constants.TABLE_BATCHHASRESULT,
+						BATCHHASRESULT.columns,
+						new String[] { String.valueOf(batchRunResID),
+								String.valueOf(batchSetRunResID),
+								String.valueOf(batchID), String.valueOf(iterNum),
+								String.valueOf(batchRunTimeMillis),
+								String.valueOf(totalXacts),
+								String.valueOf(sumXactRunTime) },
+						BATCHHASRESULT.columnDataTypes);
 Main._logger.outputDebug(insertSQL);
-			LabShelfManager.getShelf().commit();
+				LabShelfManager.getShelf().commit();
+			}catch(SQLIntegrityConstraintViolationException scve){
+				Main._logger.reportError(scve.getMessage());
+				String updateSQL = "Update " + Constants.TABLE_PREFIX
+						+ Constants.TABLE_BATCHHASRESULT + " SET "
+						+ " ElapsedTime = " + batchRunTimeMillis + ", "
+						+ " SumExecXacts = " + totalXacts + ", "
+						+ " SumXactProcTime = " + sumXactRunTime
+						+ " WHERE BatchSetRunResID = " + batchSetRunResID
+						+ " and batchID = " + batchID + " and iterNum = " + iterNum;
+				Main._logger.outputLog(updateSQL);
+				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+			}catch(Exception ex){
+				Main._logger.outputDebug(ex.getMessage());
+			}
+			
 		} else {
 Main._logger.outputDebug(insertSQL);
-			Main._logger.outputDebug("batchRun result ID: " + batchRunResID);
 			String updateSQL = "Update " + Constants.TABLE_PREFIX
 					+ Constants.TABLE_BATCHHASRESULT + " SET "
 					+ " ElapsedTime = " + batchRunTimeMillis + ", "
@@ -3108,7 +3139,7 @@ Main._logger.outputDebug(insertSQL);
 					+ " SumXactProcTime = " + sumXactRunTime
 					+ " WHERE BatchSetRunResID = " + batchSetRunResID
 					+ " and batchID = " + batchID + " and iterNum = " + iterNum;
-//Main._logger.outputLog(updateSQL);
+Main._logger.outputLog(updateSQL);
 			LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 		}
 		Main._logger.outputLog("==============================================");
@@ -3145,43 +3176,43 @@ Main._logger.outputDebug(insertSQL);
 					+ " WHERE BatchRunResID = " + batchRunResID
 					+ " and ClientID = " + clientID + " and IterNum = " + iterNum;
 //Main._logger.outputDebug(sql);
-//			int trials = 0;
-//			int succTrials = 0;
-//			boolean success = false;
-//			do{
-//				try{
-//					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-//					while (rs.next()) {
-//						clientRunResID = rs.getInt(1);
-//					}
-//					rs.close();
-//					if(clientRunResID == -1){
-//						succTrials++;
+			int trials = 0;
+			int succTrials = 0;
+			boolean success = false;
+			do{
+				try{
+					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+					while (rs.next()) {
+						clientRunResID = rs.getInt(1);
+					}
+					rs.close();
+					if(clientRunResID == -1){
+						succTrials++;
 //						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-//						if(succTrials > 5){
-//							success = true; // not existing
-//							break;
-//						}
-//						continue;
-//					}
-//					success = true;
-//					break;
-//				}catch(Exception ex){
-//					ex.printStackTrace();
-//					trials++;
+						if(succTrials > 5){
+							success = true; // not existing
+							break;
+						}
+						continue;
+					}
+					success = true;
+					break;
+				}catch(Exception ex){
+					ex.printStackTrace();
+					trials++;
 //					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
-//				}
-//			}while(trials < Constants.TRY_COUNTS);
+				}
+			}while(trials < Constants.TRY_COUNTS);
 
-//			if(!success){
-//				throw new Exception ("Labshelf connection is not robust...");
-//			}
-			
-			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-			while (rs.next()) {
-				clientRunResID = rs.getInt(1);
+			if(!success){
+				throw new Exception ("Labshelf connection is not robust...");
 			}
-			rs.close();
+			
+//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+//			while (rs.next()) {
+//				clientRunResID = rs.getInt(1);
+//			}
+//			rs.close();
 			
 			String insertSQL = "";
 			// when not existing ...
@@ -3471,34 +3502,34 @@ Main._logger.outputLog(updateSQL);
 					+ "WHERE ClientRunResID = " + clientRunResID
 					+ " and TransactionID = " + xactID;
 //Main._logger.outputDebug(sql);
-//			do{
-//				try{
-//					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-//					while (rs.next()) {
-//						xactRunResID = rs.getInt(1);
-//					}
-//					rs.close();
-//					if(xactRunResID == -1){
-//						succTrials++;
+			do{
+				try{
+					ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+					while (rs.next()) {
+						xactRunResID = rs.getInt(1);
+					}
+					rs.close();
+					if(xactRunResID == -1){
+						succTrials++;
 //						Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-//						if(succTrials > 5){
-//							success = true; // not existing
-//							break;
-//						}
-//						continue;
-//					}
-//					success = true;
-//					break;
-//				}catch(Exception ex){
-//					ex.printStackTrace();
-//					trials++;
+						if(succTrials > 5){
+							success = true; // not existing
+							break;
+						}
+						continue;
+					}
+					success = true;
+					break;
+				}catch(Exception ex){
+					ex.printStackTrace();
+					trials++;
 //					Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
-//				}
-//			}while(trials < Constants.TRY_COUNTS);
-//
-//			if(!success){
-//				throw new Exception ("Labshelf connection is not robust...");
-//			}
+				}
+			}while(trials < Constants.TRY_COUNTS);
+
+			if(!success){
+				throw new Exception ("Labshelf connection is not robust...");
+			}
 			
 			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
 			while (rs.next()) {
@@ -3522,7 +3553,7 @@ Main._logger.outputLog(updateSQL);
 								new String[] {
 										String.valueOf(xactRunResID), // xact has result ID
 										String.valueOf(clientRunResID),// client has result ID
-										String.valueOf(xactID), // xact ID
+										String.valueOf(xactID), 		// xact ID
 										String.valueOf(numExecXacts), // numExecs
 										String.valueOf(minXactProcTime), // minXactRunTime
 										String.valueOf(maxXactProcTime), // maxXactRunTime

@@ -825,56 +825,26 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			public void run() {
 				if(_clientRunStats[_clientNum] != null)
 					_clientRunStats[_clientNum].timeOut = true;
-//				if (st != null) {
-//					try {
-//						st.cancel();
-//						new SQLException("Batch run timeout");
-//					} catch (SQLException e) {
-//						//e.printStackTrace();
-//						Main._logger.reportErrorNotOnConsole(e.getMessage());
-//						st = null;
-//					}
-//				}
-//				if (_stmt != null) {
-//					try {
-//						_stmt.close();
-//						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
-//						new SQLException("Batch run timeout");
-//					} catch (SQLException e) {
-////						e.printStackTrace();
-//						Main._logger.reportErrorNotOnConsole(e.getMessage());
-//						_stmt = null;
-//					}
-//				}
 				if (st != null) {
 					try {
-						if(!st.isClosed()){
-							st.cancel();
-						}
-					} catch (SQLFeatureNotSupportedException e) {					
-					} catch(SQLException ex){
-						Main._logger.reportErrorNotOnConsole(ex.getMessage());
-						try{
-							st.cancel();
-						}catch(SQLException sqlex){}
+						st.cancel();
+						new SQLException("Batch run timeout");
+					} catch (SQLException e) {
+						//e.printStackTrace();
+						Main._logger.reportErrorNotOnConsole(e.getMessage());
+//						st = null;
 					}
-					st = null;
-					new SQLException("Batch run timeout");	
 				}
 				if (_stmt != null) {
 					try {
-						if(!_stmt.isClosed()){
-							_stmt.cancel();
-						}
-					} catch (SQLFeatureNotSupportedException e) {					
-					} catch(SQLException ex){
-						Main._logger.reportErrorNotOnConsole(ex.getMessage());
-						try{
-							_stmt.cancel();
-						}catch(SQLException sqlex){}
+						_stmt.cancel();
+						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
+						new SQLException("Batch run timeout");
+					} catch (SQLException e) {
+//						e.printStackTrace();
+						Main._logger.reportErrorNotOnConsole(e.getMessage());
+//						_stmt = null;
 					}
-					_stmt = null;
-					new SQLException("Batch run timeout");	
 				}
 			}
 		}

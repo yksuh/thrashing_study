@@ -846,6 +846,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //						_stmt = null;
 					}
 				}
+				cancel();
 			}
 		}
 		

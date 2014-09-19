@@ -2172,15 +2172,15 @@ Main._logger.outputDebug(batchSetQuery);
 //	//						return Constants.FAILED_ITER;
 //				}
 //			}
-			if(_clientRunStats[cNum].runTime/1000 > batchRunTime){
-				Main._logger.writeIntoLog(String.format("Client #%d => ClientRunTime: %d(ms)\n", cNum, 
-						_clientRunStats[cNum].runTime));
-			}
-			if(_clientRunStats[cNum].numMeasuredExecXacts != _clientRunStats[cNum].numExecXacts){
-				Main._logger.writeIntoLog(String.format("Client #%d => numMeasured: %d, numCurrXacts: %d\n", cNum, 
-						_clientRunStats[cNum].numMeasuredExecXacts, 
-						_clientRunStats[cNum].numExecXacts));
-			}
+//			if(_clientRunStats[cNum].runTime/1000 > batchRunTime){
+//				Main._logger.writeIntoLog(String.format("Client #%d => ClientRunTime: %d(ms)\n", cNum, 
+//						_clientRunStats[cNum].runTime));
+//			}
+//			if(_clientRunStats[cNum].numMeasuredExecXacts != _clientRunStats[cNum].numExecXacts){
+//				Main._logger.writeIntoLog(String.format("Client #%d => numMeasured: %d, numCurrXacts: %d\n", cNum, 
+//						_clientRunStats[cNum].numMeasuredExecXacts, 
+//						_clientRunStats[cNum].numExecXacts));
+//			}
 			
 			totalXacts				 += _clientRunStats[cNum].numExecXacts;
 			sumOfBatchRunElapsedTime += _clientRunStats[cNum].sumOfElapsedTime;

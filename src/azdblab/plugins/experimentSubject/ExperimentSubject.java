@@ -730,21 +730,26 @@ protected String getProcDiff(Socket procMonSock) throws ProcMonitorException {
             Main._logger.outputLog("\t Inserted " + (i + 1) + " Rows");
 //            commit();
           }
-          String  strdata  = "";
+          StringBuffer sb = new StringBuffer();
+//          String  strdata  = "";
           Column[] column = table.getColumns();
           // Assume all data fields are of integer data type
           for ( int j = 1; j < columnnum; j++ ) {
         	  if(column[j].myName.contains("val")){
-        		  strdata += "'Dallas, long scarred by the guilt and shame of being the place Pres. JFK was assassinated.'";
-        	  }else{
-        		  strdata += repRand.getNextRandomInt();
+//        		  strdata += "'Dallas, long scarred by the guilt and shame of being the place Pres. JFK was assassinated.'";
+        		  sb.append("'Dallas, long scarred by the guilt and shame of being the place Pres. JFK was assassinated.'");
+               }else{
+//        		  strdata += repRand.getNextRandomInt();
+            	  sb.append(repRand.getNextRandomInt());
         	  }
         	  if(j < columnnum -1){
-        		  strdata += ",";  
+//        		  strdata += ",";  
+        		  sb.append(",");
         	  }
           }
           strupdate = "INSERT INTO " + tableName + " VALUES(" + i + "," +
-                      strdata + ")";
+//                      strdata + ")";
+						sb.toString() + ")";
           _statement.addBatch(strupdate);
         }
       _statement.executeBatch();

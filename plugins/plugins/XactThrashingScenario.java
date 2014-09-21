@@ -831,7 +831,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						new SQLException("Batch run timeout");
 					} catch (SQLException e) {
 						//e.printStackTrace();
-						Main._logger.reportErrorNotOnConsole(e.getMessage());
+						Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
 //						st = null;
 					}
 				}
@@ -842,7 +842,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						new SQLException("Batch run timeout");
 					} catch (SQLException e) {
 //						e.printStackTrace();
-						Main._logger.reportErrorNotOnConsole(e.getMessage());
+						Main._logger.reportErrorNotOnConsole("Client2 #"+_clientNum+"=>"+e.getMessage());
 //						_stmt = null;
 					}
 				}
@@ -1070,8 +1070,9 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					Thread.sleep(10000);
 					Main._logger.outputLog(j+"th connection trial...");
 				}
-				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-						ResultSet.CONCUR_UPDATABLE);
+//				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+//						ResultSet.CONCUR_UPDATABLE);
+				_stmt = _conn.createStatement();
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
 //				Main._logger.reportError(sqlex.getMessage());
@@ -1288,9 +1289,10 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 									_userName, _password);
 					}
 					if(_stmt == null){
-						_stmt = _conn.createStatement(
-							ResultSet.TYPE_FORWARD_ONLY,
-							ResultSet.CONCUR_UPDATABLE);
+//						_stmt = _conn.createStatement(
+//							ResultSet.TYPE_FORWARD_ONLY,
+//							ResultSet.CONCUR_UPDATABLE);
+						_stmt = _conn.createStatement();
 					}
 					_conn.setAutoCommit(false);
 					long xactStartTime = System.currentTimeMillis();

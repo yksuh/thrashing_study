@@ -2017,6 +2017,7 @@ Main._logger.outputDebug(batchSetQuery);
 	
 	private long maxConnClosingTime = 0;
 	private long maxStmtClosingTime = 0;
+	public long maxCommitTime = 0;
 	
 	/***
 	 * Runs transactions per client in a batch
@@ -2095,7 +2096,7 @@ Main._logger.outputDebug(batchSetQuery);
 		}
 		maxConnClosingTime = 0;
 		maxStmtClosingTime = 0;
-		
+		maxCommitTime = 0;
 		for (Client c : clients) {
 			// locally set timeOut 
 			final int clientNum = c.getClientNumber();
@@ -2135,7 +2136,12 @@ Main._logger.outputDebug(batchSetQuery);
 		}while(!exitBarrier);
 		long barrierExit = System.currentTimeMillis();
 		Main._logger.outputLog("------ Barrier Exit (time: "+ (barrierExit-barrierStart)+"(ms)) ! -----");
-		Main._logger.outputLog(String.format("[Conn Close Max Time: %d(ms), Stmt Close Max Time: %d(ms)\n", maxConnClosingTime, maxStmtClosingTime));
+		Main._logger.outputLog(String.format("[Commit Max Time: %d(ms), " +
+				"Conn Close Max Time: %d(ms), " +
+				"Stmt Close Max Time: %d(ms)\n", 
+				maxCommitTime,
+				maxConnClosingTime, 
+				maxStmtClosingTime));
 		
 		int totalXacts = 0;
 		long sumOfBatchRunElapsedTime = 0;
@@ -2289,17 +2295,22 @@ Main._logger.outputDebug(batchSetQuery);
 			}
 			_conn = null;
 			
+			if(commitTime > maxCommitTime){
+				maxCommitTime = connClosingTime;
+			}
 			if(stmtClosingTime > maxStmtClosingTime){
 				maxStmtClosingTime = stmtClosingTime;
 			}
 			if(connClosingTime > maxConnClosingTime){
 				maxConnClosingTime = connClosingTime;
 			}
+			
 /****************************************************************************/
 if(_clientNum % barrier.length == 0){ // last client
 	Main._logger.writeIntoLog(
-			String.format("\tTerminated Client #%d(stmt: %d(ms), conn: %d(ms)",
+			String.format("\tTerminated Client #%d(commit: %d(ms), stmt: %d(ms), conn: %d(ms)",
 					_clientNum, 
+					commitTime,
 					stmtClosingTime, 
 					connClosingTime));
 }

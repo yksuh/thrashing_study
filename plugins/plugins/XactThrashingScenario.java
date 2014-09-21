@@ -1074,7 +1074,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						ResultSet.CONCUR_UPDATABLE);
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
-				Main._logger.reportError(sqlex.getMessage());
+//				Main._logger.reportError(sqlex.getMessage());
+				Main._logger.reportErrorNotOnConsole(sqlex.getMessage());
 			}
 		}
 

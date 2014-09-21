@@ -825,27 +825,26 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			public void run() {
 				if(_clientRunStats[_clientNum] != null)
 					_clientRunStats[_clientNum].timeOut = true;
-				if (st != null) {
-					try {
+				try {
+					if(co != null) co.commit();
+					if (st != null) {
 						st.cancel();
 						new SQLException("Batch run timeout");
-					} catch (SQLException e) {
-						//e.printStackTrace();
-						Main._logger.reportErrorNotOnConsole(e.getMessage());
-//						st = null;
-					}
+					} 
+				} catch (SQLException e) {
+					//e.printStackTrace();
+					Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
 				}
-				if (_stmt != null) {
-					try {
+				try {
+					if(_conn != null) _conn.commit();
+					if (_stmt != null) {
 						_stmt.cancel();
-						//Main._logger.outputDebug(String.format(">>> Client %d encounters timeout!", _clientNum));
 						new SQLException("Batch run timeout");
-					} catch (SQLException e) {
+					} 
+				}catch (SQLException e) {
 //						e.printStackTrace();
-						Main._logger.reportErrorNotOnConsole(e.getMessage());
-//						_stmt = null;
-					}
-				}
+					Main._logger.reportErrorNotOnConsole("Client2 #"+_clientNum+"=>"+e.getMessage());
+				}	
 				cancel();
 			}
 		}
@@ -1070,12 +1069,13 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					Thread.sleep(10000);
 					Main._logger.outputLog(j+"th connection trial...");
 				}
-				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-						ResultSet.CONCUR_UPDATABLE);
+//				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+//						ResultSet.CONCUR_UPDATABLE);
+				_stmt = _conn.createStatement();
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
 //				Main._logger.reportError(sqlex.getMessage());
-				Main._logger.reportErrorNotOnConsole(sqlex.getMessage());
+				Main._logger.reportErrorNotOnConsole("init()-Client #"+_clientNum+"=>"+sqlex.getMessage());
 			}
 		}
 
@@ -1234,7 +1234,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					_conn.commit();
 			} catch (SQLException e) {
 				// e.printStackTrace();
-				Main._logger.reportErrorNotOnConsole(e.getMessage());
+				Main._logger.reportErrorNotOnConsole("run()-Client #"+_clientNum+"=>"+e.getMessage());
 			}
 		}
 
@@ -1288,9 +1288,10 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 									_userName, _password);
 					}
 					if(_stmt == null){
-						_stmt = _conn.createStatement(
-							ResultSet.TYPE_FORWARD_ONLY,
-							ResultSet.CONCUR_UPDATABLE);
+//						_stmt = _conn.createStatement(
+//							ResultSet.TYPE_FORWARD_ONLY,
+//							ResultSet.CONCUR_UPDATABLE);
+						_stmt = _conn.createStatement();
 					}
 					_conn.setAutoCommit(false);
 					long xactStartTime = System.currentTimeMillis();
@@ -2257,6 +2258,17 @@ Main._logger.outputDebug(batchSetQuery);
 		
 		public void terminate(){
 			// TODO Auto-generated method stub
+			long commitTime = 0;
+			if(_conn != null){
+				long startCommit = System.currentTimeMillis();
+				try {
+					_conn.commit();
+				} catch (SQLException e) {
+					Main._logger.reportErrorNotOnConsole("terminate()-Client #"+_clientNum+"=>"+e.getMessage());
+				}
+				commitTime = System.currentTimeMillis() - startCommit;
+			}
+			
 			long stmtClosingTime=0, connClosingTime=0;
 			try {
 				long start = System.currentTimeMillis();

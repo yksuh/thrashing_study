@@ -1389,9 +1389,10 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				// }
 			} // while
 /************************************************************************************************************************************/		
-String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
-if(runTime > batchRunTime * 1000)
+if(runTime/1000 > batchRunTime*1.10){
+	String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
 	Main._logger.writeIntoLog(str);
+}
 /************************************************************************************************************************************/
 			_clientRunStats[_clientNum].runTime = runTime;
 			_clientRunStats[_clientNum].numMeasuredExecXacts = _numExecXacts;
@@ -3230,8 +3231,8 @@ Main._logger.outputLog(updateSQL);
 								String.valueOf(numExecXacts),
 								String.valueOf(sumXactElapsedTime) },
 						CLIENTHASRESULT.columnDataTypes);
-//if(clientNum % 100 == 0)
-//	Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);
+if(clientNum % 100 == 0)
+	Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);
 //				LabShelfManager.getShelf().commit();
 			} else {
 if(clientNum % barrier.length == 0)
@@ -3259,14 +3260,14 @@ if(clientNum % barrier.length == 0)
 						+ " WHERE batchRunResID = " + batchRunResID
 						+ " and clientID = " + clientID
 						+ " and iterNum = " + iterNum;
-Main._logger.outputLog(updateSQL);
+//Main._logger.outputLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 				LabShelfManager.getShelf().commit();
 				String sql = "SELECT ClientRunResID " + "FROM "
 						+ Constants.TABLE_PREFIX + Constants.TABLE_CLIENTHASRESULT
 						+ " WHERE BatchRunResID = " + batchRunResID
 						+ " and ClientID = " + clientID + " and IterNum = " + iterNum;
-	Main._logger.outputDebug(sql);
+//Main._logger.outputDebug(sql);
 				clientRunResID = -1;
 //				int trials = 0;
 //				int succTrials = 0;
@@ -3559,6 +3560,7 @@ Main._logger.outputLog(updateSQL);
 										String.valueOf(sumLockWaitTime) // lockWaitTime
 								}, TRANSACTIONHASRESULT.columnDataTypes);
 				LabShelfManager.getShelf().commit();
+//if(clientNum)
 //Main._logger.outputLog(insertSQL);
 			} else {
 //Main._logger.outputLog(insertSQL);

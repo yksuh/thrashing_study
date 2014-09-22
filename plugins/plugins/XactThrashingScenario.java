@@ -1726,6 +1726,8 @@ if(runTime > batchRunTime * 1000)
 			try{
 				int num = c.getClientNumber();
 				if(c.isAlive()){
+					if(num%100==0)
+						Main._logger.outputLog(String.format("destroyed Client #d", num));
 					c.destroyed();
 				}
 				if(num % 100 == 0)
@@ -2246,7 +2248,8 @@ Main._logger.outputDebug(batchSetQuery);
 		return iterNum;
 	}
 	
-	private class CloseConnection implements Runnable{
+//	private class CloseConnection implements Runnable{
+	private class CloseConnection{
 		public Connection _conn;
 		public Statement _stmt;
 		public int _clientNum;
@@ -2257,10 +2260,10 @@ Main._logger.outputDebug(batchSetQuery);
 			_clientNum = cNum;
 		}
 		
-		@Override
-		public void run() {
-			terminate();
-		}
+//		@Override
+//		public void run() {
+//			terminate();
+//		}
 		
 		public void terminate(){
 			// TODO Auto-generated method stub

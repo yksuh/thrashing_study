@@ -3640,7 +3640,7 @@ if(clientNum % barrier.length == 0)
 				// print out run stat
 				String strStat = String.format("[numXacts: 0]");
 				if(clientID % barrier.length == 0)
-					Main._logger.outputLog(str + "=>" + strStat);
+					Main._logger.writeIntoLog(str + "=>" + strStat);
 				return;
 			}
 

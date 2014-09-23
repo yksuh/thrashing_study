@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLTimeoutException;
 import java.sql.Statement;
@@ -56,72 +55,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 	}
 	
 	public XactRunStatPerClient[] _clientRunStats;
-	
-//	protected class BatchRunTimeOut extends TimerTask {
-//		public Connection _conn;
-//		public Statement _stmt;
-//		// public Client client;
-//		private int _cliNum;
-//
-//		// public long startTime;
-//		// public long batchRunTime;
-//
-//		public BatchRunTimeOut(int cNum, Connection cn, Statement st/*
-//																	 * , long
-//																	 * sTime,
-//																	 * long
-//																	 * brTime
-//																	 */) {
-//			_stmt = st;
-//			_conn = cn;
-//			// startTime = sTime;
-//			// batchRunTime = brTime;
-//			_cliNum = cNum;
-//		}
-//
-//		public void run() {
-//			try {
-//				// int cNum = client.getClientNumber();
-//				// _stats[cNum].num = cNum;
-//				// _stats[cNum].id = client.getId();
-//				// _stats[cNum].clientRunTime = System.currentTimeMillis() -
-//				// startTime;
-//				// _stats[cNum].xactNumToRunTimeVecMap =
-//				// client.getXactNumToRunTimeVecMap();
-//				// _stats[cNum].numExecXacts = client.getNumExecXacts();
-//				// Vector<Long> runTimeVec =
-//				// (_stats[cNum].xactNumToRunTimeVecMap.values()).iterator().next();
-//				// if(runTimeVec.size() == _stats[cNum].numExecXacts){
-//				// _stats[cNum].valid = true;
-//				// _stats[cNum].numExtraXacts = 0;
-//				// }else{
-//				// _stats[cNum].valid = false;
-//				// _stats[cNum].numExtraXacts =
-//				// _stats[cNum].numExecXacts-(long)(runTimeVec.size());
-//				// }
-//				//
-//				// _stats[cNum].sumOfElapsedTime = client.getSumOfElapsedTime();
-//				// _stats[cNum].xactNumToIDMap = client.getXactNumToIDMap();
-//				// if((long)((_stats[cNum].clientRunTime)/(long)1000) >
-//				// batchRunTime){
-//				// _stats[cNum].valid = false;
-//				// }else{
-//				// _stats[cNum].valid = true;
-//				// }
-//				_clientRunStats[_cliNum].timeOut = true;
-//				if (_conn != null) {
-//					_conn.close();
-//
-//				}
-//				if (_stmt != null) {
-//					_stmt.cancel();
-//				}
-//				new SQLException("Batch run timeout");
-//			} catch (Exception ex) {
-//				new SQLException("Batch run timeout");
-//			}
-//		}
-//	}
 
 	/****
 	 * Get tables to be installed for this thrashing study
@@ -825,25 +758,41 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			public void run() {
 				if(_clientRunStats[_clientNum] != null)
 					_clientRunStats[_clientNum].timeOut = true;
+//				try {
+//					if(co != null) co.commit();
+//					if (st != null) {
+//						st.cancel();
+//						new SQLException("Batch run timeout");
+//					} 
+//				} catch (SQLException e) {
+//					//e.printStackTrace();
+//					Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
+//				}
 				try {
-					if(co != null) co.commit();
-					if (st != null) {
-						st.cancel();
-						new SQLException("Batch run timeout");
-					} 
-				} catch (SQLException e) {
-					//e.printStackTrace();
-					Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
-				}
-				try {
-					if(_conn != null) _conn.commit();
+					if(_conn != null) {
+						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){
+							long start		 = System.currentTimeMillis();
+							_conn.rollback();
+							long rollbackTime = System.currentTimeMillis()-start;
+							//if(_clientNum % 20 == 0){
+								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
+							//}
+						}else{
+							_conn.commit();
+						}
+					}
 					if (_stmt != null) {
+						long start		 = System.currentTimeMillis();
 						_stmt.cancel();
+						long cancelTime = System.currentTimeMillis()-start;
+						//if(_clientNum % 20 == 0){
+							Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" stmt cancel time: " + cancelTime + "(ms)");
+						//}
 						new SQLException("Batch run timeout");
 					} 
 				}catch (SQLException e) {
 //						e.printStackTrace();
-					Main._logger.reportErrorNotOnConsole("Client2 #"+_clientNum+"=>"+e.getMessage());
+					Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+"=>"+e.getMessage());
 				}	
 				cancel();
 			}
@@ -1263,11 +1212,11 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// conn, stmt for quickly getting out of the loop
 			// timeout thread for getting number of transactions and sumElapsedTime
 			BatchRunTimeOut brt = new BatchRunTimeOut();
-			BatchRunTimeOut brt2 = new BatchRunTimeOut(this._clientNum, _conn, _stmt);
+//			BatchRunTimeOut brt2 = new BatchRunTimeOut(this._clientNum, _conn, _stmt);
 			Timer batchRunTimer = new Timer();
-			Timer batchRunTimer2 = new Timer();
+//			Timer batchRunTimer2 = new Timer();
 			batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
-			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
+//			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
 
 			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
 //				if (_timeOut) {
@@ -1398,7 +1347,7 @@ if(runTime/1000 > batchRunTime*1.10){
 			_clientRunStats[_clientNum].numMeasuredExecXacts = _numExecXacts;
 			finalExit = true;
 			batchRunTimer.cancel();
-			batchRunTimer2.cancel();
+//			batchRunTimer2.cancel();
 		}
 
 		/****

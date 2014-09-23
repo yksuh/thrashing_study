@@ -3488,6 +3488,15 @@ if(clientNum % barrier.length == 0)
 											long maxXactProcTime,
 											long sumXactProcTime,
 											long sumLockWaitTime) throws Exception{
+		String updateSQL = "Update " + Constants.TABLE_PREFIX
+				+ Constants.TABLE_TRANSACTIONHASRESULT + " SET "
+				+ " NumExecs = " + numExecXacts
+				+ ", minXactProcTime = " + minXactProcTime
+				+ ", maxXactProcTime = " + maxXactProcTime
+				+ ", sumXactProcTime = " + sumXactProcTime
+				+ ", sumLockWaitTime = " + sumLockWaitTime
+				+ " WHERE clientRunResID = " + clientRunResID + " and TransactionID = " + xactID;
+		
 		// get transaction run result identifier
 		long xactRunResID = -1;
 		try {
@@ -3564,31 +3573,15 @@ if(clientNum % barrier.length == 0)
 //Main._logger.outputLog(insertSQL);
 			} else {
 //Main._logger.outputLog(insertSQL);
-				String updateSQL = "Update " + Constants.TABLE_PREFIX
-						+ Constants.TABLE_TRANSACTIONHASRESULT + " SET "
-						+ " NumExecs = " + numExecXacts
-						+ ", minXactProcTime = " + minXactProcTime
-						+ ", maxXactProcTime = " + maxXactProcTime
-						+ ", sumXactProcTime = " + sumXactProcTime
-						+ ", sumLockWaitTime = " + sumLockWaitTime
-						+ " WHERE TransactionRunResID = " + xactRunResID;
 //				Main._logger.outputLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 				LabShelfManager.getShelf().commit();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			Main._logger.reportErrorNotOnConsole(updateSQL);
 			Main._logger.reportError(e.getMessage());
 			if(e.getMessage().contains("unique")){
-				String updateSQL = "Update " + Constants.TABLE_PREFIX
-						+ Constants.TABLE_TRANSACTIONHASRESULT + " SET "
-						+ " NumExecs = " + numExecXacts
-						+ ", minXactProcTime = " + minXactProcTime
-						+ ", maxXactProcTime = " + maxXactProcTime
-						+ ", sumXactProcTime = " + sumXactProcTime
-						+ ", sumLockWaitTime = " + sumLockWaitTime
-						+ " WHERE clientRunResID = " + clientRunResID + " and TransactionID = " + xactID;
-//				Main._logger.outputLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 				LabShelfManager.getShelf().commit();
 			}else{

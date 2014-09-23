@@ -745,15 +745,15 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			public Connection co = null;
 			public Statement st = null;
 			
-			public BatchRunTimeOut(int clientNumber, Connection conn,
-					Statement stmt) {
-				st = stmt;
-				co = conn;
-				clientNumber = cn;
-			}
+//			public BatchRunTimeOut(int clientNumber, Connection conn,
+//					Statement stmt) {
+//				st = stmt;
+//				co = conn;
+//				clientNumber = cn;
+//			}
 
-			public BatchRunTimeOut() {
-			}
+//			public BatchRunTimeOut() {
+//			}
 
 			public void run() {
 				if(_clientRunStats[_clientNum] != null)
@@ -1261,6 +1261,9 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							// reset query timeout 
 							// before executing another transaction we will set the new timeout based on remaining time
 							//_stmt.setQueryTimeout((int)batchRunTime * 1000);
+						} catch(SQLTimeoutException ste){ // timeout has reached 
+							Main._logger.reportErrorNotOnConsole(ste.getMessage());
+							break;
 						} catch (Exception ex) {
 							continue;
 						}
@@ -1284,10 +1287,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						_xactNumToRunTimeVecMap.put(xactNum, xactRunTimeVec);
 					}
 				} 
-				catch(SQLTimeoutException ste){
-					Main._logger.reportErrorNotOnConsole(ste.getMessage());
-					break;
-				}
 				catch (Exception e) {
 					if(e.getMessage().contains("timeout")){
 						break;
@@ -1347,6 +1346,7 @@ if(runTime/1000 > batchRunTime*1.10){
 			_clientRunStats[_clientNum].numMeasuredExecXacts = _numExecXacts;
 			finalExit = true;
 			batchRunTimer.cancel();
+			brt.cancel();
 //			batchRunTimer2.cancel();
 		}
 

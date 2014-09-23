@@ -778,8 +778,7 @@ _logger.outputLog(line);
 					.println("## <ExperimentStart> Purge Already installed tables ##################");
 			// find all tables in the experimentSubject
 			experimentRun.getExperimentSubject().dropAllInstalledTables();
-			System.out
-					.println("######################################################################");
+			System.out.println("######################################################################");
 
 			// drop them all until there is no table left
 			// have a scenario create a new table

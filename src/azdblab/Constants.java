@@ -686,6 +686,9 @@ public class Constants {
 	public static final String SEQUENCE_BATCHHASRESULT 			= "SEQ_BATCHRESULT";
 	public static final String SEQUENCE_CLIENTHASRESULT			= "SEQ_CLIENTRESULT";
 	public static final String SEQUENCE_TRANSACTIONHASRESULT 	= "SEQ_XACTRESULT";	
+	// clone table prefix
+	public static final String CLONE_TABLE_PREFIX = "clone_";
+	
 	
 	/****
 	 * Deprecated

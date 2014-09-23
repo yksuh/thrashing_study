@@ -15,12 +15,12 @@ package plugins;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.sql.ResultSet;
 import java.util.Vector;
 
+import azdblab.Constants;
 import azdblab.executable.Main;
 import azdblab.labShelf.GeneralDBMS;
 import azdblab.labShelf.OperatorNode;
@@ -165,7 +165,8 @@ public class PgsqlSubject extends ExperimentSubject {
 			for(int i=0;i<vecTables.size();i++){
 				String tblName = (String)vecTables.get(i);
 				Main._logger.outputLog("installed tableName: " + tblName);
-				dropTable(tblName);				
+				if(!tblName.contains(Constants.CLONE_TABLE_PREFIX))
+					dropTable(tblName);			
 			}
 	  }catch (SQLException e) {
 		  e.printStackTrace();

@@ -912,12 +912,12 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					experimentSubject.copyTable(curr_table.table_name_with_prefix, Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix);
 				}
 			}else{
-				if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
+				//if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
 					populateXactTable(curr_table);
 					experimentSubject.copyTable(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix, curr_table.table_name_with_prefix);
-				}
+				//}
 				// copy the populated tables to cloning tables
-				experimentSubject.copyTable(curr_table.table_name_with_prefix, Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix);
+				//experimentSubject.copyTable(curr_table.table_name_with_prefix, Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix);
 			}
 			// (int)((double)(i + 1) / (double)myVariableTables.length * 100) =
 			// % completed

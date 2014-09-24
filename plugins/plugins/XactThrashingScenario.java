@@ -1303,6 +1303,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						// elapsedTime + " (msec)");
 					}
 					//_stmt.executeBatch(); // for confirmatory
+					if((System.currentTimeMillis() - startTime) > batchRunTime * 1000)
+						break;
 					NewCommit();
 					// NewClose();
 					long elapsedTime = System.currentTimeMillis()- xactStartTime;

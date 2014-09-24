@@ -741,9 +741,9 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 	public class Client extends Thread {
 
 		protected class BatchRunTimeOut extends TimerTask {
-			public int cn = 0;
-			public Connection co = null;
-			public Statement st = null;
+//			public int cn = 0;
+//			public Connection co = null;
+//			public Statement st = null;
 			
 //			public BatchRunTimeOut(int clientNumber, Connection conn,
 //					Statement stmt) {
@@ -1012,6 +1012,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				while(true){
 					_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
 					if(_conn != null) break;
+					_conn.setAutoCommit(false);
 					if(j++ % 10 == 0){
 						throw new Exception("Client " + _clientNum + " cannot have a connection!");
 					}
@@ -1235,6 +1236,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					if (_conn == null) {
 							_conn = DriverManager.getConnection(_connStr,
 									_userName, _password);
+							_conn.setAutoCommit(false);
 					}
 					if(_stmt == null){
 //						_stmt = _conn.createStatement(
@@ -1264,8 +1266,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						} catch(SQLTimeoutException ste){ // timeout has reached 
 							Main._logger.reportErrorNotOnConsole(ste.getMessage());
 							break;
+						} catch (SQLException sqe) {
+							if((System.currentTimeMillis() - startTime) > batchRunTime * 1000) break;
+							else continue;
 						} catch (Exception ex) {
-							continue;
+							if((System.currentTimeMillis() - startTime) > batchRunTime * 1000) break;
+							else continue;
 						}
 						// long elapsedTime =
 						// System.currentTimeMillis()-startTime;

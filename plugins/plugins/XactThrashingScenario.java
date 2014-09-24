@@ -769,18 +769,18 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //					Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
 //				}
 				try {
-//					if(_conn != null) {
-//						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){
-//							long start		 = System.currentTimeMillis();
-//							//_conn.rollback();
-//							long rollbackTime = System.currentTimeMillis()-start;
-//							//if(_clientNum % 20 == 0){
-//								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
-//							//}
-//						}else{
-//							_conn.commit();
-//						}
-//					}
+					if(_conn != null) {
+						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){
+							long start		 = System.currentTimeMillis();
+							_conn.rollback();
+							long rollbackTime = System.currentTimeMillis()-start;
+							//if(_clientNum % 20 == 0){
+								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
+							//}
+						}else{
+							_conn.commit();
+						}
+					}
 					if (_stmt != null) {
 						long start		 = System.currentTimeMillis();
 						_stmt.cancel();

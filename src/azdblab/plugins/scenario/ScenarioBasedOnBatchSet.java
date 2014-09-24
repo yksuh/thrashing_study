@@ -588,10 +588,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	 * Populate database
 	 * @throws Exception
 	 */
-	protected void preStep() throws Exception {
+	protected void preStep(boolean first) throws Exception {
 		initializeNotebookContent();
 		// populate fixed tables
-		initializeExperimentTables();
+		initializeExperimentTables(first);
 	}
 	
 	/******
@@ -673,7 +673,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == 0){
 //					continue;
 //				}
-				
+				boolean firstLoading = false;
 				// effective db size
 				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
 					batchSetNumToRun++;
@@ -717,7 +717,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						int currTrialCnt = 1, currExpBackoffWaitTime = Constants.WAIT_TIME;
 						
 						// initialize experiment tables 
-						preStep();
+						preStep(firstLoading);
 						
 						
 						// analyze this batch set
@@ -897,7 +897,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	 * 
 	 * @throws Exception
 	 */
-	private void initializeExperimentTables() throws Exception {
+	private void initializeExperimentTables(boolean first) throws Exception {
 		/*if (myXactTables.length != 1) {
 			Main._logger.reportError("OneDimensionalExhaustiveAnalyzer: too many or too few variable "
 							+ "tables: " + myXactTables.length);
@@ -906,9 +906,25 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 
 		// boolean isVariable = false;
 		// Set up fixed tables
+		
 		for (int i = 0; i < myXactTables.length; i++) {
 			Table curr_table = myXactTables[i];
-			populateXactTable(curr_table);
+			if(first){
+				// If a clone table does not exist
+				if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
+					populateXactTable(curr_table); // then populate and clone the loaded table to a clone table
+					experimentSubject.copyTable(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix, curr_table.table_name_with_prefix);
+				}else{ // otherwise, just use it for saving loading time
+					experimentSubject.copyTable(curr_table.table_name_with_prefix, Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix);
+				}
+			}else{
+				if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
+					populateXactTable(curr_table);
+					experimentSubject.copyTable(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix, curr_table.table_name_with_prefix);
+				}
+				// copy the populated tables to cloning tables
+				experimentSubject.copyTable(curr_table.table_name_with_prefix, Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix);
+			}
 			// (int)((double)(i + 1) / (double)myVariableTables.length * 100) =
 			// % completed
 //			recordRunProgress((int) ((double) (i + 1)
@@ -916,6 +932,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //					"Populating Transaction Tables");
 		}
 	}
+	
 //	/****
 //	 * Set parameters specified in the spec
 //	 */

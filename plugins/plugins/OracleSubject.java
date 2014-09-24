@@ -27,6 +27,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Vector;
+
+import azdblab.Constants;
 import azdblab.exception.dbms.DBMSInvalidConnectionParameterException;
 import azdblab.executable.Main;
 import azdblab.labShelf.GeneralDBMS;
@@ -668,7 +670,8 @@ public class OracleSubject extends LabShelfManager {
 			for (int i = 0; i < vecTables.size(); i++) {
 				String tblName = (String) vecTables.get(i);
 				Main._logger.outputLog("installed tableName: " + tblName);
-				dropTable(tblName);
+				if(!tblName.contains(Constants.CLONE_TABLE_PREFIX))
+					dropTable(tblName);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

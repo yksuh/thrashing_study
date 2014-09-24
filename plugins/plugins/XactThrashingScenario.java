@@ -1755,15 +1755,16 @@ if(_clientNum % 100 == 0){
 			int k = 1;
 //			while(k <= Constants.MAX_ITERS){
 //			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
-				Main._logger.outputLog(String.format("<<<<<< %d(/%d) iteration start!", k, Constants.MAX_ITERS));
+//				Main._logger.outputLog(String.format("<<<<<< %d(/%d) iteration start!", k, Constants.MAX_ITERS));
+				Main._logger.outputLog(String.format("<<<< batch generation start!"));
 				
 				// run this batch for X times
 				int retry = stepC(batchSetRunResID, batchID, MPL, k);
-				if(retry == Constants.FAILED_ITER){
-					continue;
-				}
+//				if(retry == Constants.FAILED_ITER){
+//					continue;
+//				}
 
-				Main._logger.outputLog(String.format("<<<<<<<<<< Done!\n"));
+				Main._logger.outputLog(String.format(">>>>> Done!"));
 				
 //				// wait for a minute to clean up any remaining transactions
 //				try{
@@ -1781,7 +1782,7 @@ if(_clientNum % 100 == 0){
 				"Update the batchset #%d(runID:%d) analysis!", batchSetID,
 				runID));
 		// Analyze if this batchset thrashes...
-		computeMaximumMPL(batchSetRunResID);
+//		computeMaximumMPL(batchSetRunResID);
 	}
 
 	@Override
@@ -2080,7 +2081,7 @@ Main._logger.outputDebug(batchSetQuery);
 			String strPassword = experimentSubject.getPassword();
 			// Main._logger.outputLog("Client " + (clientNum) +
 			// " is being initialized...");
-			if(batchID == 12652 && clientNum <= 168) continue;
+			//if(batchID == 12652 && clientNum <= 168) continue;
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);

@@ -860,7 +860,8 @@ public class Constants {
 	public static int NumIDs    = 5;
 	public static int NumValues = 2;
 	
-	public static int MAX_ITERS = 3;
+//	public static int MAX_ITERS = 3;
+	public static int MAX_ITERS = 5;
 	public static double DEFAULT_UPT_ROWS = 0;
 	public static int FAILED_ITER = -1;
 	public static final String TABLE_TPSRESULT_NAME = "AZDBLAB_XACTRUNSTAT";

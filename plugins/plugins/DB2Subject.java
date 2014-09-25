@@ -261,14 +261,14 @@ public class DB2Subject extends ExperimentSubject {
 			// oriTable;
 			// Main.defaultLogger.logging_normal("newTable: " + newTable +
 			// ", oriTable: " + oriTable);
-			// Main.defaultLogger.logging_normal("cloneSQL: " + cloneSQL);
+			Main._logger.outputLog("cloneSQL: " + cloneSQL);
 			_statement.executeUpdate(cloneSQL);
 			String populateTable = "INSERT INTO " + newTable
 					+ " SELECT * FROM " + oriTable;
 			// Main._logger.outputLog("cloning variable table: " +
 			// populateTable);
 			_statement.executeUpdate(populateTable);
-			// Main._logger.outputLog("Clone table finished!");
+			Main._logger.outputLog("Clone table finished!");
 			commit();
 		} catch (SQLException sqlex) {
 //			close();

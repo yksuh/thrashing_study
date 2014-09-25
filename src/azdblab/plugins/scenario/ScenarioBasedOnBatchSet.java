@@ -712,7 +712,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						
 						// initialize experiment tables 
 						preStep(firstLoading);
-						
+						if(!firstLoading) firstLoading = true;
 						
 						// analyze this batch set
 						studyBatchSet(runID,

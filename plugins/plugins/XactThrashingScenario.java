@@ -769,18 +769,18 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //					Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
 //				}
 				try {
-//					if(_conn != null) {
-//						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){
-//							long start		 = System.currentTimeMillis();
-//							//_conn.rollback();
-//							long rollbackTime = System.currentTimeMillis()-start;
-//							//if(_clientNum % 20 == 0){
-//								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
-//							//}
-//						}else{
-//							_conn.commit();
-//						}
-//					}
+					if(_conn != null) {
+						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){
+							long start		 = System.currentTimeMillis();
+							_conn.rollback();
+							long rollbackTime = System.currentTimeMillis()-start;
+							//if(_clientNum % 20 == 0){
+								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
+							//}
+						}else{
+							_conn.commit();
+						}
+					}
 					if (_stmt != null) {
 						long start		 = System.currentTimeMillis();
 						_stmt.cancel();
@@ -1184,7 +1184,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					_conn.commit();
 			} catch (SQLException e) {
 				// e.printStackTrace();
-				Main._logger.reportErrorNotOnConsole("run()-#"+_clientNum+"=>"+e.getMessage());
+				//Main._logger.reportErrorNotOnConsole("run()-#"+_clientNum+"=>"+e.getMessage());
 			}
 		}
 
@@ -1279,19 +1279,19 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							//_stmt.setQueryTimeout((int)batchRunTime * 1000);
 						} catch(SQLTimeoutException ste){ // timeout has reached 
 							if((System.currentTimeMillis() - startTime) > batchRunTime * 1000){
-								Main._logger.reportErrorNotOnConsole("cancel-#"+_clientNum+"=>"+"Client #"+_clientNum+"=>"+ste.getMessage());
+								//Main._logger.reportErrorNotOnConsole("cancel-#"+_clientNum+"=>"+"Client #"+_clientNum+"=>"+ste.getMessage());
 								break;
 							}
 							else continue;
 						} catch (SQLException sqe) {
 							if((System.currentTimeMillis() - startTime) > batchRunTime * 1000){
-								Main._logger.reportErrorNotOnConsole("querytimeout-#"+_clientNum+"=>"+sqe.getMessage());
+								//Main._logger.reportErrorNotOnConsole("querytimeout-#"+_clientNum+"=>"+sqe.getMessage());
 								break;
 							}
 							else continue;
 						} catch (Exception ex) {
 							if((System.currentTimeMillis() - startTime) > batchRunTime * 1000){
-								Main._logger.reportErrorNotOnConsole("normal-#"+_clientNum+"=>"+ex.getMessage());
+								//Main._logger.reportErrorNotOnConsole("normal-#"+_clientNum+"=>"+ex.getMessage());
 								break;
 							}
 							else continue;
@@ -1303,8 +1303,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						// elapsedTime + " (msec)");
 					}
 					//_stmt.executeBatch(); // for confirmatory
-					if((System.currentTimeMillis() - startTime) > batchRunTime * 1000)
-						break;
 					NewCommit();
 					// NewClose();
 					long elapsedTime = System.currentTimeMillis()- xactStartTime;
@@ -1368,10 +1366,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				// }
 			} // while
 /************************************************************************************************************************************/		
-if(runTime/1000 > batchRunTime*1.10){
-	String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
-	Main._logger.writeIntoLog(str);
-}
+//if(runTime/1000 > batchRunTime*1.10){
+//	if(_clientNum % 100 == 0){
+//		String str = String.format("\t>>TimeOuted Client #%d (%d(ms), #Xacts:%d)", _clientNum, runTime, _numExecXacts);
+//		Main._logger.writeIntoLog(str);
+//	}
+//}
 /************************************************************************************************************************************/
 			_clientRunStats[_clientNum].runTime = runTime;
 			_clientRunStats[_clientNum].numMeasuredExecXacts = _numExecXacts;

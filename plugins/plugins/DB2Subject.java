@@ -296,8 +296,8 @@ public class DB2Subject extends ExperimentSubject {
 			String populateTable = "INSERT INTO " + newTable
 					+ " SELECT * FROM " + oriTable + " WHERE id1 < "
 					+ cardinality;
-			// Main._logger.outputLog("cloning variable table: " +
-			// populateTable);
+			 Main._logger.outputLog("populateTable: " +
+			 populateTable);
 			_statement.executeUpdate(populateTable);
 			// Main._logger.outputLog("Clone table finished!");
 			commit();

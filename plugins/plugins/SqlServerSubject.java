@@ -325,7 +325,8 @@ public class SqlServerSubject extends ExperimentSubject {
 			for(int i=0;i<vecTables.size();i++){
 				String tblName = (String)vecTables.get(i);
 				Main._logger.outputLog("installed tableName: " + tblName);
-				dropTable(tblName);		
+				if(!tblName.contains(Constants.CLONE_TABLE_PREFIX))
+					dropTable(tblName);		
 				this.commit();
 			}
 		}catch (SQLException e) {

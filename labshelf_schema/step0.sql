@@ -1,5 +1,6 @@
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/15/14
+-- Revision: 09/26/14
 -- Description: Define step queries for analyzing DBMS thrashing
 
 -- DBMSes participating in the analysis
@@ -32,7 +33,8 @@ DROP TABLE Analysis_Runs CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_Runs AS
 	SELECT runid 
 	FROM AZDBLab_ExperimentRun -- 14 runs (8 runs per DBMS) 64 runs = 20% done
-	WHERE runid IN (609,610,611,689,709,749,809,829,849,869,889,929,969,989,1110,1109,949,1129,1169) 
+	--WHERE runid IN (609,610,611,689,709,749,809,829,849,869,889,929,969,989,1110,1109,949,1129,1169) 
+	WHERE runid IN (689, 1291, 1610, 1749) 
 	ORDER BY runid;
 ALTER TABLE Analysis_Runs ADD PRIMARY KEY (runid);
 
@@ -52,7 +54,7 @@ ALTER TABLE Analysis_Duration ADD PRIMARY KEY (period);
 
 -- Create a table for thrashing threshold 
 DROP TABLE Analysis_TT CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_Duration AS
+CREATE TABLE Analysis_TT AS
 	SELECT 0.2 AS threshold -- 20% down
 	FROM Dual;
 ALTER TABLE Analysis_TT ADD PRIMARY KEY (threshold);
@@ -81,7 +83,7 @@ CREATE TABLE Analysis_S0_ABSR AS
 		bs.BatchSetID,			 -- batchset id
 		bsr.BatchSetRunResID,		 -- primary key
 		bs.batchSzIncr,			 -- batch increments
-		bs.numCores as numProcessors	 -- number of processors
+		bsr.numCores as numProcessors,	 -- number of processors
 		bs.EFFECTIVEDBSZ as actRowPool,  -- active row pool
 		bs.XACTSZ*100 as pctRead,	 -- percentage of read
 		bs.XLOCKRATIO*100 as pctUpdate,	 -- percentage of write
@@ -100,7 +102,7 @@ CREATE TABLE Analysis_S0_ABSR AS
                -- er.percentage = 100 AND
 	       bsr.batchsetid = bs.batchsetid;
 ALTER TABLE Analysis_S0_ABSR ADD PRIMARY KEY (BatchSetRunResID);
-
+--select runid, count(*) from Analysis_S0_ABSR group by runid;
 -- Gather all the batches in the included batchsets
 -- Analysis_S0_AB: Analysis_S0_All_Batches
 DROP TABLE Analysis_S0_AB CASCADE CONSTRAINTS;
@@ -113,9 +115,9 @@ CREATE TABLE Analysis_S0_AB AS
 	   b.batchID,
 	   b.MPL 
     FROM Analysis_S0_ABSR absr,
-	 Analysis_Batch b
-    WHERE absr.batchsetID = b.batchsetID
-ALTER VIEW Analysis_S0_AB ADD PRIMARY KEY (runid, batchsetid, MPL);
+	 AZDBLab_Batch b
+    WHERE absr.batchsetID = b.batchsetID;
+ALTER TABLE Analysis_S0_AB ADD PRIMARY KEY (runid, batchsetid, MPL);
 
 -- Batch Statistics
 -- Compute the total number of batches by dbms, experiment, and run
@@ -126,11 +128,12 @@ CREATE VIEW Analysis_S0_ABS AS
 	       ab.experimentName,
 	       ab.runid,
 	       ab.batchsetid, 
+	       ab.batchSzIncr,
 	       min(MPL) as min_mpl,
                max(MPL) AS max_mpl,
 	       count(distinct batchID) AS numBs
-	FROM Analysis_S0_AB
-	GROUP BY dbms, experimentName, runid, batchsetid;
+	FROM Analysis_S0_AB ab
+	GROUP BY dbms, experimentName, runid, batchsetid, batchSzIncr;
 ALTER VIEW Analysis_S0_ABS ADD PRIMARY KEY (runid, batchsetid) DISABLE;
 
 -- Get all batch executions from the chosen labshelf
@@ -158,18 +161,19 @@ CREATE TABLE Analysis_S0_ABE AS
 	   -- all the batches
 	   AND ab.batchID 	     = br.BatchID;
 ALTER TABLE Analysis_S0_ABE ADD PRIMARY KEY (runid, BatchSetID, MPL, IterNum); 
+--select count(*) from Analysis_S0_ABE
 
 -- Executed Batch Statistics
 -- Compute the total number of executed batches by dbms, experiment, and run
 -- Analysis_S0_EBS: Analysis_S0_Executed_Batch_Stat
 DROP VIEW Analysis_S0_EBS CASCADE CONSTRAINTS;
 CREATE VIEW Analysis_S0_EBS AS
-	SELECT ab.dbms,
-	       ab.experimentName,
-	       ab.runid,
-	       ab.batchsetid, 
-	       count(distinct batchID) AS numEBs
-	FROM Analysis_S0_ABE
+	SELECT abe.dbms,
+	       abe.experimentName,
+	       abe.runid,
+	       abe.batchsetid, 
+	       count(distinct abe.batchID) AS numEBs
+	FROM Analysis_S0_ABE abe
 	GROUP BY dbms, experimentName, runid, batchsetid;
 ALTER VIEW Analysis_S0_EBS ADD PRIMARY KEY (runid, batchsetid) DISABLE;
 
@@ -178,16 +182,37 @@ ALTER VIEW Analysis_S0_EBS ADD PRIMARY KEY (runid, batchsetid) DISABLE;
 -- Analysis_S0_ABES: Analysis_S0_Batch_Executions
 DROP VIEW Analysis_S0_ABES CASCADE CONSTRAINTS;
 CREATE VIEW Analysis_S0_ABES AS
-	SELECT abr.dbms,
-	       abr.experimentName,
-	       abr.runid,
-	       abr.batchsetid, 
-	       abr.batchid,
-	       abr.MPL,
+	SELECT abe.dbms,
+	       abe.experimentName,
+	       abe.runid,
+	       abe.batchsetid, 
+	       abe.batchid,
+	       abe.MPL,
 	       count(distinct iternum) as numBEs
-	FROM Analysis_S0_ABE abr
-	GROUP BY (abr.dbms, abr.experimentName, abr.runid, abr.batchsetid, abr.batchID, abr.MPL);
+	FROM Analysis_S0_ABE abe
+	GROUP BY (abe.dbms, abe.experimentName, abe.runid, abe.batchsetid, abe.batchID, abe.MPL);
 ALTER VIEW Analysis_S0_ABES ADD PRIMARY KEY (runid, batchsetid, batchID) DISABLE;
+
+-- Compute the total number of batches per batchset
+-- Analysis_S0_TBS: Analysis_S0_Total_Batch_Stat
+DROP VIEW Analysis_S0_TBS CASCADE CONSTRAINTS;
+CREATE VIEW Analysis_S0_TBS AS
+	SELECT dbms,
+	       experimentName,	
+	       runid,
+	       batchsetid,
+	       sum(numBEs) AS numBEPerBS
+	FROM Analysis_S0_ABES
+	GROUP BY dbms, experimentname,runid, batchsetid;
+ALTER VIEW Analysis_S0_TBS ADD PRIMARY KEY (runid, batchsetid) DISABLE;
+DELETE FROM Analysis_RowCount WHERE stepname = 'Analysis_S0_TBS';
+INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
+	SELECT dbms as dbmsName, 
+	       experimentname as exprName,
+	       'Analysis_S0_TBS' as stepName,
+	       sum(numBEPerBS) as stepResultSize
+	FROM Analysis_S0_TBS
+	GROUP BY dbms, experimentname;
 
 -- Compute the total number of batches by dbms
 -- Analysis_S0_DTB: Analysis_S0_DBMS_Total_Batches
@@ -204,13 +229,14 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	SELECT dbms as dbmsName, 
 	       experimentname as exprName,
 	       'Analysis_S0_DTB' as stepName,
-	       totalBEs as stepResultSize
+	       sum(numBEPerDBMS) as stepResultSize
 	FROM Analysis_S0_DTB
 	GROUP BY dbms, experimentname;
-
+--select * from analysis_rowcount order by dbmsname, stepName, stepResultSize;
 -- Get the total number of batch executions across DBMes
 -- Analysis_S0_TBE: Analysis_S0_Total_Batch_Executions
 DROP VIEW Analysis_S0_TBE CASCADE CONSTRAINTS;
 CREATE VIEW Analysis_S0_TBE AS
 	SELECT SUM(numBEPerDBMS) AS totalBEs
 	FROM Analysis_S0_DTB;
+--select * from Analysis_S0_TBE

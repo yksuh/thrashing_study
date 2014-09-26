@@ -15,10 +15,10 @@ CREATE TABLE Analysis_S1_DBR AS
 	       MPL,		
                avg(totalExecXacts) as numExecXacts, 
 	       avg(totalProcTime) as procTime,
-	       avg(totalExecXacts/ELAPSEDTIME as tps
+	       avg(totalExecXacts/ELAPSEDTIME) as tps
 	FROM Analysis_S0_ABE abr
-	GROUP BY BatchSetID, runid, dbms, batchSzIncr, MPL
-	ORDER BY BatchSetID, runid, dbms, batchSzIncr, MPL asc;
+	GROUP BY dbms, experimentname, runid, BatchSetID, dbms, batchSzIncr, MPL
+	ORDER BY dbms, experimentname, runid, BatchSetID, dbms, batchSzIncr, MPL asc;
 ALTER TABLE Analysis_S1_DBR ADD PRIMARY KEY (batchSetID, runID, MPL);
 
 -- Collect the last MPL tried
@@ -31,7 +31,7 @@ CREATE TABLE Analysis_S1_MPLEnd  AS
 	       batchSetID, 	  -- batchSetID
 	       max(MPL+batchSzIncr) as endMPL -- MPL
 	FROM Analysis_S0_ABE
-	GROUP BY BatchSetID, runid;
+	GROUP BY dbms, experimentname, runid, BatchSetID;
 ALTER TABLE Analysis_S1_MPLEnd ADD PRIMARY KEY (runID, batchsetID);
 
 -- Get the average values on # of executed xacts and processing time per batchset

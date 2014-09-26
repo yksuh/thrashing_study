@@ -904,17 +904,18 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 		for (int i = 0; i < myXactTables.length; i++) {
 			Table curr_table = myXactTables[i];
 			if(first){
-				// If a clone table does not exist
-				if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
+//				// If a clone table does not exist
+//				if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
 					populateXactTable(curr_table); // then populate and clone the loaded table to a clone table
 					experimentSubject.copyTable(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix, curr_table.table_name_with_prefix);
-				}else{ // otherwise, just use it for saving loading time
-					experimentSubject.copyTable(curr_table.table_name_with_prefix, Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix);
-				}
+//				}else{ // otherwise, just use it for saving loading time
+//					experimentSubject.copyTable(curr_table.table_name_with_prefix, Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix);
+//				}
 			}else{
 				if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
-					populateXactTable(curr_table);
-					experimentSubject.copyTable(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix, curr_table.table_name_with_prefix);
+					new Exception("Clone table ("+Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix+") doesn't exist!");
+//					populateXactTable(curr_table);
+//					experimentSubject.copyTable(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix, curr_table.table_name_with_prefix);
 				}
 				// copy the populated tables to cloning tables
 				experimentSubject.copyTable(curr_table.table_name_with_prefix, Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix);

@@ -186,8 +186,7 @@ public class MySQLSubject extends ExperimentSubject {
 			for (int i = 0; i < vecTables.size(); i++) {
 				String tblName = (String) vecTables.get(i);
 				Main._logger.outputLog("installed tableName: " + tblName);
-				if(!tblName.contains(Constants.CLONE_TABLE_PREFIX))
-					dropTable(tblName);
+				dropTable(tblName);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

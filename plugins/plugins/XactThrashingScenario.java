@@ -2275,7 +2275,7 @@ Main._logger.outputDebug(batchSetQuery);
 			try {
 				long start = System.currentTimeMillis();
 				if (_conn != null){
-					_conn.abort(null);
+					//_conn.abort(null);
 					_conn.rollback();
 					_conn.close();
 				}

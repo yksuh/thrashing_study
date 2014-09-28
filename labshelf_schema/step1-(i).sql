@@ -1,7 +1,7 @@
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/15/14
--- Revision: 09/22/14
--- Description: Define step queries for experiment-wide, batch execution, and batchset execution sanity checks
+-- Revision: 09/22/14, 09/27/14
+-- Description: Define step1 queries for experiment-wide, batch execution, and batchset execution sanity checks
 
 -- Experiment-wide sanity checks
 -- (1) Number of Missing Batches
@@ -15,7 +15,7 @@ CREATE VIEW Analysis_S1_MB_PDE AS
 	       t1.batchsetid,
 	       -- numMissingBatches = # of generated batches - # of executed batches
 	       -- COALESCE because value may be NULL
-	       COALESCE(((t1.max_mpl-t1.min_mpl)/t1.batchSzIncr+1)-t2.numEBs, 0) as numMBPerRunBatchSet -- num
+	       COALESCE(((t1.endMPL-t1.startMPL)/t1.batchSzIncr+1)-t2.numEBs, 0) as numMBPerRunBatchSet -- num
 	FROM  Analysis_S0_ABS t1,
 	      Analysis_S0_EBS t2
 	WHERE t1.runid	    = t2.runid and 
@@ -30,6 +30,7 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	FROM Analysis_S1_MB_PDE
 	GROUP BY dbms, experimentname;
 --select * from Analysis_RowCount where stepname = 'Analysis_S1_MB_PDE'
+
 -- (2) Number of Inconsistent Processor Configuration Violations
 -- Caught when each executor gets launched 
 
@@ -45,7 +46,7 @@ CREATE VIEW Analysis_S1_MBE_PDE AS
 	       COALESCE(t1.numBs*t2.numExecutions-t3.numBEPerBS, 0) as numMBEPerRunBatchSet 
 	FROM  Analysis_S0_ABS t1,     -- batches
 	      Analysis_ExecCounts t2, -- number of executions
-	      Analysis_S0_TBS t3      -- total batch executions
+	      Analysis_S0_TNB t3      -- total batch executions
 	WHERE t1.runid	    = t3.runid and 
 	      t1.batchsetid = t3.batchsetid;
 ALTER VIEW Analysis_S1_MBE_PDE ADD PRIMARY KEY (runid, batchsetid) DISABLE;

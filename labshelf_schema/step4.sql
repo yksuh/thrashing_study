@@ -1,33 +1,46 @@
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/15/14
+-- Revision: 09/27/14
 -- Description: Define step4 queries for computing the final maxMPL on the retained batchsets
 
--- Generate final table
--- Analysis_S4_SMR:  Analysis_Step4_Summary
-DROP TABLE Analysis_S4_SMR CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S4_SMR  AS
+-- Step4: Report the DBMS thrashing on the retained batchsets
+-- Analysis_S4:  Analysis_Step4
+DROP TABLE Analysis_S4 CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S4  AS
 	SELECT  --distinct 
-		absr.version as ver,	    -- labshelf version
+		--absr.version as ver,	    -- labshelf version
+		absr.dbms,
 		absr.experimentid,
-		s3.experimentname as expName,
+		absr.experimentname,
 		(case 
-       			when s3iii.experimentname like  '%pk%' then 1
+       			when absr.experimentname like  '%pk%' then 1
         		else 0
        		END ) pk,
-		s3.dbms,
-		s3.runid,
-		s3.batchSetID,
-		absr.numProcessors as nPrcs,
+		absr.runid,
+		absr.batchSetID,
+		absr.numProcessors,
 		--absr.bufferSpace,
-		absr.duration as sess_dur,
+		absr.duration,
+		absr.actRowPool,
 		absr.pctRead,
 		absr.pctUpdate,
-		absr.actRowPool,
-		s3.avgProcTime as ATPTime,
-		s3.maxMPL
-	FROM Analysis_S0_ABSR absr
-	     Analysis_S3_UBS s3
-	WHERE absr.batchsetID = s3iii.batchsetID AND
-	      absr.runID      = s3iii.runID
-	ORDER by expName asc, dbms asc, runid, nPrcs, pctRead, pctUpdate, actRowPool;
-ALTER TABLE Analysis_S4_SMR  ADD PRIMARY KEY (runID, batchSetID);
+		s3ubs.avgProcTime  as ATP,
+		s3ubs.maxMPL
+	FROM Analysis_S0_ABSR absr,
+	     Analysis_S3_UBS  s3ubs
+	WHERE absr.runID      = s3ubs.runID 
+          AND absr.batchSetID = s3ubs.batchSetID
+	ORDER by dbms, experimentname, pk, runid, batchsetid, numProcessors, actRowPool, pctRead, pctUpdate, ATP, maxMPL;
+ALTER TABLE Analysis_S4  ADD PRIMARY KEY (runID, batchSetID);
+DELETE FROM Analysis_RowCount WHERE stepname = 'Analysis_S4';
+INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
+	SELECT dbms as dbmsName, 
+	       experimentname as exprName,
+	       'Analysis_S4' as stepName,
+	       count(*) as stepResultSize
+	FROM Analysis_S4
+	GROUP BY dbms, experimentname;
+-- select * from Analysis_RowCount order by dbmsName, exprName, stepResultSize
+-- select dbmsName, exprName, stepName, sum(stepResultSize) as stepSize from Analysis_RowCount group by dbmsname, exprName, stepName order by dbmsName, exprName, stepSize desc
+-- select dbmsName, exprName, stepName, sum(stepResultSize) as stepSize from Analysis_RowCount where stepName IN ('Analysis_S0', 'Analysis_S4') group by dbmsname, exprName, stepName order by dbmsName, exprName, stepSize desc
+-- select stepName, exprName, dbmsName, sum(stepResultSize) as stepSize from Analysis_RowCount where stepName IN ('Analysis_S0', 'Analysis_S4') group by stepName, exprName, dbmsName order by stepName, exprName, dbmsName, stepSize desc

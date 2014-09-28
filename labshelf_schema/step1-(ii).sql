@@ -1,191 +1,109 @@
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/15/14
--- Revision: 09/22/14
--- Description: Define step queries for detecting DBMS thrashing on the raw data
+-- Revision: 09/22/14, 09/27/14
+-- Description: Define step1-(ii) queries for batch execution sanity checks
 
--- Get the average values on # of executed xacts and processing time
--- Analysis_S1_DBR:  Analysis_S1_Derived_Batch_Runs
-DROP TABLE Analysis_S1_DBR CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_DBR AS
-	SELECT dbms,
-	       experimentname,
-	       runid,   	
-	       batchSetID, 	
-	       batchSzIncr,
-	       MPL,		
-               avg(totalExecXacts) as numExecXacts, 
-	       avg(totalProcTime) as procTime,
-	       avg(totalExecXacts/ELAPSEDTIME) as tps
-	FROM Analysis_S0_ABE abr
-	GROUP BY dbms, experimentname, runid, BatchSetID, dbms, batchSzIncr, MPL
-	ORDER BY dbms, experimentname, runid, BatchSetID, dbms, batchSzIncr, MPL asc;
-ALTER TABLE Analysis_S1_DBR ADD PRIMARY KEY (batchSetID, runID, MPL);
+-- Batch Execution sanity checks
 
--- Collect the last MPL tried
--- Analysis_S1_MPLEnd:  Analysis_Step0_MPLEnd
-DROP TABLE Analysis_S1_MPLEnd CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_MPLEnd  AS
-	SELECT dbms,
-	       experimentname,
-	       runid,   	  -- runID    (key)
-	       batchSetID, 	  -- batchSetID
-	       max(MPL+batchSzIncr) as endMPL -- MPL
-	FROM Analysis_S0_ABE
-	GROUP BY dbms, experimentname, runid, BatchSetID;
-ALTER TABLE Analysis_S1_MPLEnd ADD PRIMARY KEY (runID, batchsetID);
+-- (1) Zero TPS violations
+-- Analysis_S1_ZTV: Analysis_S1_Zero_TPS_Violations
+DROP TABLE Analysis_S1_ZTV CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S1_ZTV AS			
+	SELECT abe.dbms,
+	       abe.experimentname,
+	       abe.runid,
+	       abe.batchsetid,
+	       abe.batchSzIncr,
+	       abe.MPL,
+	       abe.iternum
+	FROM Analysis_S0_ABE abe, 
+	     Analysis_S0_ABS s0abs
+	WHERE abe.runid      = s0abs.runid
+	  and abe.batchsetid = s0abs.batchsetid
+          and abe.MPL 	     = s0abs.startMPL
+	  and abe.totalExecXacts = 0;
+ALTER TABLE Analysis_S1_ZTV ADD PRIMARY KEY (runid, batchsetid, MPL, iternum); 
+DELETE FROM Analysis_RowCount WHERE stepname = 'Analysis_S1_ZTV';
+INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
+	SELECT dbms as dbmsName, 
+	       experimentname as exprName,
+	       'Analysis_S1_ZTV' as stepName,
+	       count(*) as stepResultSize
+	FROM Analysis_S1_ZTV
+	GROUP BY dbms, experimentname;
+--select  from Analysis_S1_ZTV
+--select dbms, experimentname, avg(MPL) from Analysis_S1_ZTV group by dbms, experimentname
+--select dbms, experimentname, min(MPL) from Analysis_S1_ZTV group by dbms, experimentname
+--select * from Analysis_RowCount where stepname = 'Analysis_S1_ZTV'
 
--- Get the average values on # of executed xacts and processing time per batchset
--- Analysis_S1_BSD:  Analysis_S1_Batchset_Details
-DROP TABLE Analysis_S1_BSD CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_BSD AS
-	SELECT dbms,
-	       experimentname,
-	       runid,   	  -- runID   
-	       batchSetID, 	
-	       sum(procTime) as sumProcTime,
-	       sum(numExecXacts) as sumExecXacts,
-	       (CASE WHEN sum(numExecXacts) > 0 then sum(procTime)/sum(numExecXacts) ELSE sum(procTime) END) as avgProcTime
---		round(sum(procTime)/sum(numExecXacts),2) as avgProcTime
-	FROM Analysis_S1_DBR
-	GROUP BY batchSetID, runid, dbms;
-ALTER TABLE Analysis_S1_BSD ADD PRIMARY KEY (runID, batchSetID);
+-- (2) Session duration violations
+-- Analysis_S1_SDV: Analysis_S1_Session_Duration_Violations
+DROP TABLE Analysis_S1_SDV CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S1_SDV AS			
+	SELECT  abe.dbms,
+		abe.experimentname,
+		abe.runid,
+		abe.BatchSetID,
+		abe.batchSzIncr,
+	        abe.MPL,		   
+		abe.IterNum,	     -- iteration number
+		abe.ELAPSEDTIME
+	FROM Analysis_S0_ABE abe,
+             Analysis_Duration dur
+	WHERE TRUNC(abe.ELAPSEDTIME/1000) > dur.period;
+ALTER TABLE Analysis_S1_SDV ADD PRIMARY KEY (runid, batchsetID, MPL, IterNum); 
+DELETE FROM Analysis_RowCount WHERE stepname = 'Analysis_S1_SDV';
+INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
+	SELECT dbms as dbmsName, 
+	       experimentname as exprName,
+	       'Analysis_S1_SDV' as stepName,
+	       count(*) as stepResultSize
+	FROM Analysis_S1_SDV
+	GROUP BY dbms, experimentname;
 
--- Locate an MPL value whose TPS is twice greater than that of the next MPL.
--- Analysis_S1_TP:  Analysis_Step1_Thrashing_Points
-DROP TABLE Analysis_S1_TP CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_TP  AS
-	SELECT  prev.batchSetID,
-		prev.runID,
-		prev.dbms,
-	        prev.MPL
-	FROM Analysis_S1_DBR prev,
-	     Analysis_S1_DBR next,
-	     Analysis_TT tt
-        WHERE prev.runID      = next.runID
-	  and prev.batchSetID = next.batchSetID
-	  and prev.MPL 	      = next.MPL-next.batchSzIncr
-	  and prev.tps > (1+tt.threshold)*next.tps 
-	  and prev.tps > (SELECT max(TPS)
-			  FROM Analysis_S1_DBR t0
-			  WHERE t0.runID = next.runID
-			   AND t0.batchsetID = next.batchSetID
-			   AND t0.MPL > next.MPL);
-ALTER TABLE Analysis_S1_TP ADD PRIMARY KEY (batchSetID, runID, MPL);
+--select * from Analysis_RowCount where stepname = 'Analysis_S1_SDV'
 
--- Determine the final thrashing point by finding the minimum MPL in a batchset
--- Paradoxically, this minimum MPL gets treated as the maximum MPL tolerated by a DBMS.
--- Analysis_S1_FTP:  Analysis_Step0_Final_Thrashing_Point
-DROP TABLE Analysis_S1_FTP CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_FTP  AS
-	SELECT  batchSetID,
-		runID,
-		min(MPL) as maxMPL
-	FROM Analysis_S1_TP s2i
-	GROUP BY batchSetID, runID, dbms;
-ALTER TABLE Analysis_S1_FTP ADD PRIMARY KEY (batchSetID, runID, MPL);
+-- (3) Excessive ATP time violations
 
--- Get the TPS of the maximum MPL per batchset in a run
--- Analysis_S1_FTPE:  Analysis_Step0_Final_Thrashing_Point
-DROP TABLE Analysis_S1_FTPE CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_FTPE AS
-	SELECT  dbr.dbms,
-		dbr.runID,
-		dbr.batchSetID,
-		ftp.maxMPL,	-- thrashing point
-		dbr.TPS,
-		dbr.numExecXacts,
-		dbr.procTime,
-		dbr.tps
-	FROM Analysis_S1_FTP ftp,
-	     Analysis_S1_DBR dbr
-	WHERE ftp.runID	     = dbr.runID 
-	  and ftp.batchSetID = dbr.batchSetID 
-	  and ftp.maxMPL     = dbr.MPL;
-ALTER TABLE Analysis_S1_FTP ADD PRIMARY KEY (batchSetID, runID, maxMPL);
+-- Analysis_ATP_Stat: Analysis_ATP_Statistics_at_MPL
+DROP TABLE Analysis_ATP_Stat CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_ATP_Stat AS			
+	SELECT  abe.dbms,
+	        abe.experimentname,
+	        abe.runid,
+		abe.BatchSetID,
+		abe.MPL,		   
+		AVG(abe.totalProcTime / abe.totalExecXacts) as AvgATPtime,
+		STDDEV(abe.totalProcTime / abe.totalExecXacts)as STDATPtime          
+	FROM Analysis_S0_ABE abe
+	WHERE abe.totalProcTime > 0
+	GROUP BY dbms, experimentName, runid, batchsetID, MPL;
+ALTER TABLE Analysis_ATP_Stat ADD PRIMARY KEY (runid, batchsetID, MPL); 
 
--- Find a batchset that encountered thrashing
--- Analysis_S1_TBS:  Analysis_Step3_Thrashing_Batchset
-DROP TABLE Analysis_S1_TBS CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_TBS  AS
-	SELECT  bsd.batchSetID,
-		bsd.runID,
-		ftp.maxMPL
-	FROM Analysis_S1_BSD bsd,
-	     Analysis_S1_FTP ftp
-	WHERE bsd.runID = ftp.runID AND 
-	      bsd.batchSetID = ftp.batchSetID;
-ALTER TABLE Analysis_S1_TBS  ADD PRIMARY KEY (batchSetID, runID);
-
--- Find a batchset that showed no thrashing
--- Analysis_S1_NBS:  Analysis_Step0_No_Thrashing_BatchSet
-DROP TABLE Analysis_S1_NBS CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_NBS  AS
-	SELECT  t0.batchSetID,
-		t0.runID,
-		--s1i.dbms,
-		--s1i.avgProcTime,
-		t3.endMPL as maxMPL
-	FROM
-		(SELECT  t1.batchSetID,
-			 t1.runID
-		FROM Analysis_S1_BSD t1
-		MINUS
-		SELECT  t2.batchSetID,
-			t2.runID
-		FROM Analysis_S1_FTP t2) t0, -- Batchsets no thrashing
-		Analysis_S1_MPLEnd t3
-	WHERE t0.batchSetID = t3.batchSetID
-	  AND t0.runID = t3.runID;
-ALTER TABLE Analysis_S1_NBS ADD PRIMARY KEY (batchSetID, runID);
-
--- Gather batchsets with/without thrashing 
--- Analysis_S1_UBS:  Analysis_Step0_Union_BatchSet
-DROP TABLE Analysis_S1_UBS CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_UBS  AS
-	SELECT  t0.batchSetID,
-		t0.runID,
-		t1.dbms,
-		t1.avgProcTime,
-		t0.maxMPL
-	FROM	
-		(SELECT *
-		 FROM Analysis_S1_TBS
-		 UNION
-		 SELECT *
-		 FROM Analysis_S1_NBS) t0,
-		Analysis_S1_BSD t1
-	WHERE t0.batchSetID = t1.batchSetID
-	  AND t0.runID	    = t1.runID;
-ALTER TABLE Analysis_S1_UBS ADD PRIMARY KEY (batchSetID, runID);
-
--- Generate final table
--- Analysis_S1_SMR:  Analysis_Step0_Summary
-DROP TABLE Analysis_S1_SMR CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S1_SMR  AS
-	SELECT  --distinct 
-		absr.version as ver,	    -- labshelf version
-		absr.experimentid,
-		absr.experimentname as expName,
-		(case 
-       			when experimentname like  '%pk%' then 1
-        		else 0
-       		END ) pk,
-		absr.dbms,
-		absr.runid,
-		absr.batchSetID,
-		absr.numCores as nPrcs,
-		absr.bufferSpace,
-		absr.duration as session_duration,
-		(bs.xactsz*100) as rPct,
-		(bs.XLOCKRATIO*100) as uPct,
-		(effectiveDBSz*100) as ARP,
-		ubs.avgProcTime  as ATP,
-		ubs.maxMPL
-	FROM Analysis_S0_ABSR absr,
-	     AZDBLab_BatchSet bs,
-	     Analysis_S1_UBS ubs
-	WHERE absr.batchsetID = bs.batchsetID AND
-	      absr.runID      = ubs.runID AND 
-	      absr.batchSetID = ubs.batchSetID
-	ORDER by expName asc, dbms asc, runid, nPrcs, rPct, uPct, hsr;
-ALTER TABLE Analysis_S1_SMR  ADD PRIMARY KEY (runID, batchSetID);
+-- Analysis_S1_EAV: Analysis_S1_Excessive_ATP_time_Violations
+DROP TABLE Analysis_S1_EAV CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S1_EAV AS		
+	SELECT  abe.dbms,
+		abe.experimentname,
+		abe.runid,
+		abe.BatchSetID,
+		abe.batchSzIncr,
+	        abe.MPL,		   
+		abe.IterNum	     -- iteration number
+	FROM Analysis_S0_ABE abe,
+             Analysis_ATP_Stat aas
+	WHERE abe.runid      = aas.runid 
+          and abe.batchsetid = aas.batchsetid 
+	  and abe.MPL	     = aas.MPL
+	  -- ATP time greater than the average + two standard deviations
+	  and (abe.totalProcTime / abe.totalExecXacts) > (aas.AvgATPtime + 2*aas.STDATPtime)
+          and abe.totalProcTime > 0;
+ALTER TABLE Analysis_S1_EAV ADD PRIMARY KEY (runid, batchsetID, MPL, iternum); 
+DELETE FROM Analysis_RowCount WHERE stepname = 'Analysis_S1_EAV';
+INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
+	SELECT dbms as dbmsName, 
+	       experimentname as exprName,
+	       'Analysis_S1_EAV' as stepName,
+	       count(*) as stepResultSize
+	FROM Analysis_S1_EAV
+	GROUP BY dbms, experimentname;

@@ -1025,7 +1025,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
 //				Main._logger.reportError(sqlex.getMessage());
-				Main._logger.reportErrorNotOnConsole("init()-Client #"+_clientNum+"=>"+sqlex.getMessage());
+				if(_clientNum % 10 == 0)
+					Main._logger.reportErrorNotOnConsole("init()-Client #"+_clientNum+"=>"+sqlex.getMessage());
 			}
 		}
 
@@ -2254,37 +2255,42 @@ Main._logger.outputDebug(batchSetQuery);
 				try {
 					_conn.commit();
 				} catch (SQLException e) {
-					Main._logger.reportErrorNotOnConsole("terminate()-Client #"+_clientNum+"=>"+e.getMessage());
+					if(_clientNum % 10 == 0)
+						Main._logger.reportErrorNotOnConsole("terminate()-Client #"+_clientNum+"=>"+e.getMessage());
 				}
 				commitTime = System.currentTimeMillis() - startCommit;
 			}
 			
-			long stmtClosingTime=0, connClosingTime=0;
-			try {
-				long start = System.currentTimeMillis();
-				if (_stmt != null)
-					_stmt.close();
-				stmtClosingTime = System.currentTimeMillis()-start;
-			} catch (SQLException ex) {
-				Main._logger.reportErrorNotOnConsole(ex.getMessage());
-			}
+			//long stmtClosingTime=0, connClosingTime=0;
+			long connClosingTime = 0;
+//			try {
+//				long start = System.currentTimeMillis();
+//				if (_stmt != null)
+//					_stmt.close();
+//				stmtClosingTime = System.currentTimeMillis()-start;
+//			} catch (SQLException ex) {
+//				Main._logger.reportErrorNotOnConsole("stmt-close-#"+_clientNum+"=>"+ex.getMessage());
+//			}
 			_stmt = null;
 			try {
 				long start = System.currentTimeMillis();
-				if (_conn != null)
+				if (_conn != null){
+					_conn.abort(null);
+					_conn.rollback();
 					_conn.close();
+				}
 				connClosingTime = System.currentTimeMillis()-start;
 			} catch (SQLException e) {
-				Main._logger.reportErrorNotOnConsole(e.getMessage());
+				Main._logger.reportErrorNotOnConsole("conn-close-#"+_clientNum+"=>"+e.getMessage());
 			}
 			_conn = null;
 			
 			if(commitTime > maxCommitTime){
 				maxCommitTime = connClosingTime;
 			}
-			if(stmtClosingTime > maxStmtClosingTime){
-				maxStmtClosingTime = stmtClosingTime;
-			}
+//			if(stmtClosingTime > maxStmtClosingTime){
+//				maxStmtClosingTime = stmtClosingTime;
+//			}
 			if(connClosingTime > maxConnClosingTime){
 				maxConnClosingTime = connClosingTime;
 			}
@@ -2292,10 +2298,11 @@ Main._logger.outputDebug(batchSetQuery);
 /****************************************************************************/
 if(_clientNum % barrier.length == 0){ // last client
 	Main._logger.writeIntoLog(
-			String.format("\tTerminated Client #%d(commit: %d(ms), stmt: %d(ms), conn: %d(ms)",
+//			String.format("\tTerminated Client #%d(commit: %d(ms), stmt: %d(ms), conn: %d(ms)",
+			String.format("\tTerminated Client #%d(commit: %d(ms), conn: %d(ms)",
 					_clientNum, 
 					commitTime,
-					stmtClosingTime, 
+//					stmtClosingTime, 
 					connClosingTime));
 }
 /****************************************************************************/

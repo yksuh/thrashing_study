@@ -671,10 +671,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					continue;
 				}
 				
-				boolean firstLoading = false;
+				boolean firstLoading = true;
 				// effective db size
 				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
-					if(firstLoading) firstLoading = false;
+					//if(firstLoading) firstLoading = false;
 					batchSetNumToRun++;
 					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, hotspot ratio: %d%%)", 
 							batchSetNumToRun, dNmRwsFrmSLCT*100, (int)(dNmRwsFrmUPT*100), (int)(dActRowPlSz*100));
@@ -712,7 +712,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						
 						// initialize experiment tables 
 						preStep(firstLoading);
-						if(!firstLoading) firstLoading = true;
+						if(firstLoading) firstLoading = false;
 						
 						// analyze this batch set
 						studyBatchSet(runID,

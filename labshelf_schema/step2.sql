@@ -44,19 +44,16 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       COUNT(*) as stepResultSize
 	FROM Analysis_S1_FBE
 	GROUP BY dbms, experimentname;
---select * from Analysis_RowCount where stepname = 'Analysis_S1_SDV'
+--select * from Analysis_RowCount where stepname = 'Analysis_S1_FBE'
 
 -- Analysis_S2_BE: Analysis_S2_Batch_Executions
 DROP TABLE Analysis_S2_BE CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_S2_BE AS	
 	SELECT abe.*
-	FROM Analysis_S0_ABE abe,
-	     Analysis_S1_FBE fbe
-	WHERE abe.runid      = fbe.runid 
-	  and abe.batchsetid = fbe.batchsetid 
-	  and abe.MPL        = fbe.MPL
-	  and abe.iternum    = fbe.iternum;
-ALTER TABLE Analysis_S2_BE ADD PRIMARY KEY (runid, batchsetid);
+	FROM Analysis_S0_ABE abe
+	WHERE (abe.runid, abe.batchsetid, abe.MPL, abe.iternum) 
+		NOT IN (SELECT runid, batchsetid, MPL, iternum FROM Analysis_S1_FBE);
+ALTER TABLE Analysis_S2_BE ADD PRIMARY KEY (runid, batchsetid, MPL, iternum);
 DELETE FROM Analysis_RowCount WHERE stepname = 'Analysis_S2_BE';
 INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	SELECT dbms as dbmsName, 
@@ -65,3 +62,6 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Analysis_S2_BE
 	GROUP BY dbms, experimentname;
+--select * from Analysis_RowCount where stepname = 'Analysis_S2_BE'
+--select * from Analysis_RowCount where stepname = 'Analysis_S0_ABE'
+

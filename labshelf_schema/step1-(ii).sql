@@ -107,3 +107,4 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Analysis_S1_EAV
 	GROUP BY dbms, experimentname;
+--select * from Analysis_RowCount where stepname = 'Analysis_S1_EAV'

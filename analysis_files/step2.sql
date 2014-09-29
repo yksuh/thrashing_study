@@ -1,7 +1,7 @@
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/15/14
--- Revision: 09/22/14, 09/27/14
--- Description: Define step queries for batchset execution sanity checks
+-- Revision: 09/22/14, 09/27/14, 09/29/14
+-- Description: Define step2 queries for batchset execution sanity checks
 
 -- Step 2: Drop selected batch executions failing to pass saniy checks
 
@@ -62,6 +62,6 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Analysis_S2_BE
 	GROUP BY dbms, experimentname;
---select * from Analysis_RowCount where stepname = 'Analysis_S2_BE'
---select * from Analysis_RowCount where stepname = 'Analysis_S0_ABE'
+--select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S2_BE'
+--select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S0_ABE'
 

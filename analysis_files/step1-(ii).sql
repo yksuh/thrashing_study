@@ -31,7 +31,6 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Analysis_S1_ZTV
 	GROUP BY dbms, experimentname;
---select  from Analysis_S1_ZTV
 --select dbms, experimentname, avg(MPL) from Analysis_S1_ZTV group by dbms, experimentname
 --select dbms, experimentname, min(MPL) from Analysis_S1_ZTV group by dbms, experimentname
 --select * from Analysis_RowCount where stepname = 'Analysis_S1_ZTV'
@@ -50,7 +49,10 @@ CREATE TABLE Analysis_S1_SDV AS
 		abe.ELAPSEDTIME
 	FROM Analysis_S0_ABE abe,
              Analysis_Duration dur
-	WHERE TRUNC(abe.ELAPSEDTIME/1000) > dur.period;
+	WHERE TRUNC(abe.ELAPSEDTIME/1000) > dur.period
+	--WHERE TRUNC(abe.ELAPSEDTIME/1000) > dur.period*1.01
+	--WHERE TRUNC(abe.ELAPSEDTIME/1000) > dur.period*1.01
+	;
 ALTER TABLE Analysis_S1_SDV ADD PRIMARY KEY (runid, batchsetID, MPL, IterNum); 
 DELETE FROM Analysis_RowCount WHERE stepname = 'Analysis_S1_SDV';
 INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
@@ -61,7 +63,7 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	FROM Analysis_S1_SDV
 	GROUP BY dbms, experimentname;
 
---select * from Analysis_RowCount where stepname = 'Analysis_S1_SDV'
+--select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_SDV'
 
 -- (3) Excessive ATP time violations
 

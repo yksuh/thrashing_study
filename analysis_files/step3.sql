@@ -1,6 +1,6 @@
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/22/14
--- Revision: 09/27/14
+-- Revision: 09/27/14, 09/29/14
 -- Description: Define step3 queries for dropping batchsets violating sanity checks
 
 -- Get the remaining batch executions after step2
@@ -29,7 +29,8 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(distinct batchSetID) as stepResultSize
 	FROM Analysis_S3_0
 	GROUP BY dbms, experimentname;
---select * from Analysis_RowCount where stepname = 'Analysis_S3_0'
+--select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_0' group by dbmsName
+--select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_0'
 
 -- Step3-I: Drop batchsets that do not have all the MPLs in their batchsets
 -- Select only the batchsets having every batch
@@ -62,7 +63,8 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(BatchSetID) as stepResultSize
 	FROM Analysis_S3_I
 	GROUP BY dbms, experimentname;
---select * from Analysis_RowCount where stepname = 'Analysis_S3_I'
+--select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_I' group by dbmsName
+--select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_I'
 
 -- Step3-II: Drop batchsets failing to pass sanity checks at step1-(iv)
 -- Analysis_S3_II:  Analysis_Step3_II
@@ -82,6 +84,20 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(BatchSetID) as stepResultSize
 	FROM Analysis_S3_II
 	GROUP BY dbms, experimentname;
+--select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_II' group by dbmsName
+--select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_II'
+
+
+-- Analysis_S3_II_Ext:  Analysis_Step3_II_Extended
+DROP TABLE Analysis_S3_II_Ext CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S3_II_Ext AS
+	SELECT t0.*
+	FROM Analysis_S3_0 t0, 
+	     Analysis_S3_I s3i
+	WHERE t0.runid 	    = s3i.runid
+	  and t0.batchsetid = s3i.batchsetid;
+ALTER TABLE Analysis_S3_II_Ext ADD PRIMARY KEY (runid, BatchSetID, MPL);
+--select count(*) from Analysis_S3_II_Ext
 
 -- Analysis_S3_BSD:  Analysis_S3_Batchset_Details
 DROP TABLE Analysis_S3_BSD CASCADE CONSTRAINTS;
@@ -96,19 +112,9 @@ CREATE TABLE Analysis_S3_BSD AS
 	WHERE t0.runid = t1.runid and t0.batchsetID = t1.batchSetID
 	GROUP BY t0.dbms, t0.experimentname, t0.runid, t0.batchSetID; 
 ALTER TABLE Analysis_S3_BSD ADD PRIMARY KEY (runID, batchSetID);
+--select count(*) from Analysis_S3_BSD
 
 -- Locate an MPL value whose TPS is twice greater than that of the next MPL.
-
--- Analysis_S3_II_Ext:  Analysis_Step3_II_Extended
-DROP TABLE Analysis_S3_II_Ext CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S3_II_Ext AS
-	SELECT t0.*
-	FROM Analysis_S3_0 t0, 
-	     Analysis_S3_I s3i
-	WHERE t0.runid 	    = s3i.runid
-	  and t0.batchsetid = s3i.batchsetid;
-ALTER TABLE Analysis_S3_II_Ext ADD PRIMARY KEY (runid, BatchSetID, MPL);
-
 -- Analysis_S3_TP:  Analysis_Step3_Thrashing_Points
 DROP TABLE Analysis_S3_TP CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_S3_TP  AS
@@ -154,20 +160,22 @@ CREATE TABLE Analysis_S3_FTPE AS
 	        s3ii.runid,   	
 	        s3ii.batchSetID, 
 		ftp.maxMPL,	-- thrashing point	
-	        s3ii.numExecXacts,
-		s3ii.procTime,
-		s3ii.tps
+	        s3ii.tps,
+		s3ii.numExecXacts,
+		s3ii.procTime
 	FROM Analysis_S3_FTP ftp,
 	     Analysis_S3_II_Ext   s3ii
 	WHERE ftp.runID	     = s3ii.runID 
 	  and ftp.batchSetID = s3ii.batchSetID 
 	  and ftp.maxMPL     = s3ii.MPL;
 ALTER TABLE Analysis_S3_FTPE ADD PRIMARY KEY (runID, batchSetID);
+--select count(*) from Analysis_S3_FTPE
 
 -- Step3-III: Drop batchsets revealing transient DBMS thrashing
+
 -- Drop transient thrashing Violations
-DROP TABLE Analysis_S3_III CASCADE CONSTRAINTS;
-CREATE TABLE Analysis_S3_III AS		
+DROP TABLE Analysis_S3_TTV CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S3_TTV AS		
 	SELECT distinct 
 	       s3ii.dbms,
 	       s3ii.experimentname,
@@ -178,7 +186,23 @@ CREATE TABLE Analysis_S3_III AS
 	WHERE ftpe.runid      = s3ii.runid 
           and ftpe.batchsetid = s3ii.batchsetid
 	  and ftpe.maxMPL < s3ii.MPL
-	  and ftpe.tps > s3ii.tps;
+	  and s3ii.tps > ftpe.tps;
+ALTER TABLE Analysis_S3_TTV ADD PRIMARY KEY (runid, BatchSetID); 
+DELETE FROM Analysis_RowCount WHERE stepname = 'Analysis_S3_TTV';
+INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
+	SELECT dbms as dbmsName, 
+	       experimentname as exprName,
+	       'Analysis_S3_TTV' as stepName,
+	       COALESCE(count(*), 0) as stepResultSize
+	FROM Analysis_S3_TTV
+	GROUP BY dbms, experimentname;
+
+-- Analysis_S3_III: Analysis_Step3_III
+DROP TABLE Analysis_S3_III CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S3_III AS		
+	SELECT s3ii.*
+	FROM Analysis_S3_II s3ii
+	WHERE (runid, batchSetID) NOT IN (SELECT runid, batchsetID FROM Analysis_S3_TTV);
 ALTER TABLE Analysis_S3_III ADD PRIMARY KEY (runid, BatchSetID); 
 DELETE FROM Analysis_RowCount WHERE stepname = 'Analysis_S3_III';
 INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
@@ -188,6 +212,23 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Analysis_S3_III
 	GROUP BY dbms, experimentname;
+--select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_III' group by dbmsName
+--select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_III'
+
+-- Find a batchset that encountered thrashing
+-- Analysis_S3_TBS:  Analysis_Step3_Thrashing_Batchset
+DROP TABLE Analysis_S3_TBS CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S3_TBS  AS
+	SELECT  s3iii.dbms,
+	        s3iii.experimentname,
+		s3iii.runID,
+		s3iii.batchSetID,
+		ftp.maxMPL
+	FROM Analysis_S3_III s3iii,
+	     Analysis_S3_FTP ftp
+	WHERE s3iii.runID = ftp.runID AND 
+	      s3iii.batchSetID = ftp.batchSetID;
+ALTER TABLE Analysis_S3_TBS  ADD PRIMARY KEY (runID, batchSetID);
 
 -- Find a batchset that showed no thrashing
 -- Analysis_S3_NBS:  Analysis_Step3_No_Thrashing_BatchSet
@@ -195,15 +236,15 @@ DROP TABLE Analysis_S3_NBS CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_S3_NBS  AS
 	SELECT  t0.dbms,
 	        t0.experimentname,
-	        t0.batchSetID,
-		t0.runID,
+	        t0.runID,
+		t0.batchSetID,
 		t3.endMPL as maxMPL
 	FROM
 		(SELECT  t1.dbms,
 			 t1.experimentname,
 			 t1.runID,
 			 t1.batchSetID
-		FROM Analysis_S3_BSD t1
+		FROM Analysis_S3_III t1
 		MINUS
 		SELECT  t2.dbms,
 			t2.experimentname,
@@ -214,24 +255,28 @@ CREATE TABLE Analysis_S3_NBS  AS
 	WHERE t0.runID = t3.runID
 	  AND t0.batchSetID = t3.batchSetID;
 ALTER TABLE Analysis_S3_NBS ADD PRIMARY KEY (runID, batchSetID);
+--select runid, count(*) as numThrashedBS from Analysis_S3_TBS group by runid order by runid
+--select runid, count(*) as numThrashedBS from Analysis_S3_NBS group by runid order by runid
 
 -- Gather batchsets with/without thrashing 
 -- Analysis_S3_UBS:  Analysis_Step3_Union_BatchSet
 DROP TABLE Analysis_S3_UBS CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_S3_UBS  AS
-	SELECT  t1.dbms,
-		t1.experimentname,
-	        t0.runID,
-		t0.batchSetID,
-		t1.avgProcTime,
-		t0.maxMPL
-	FROM	
-		(SELECT *
-		 FROM Analysis_S3_FTP -- thrashing batchsets
-		 UNION
-		 SELECT *
-		 FROM Analysis_S3_NBS) t0,
-		Analysis_S3_BSD t1
+	SELECT *
+	FROM Analysis_S3_TBS
+	UNION
+	SELECT *
+	FROM Analysis_S3_NBS;
+ALTER TABLE Analysis_S3_UBS ADD PRIMARY KEY (runID, batchSetID);
+--select sum(count(batchsetID)) from Analysis_S3_UBS group by runid
+
+-- Extend the measured stat of all the batchsets
+-- Analysis_S3_UBSE:  Analysis_Step3_Union_BatchSet_Extended
+DROP TABLE Analysis_S3_UBSE CASCADE CONSTRAINTS;
+CREATE TABLE Analysis_S3_UBSE  AS
+	SELECT  t0.*,
+		t1.avgProcTime
+	FROM Analysis_S3_UBS t0, Analysis_S3_BSD t1
 	WHERE t0.runID	    = t1.runID
 	  AND t0.batchSetID = t1.batchSetID;
-ALTER TABLE Analysis_S3_UBS ADD PRIMARY KEY (runID, batchSetID);
+ALTER TABLE Analysis_S3_UBSE ADD PRIMARY KEY (runID, batchSetID);

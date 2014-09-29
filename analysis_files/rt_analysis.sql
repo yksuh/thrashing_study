@@ -1,3 +1,6 @@
+-- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
+-- Date: 09/29/14
+-- Description: Define step queries for summing up the runtime hours
 
 DROP TABLE RTE_Dmd;
 CREATE TABLE RTE_Dmd 	-- Primary key is a dbms.
@@ -5,8 +8,8 @@ CREATE TABLE RTE_Dmd 	-- Primary key is a dbms.
 	dbmsName	VARCHAR2(10) NOT NULL PRIMARY KEY, -- dbms name
 	loadingHours	NUMBER (10, 3)  		   -- loading time
 );
-INSERT INTO RTE_Dmd VALUES ('db2',    1.0);  
-INSERT INTO RTE_Dmd VALUES ('oracle', 0.53);    
+INSERT INTO RTE_Dmd VALUES ('db2',    0.5);  
+INSERT INTO RTE_Dmd VALUES ('oracle', 1);    
 INSERT INTO RTE_Dmd VALUES ('pgsql',  0.1);     
 INSERT INTO RTE_Dmd VALUES ('mysql',  0.017);    
 INSERT INTO RTE_Dmd VALUES ('teradata',  0.2);  
@@ -15,9 +18,16 @@ INSERT INTO RTE_Dmd VALUES ('sqlserver',  0.1);
 DROP TABLE RTE_Chosen_Runs;
 CREATE TABLE RTE_Chosen_Runs AS -- Primary key is runid.
 	SELECT runid 
-	FROM AZDBLab_ExperimentRun
-	--WHERE runid IN (252,256,250,254,257,253,263,264,293,267,270,415,269,285,418,441,516,536,659,682)
-	WHERE CURRENTSTAGE like 'Completed'
+	FROM AZDBLab_ExperimentRun 
+	-- non pk runs
+	WHERE CURRENTSTAGE like 'Completed' 
+	 AND runid IN (689,1289,889,969,611,    949,1291,610,709,989, 849,1270,809,749,1469, 1870,1369,1109,829,1769) 
+	UNION
+	SELECT runid 
+	FROM AZDBLab_ExperimentRun 
+	-- pk runs
+	WHERE CURRENTSTAGE like 'Completed' 
+	 AND runid IN (1351,1290,1329,1129,869, 1710,1471,1610,1729,1110, 1630,1473,1709,1472,1232, 1869,1470,1609,1749,1649) 
 	ORDER BY runid;
 ALTER TABLE RTE_Chosen_Runs ADD PRIMARY KEY (runid);
 
@@ -36,7 +46,7 @@ CREATE VIEW RTE_S0 AS 	-- Primary key is a query execution: (qeid)
 	where RTE_runs.runid = rl.runid
 	  and rl.runid = er.runid 
 	  and er.experimentid = ex.experimentid
-	  and ((ex.experimentname like '%eh%' and (((rl.currentstage like 'Done with%') or (rl.currentstage like 'Completed%'))or (rl.currentstage like '%Populating Variable Tables%'))) or (ex.experimentname like '%op%' and (rl.currentstage like 'Analyzing Query%' or rl.currentstage like '%Done with the max table population%')))
+	  and (ex.experimentname like '%xt%' and (rl.currentstage like 'Analyzed #%' or rl.currentstage like '%Experiment is ready%')))
 	order by dbmsName, exprName, runid, current_time;
 ALTER VIEW RTE_S0 ADD PRIMARY KEY (runid, rnum) DISABLE;
 
@@ -52,7 +62,7 @@ CREATE VIEW RTE_S1 AS
 	WHERE t0.runid = t1.runid 
 	and t1.rnum >= 1
 	and t1.rnum-1 = t0.rnum 
-	and ((t1.exprName like '%eh%' and (t1.currentstage like 'Done with%' or t1.currentstage like 'Completed%')) or (t1.exprName like '%op%' and t1.currentstage like '%Analyzing Query%'))
+	and (t1.exprName like '%xt%' and t1.currentstage like '%Analyzed #%')
 	order by t1.runid, t1.rnum asc;
 ALTER VIEW RTE_S1 ADD PRIMARY KEY (runid, currentstage) DISABLE;
 
@@ -97,3 +107,4 @@ ALTER VIEW RTE_S4 ADD PRIMARY KEY (runid) DISABLE;
 --SELECT * FROM RTE_S4;
 --SELECT sum(HOURS) FROM RTE_S4;
 --SELECT dbmsname, round(sum(HOURS),2) FROM RTE_S4 group by dbmsname;
+

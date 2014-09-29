@@ -1,0 +1,15 @@
+
+SQL> SELECT sum(HOURS) FROM RTE_S4;
+
+SUM(HOURS)
+----------
+ 5000.3305
+
+SQL> SELECT dbmsname, round(sum(HOURS),2) FROM RTE_S4 group by dbmsname;
+DBMSNAME   ROUND(SUM(HOURS),2)
+---------- -------------------
+mysql			529.77
+pgsql		       1242.45
+sqlserver		620.25
+db2			1487.3
+oracle		       1120.56

@@ -34,6 +34,10 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 --select dbms, experimentname, avg(MPL) from Analysis_S1_ZTV group by dbms, experimentname
 --select dbms, experimentname, min(MPL) from Analysis_S1_ZTV group by dbms, experimentname
 --select * from Analysis_RowCount where stepname = 'Analysis_S1_ZTV'
+<<<<<<< HEAD:analysis_files/step1-(ii).sql
+=======
+-- select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_ZTV'
+>>>>>>> AnalysisQuery:analysis_files/step1-(ii).sql
 
 -- (2) Session duration violations
 -- Analysis_S1_SDV: Analysis_S1_Session_Duration_Violations

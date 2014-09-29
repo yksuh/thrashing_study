@@ -141,9 +141,15 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	SELECT dbms as dbmsName, 
 	       experimentname as exprName,
 	       'Analysis_S0_AB' as stepName,
-	       count(*) as stepResultSize
-	FROM Analysis_S0
-	GROUP BY dbms, experimentname;
+	       sum(numBs) as stepResultSize
+	FROM (SELECT dbms,
+ 		     experimentname,
+		     runID,
+		     batchSetID,
+	      	     count(MPL) as numBs
+	      FROM Analysis_S0_AB
+	      GROUP BY dbms, experimentname, runID, batchSetID)
+	GROUP BY dbms, experimentname, runID;
 
 -- Batch Statistics
 -- Compute the total number of batches by dbms, experiment, and run

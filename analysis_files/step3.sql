@@ -66,7 +66,11 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 --select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_I' group by dbmsName
 --select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_I'
 
+<<<<<<< HEAD
 -- Step3-II: Drop batchsets failing to pass sanity checks at step1-(iv)
+=======
+-- Step3-II: Drop batchsets failing to pass sanity checks at step1-(iii)
+>>>>>>> AnalysisQuery
 -- Analysis_S3_II:  Analysis_Step3_II
 DROP TABLE Analysis_S3_II CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_S3_II AS

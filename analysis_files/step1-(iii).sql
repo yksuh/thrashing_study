@@ -1,18 +1,18 @@
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/15/14
--- Revision: 09/22/14
--- Description: Define step queries for batchset execution sanity checks
+-- Revision: 09/22/14, 09/27/14
+-- Description: Define step1-(iii) queries for batchset execution sanity checks
 
 -- Batchset sanity checks
 -- (1) Number of Transient Thrashing Violations
 DROP TABLE Analysis_S1_TTV CASCADE CONSTRAINTS;
 CREATE TABLE Analysis_S1_TTV AS		
-	SELECT  ftp.dbms,
-		dbr.experimentname,
-		ftp.runid,
-		ftp.BatchSetID
-	FROM Analysis_S1_FTPE ftpe,
-	     Analysis_S1_DBR  dbr
+	SELECT  ftpe.dbms,
+		ftpe.experimentname,
+		ftpe.runid,
+		ftpe.BatchSetID
+	FROM Analysis_S0_FTPE ftpe,
+	     Analysis_S0_DBR  dbr
 	WHERE ftpe.runid      = dbr.runid 
           and ftpe.batchsetid = dbr.batchsetid 
 	  and ftpe.maxMPL < dbr.MPL
@@ -26,3 +26,4 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Analysis_S1_TTV
 	GROUP BY dbms, experimentname;
+--select * from Analysis_RowCount where stepname = 'Analysis_S1_TTV'

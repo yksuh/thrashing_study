@@ -26,11 +26,46 @@ SUM(STEPRESULTSIZE)
 -------------------
 	       1110
 
+SQL> select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepName = 'Analysis_S0_AB' group by dbmsname;
+
+DBMSNAME   SUM(STEPRESULTSIZE)
+---------- -------------------
+mysql			  2240
+pgsql			  2240
+sqlserver		  2160
+db2			  2220
+oracle			  2240
+
+
+SQL> select sum(stepResultSize) from Analysis_RowCount where stepName = 'Analysis_S0_AB';
+
+SUM(STEPRESULTSIZE)
+-------------------
+	      11100
+
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S0_ABE';
 
 SUM(STEPRESULTSIZE)
 -------------------
 	      33299
+
+SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_ZTV';
+
+SUM(STEPRESULTSIZE)
+-------------------
+		  4
+
+SQL>  select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_SDV';
+
+SUM(STEPRESULTSIZE)
+-------------------
+	       1940
+
+
+SQL>  select COALESCE(sum(stepResultSize), 0) from Analysis_RowCount where stepname = 'Analysis_S1_EAV';
+
+
+SQL>  select COALESCE(sum(stepResultSize), 0) from Analysis_RowCount where stepname = 'Analysis_S1_TTV'
 
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S2_BE';
 
@@ -63,7 +98,7 @@ SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysi
 
 SUM(STEPRESULTSIZE)
 ------------------- 
-	       1004 (
+	       1004 
 
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S4';
 

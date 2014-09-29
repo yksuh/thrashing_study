@@ -3,9 +3,9 @@ SQL> select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepName 
 DBMSNAME   SUM(STEPRESULTSIZE)
 ---------- -------------------
 mysql			   224
-sqlserver		   216
+sqlserver		   224
 pgsql			   224
-db2			   222
+db2			   224
 oracle			   224
 
 select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepName IN ('Analysis_S4') group by dbmsname;
@@ -13,9 +13,9 @@ select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepName IN ('
 DBMSNAME   SUM(STEPRESULTSIZE)
 ---------- -------------------
 mysql			   201 (10.26% dropped)
-sqlserver		   216 (0% dropped)
+sqlserver		   224 (0% dropped)
 pgsql			   191 (14.73% dropped)
-db2			   197 (11.26% dropped)
+db2			   202 (9.82% dropped)
 oracle			   199 (11.16% dropped)
 
 select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S4';
@@ -26,85 +26,50 @@ SUM(STEPRESULTSIZE)
 -------------------
 	       1110
 
-SQL> select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepName = 'Analysis_S0_AB' group by dbmsname;
-
-DBMSNAME   SUM(STEPRESULTSIZE)
----------- -------------------
-mysql			  2240
-pgsql			  2240
-sqlserver		  2160
-db2			  2220
-oracle			  2240
-
-
-SQL> select sum(stepResultSize) from Analysis_RowCount where stepName = 'Analysis_S0_AB';
-
-SUM(STEPRESULTSIZE)
--------------------
-	      11100
-
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S0_ABE';
 
 SUM(STEPRESULTSIZE)
 -------------------
 	      33299
 
-SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_ZTV';
-
-SUM(STEPRESULTSIZE)
--------------------
-		  4
-
-SQL>  select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_SDV';
-
-SUM(STEPRESULTSIZE)
--------------------
-	       1940
-
-
-SQL>  select COALESCE(sum(stepResultSize), 0) from Analysis_RowCount where stepname = 'Analysis_S1_EAV';
-
-
-SQL>  select COALESCE(sum(stepResultSize), 0) from Analysis_RowCount where stepname = 'Analysis_S1_TTV'
-
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S2_BE';
 
 SUM(STEPRESULTSIZE)
 -------------------
-	      31354
-5.84% dropped
+	      31424
+6.47% dropped
 
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_0';
 
 SUM(STEPRESULTSIZE)
 -------------------
-	       1110
+	       1112
 
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_I';
 
 SUM(STEPRESULTSIZE)
 -------------------
-	       1004
+	       1009
 
-9.04% dropped
+9.91% dropped
 
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_II';
 
 SUM(STEPRESULTSIZE)
 -------------------
-	       1004
+	       1009
 
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_III';
 
 SUM(STEPRESULTSIZE)
-------------------- 
-	       1004 
+-------------------
+	       1009
 
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S4';
 
 SUM(STEPRESULTSIZE)
 -------------------
-	       1004
+	       1009
 
 
 SQL> select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepName IN ('Analysis_S0') group by dbmsname;
@@ -145,24 +110,27 @@ SUM(STEPRESULTSIZE)
 -------------------
 	       1004
 
+SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_ZTV';
+
+SUM(STEPRESULTSIZE)
+-------------------
+		  6
 
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_SDV';
 
 SUM(STEPRESULTSIZE)
 -------------------
-	       1941
+	       1909
+
+SQL> select COALESCE(sum(stepResultSize), 0) from Analysis_RowCount where stepname = 'Analysis_S1_EAV';
+
+SQL> select COALESCE(sum(stepResultSize), 0) from Analysis_RowCount where stepname = 'Analysis_S1_TTV';
+
 
 SQL> select count(*) from Analysis_S0_ABE;
 
   COUNT(*)
 ----------
-
-
-SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_SDV';
-
-SUM(STEPRESULTSIZE)
--------------------
-	       1663
 
 SQL> select count(*) from Analysis_S0_ABE;
 

@@ -1025,7 +1025,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				return;
 			} catch (SQLException | ClassNotFoundException sqlex) {
 //				Main._logger.reportError(sqlex.getMessage());
-				if(_clientNum % 10 == 0)
+				//if(_clientNum % 10 == 0)
 					Main._logger.reportErrorNotOnConsole("init()-Client #"+_clientNum+"=>"+sqlex.getMessage());
 			}
 		}
@@ -2276,7 +2276,7 @@ Main._logger.outputDebug(batchSetQuery);
 				long start = System.currentTimeMillis();
 				if (_conn != null){
 					//_conn.abort(null);
-					_conn.rollback();
+//					_conn.rollback();
 					_conn.close();
 				}
 				connClosingTime = System.currentTimeMillis()-start;

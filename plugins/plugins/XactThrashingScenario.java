@@ -2255,17 +2255,17 @@ Main._logger.outputDebug(batchSetQuery);
 		public void terminate(){
 			// TODO Auto-generated method stub
 			long commitTime = 0;
-//			if(_conn != null){
-//				long startCommit = System.currentTimeMillis();
-//				try {
-//					if(!_conn.isClosed()) _conn.commit();
-//				} catch (SQLException e) {
-//					commitTime = System.currentTimeMillis() - startCommit;
-//					//if(_clientNum % 10 == 0)
-//						Main._logger.reportErrorNotOnConsole("terminate()-Client #"+_clientNum+"=>"+e.getMessage() + ", commit: "+commitTime+"(ms)");
-//				}
-//				commitTime = System.currentTimeMillis() - startCommit;
-//			}
+			if(_conn != null){
+				long startCommit = System.currentTimeMillis();
+				try {
+					if(!_conn.isClosed()) _conn.commit();
+				} catch (SQLException e) {
+					commitTime = System.currentTimeMillis() - startCommit;
+					//if(_clientNum % 10 == 0)
+						Main._logger.reportErrorNotOnConsole("terminate()-Client #"+_clientNum+"=>"+e.getMessage() + ", commit: "+commitTime+"(ms)");
+				}
+				commitTime = System.currentTimeMillis() - startCommit;
+			}
 			
 			long start=0, stmtClosingTime = 0;
 			long connClosingTime = 0;
@@ -2283,11 +2283,7 @@ Main._logger.outputDebug(batchSetQuery);
 				if (_conn != null){
 					//_conn.abort(null);
 //					_conn.rollback();
-					if(!_conn.isClosed()){ 
-						_conn.setAutoCommit(true);
-						//_conn.commit();
-						_conn.close();
-					}
+					if(!_conn.isClosed()) _conn.close();
 				}
 				connClosingTime = System.currentTimeMillis()-start;
 			} catch (SQLException e) {
@@ -2319,7 +2315,7 @@ if(commitTime > 180*1000 || stmtClosingTime > 180*1000 || connClosingTime > 180*
 /****************************************************************************/
 			barrier[_clientNum-1] = true;
 		}
-	}	
+	}
 	
 //	class ClientData{
 //		int clientID = -1;

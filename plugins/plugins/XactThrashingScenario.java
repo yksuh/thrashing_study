@@ -1180,12 +1180,16 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * for inserts statements to be seen.
 		 */
 		public void NewCommit() {
+			long startTime = 0;
 			try {
-				if (_conn != null && !_conn.isClosed())
+				if (_conn != null && !_conn.isClosed()){
+					startTime = System.currentTimeMillis();
 					_conn.commit();
+				}
 			} catch (SQLException e) {
 				// e.printStackTrace();
-				//Main._logger.reportErrorNotOnConsole("run()-#"+_clientNum+"=>"+e.getMessage());
+				long elapsedTime = System.currentTimeMillis()-startTime;
+				Main._logger.reportErrorNotOnConsole("run()-#"+_clientNum+"=>"+e.getMessage() + ", commit time: "+ elapsedTime +"(ms)");
 			}
 		}
 
@@ -1220,6 +1224,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			//batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
 //			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
 
+			//while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
 			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
 //				if (_timeOut) {
 //					long elapsedTime = System.currentTimeMillis()-_startTime;
@@ -1263,7 +1268,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					}
 					long xactStartTime = System.currentTimeMillis();
 					// run transaction
-					for (int i = 0; i < transactionToRun.size(); i++) {
+					for (int i = 0; i < transactionToRun.size(); i++) { 
 						String sql = transactionToRun.get(i);
 						// select
 						// long startTime = System.currentTimeMillis();
@@ -1279,19 +1284,19 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							// before executing another transaction we will set the new timeout based on remaining time
 							//_stmt.setQueryTimeout((int)batchRunTime * 1000);
 						} catch(SQLTimeoutException ste){ // timeout has reached 
-							if((System.currentTimeMillis() - startTime) > batchRunTime * 1000){
+							if((System.currentTimeMillis() - startTime)/1000 > batchRunTime){
 								//Main._logger.reportErrorNotOnConsole("cancel-#"+_clientNum+"=>"+"Client #"+_clientNum+"=>"+ste.getMessage());
 								break;
 							}
 							else continue;
 						} catch (SQLException sqe) {
-							if((System.currentTimeMillis() - startTime) > batchRunTime * 1000){
+							if((System.currentTimeMillis() - startTime)/1000 > batchRunTime){
 								//Main._logger.reportErrorNotOnConsole("querytimeout-#"+_clientNum+"=>"+sqe.getMessage());
 								break;
 							}
 							else continue;
 						} catch (Exception ex) {
-							if((System.currentTimeMillis() - startTime) > batchRunTime * 1000){
+							if((System.currentTimeMillis() - startTime)/1000 > batchRunTime){
 								//Main._logger.reportErrorNotOnConsole("normal-#"+_clientNum+"=>"+ex.getMessage());
 								break;
 							}
@@ -2253,56 +2258,58 @@ Main._logger.outputDebug(batchSetQuery);
 			if(_conn != null){
 				long startCommit = System.currentTimeMillis();
 				try {
-					_conn.commit();
+					if(!_conn.isClosed()) _conn.commit();
 				} catch (SQLException e) {
-					if(_clientNum % 10 == 0)
-						Main._logger.reportErrorNotOnConsole("terminate()-Client #"+_clientNum+"=>"+e.getMessage());
+					commitTime = System.currentTimeMillis() - startCommit;
+					//if(_clientNum % 10 == 0)
+						Main._logger.reportErrorNotOnConsole("terminate()-Client #"+_clientNum+"=>"+e.getMessage() + ", commit: "+commitTime+"(ms)");
 				}
 				commitTime = System.currentTimeMillis() - startCommit;
 			}
 			
-			//long stmtClosingTime=0, connClosingTime=0;
+			long start=0, stmtClosingTime = 0;
 			long connClosingTime = 0;
-//			try {
-//				long start = System.currentTimeMillis();
-//				if (_stmt != null)
-//					_stmt.close();
-//				stmtClosingTime = System.currentTimeMillis()-start;
-//			} catch (SQLException ex) {
-//				Main._logger.reportErrorNotOnConsole("stmt-close-#"+_clientNum+"=>"+ex.getMessage());
-//			}
+			try {
+				start = System.currentTimeMillis();
+				if(_conn != null && !_conn.isClosed() && _stmt != null) _stmt.close();
+				stmtClosingTime = System.currentTimeMillis()-start;
+			} catch (SQLException ex) {
+				stmtClosingTime = System.currentTimeMillis()-start;
+				Main._logger.reportErrorNotOnConsole("stmt-close-#"+_clientNum+"=>"+ex.getMessage()+", stmt: " + stmtClosingTime + "(ms)");
+			}
 			_stmt = null;
 			try {
-				long start = System.currentTimeMillis();
+				start = System.currentTimeMillis();
 				if (_conn != null){
 					//_conn.abort(null);
 //					_conn.rollback();
-					_conn.close();
+					if(!_conn.isClosed()) _conn.close();
 				}
 				connClosingTime = System.currentTimeMillis()-start;
 			} catch (SQLException e) {
-				Main._logger.reportErrorNotOnConsole("conn-close-#"+_clientNum+"=>"+e.getMessage());
+				connClosingTime = System.currentTimeMillis()-start;
+				Main._logger.reportErrorNotOnConsole("conn-close-#"+_clientNum+"=>"+e.getMessage() + ", conn: "+connClosingTime+"(ms)");
 			}
 			_conn = null;
 			
 			if(commitTime > maxCommitTime){
 				maxCommitTime = connClosingTime;
 			}
-//			if(stmtClosingTime > maxStmtClosingTime){
-//				maxStmtClosingTime = stmtClosingTime;
-//			}
+			if(stmtClosingTime > maxStmtClosingTime){
+				maxStmtClosingTime = stmtClosingTime;
+			}
 			if(connClosingTime > maxConnClosingTime){
 				maxConnClosingTime = connClosingTime;
 			}
 			
 /****************************************************************************/
-if(_clientNum % barrier.length == 0){ // last client
+if(commitTime > 180*1000 || stmtClosingTime > 180*1000 || connClosingTime > 180*1000){ // last client
 	Main._logger.writeIntoLog(
-//			String.format("\tTerminated Client #%d(commit: %d(ms), stmt: %d(ms), conn: %d(ms)",
-			String.format("\tTerminated Client #%d(commit: %d(ms), conn: %d(ms)",
+			String.format("\tTerminated Client #%d(commit: %d(ms), stmt: %d(ms), conn: %d(ms)",
+//			String.format("\tTerminated Client #%d(commit: %d(ms), conn: %d(ms)",
 					_clientNum, 
 					commitTime,
-//					stmtClosingTime, 
+					stmtClosingTime, 
 					connClosingTime));
 }
 /****************************************************************************/

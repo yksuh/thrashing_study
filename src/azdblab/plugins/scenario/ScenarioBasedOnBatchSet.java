@@ -673,7 +673,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == 0){
 //					continue;
 //				}
-				boolean firstLoading = false;
+//				boolean firstLoading = true; // no loading is required
 				// effective db size
 				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
 					batchSetNumToRun++;
@@ -681,7 +681,16 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 							batchSetNumToRun, dNmRwsFrmSLCT*100, (int)(dNmRwsFrmUPT*100), (int)(dActRowPlSz*100));
 					Main._logger.outputLog(str);
 					
-					if(batchSetNumToRun <= 16){
+					if(batchSetNumToRun == 1){
+						if(dNmRwsFrmSLCT == 0 && dNmRwsFrmUPT == 0.25 && dActRowPlSz == 0.25){
+							
+						}else{
+							System.out.println("batchset number is wrong");
+							System.exit(-1);
+						}
+					}
+					
+					if(batchSetNumToRun > 16){
 						continue;
 					}
 					
@@ -717,7 +726,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						int currTrialCnt = 1, currExpBackoffWaitTime = Constants.WAIT_TIME;
 						
 						// initialize experiment tables 
-						preStep(firstLoading);
+						//preStep(firstLoading);
 						
 						
 						// analyze this batch set

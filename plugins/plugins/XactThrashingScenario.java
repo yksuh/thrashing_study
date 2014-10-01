@@ -2086,7 +2086,7 @@ Main._logger.outputDebug(batchSetQuery);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);
 			// set up client (i+1)
-			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
+//			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
 			// configure this client
 			clients[i].setTransaction();
 		}

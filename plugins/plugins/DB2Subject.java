@@ -1919,7 +1919,7 @@ public class DB2Subject extends ExperimentSubject {
 			for (int i = 0; i < vecTables.size(); i++) {
 				String tblName = (String) vecTables.get(i);
 				Main._logger.outputLog("installed tableName: " + tblName);
-				if (tblName.contains("EXPLAIN") || tblName.contains("ADVISE") || tblName.contains(Constants.CLONE_TABLE_PREFIX)) {
+				if (tblName.contains("EXPLAIN") || tblName.contains("ADVISE") /*|| tblName.contains(Constants.CLONE_TABLE_PREFIX)*/) {
 					// do nothing
 				} else {
 					dropTable(tblName);

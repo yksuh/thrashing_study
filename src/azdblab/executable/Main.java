@@ -288,9 +288,9 @@ public class Main {
 			
 //			CheckSingleCore();
 			
-			if(!machineName.contains("sodb6") && !machineName.contains("sodb4")){
-				CheckExecutorAndDBMSRunning(dbms_name);
-			}
+//			if(!machineName.contains("sodb6") && !machineName.contains("sodb4")){
+//				CheckExecutorAndDBMSRunning(dbms_name);
+//			}
 //			CheckExecutorAndDBMSRunning(dbms_name);
 
 			

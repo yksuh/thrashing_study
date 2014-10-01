@@ -58,8 +58,7 @@ public class Executor extends NotificationBroadcasterSupport implements
 	private class TaskScanner extends TimerTask {
 
 		public void run() {
-			while(true)
-				performTasks();
+			performTasks();
 		}
 
 	}

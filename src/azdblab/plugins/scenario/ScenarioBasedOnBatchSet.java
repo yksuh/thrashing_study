@@ -591,7 +591,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	protected void preStep(boolean first) throws Exception {
 		initializeNotebookContent();
 		// populate fixed tables
-		initializeExperimentTables(first);
+		//initializeExperimentTables(first);
 	}
 	
 	/******
@@ -673,7 +673,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == 0){
 //					continue;
 //				}
-//				boolean firstLoading = true; // no loading is required
+				boolean firstLoading = true; // no loading is required
 				// effective db size
 				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
 					batchSetNumToRun++;
@@ -726,7 +726,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						int currTrialCnt = 1, currExpBackoffWaitTime = Constants.WAIT_TIME;
 						
 						// initialize experiment tables 
-						//preStep(firstLoading);
+						preStep(firstLoading);
 						
 						
 						// analyze this batch set

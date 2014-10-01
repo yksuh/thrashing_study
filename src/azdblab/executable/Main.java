@@ -851,10 +851,10 @@ _logger.outputLog(line);
 
 		try {
 			Scenario scen = experimentRun.getScenarioInstance();
-//			if(!CheckNumCores(numCores)){
-//				_logger.outputLog("Please check '/boot/grub/grub.conf' or any other grub file, to see if 'maxcpus="+numCores+"' is given in the kernel entry.");
-//				System.exit(-1);
-//			}
+			if(!CheckNumCores(numCores)){
+				_logger.outputLog("Please check '/boot/grub/grub.conf' or any other grub file, to see if 'maxcpus="+numCores+"' is given in the kernel entry.");
+				System.exit(-1);
+			}
 //			scen.setCores(numCores);
 //			scen.setDuration(duration);
 //			scen.setTerminals(numTerminals);

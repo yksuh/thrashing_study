@@ -778,7 +778,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
 //							//}
 //						}else{
-							_conn.commit();
+							//_conn.commit();
 //						}
 					}
 					if (_stmt != null) {
@@ -1244,7 +1244,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							try {
 								_conn = DriverManager.getConnection(_connStr,
 										_userName, _password);
-								//_conn.setAutoCommit(false);
+								_conn.setAutoCommit(false);
 							} catch (SQLException e) {
 								//Main._logger.reportErrorNotOnConsole("new conn-#"+_clientNum+"=>"+e.getMessage());
 								continue;
@@ -1385,8 +1385,10 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			_clientRunStats[_clientNum].runTime = runTime;
 			_clientRunStats[_clientNum].numMeasuredExecXacts = _numExecXacts;
 			finalExit = true;
-//			batchRunTimer.cancel();
-//			brt.cancel();
+			if(experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
+				batchRunTimer.cancel();
+				brt.cancel();
+			}
 //			batchRunTimer2.cancel();
 		}
 

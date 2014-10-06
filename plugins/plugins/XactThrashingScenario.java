@@ -741,49 +741,53 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 	public class Client extends Thread {
 
 		protected class BatchRunTimeOut extends TimerTask {
-//			public int cn = 0;
-//			public Connection co = null;
-//			public Statement st = null;
+			public int cn = 0;
+			public Connection co = null;
+			public Statement st = null;
 			
-//			public BatchRunTimeOut(int clientNumber, Connection conn,
-//					Statement stmt) {
-//				st = stmt;
-//				co = conn;
-//				clientNumber = cn;
-//			}
+			public BatchRunTimeOut(int clientNumber, Connection conn,
+					Statement stmt) {
+				st = stmt;
+				co = conn;
+				clientNumber = cn;
+			}
 
-//			public BatchRunTimeOut() {
-//			}
+			public BatchRunTimeOut() {
+			}
 
 			public void run() {
 				if(_clientRunStats[_clientNum] != null)
 					_clientRunStats[_clientNum].timeOut = true;
-//				try {
-//					if(co != null) co.commit();
-//					if (st != null) {
-//						st.cancel();
-//						new SQLException("Batch run timeout");
-//					} 
-//				} catch (SQLException e) {
-//					//e.printStackTrace();
-//					Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
-//				}
+				try {
+					if(co != null) co.commit();
+					if (st != null) {
+						st.cancel();
+						new SQLException("Batch run timeout");
+					} 
+				} catch (SQLException e) {
+					//e.printStackTrace();
+					Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
+				}
 				try {
 					if(_conn != null) {
-//						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){
-//							long start		 = System.currentTimeMillis();
-//							_conn.rollback();
-//							long rollbackTime = System.currentTimeMillis()-start;
-//							//if(_clientNum % 20 == 0){
-//								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
-//							//}
-//						}else{
-							//_conn.commit();
-//						}
+						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){
+							long start		 = System.currentTimeMillis();
+							_conn.rollback();
+							long rollbackTime = System.currentTimeMillis()-start;
+							//if(_clientNum % 20 == 0){
+								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
+							//}
+						}else{
+							_conn.commit();
+						}
 					}
 					if (_stmt != null) {
 //						long start		 = System.currentTimeMillis();
-						_stmt.cancel();
+						try{
+							_stmt.cancel();
+						}catch(Exception ex){
+							Main._logger.reportErrorNotOnConsole("run-cancel()-Client #"+_clientNum+"=>"+ex.getMessage());
+						}
 //						long cancelTime = System.currentTimeMillis()-start;
 						//if(_clientNum % 20 == 0){
 //							Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" stmt cancel time: " + cancelTime + "(ms)");
@@ -792,7 +796,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					} 
 				}catch (SQLException e) {
 //						e.printStackTrace();
-					Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+"=>"+e.getMessage());
+					Main._logger.reportErrorNotOnConsole("run()-Client #"+_clientNum+"=>"+e.getMessage());
 				}	
 				cancel();
 			}
@@ -1218,12 +1222,13 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// conn, stmt for quickly getting out of the loop
 			// timeout thread for getting number of transactions and sumElapsedTime
 			BatchRunTimeOut brt = new BatchRunTimeOut();
-//			BatchRunTimeOut brt2 = new BatchRunTimeOut(this._clientNum, _conn, _stmt);
+			BatchRunTimeOut brt2 = new BatchRunTimeOut(this._clientNum, _conn, _stmt);
 			Timer batchRunTimer = new Timer();
-//			Timer batchRunTimer2 = new Timer();
-			if(experimentSubject.getDBMSName().toLowerCase().contains("mysql"))
+			Timer batchRunTimer2 = new Timer();
+			if(experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
 				batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
-//			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
+				batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
+			}
 
 			//while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
 			while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
@@ -1388,8 +1393,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			if(experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
 				batchRunTimer.cancel();
 				brt.cancel();
+				batchRunTimer2.cancel();
 			}
-//			batchRunTimer2.cancel();
 		}
 
 		/****

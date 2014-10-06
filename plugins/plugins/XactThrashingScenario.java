@@ -770,23 +770,23 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //				}
 				try {
 					if(_conn != null) {
-						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){
-							long start		 = System.currentTimeMillis();
-							_conn.rollback();
-							long rollbackTime = System.currentTimeMillis()-start;
-							//if(_clientNum % 20 == 0){
-								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
-							//}
-						}else{
+//						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){
+//							long start		 = System.currentTimeMillis();
+//							_conn.rollback();
+//							long rollbackTime = System.currentTimeMillis()-start;
+//							//if(_clientNum % 20 == 0){
+//								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
+//							//}
+//						}else{
 							_conn.commit();
-						}
+//						}
 					}
 					if (_stmt != null) {
-						long start		 = System.currentTimeMillis();
+//						long start		 = System.currentTimeMillis();
 						_stmt.cancel();
-						long cancelTime = System.currentTimeMillis()-start;
+//						long cancelTime = System.currentTimeMillis()-start;
 						//if(_clientNum % 20 == 0){
-							Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" stmt cancel time: " + cancelTime + "(ms)");
+//							Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" stmt cancel time: " + cancelTime + "(ms)");
 						//}
 						new SQLException("Batch run timeout");
 					} 
@@ -1217,11 +1217,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			long runTime = 0;
 			// conn, stmt for quickly getting out of the loop
 			// timeout thread for getting number of transactions and sumElapsedTime
-			//BatchRunTimeOut brt = new BatchRunTimeOut();
+			BatchRunTimeOut brt = new BatchRunTimeOut();
 //			BatchRunTimeOut brt2 = new BatchRunTimeOut(this._clientNum, _conn, _stmt);
-			//Timer batchRunTimer = new Timer();
+			Timer batchRunTimer = new Timer();
 //			Timer batchRunTimer2 = new Timer();
-			//batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
+			if(experimentSubject.getDBMSName().toLowerCase().contains("mysql"))
+				batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
 //			batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
 
 			//while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
@@ -1273,12 +1274,14 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						// select
 						// long startTime = System.currentTimeMillis();
 						try {
-							long elapsedTime = System.currentTimeMillis() - startTime;
-							int remainingTimeout = (int)batchRunTime-((int)elapsedTime)/1000;
-							if(remainingTimeout > 0)
-								_stmt.setQueryTimeout(remainingTimeout);
-							else
-								break;
+							if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
+								long elapsedTime = System.currentTimeMillis() - startTime;
+								int remainingTimeout = (int)batchRunTime-((int)elapsedTime)/1000;
+								if(remainingTimeout > 0)
+									_stmt.setQueryTimeout(remainingTimeout);
+								else
+									break;
+							}
 							_stmt.execute(sql); 	// for exploratory
 							// reset query timeout 
 							// before executing another transaction we will set the new timeout based on remaining time

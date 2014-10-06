@@ -2232,7 +2232,11 @@ Main._logger.outputDebug(batchSetQuery);
 										stat.xactNumToRunTimeVecMap, // runtime vector 
 										iterNum); // iteration number
 		}
-		return iterNum;
+		long start = System.currentTimeMillis();
+		System.gc();
+        long elapsedTime = System.currentTimeMillis()-start;
+        Main._logger.outputDebug("Executed System.gc(): " + elapsedTime + "(ms)");
+        return iterNum;
 	}
 	
 //	private class CloseConnection implements Runnable{

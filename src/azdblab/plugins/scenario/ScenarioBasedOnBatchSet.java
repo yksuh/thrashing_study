@@ -657,7 +657,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 		int totalBatchSets = (totalNumRealSel+totalNumUpdateSel)*totalActiveRowPools;
 		double dNmRwsFrmSLCT = 0;
 		
-		boolean firstLoading = false;
+		boolean firstLoading = true;
 		// transaction size
 //		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
 		while(dNmRwsFrmSLCT <= mxNumRowsFromSELECT){
@@ -915,7 +915,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 			}else{
 				Main._logger.outputDebug("cloning chosen!");
 				if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
-					throw new Exception("Clone table ("+Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix+") doesn't exist!");
+					throw new Exception("No clone table ("+Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix+")");
 //					populateXactTable(curr_table);
 //					experimentSubject.copyTable(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix, curr_table.table_name_with_prefix);
 				}else{

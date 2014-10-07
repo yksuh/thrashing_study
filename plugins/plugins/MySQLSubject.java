@@ -165,7 +165,7 @@ public class MySQLSubject extends ExperimentSubject {
 
 		} catch (SQLException sqlex) {
 			close();			
-//			sqlex.printStackTrace();
+			sqlex.printStackTrace();
 			throw new Exception(sqlex.getMessage());
 		}
 

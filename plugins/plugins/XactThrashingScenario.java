@@ -745,16 +745,16 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			public Connection co = null;
 			public Statement st = null;
 			
-			public BatchRunTimeOut(int clientNumber, Connection conn,
-					Statement stmt) {
-				st = stmt;
-				co = conn;
-				clientNumber = cn;
-			}
-
-			public BatchRunTimeOut() {
-			}
-
+//			public BatchRunTimeOut(int clientNumber, Connection conn,
+//					Statement stmt) {
+//				st = stmt;
+//				co = conn;
+//				clientNumber = cn;
+//			}
+//
+//			public BatchRunTimeOut() {
+//			}
+			
 			public void run() {
 				if(_clientRunStats[_clientNum] != null)
 					_clientRunStats[_clientNum].timeOut = true;
@@ -1224,12 +1224,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// conn, stmt for quickly getting out of the loop
 			// timeout thread for getting number of transactions and sumElapsedTime
 			BatchRunTimeOut brt = new BatchRunTimeOut();
-			BatchRunTimeOut brt2 = new BatchRunTimeOut(this._clientNum, _conn, _stmt);
+//			BatchRunTimeOut brt2 = new BatchRunTimeOut(this._clientNum, _conn, _stmt);
 			Timer batchRunTimer = new Timer();
-			Timer batchRunTimer2 = new Timer();
+//			Timer batchRunTimer2 = new Timer();
 			if(experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
 				batchRunTimer.scheduleAtFixedRate(brt, batchRunTime * 1000, batchRunTime * 1000);
-				batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
+//				batchRunTimer2.scheduleAtFixedRate(brt2, batchRunTime * 1000, batchRunTime * 1000);
 			}
 
 			//while((runTime = (System.currentTimeMillis()-startTime)) < batchRunTime * 1000){
@@ -1395,7 +1395,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			if(experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
 				batchRunTimer.cancel();
 				brt.cancel();
-				batchRunTimer2.cancel();
+//				batchRunTimer2.cancel();
 			}
 		}
 

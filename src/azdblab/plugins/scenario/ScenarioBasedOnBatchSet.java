@@ -915,7 +915,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 			}else{
 				Main._logger.outputDebug("cloning chosen!");
 				if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
-					new Exception("Clone table ("+Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix+") doesn't exist!");
+					throw new Exception("Clone table ("+Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix+") doesn't exist!");
 //					populateXactTable(curr_table);
 //					experimentSubject.copyTable(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix, curr_table.table_name_with_prefix);
 				}else{

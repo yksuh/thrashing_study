@@ -713,7 +713,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						
 						// initialize experiment tables 
 						preStep(firstLoading);
-						if(firstLoading) firstLoading = false;
+						if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
+							if(firstLoading) firstLoading = false;
+						}
 						
 						// analyze this batch set
 						studyBatchSet(runID,

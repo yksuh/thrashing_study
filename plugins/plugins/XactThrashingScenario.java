@@ -778,22 +778,24 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
 							//}
 						}else{
-							_conn.commit();
+							if(!_conn.isClosed()){ 
+								_conn.commit();
+								if (_stmt != null) {
+//									long start		 = System.currentTimeMillis();
+									try{
+										_stmt.cancel();
+									}catch(Exception ex){
+										Main._logger.reportErrorNotOnConsole("run-cancel()-Client #"+_clientNum+"=>"+ex.getMessage());
+									}
+//									long cancelTime = System.currentTimeMillis()-start;
+									//if(_clientNum % 20 == 0){
+//										Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" stmt cancel time: " + cancelTime + "(ms)");
+									//}
+									new SQLException("Batch run timeout");
+								} 
+							}
 						}
 					}
-					if (_stmt != null) {
-//						long start		 = System.currentTimeMillis();
-						try{
-							_stmt.cancel();
-						}catch(Exception ex){
-							Main._logger.reportErrorNotOnConsole("run-cancel()-Client #"+_clientNum+"=>"+ex.getMessage());
-						}
-//						long cancelTime = System.currentTimeMillis()-start;
-						//if(_clientNum % 20 == 0){
-//							Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" stmt cancel time: " + cancelTime + "(ms)");
-						//}
-						new SQLException("Batch run timeout");
-					} 
 				}catch (SQLException e) {
 //						e.printStackTrace();
 					Main._logger.reportErrorNotOnConsole("run()-Client #"+_clientNum+"=>"+e.getMessage());

@@ -132,7 +132,7 @@ public class MySQLSubject extends ExperimentSubject {
 					+ oriTable;
 
 			_statement.executeUpdate(cloneSQL);
-
+			commit();
 			// Main._logger.outputLog("Clone table finished!");
 
 		} catch (SQLException sqlex) {
@@ -160,7 +160,7 @@ public class MySQLSubject extends ExperimentSubject {
 					+ oriTable + " WHERE id1 < " + cardinality;
 
 			_statement.executeUpdate(cloneSQL);
-
+			commit();
 			// Main._logger.outputLog("Clone table finished!");
 
 		} catch (SQLException sqlex) {

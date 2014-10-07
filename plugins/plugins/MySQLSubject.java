@@ -130,14 +130,14 @@ public class MySQLSubject extends ExperimentSubject {
 
 			String cloneSQL = "CREATE TABLE " + newTable + " AS SELECT * FROM "
 					+ oriTable;
-
+			Main._logger.outputLog(cloneSQL);
 			_statement.executeUpdate(cloneSQL);
 			commit();
-			// Main._logger.outputLog("Clone table finished!");
+			Main._logger.outputLog("Clone table finished!");
 
 		} catch (SQLException sqlex) {
 			close();			
-//			sqlex.printStackTrace();
+			sqlex.printStackTrace();
 			throw new Exception(sqlex.getMessage());
 		}
 
@@ -165,7 +165,7 @@ public class MySQLSubject extends ExperimentSubject {
 
 		} catch (SQLException sqlex) {
 			close();			
-//			sqlex.printStackTrace();
+			sqlex.printStackTrace();
 			throw new Exception(sqlex.getMessage());
 		}
 

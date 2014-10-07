@@ -713,9 +713,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						
 						// initialize experiment tables 
 						preStep(firstLoading);
-						if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
-							if(firstLoading) firstLoading = false;
-						}
+						if(firstLoading) firstLoading = false;
 						
 						// analyze this batch set
 						studyBatchSet(runID,
@@ -915,8 +913,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //					experimentSubject.copyTable(curr_table.table_name_with_prefix, Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix);
 //				}
 			}else{
+				Main._logger.outputDebug("cloning chosen!");
 				if(!experimentSubject.tableExists(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix)){
-					new Exception("Clone table ("+Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix+") doesn't exist!");
+					throw new Exception("No clone table ("+Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix+")");
 //					populateXactTable(curr_table);
 //					experimentSubject.copyTable(Constants.CLONE_TABLE_PREFIX+curr_table.table_name_with_prefix, curr_table.table_name_with_prefix);
 				}else{

@@ -758,16 +758,16 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			public void run() {
 				if(_clientRunStats[_clientNum] != null)
 					_clientRunStats[_clientNum].timeOut = true;
-				try {
-					if(co != null) co.commit();
-					if (st != null) {
-						st.cancel();
-						new SQLException("Batch run timeout");
-					} 
-				} catch (SQLException e) {
-					//e.printStackTrace();
-					Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
-				}
+//				try {
+//					if(co != null) co.commit();
+//					if (st != null) {
+//						st.cancel();
+//						new SQLException("Batch run timeout");
+//					} 
+//				} catch (SQLException e) {
+//					//e.printStackTrace();
+//					Main._logger.reportErrorNotOnConsole("Client1 #"+_clientNum+"=>"+e.getMessage());
+//				}
 				try {
 					if(_conn != null) {
 						if(experimentSubject.getDBMSName().toLowerCase().contains("db2")){

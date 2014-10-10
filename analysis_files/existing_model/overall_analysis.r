@@ -1,27 +1,36 @@
-# Overall
+# Overall: 23.96%
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
-# ATP normalization
-# db2
+# ATP & MAXMPL normalization
 db2 <- subset(x, x$DBMS=='db2')
 db2$ATP = (db2$ATP-min(db2$ATP))/(max(db2$ATP)-min(db2$ATP))
 db2$MAXMPL = (db2$MAXMPL-min(db2$MAXMPL))/(max(db2$MAXMPL)-min(db2$MAXMPL))
-# oracle
+#nrow(db2)
+#nrow(subset(db2, db2$MAXMPL < 1))
+#nrow(subset(db2, db2$MAXMPL <= 0.5))
 oracle <- subset(x, x$DBMS=='oracle')
 oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
 oracle$MAXMPL = (oracle$MAXMPL-min(oracle$MAXMPL))/(max(oracle$MAXMPL)-min(oracle$MAXMPL))
-# mysql
+#nrow(oracle)
+#nrow(subset(oracle, oracle$MAXMPL < 1))
+#nrow(subset(oracle, oracle$MAXMPL <= 0.5))
 mysql <- subset(x, x$DBMS=='mysql')
 mysql$ATP = (mysql$ATP-min(mysql$ATP))/(max(mysql$ATP)-min(pgsql$ATP))
 mysql$MAXMPL = (mysql$MAXMPL-min(mysql$MAXMPL))/(max(mysql$MAXMPL)-min(mysql$MAXMPL))
-# pgsql
+#nrow(mysql)
+#nrow(subset(mysql, mysql$MAXMPL < 1))
+#nrow(subset(mysql, mysql$MAXMPL <= 0.5))
 pgsql <- subset(x, x$DBMS=='pgsql')
 pgsql$ATP = (pgsql$ATP-min(pgsql$ATP))/(max(pgsql$ATP)-min(pgsql$ATP))
 pgsql$MAXMPL = (pgsql$MAXMPL-min(pgsql$MAXMPL))/(max(pgsql$MAXMPL)-min(pgsql$MAXMPL))
-# sqlserver
+#nrow(pgsql)
+#nrow(subset(pgsql, pgsql$MAXMPL < 1))
+#nrow(subset(pgsql, pgsql$MAXMPL <= 0.5))
 sqlserver <- subset(x, x$DBMS=='sqlserver')
 sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
 sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
-# combine all
+#nrow(sqlserver)
+#nrow(subset(sqlserver, sqlserver$MAXMPL < 1))
+#nrow(subset(sqlserver, sqlserver$MAXMPL <= 0.5))
 x = rbind(db2,oracle,mysql,pgsql,sqlserver) 
 x$ACTROWPOOL = (x$ACTROWPOOL-min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)-min(x$ACTROWPOOL))
 x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
@@ -30,16 +39,19 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 
 library(lavaan)
 thrashing_model <- '
-     # mediator
+    # mediator
       ATP ~ a1*NUMPROCESSORS+a2*ACTROWPOOL+a3*PK+a4*PCTUPDATE+a5*PCTREAD
     # dependent variable
       MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c3*ACTROWPOOL + c4*PCTUPDATE + c5*PCTREAD
     # interactions
      INT_1 := a3*a4
      INT_2 := a3*a5
-     INT_3 := a1*a2'
+     INT_3 := a1*a2
+    '
 fit <- sem(thrashing_model, data = x)
 summary(fit, standardized=TRUE, rsq=T) 
+
+	lavaan (0.5-17) converged normally after  26 iterations
 
 	  Number of observations                          1004
 
@@ -53,7 +65,7 @@ summary(fit, standardized=TRUE, rsq=T)
 	  Information                                 Expected
 	  Standard Errors                             Standard
 
-		           Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+			   Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
 	Regressions:
 	  ATP ~
 	    NUMPROCE (a1)    -0.079    0.020   -3.909    0.000   -0.079   -0.118
@@ -75,6 +87,7 @@ summary(fit, standardized=TRUE, rsq=T)
 	Defined parameters:
 	    INT_1             0.010    0.003    3.379    0.001    0.010    0.026
 	    INT_2            -0.002    0.003   -0.803    0.422   -0.002   -0.005
+	    INT_4            -0.005    0.002   -2.266    0.023   -0.005   -0.014
 	    INT_3            -0.004    0.002   -2.056    0.040   -0.004   -0.009
 
 	R-Square:
@@ -82,12 +95,13 @@ summary(fit, standardized=TRUE, rsq=T)
 	    ATP               0.081
 	    MAXMPL            0.014
 
+
 library(mediation)
-med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + ACTROWPOOL:NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + PK + PCTREAD + PCTREAD:PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 summary(med.fit)
 
 	Call:
-	lm(formula = ATP ~ NUMPROCESSORS + ACTROWPOOL + ACTROWPOOL:NUMPROCESSORS + 
+	lm(formula = ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + 
 	    PK + PCTREAD + PCTREAD:PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 
 	Residuals:
@@ -147,19 +161,37 @@ test.modmed(med.out, covariates.1 = list (x$ACTROWPOOL < 0.5), covariates.2 = li
 		Test of ACME(covariates.1) - ACME(covariates.2) = 0
 
 	data:  estimates from med.out
-	ACME(covariates.1) - ACME(covariates.2) = -2e-04, p-value = 0.976
+	ACME(covariates.1) - ACME(covariates.2) = 1e-04, p-value = 0.986
 	alternative hypothesis: true ACME(covariates.1) - ACME(covariates.2) is not equal to 0
 	95 percent confidence interval:
-	 -0.01170350  0.01093868
+	 -0.01442857  0.01333295
 
 
 		Test of ADE(covariates.1) - ADE(covariates.2) = 0
 
 	data:  estimates from med.out
-	ADE(covariates.1) - ADE(covariates.2) = 0.002, p-value = 0.99
+	ADE(covariates.1) - ADE(covariates.2) = -9e-04, p-value = 0.982
 	alternative hypothesis: true ADE(covariates.1) - ADE(covariates.2) is not equal to 0
 	95 percent confidence interval:
-	 -0.0780183  0.0878735
+	 -0.09631502  0.10129687
+
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME            0.00855      0.00119      0.01831    0.02
+	ADE            -0.03105     -0.09009      0.02980    0.33
+	Total Effect   -0.02251     -0.08027      0.03945    0.48
+	Prop. Mediated -0.18140     -2.48711      3.96667    0.49
+
+	Sample Size Used: 1004 
+
+
+	Simulations: 1000
 
 med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTREAD")
 summary(med.out)
@@ -169,15 +201,15 @@ summary(med.out)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME           -0.00216     -0.00985      0.00419    0.48
-	ADE            -0.07113     -0.14841      0.01136    0.10
-	Total Effect   -0.07329     -0.15080      0.00930    0.09
-	Prop. Mediated  0.02348     -0.20486      0.26175    0.55
+	ACME           -0.00230     -0.00996      0.00421    0.44
+	ADE            -0.07200     -0.15006      0.01224    0.10
+	Total Effect   -0.07430     -0.15204      0.00878    0.09
+	Prop. Mediated  0.02302     -0.20084      0.30776    0.48
 
 	Sample Size Used: 1004 
 
 
-	Simulations: 1000 
+	Simulations: 1000
 
 test.modmed(med.out, covariates.1 = list (x$PK == 1), covariates.2 = list (x$PK == 0), data = x)
 
@@ -206,10 +238,10 @@ summary(med.out)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME            0.01024      0.00192      0.02161    0.01
-	ADE            -0.01932     -0.08692      0.05465    0.58
-	Total Effect   -0.00908     -0.07933      0.06316    0.80
-	Prop. Mediated -0.14100     -4.30469      3.31166    0.80
+	ACME            0.01030      0.00203      0.02102    0.01
+	ADE            -0.01892     -0.08843      0.04821    0.63
+	Total Effect   -0.00862     -0.07682      0.05929    0.86
+	Prop. Mediated -0.10391     -4.23937      5.85301    0.87
 
 	Sample Size Used: 1004 
 
@@ -221,17 +253,17 @@ test.modmed(med.out, covariates.1 = list (x$PK == 1), covariates.2 = list (x$PK 
 		Test of ACME(covariates.1) - ACME(covariates.2) = 0
 
 	data:  estimates from med.out
-	ACME(covariates.1) - ACME(covariates.2) = -3e-04, p-value = 0.958
+	ACME(covariates.1) - ACME(covariates.2) = 2e-04, p-value = 0.95
 	alternative hypothesis: true ACME(covariates.1) - ACME(covariates.2) is not equal to 0
 	95 percent confidence interval:
-	 -0.01342584  0.01450563
+	 -0.01541892  0.01483382
 
 
 		Test of ADE(covariates.1) - ADE(covariates.2) = 0
 
 	data:  estimates from med.out
-	ADE(covariates.1) - ADE(covariates.2) = 0.002, p-value = 0.99
+	ADE(covariates.1) - ADE(covariates.2) = 8e-04, p-value = 0.986
 	alternative hypothesis: true ADE(covariates.1) - ADE(covariates.2) is not equal to 0
 	95 percent confidence interval:
-	 -0.09913852  0.09940461
+	 -0.1010838  0.1041259
 

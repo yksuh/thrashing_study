@@ -10,9 +10,6 @@ x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
 x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
 
->>>>> Model Change
-
-
 library(lavaan)
 thrashing_model <- '
      # mediator
@@ -20,7 +17,8 @@ thrashing_model <- '
     # dependent variable
       MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c3*ACTROWPOOL + c4*PCTUPDATE + c5*PCTREAD + c6*PK
     # interactions
-     INT_1 := a3*a4'
+     INT_1 := a3*a4
+     INT_3 := a1*a2'
 fit <- sem(thrashing_model, data = x)
 summary(fit, standardized=TRUE, rsq=T) 
 
@@ -60,12 +58,41 @@ summary(fit, standardized=TRUE, rsq=T)
 
 	Defined parameters:
 	    INT_1             0.054    0.011    4.741    0.000    0.054    0.144
+	    INT_3            -0.000    0.001   -0.249    0.804   -0.000   -0.001
 
 	R-Square:
 
 	    ATP               0.501
 	    MAXMPL            0.499
 
+library(mediation)
+med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + PK + PCTREAD + PCTUPDATE + PCTUPDATE:PK, data = x)
+summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + 
+	    PK + PCTREAD + PCTUPDATE + PCTUPDATE:PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.32910 -0.11070 -0.00706  0.10067  0.60201 
+
+	Coefficients:
+		                 Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)               0.40003    0.03803  10.519  < 2e-16 ***
+	NUMPROCESSORS            -0.02624    0.05310  -0.494    0.622    
+	ACTROWPOOL                0.02260    0.04834   0.468    0.641    
+	PK                       -0.28703    0.03577  -8.025 1.19e-13 ***
+	PCTREAD                   0.17070    0.04112   4.151 5.07e-05 ***
+	PCTUPDATE                -0.52618    0.04791 -10.984  < 2e-16 ***
+	NUMPROCESSORS:ACTROWPOOL -0.02250    0.08445  -0.266    0.790    
+	PK:PCTUPDATE              0.38169    0.06860   5.564 9.25e-08 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.1755 on 183 degrees of freedom
+	Multiple R-squared:  0.5737,	Adjusted R-squared:  0.5573 
+	F-statistic: 35.18 on 7 and 183 DF,  p-value: < 2.2e-16
 
 out.fit <- lm(MAXMPL ~ ATP + ACTROWPOOL + NUMPROCESSORS + PCTUPDATE + PCTREAD + PK, data = x)
 summary(out.fit)
@@ -102,73 +129,35 @@ summary(med.out)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME           -0.01019     -0.03372      0.00803    0.25
-	ADE            -0.22213     -0.33232     -0.11796    0.00
-	Total Effect   -0.23232     -0.34198     -0.12783    0.00
-	Prop. Mediated  0.03788     -0.03617      0.15769    0.25
+	ACME           -0.00975     -0.03204      0.00542    0.27
+	ADE            -0.22259     -0.33153     -0.11140    0.00
+	Total Effect   -0.23234     -0.33838     -0.12211    0.00
+	Prop. Mediated  0.03674     -0.02823      0.16045    0.27
 
 	Sample Size Used: 191 
 
 
-	Simulations: 1000 
+	Simulations: 1000
 
 test.modmed(med.out, covariates.1 = list (x$ACTROWPOOL < 0.5), covariates.2 = list (x$x$ACTROWPOOL >= 0.5), data = x)
 
-	Test of ACME(covariates.1) - ACME(covariates.2) = 0
+		Test of ACME(covariates.1) - ACME(covariates.2) = 0
 
 	data:  estimates from med.out
-	ACME(covariates.1) - ACME(covariates.2) = 4e-04, p-value = 0.982
+	ACME(covariates.1) - ACME(covariates.2) = -1e-04, p-value = 0.996
 	alternative hypothesis: true ACME(covariates.1) - ACME(covariates.2) is not equal to 0
 	95 percent confidence interval:
-	 -0.03210644  0.03088594
+	 -0.02918042  0.02823620
 
 
 		Test of ADE(covariates.1) - ADE(covariates.2) = 0
 
 	data:  estimates from med.out
-	ADE(covariates.1) - ADE(covariates.2) = -3e-04, p-value = 0.992
+	ADE(covariates.1) - ADE(covariates.2) = -7e-04, p-value = 0.986
 	alternative hypothesis: true ADE(covariates.1) - ADE(covariates.2) is not equal to 0
 	95 percent confidence interval:
-	 -0.1521787  0.1525445
+	 -0.1530285  0.1508995
 
-
-med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTREAD")
-summary(med.out)
-
-	Causal Mediation Analysis 
-
-	Quasi-Bayesian Confidence Intervals
-
-		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME            0.04600      0.00772      0.09931    0.01
-	ADE            -0.16435     -0.29724     -0.02531    0.01
-	Total Effect   -0.11835     -0.25008      0.01890    0.09
-	Prop. Mediated -0.33249     -2.74707      2.04507    0.10
-
-	Sample Size Used: 191 
-
-
-	Simulations: 1000 
-
-
-test.modmed(med.out, covariates.1 = list (x$PK == 1), covariates.2 = list (x$PK == 0), data = x)
-
-	Test of ACME(covariates.1) - ACME(covariates.2) = 0
-
-	data:  estimates from med.out
-	ACME(covariates.1) - ACME(covariates.2) = 3e-04, p-value = 0.982
-	alternative hypothesis: true ACME(covariates.1) - ACME(covariates.2) is not equal to 0
-	95 percent confidence interval:
-	 -0.06724593  0.06609272
-
-
-		Test of ADE(covariates.1) - ADE(covariates.2) = 0
-
-	data:  estimates from med.out
-	ADE(covariates.1) - ADE(covariates.2) = 0.0019, p-value = 0.986
-	alternative hypothesis: true ADE(covariates.1) - ADE(covariates.2) is not equal to 0
-	95 percent confidence interval:
-	 -0.2025858  0.2112903
 
 med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE")
 summary(med.out)
@@ -178,33 +167,33 @@ summary(med.out)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME            -0.0985      -0.1929      -0.0165    0.02
-	ADE             -0.2279      -0.3755      -0.0601    0.01
-	Total Effect    -0.3264      -0.4582      -0.1968    0.00
-	Prop. Mediated   0.3001       0.0490       0.7364    0.02
+	ACME            -0.0977      -0.1872      -0.0166    0.02
+	ADE             -0.2326      -0.3876      -0.0909    0.00
+	Total Effect    -0.3303      -0.4574      -0.2020    0.00
+	Prop. Mediated   0.2905       0.0472       0.6399    0.02
 
 	Sample Size Used: 191 
 
 
 	Simulations: 1000 
 
+
 test.modmed(med.out, covariates.1 = list (x$PK == 1), covariates.2 = list (x$PK == 0), data = x)
 
 	Test of ACME(covariates.1) - ACME(covariates.2) = 0
 
-data:  estimates from med.out
-ACME(covariates.1) - ACME(covariates.2) = 0.0025, p-value = 0.982
-alternative hypothesis: true ACME(covariates.1) - ACME(covariates.2) is not equal to 0
-95 percent confidence interval:
- -0.1092715  0.1343181
+	data:  estimates from med.out
+	ACME(covariates.1) - ACME(covariates.2) = 0.0024, p-value = 0.948
+	alternative hypothesis: true ACME(covariates.1) - ACME(covariates.2) is not equal to 0
+	95 percent confidence interval:
+	 -0.1259795  0.1171565
 
 
-	Test of ADE(covariates.1) - ADE(covariates.2) = 0
+		Test of ADE(covariates.1) - ADE(covariates.2) = 0
 
-data:  estimates from med.out
-ADE(covariates.1) - ADE(covariates.2) = -0.001, p-value = 0.998
-alternative hypothesis: true ADE(covariates.1) - ADE(covariates.2) is not equal to 0
-95 percent confidence interval:
- -0.2113151  0.2175743
-
+	data:  estimates from med.out
+	ADE(covariates.1) - ADE(covariates.2) = 2e-04, p-value = 0.998
+	alternative hypothesis: true ADE(covariates.1) - ADE(covariates.2) is not equal to 0
+	95 percent confidence interval:
+	 -0.2391574  0.2081055
 

@@ -23,6 +23,11 @@ thrashing_model <- '
      INT_1 := a3*a4
      INT_2 := a3*a5
      INT_3 := a1*a2
+ # constraints
+    a1+a2+a3+a4+a5 < 1
+    a1+a2+a3+a4+a5 > -1
+    b1+c2+c3+c4+c5 < 1
+    b1+c2+c3+c4+c5 > -1
      '
 fit <- sem(thrashing_model, data = x)
 summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 

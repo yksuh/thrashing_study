@@ -37,6 +37,7 @@ SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysi
 SUM(STEPRESULTSIZE)
 -------------------
 	      31424
+6.47% dropped
 
 SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S3_0';
 
@@ -119,26 +120,17 @@ SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysi
 
 SUM(STEPRESULTSIZE)
 -------------------
-	       1941
-
-SQL> select count(*) from Analysis_S0_ABE;
-
-  COUNT(*)
-----------
-
-
-SQL> select sum(stepResultSize) from Analysis_RowCount where stepname = 'Analysis_S1_SDV';
-
-SUM(STEPRESULTSIZE)
--------------------
-	       1663
-=======
 	       1909
 
 SQL> select COALESCE(sum(stepResultSize), 0) from Analysis_RowCount where stepname = 'Analysis_S1_EAV';
 
 SQL> select COALESCE(sum(stepResultSize), 0) from Analysis_RowCount where stepname = 'Analysis_S1_TTV';
 
+
+SQL> select count(*) from Analysis_S0_ABE;
+
+  COUNT(*)
+----------
 
 SQL> select count(*) from Analysis_S0_ABE;
 

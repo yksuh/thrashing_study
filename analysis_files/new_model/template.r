@@ -1,3 +1,24 @@
+library(lavaan)
+thrashing_model <- '
+     # mediator
+     # ATP ~ a1*NUMPROCESSORS+a2*ACTROWPOOL+a3*PK+a4*PCTUPDATE+a5*PCTREAD
+    # dependent variable
+      ATP ~ c2*PK
+    # interactions
+     '
+fit <- sem(thrashing_model, data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+
+pdf("test2.pdf")
+plot(x$ATP, x$MAXMPL, col="black", main='ATP time vs. MPL Capability (raw data)', xlab='ATP time', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("test2.pdf")
+plot(x$ATP, x$MAXMPL, col="black", main='ATP time vs. MPL Capability (standardized data)', xlab='ATP time', ylab=expression('MPL Capability'))
+dev.off()
+
+
 # Overall
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 # ATP & MAXMPL normalization

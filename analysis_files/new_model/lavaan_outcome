@@ -1,0 +1,116 @@
+# plotting
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+pdf("atpt_mplc.pdf")
+plot(x$ATP, x$MAXMPL, col="black", main='ATP time vs. MPL Capability (raw data)', xlab='ATP time (msec)', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("arp_mplc.pdf")
+plot(x$ACTROWPOOL*100, x$MAXMPL, col="black", main='Active Row Pool vs. MPL Capability (raw data)', xlab='Active Row Pool (%)', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("np_mplc.pdf")
+plot(x$NUMPROCESSORS, x$MAXMPL, col="black", main='# of Processors vs. MPL Capability (raw data)', xlab='# of Processors', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("pu_mplc.pdf")
+plot(x$PCTUPDATE, x$MAXMPL, col="black", main='Pct. of Rows from UPDATE vs. MPL Capability (raw data)', xlab='Percentage of Rows from UPDATE (%)', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("ps_mplc.pdf")
+plot(x$PCTREAD*100, x$MAXMPL, col="black", main='Pct. of Rows from SELECT vs. MPL Capability (raw data)', xlab='Percentage of Rows from SELECT (%)', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("pk_mplc.pdf")
+plot(x$PK, x$MAXMPL, col="black", main='Presence of primary keys vs. MPL Capability (raw data)', xlab='Presence of Primary Keys', ylab=expression('MPL Capability'))
+dev.off()
+
+x$ATP = (x$ATP-min(x$ATP))/(max(x$ATP)-min(x$ATP))
+x$MAXMPL = (x$MAXMPL-min(x$MAXMPL))/(max(x$MAXMPL)-min(x$MAXMPL))
+
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+x$ATP = (x$ATP-min(x$ATP))/(max(x$ATP)-min(x$ATP))
+x$MAXMPL = (x$MAXMPL-min(x$MAXMPL))/(max(x$MAXMPL)-min(x$MAXMPL))
+pdf("normalized_atpt_mplc.pdf")
+plot(x$ATP, x$MAXMPL, col="black", main='ATP time vs. MPL Capability (standardized data)', xlab='ATP time', ylab=expression('MPL Capability'))
+dev.off()
+
+x$ACTROWPOOL = (x$ACTROWPOOL-min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)-min(x$ACTROWPOOL))
+x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
+x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
+x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ c6*NUMPROCESSORS+c5*PCTUPDATE+c4*PK
+    # dependent variable
+     
+    # interactions
+       INT_1 := c5*c4
+     '
+fit <- sem(thrashing_model,  data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 
+
+MAXMPL ~ b1*ATP + c3*ACTROWPOOL + c4*PCTUPDATE + c5*PCTREAD 
+b1*ATP + c4*PCTUPDATE + c5*PCTREAD  + 
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ b1*PK
+    # dependent variable
+     
+    # interactions
+     '
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 
+
+  MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c3*ACTROWPOOL + c4*PCTUPDATE + c5*PCTREAD + c6*PK
+
+dependant variable
+	DBMS
+		A variable(s): p < 0.05
+		A variable(s): p >= 0.05
+ATP	
+	Overall
+		
+ATP
+	db2
+		PCTUPDATE, PCTREAD, PK, NUMPROCESSORS
+		ACTROWPOOL
+	mysql
+		PK, ACTROWPOOL	
+		NUMPROCESSORS, PCTUPDATE, PCTREAD
+	oracle
+		PK, PCTUPDATE, PCTREAD
+		ACTROWPOOL, NUMPROCESSORS
+	sqlserver
+		NUMPROCESSORS,PCTUPDATE
+		PK, ACTROWPOOL, PCTREAD
+	pgsql
+		PCTUPDATE, PK, PCTREAD	
+		NUMPROCESSORS, ACTROWPOOL
+
+Common:PK
+ 
+Union: PCTUPDATE,  PCTREAD, NUMPROCESSORS, ACTROWPOOL, ATP, PK
+
+MAXMPL
+	db2
+		PCTUPDATE, PCTREAD, NUMPROCESSORS, ACTROWPOOL
+		PK, ATP
+	mysql
+		PCTUPDATE, PCTREAD, ACTROWPOOL, ATP
+		NUMPROCESSORS, PK
+	oracle
+		PCTUPDATE, NUMPROCESSORS
+		ATP, PCTREAD, ACTROWPOOL, PK
+	sqlserver
+		ATP, PCTUPDATE, NUMPROCESSORS
+		PCTREAD, ACTROWPOOL, PK		
+	pgsql
+		PK, NUMPROCESSORS,PCTUPDATE
+		ACTROWPOOL, PCTREAD, ATP
+
+Common:PCTUPDATE
+ 
+Union: PCTUPDATE,  PCTREAD, NUMPROCESSORS, ACTROWPOOL, ATP, PK

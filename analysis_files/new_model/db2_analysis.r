@@ -20,7 +20,7 @@ thrashing_model <- '
      INT_2 := a3*a5
      INT_3 := a1*a2
      '
-fit <- sem(thrashing_model, data = x)
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
 summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 
 
 	lavaan (0.5-17) converged normally after  25 iterations

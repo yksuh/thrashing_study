@@ -798,7 +798,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					}
 				}catch (SQLException e) {
 //						e.printStackTrace();
-					Main._logger.reportErrorNotOnConsole("run()-Client #"+_clientNum+"=>"+e.getMessage());
+//					if(_clientNum % 100 == 0)
+//						Main._logger.reportErrorNotOnConsole("run()-Client #"+_clientNum+"=>"+e.getMessage());
 				}	
 				cancel();
 			}
@@ -1195,7 +1196,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			} catch (SQLException e) {
 				// e.printStackTrace();
 				long elapsedTime = System.currentTimeMillis()-startTime;
-				Main._logger.reportErrorNotOnConsole("run()-#"+_clientNum+"=>"+e.getMessage() + ", commit time: "+ elapsedTime +"(ms)");
+//				if(_clientNum % 100 == 0)
+//					Main._logger.reportErrorNotOnConsole("run()-#"+_clientNum+"=>"+e.getMessage() + ", commit time: "+ elapsedTime +"(ms)");
 			}
 		}
 

@@ -28,31 +28,6 @@ x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
 x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
 
-med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
-out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
-med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", robustSE = TRUE)
-sens.out <- medsens(med.out, effect.type = "indirect")
-summary(med.out)
-
-summary(sens.out)
-
-Mediation Sensitivity Analysis for Average Causal Mediation Effect
-
-Sensitivity Region
-
-      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
-[1,] -0.1 -0.0015      -0.0083       0.0053         0.01       0.0089
-
-Rho at which ACME = 0: -0.1
-R^2_M*R^2_Y* at which ACME = 0: 0.01
-R^2_M~R^2_Y~ at which ACME = 0: 0.0089 
-
-$r.square.y
-[1] 0.007462195
-
-$r.square.m
-[1] 0.1047084
-
 med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 out.fit <- lm(MAXMPL ~ ATP + PK, data = x)
 med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = TRUE)
@@ -164,6 +139,33 @@ summary(sens.out)
 sens.out$r.square.y
 [1] 0.02931289
 sens.out$r.square.m
+[1] 0.1047084
+
+-----------
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", robustSE = TRUE)
+sens.out <- medsens(med.out, effect.type = "indirect")
+summary(med.out)
+
+summary(sens.out)
+
+Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+Sensitivity Region
+
+      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+[1,] -0.1 -0.0015      -0.0083       0.0053         0.01       0.0089
+
+Rho at which ACME = 0: -0.1
+R^2_M*R^2_Y* at which ACME = 0: 0.01
+R^2_M~R^2_Y~ at which ACME = 0: 0.0089 
+
+$r.square.y
+[1] 0.007462195
+
+$r.square.m
 [1] 0.1047084
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE*PK, data = x)

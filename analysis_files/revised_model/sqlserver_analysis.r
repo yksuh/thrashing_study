@@ -13,58 +13,48 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 library(lavaan)
 thrashing_model <- '
      # mediator
-      ATP ~ a1*NUMPROCESSORS+a2*ACTROWPOOL+a3*PK+a4*PCTUPDATE+a5*PCTREAD
+      ATP ~ a1*NUMPROCESSORS+a4*PCTUPDATE
     # dependent variable
-      MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c3*ACTROWPOOL + c4*PCTUPDATE + c5*PCTREAD + c6*PK
-    # interactions
-     INT_1 := a3*a4
-     INT_2 := a3*a5
-     INT_3 := a1*a2'
+      MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c4*PCTUPDATE
+    # interactions'
 fit <- sem(thrashing_model, data = x)
 summary(fit, standardized=TRUE, rsq=T) 
 
-	lavaan (0.5-17) converged normally after  26 iterations
+lavaan (0.5-17) converged normally after  20 iterations
 
-	  Number of observations                           216
+  Number of observations                           216
 
-	  Estimator                                         ML
-	  Minimum Function Test Statistic                0.000
-	  Degrees of freedom                                 0
-	  Minimum Function Value               0.0000000000000
+  Estimator                                         ML
+  Minimum Function Test Statistic                0.000
+  Degrees of freedom                                 0
+  Minimum Function Value               0.0000000000000
 
-	Parameter estimates:
+Parameter estimates:
 
-	  Information                                 Expected
-	  Standard Errors                             Standard
+  Information                                 Expected
+  Standard Errors                             Standard
 
-		           Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
-	Regressions:
-	  ATP ~
-	    NUMPROCE (a1)    -0.450    0.046   -9.874    0.000   -0.450   -0.550
-	    ACTROWPO (a2)     0.004    0.047    0.087    0.931    0.004    0.005
-	    PK       (a3)     0.021    0.035    0.595    0.552    0.021    0.033
-	    PCTUPDAT (a4)     0.123    0.052    2.365    0.018    0.123    0.146
-	    PCTREAD  (a5)    -0.009    0.059   -0.162    0.872   -0.009   -0.010
-	  MAXMPL ~
-	    ATP      (b1)     0.162    0.064    2.543    0.011    0.162    0.180
-	    NUMPROCE (c2)     0.416    0.051    8.101    0.000    0.416    0.567
-	    ACTROWPO (c3)     0.007    0.044    0.161    0.872    0.007    0.009
-	    PCTUPDAT (c4)    -0.134    0.049   -2.723    0.006   -0.134   -0.177
-	    PCTREAD  (c5)     0.007    0.055    0.128    0.898    0.007    0.008
-	    PK       (c6)    -0.042    0.033   -1.263    0.206   -0.042   -0.074
+                   Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+Regressions:
+  ATP ~
+    NUMPROCE (a1)    -0.449    0.046   -9.859    0.000   -0.449   -0.550
+    PCTUPDAT (a4)     0.128    0.047    2.714    0.007    0.128    0.151
+  MAXMPL ~
+    ATP      (b1)     0.159    0.064    2.484    0.013    0.159    0.177
+    NUMPROCE (c2)     0.413    0.052    8.025    0.000    0.413    0.563
+    PCTUPDAT (c4)    -0.139    0.045   -3.087    0.002   -0.139   -0.183
 
-	Variances:
-	    ATP               0.067    0.006                      0.067    0.670
-	    MAXMPL            0.059    0.006                      0.059    0.728
+Variances:
+    ATP               0.067    0.006                      0.067    0.671
+    MAXMPL            0.059    0.006                      0.059    0.734
 
-	Defined parameters:
-	    INT_1             0.003    0.004    0.579    0.562    0.003    0.005
-	    INT_3            -0.002    0.021   -0.087    0.931   -0.002   -0.003
+R-Square:
 
-	R-Square:
+    ATP               0.329
+    MAXMPL            0.266
 
-	    ATP               0.330
-	    MAXMPL            0.272
+
+
 
 
 library(mediation)

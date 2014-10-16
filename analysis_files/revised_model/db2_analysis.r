@@ -12,23 +12,60 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 library(lavaan)
 thrashing_model <- '
      # mediator
-      ATP ~ a1*NUMPROCESSORS+a2*ACTROWPOOL+a3*PK+a4*PCTUPDATE+a5*PCTREAD
+      ATP ~ a1*NUMPROCESSORS+a2*ACTROWPOOL+a3*PK+a4*PCTUPDATE
     # dependent variable
-      MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c3*ACTROWPOOL + c4*PCTUPDATE + c5*PCTREAD + c6*PK
-    # interactions
-     INT_1 := a3*a4
-     INT_3 := a1*a2'
-fit <- sem(thrashing_model, data = x)
-summary(fit, standardized=TRUE, rsq=T) 
+      MAXMPL ~ b1*ATP
+   # interactions
+       INT_1 := a3*a4
+       INT_2 := a1*a2
+     '
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
 
-	lavaan (0.5-17) converged normally after  25 iterations
+
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a1*NUMPROCESSORS+a2*ACTROWPOOL+a3*PK+a4*PCTUPDATE
+    # dependent variable
+      MAXMPL ~ b1*ATP
+   # interactions
+       INT_1 := a3*a4
+       INT_2 := a1*a2
+     '
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+	lavaan (0.5-17) converged normally after  45 iterations
 
 	  Number of observations                           197
 
-	  Estimator                                         ML
-	  Minimum Function Test Statistic                0.000
-	  Degrees of freedom                                 0
-	  Minimum Function Value               0.0000000000000
+	  Estimator                                       DWLS
+	  Minimum Function Test Statistic               42.819
+	  Degrees of freedom                                 4
+	  P-value (Chi-square)                           0.000
+
+	Model test baseline model:
+
+	  Minimum Function Test Statistic               71.420
+	  Degrees of freedom                                 9
+	  P-value                                        0.000
+
+	User model versus baseline model:
+
+	  Comparative Fit Index (CFI)                    0.378
+	  Tucker-Lewis Index (TLI)                      -0.399
+
+	Root Mean Square Error of Approximation:
+
+	  RMSEA                                          0.223
+	  90 Percent Confidence Interval          0.165  0.285
+	  P-value RMSEA <= 0.05                          0.000
+
+	Standardized Root Mean Square Residual:
+
+	  SRMR                                           0.098
 
 	Parameter estimates:
 
@@ -38,31 +75,303 @@ summary(fit, standardized=TRUE, rsq=T)
 		           Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
 	Regressions:
 	  ATP ~
-	    NUMPROCE (a1)     0.070    0.032    2.193    0.028    0.070    0.143
-	    ACTROWPO (a2)     0.044    0.034    1.278    0.201    0.044    0.083
-	    PK       (a3)     0.044    0.026    1.705    0.088    0.044    0.112
-	    PCTUPDAT (a4)    -0.193    0.038   -5.061    0.000   -0.193   -0.364
-	    PCTREAD  (a5)    -0.149    0.044   -3.375    0.001   -0.149   -0.242
+	    NUMPROCE (a1)     0.081    0.037    2.172    0.030    0.081    0.164
+	    ACTROWPO (a2)     0.041    0.036    1.146    0.252    0.041    0.077
+	    PK       (a3)     0.052    0.029    1.807    0.071    0.052    0.132
+	    PCTUPDAT (a4)    -0.125    0.038   -3.325    0.001   -0.125   -0.233
 	  MAXMPL ~
-	    ATP      (b1)     0.211    0.107    1.980    0.048    0.211    0.136
-	    NUMPROCE (c2)     0.194    0.048    4.040    0.000    0.194    0.258
-	    ACTROWPO (c3)    -0.130    0.051   -2.525    0.012   -0.130   -0.160
-	    PCTUPDAT (c4)     0.230    0.061    3.798    0.000    0.230    0.280
-	    PCTREAD  (c5)    -0.076    0.068   -1.116    0.265   -0.076   -0.080
-	    PK       (c6)     0.064    0.039    1.650    0.099    0.064    0.105
+	    ATP      (b1)     0.145    0.079    1.828    0.068    0.145    0.094
+
+	Covariances:
+	  NUMPROCESSORS ~~
+	    ACTROWPOOL        0.001    0.011    0.062    0.950    0.001    0.004
+	    PK                0.007    0.014    0.465    0.642    0.007    0.033
+	    PCTUPDATE         0.003    0.011    0.260    0.795    0.003    0.019
+	  ACTROWPOOL ~~
+	    PK                0.001    0.013    0.087    0.931    0.001    0.006
+	    PCTUPDATE        -0.001    0.010   -0.087    0.930   -0.001   -0.006
+	  PK ~~
+	    PCTUPDATE        -0.007    0.013   -0.522    0.602   -0.007   -0.037
 
 	Variances:
-	    ATP               0.032    0.003                      0.032    0.838
-	    MAXMPL            0.072    0.007                      0.072    0.782
+	    ATP               0.035    0.011                      0.035    0.893
+	    MAXMPL            0.091    0.010                      0.091    0.991
+	    NUMPROCESSORS     0.162    0.009                      0.162    1.000
+	    ACTROWPOOL        0.140    0.008                      0.140    1.000
+	    PK                0.251    0.001                      0.251    1.000
+	    PCTUPDATE         0.136    0.009                      0.136    1.000
 
 	Defined parameters:
-	    INT_1            -0.008    0.005   -1.645    0.100   -0.008   -0.041
-	    INT_3             0.003    0.003    1.107    0.268    0.003    0.012
+	    INT_1            -0.007    0.004   -1.619    0.105   -0.007   -0.031
+	    INT_2             0.003    0.003    1.012    0.311    0.003    0.013
 
 	R-Square:
 
-	    ATP               0.162
-	    MAXMPL            0.218
+	    ATP               0.107
+	    MAXMPL            0.009
+## for db2
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a4*PCTUPDATE+a5*PCTREAD+a3*PK
+    # dependent variable
+      MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c4*PCTUPDATE
+    # interactions
+     '
+fit <- sem(thrashing_model, estimator="DWLS", orthogonal = TRUE, data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 
+
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a1*NUMPROCESSORS+a4*PCTUPDATE+a5*PCTREAD
+    # dependent variable
+      MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c3*ACTROWPOOL + c4*PCTUPDATE
+    # interactions
+     '
+#fit <- sem(thrashing_model, estimator="DWLS", orthogonal = TRUE, data = x)
+fit <- sem(thrashing_model, data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 
+
+lavaan (0.5-17) converged normally after  21 iterations
+
+  Number of observations                           197
+
+  Estimator                                         ML
+  Minimum Function Test Statistic                2.936
+  Degrees of freedom                                 2
+  P-value (Chi-square)                           0.230
+
+Model test baseline model:
+
+  Minimum Function Test Statistic               77.657
+  Degrees of freedom                                 9
+  P-value                                        0.000
+
+User model versus baseline model:
+
+  Comparative Fit Index (CFI)                    0.986
+  Tucker-Lewis Index (TLI)                       0.939
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)               -266.687
+  Loglikelihood unrestricted model (H1)       -265.219
+
+  Number of free parameters                          9
+  Akaike (AIC)                                 551.373
+  Bayesian (BIC)                               580.922
+  Sample-size adjusted Bayesian (BIC)          552.410
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.049
+  90 Percent Confidence Interval          0.000  0.158
+  P-value RMSEA <= 0.05                          0.385
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.023
+
+Parameter estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+                   Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+Regressions:
+  ATP ~
+    NUMPROCE (a1)     0.072    0.032    2.236    0.025    0.072    0.148
+    PCTUPDAT (a4)    -0.197    0.038   -5.134    0.000   -0.197   -0.372
+    PCTREAD  (a5)    -0.155    0.045   -3.479    0.001   -0.155   -0.252
+  MAXMPL ~
+    ATP      (b1)     0.262    0.104    2.530    0.011    0.262    0.168
+    NUMPROCE (c2)     0.192    0.048    3.961    0.000    0.192    0.254
+    ACTROWPO (c3)    -0.130    0.052   -2.510    0.012   -0.130   -0.159
+    PCTUPDAT (c4)     0.262    0.054    4.809    0.000    0.262    0.317
+
+Variances:
+    ATP               0.033    0.003                      0.033    0.857
+    MAXMPL            0.073    0.007                      0.073    0.795
+
+R-Square:
+
+    ATP               0.143
+    MAXMPL            0.205
+
+
+
+
+
+
+
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a1*NUMPROCESSORS+a4*PCTUPDATE
+    # dependent variable
+      MAXMPL ~ b1*ATP + c3*ACTROWPOOL+ c5*PK
+    # interactions
+    # INT_1 := a3*a4
+    # INT_2 := a3*a5
+     #INT_3 := a1*a2
+     '
+fit <- sem(thrashing_model, data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 
+
+lavaan (0.5-17) converged normally after  21 iterations
+
+  Number of observations                           197
+
+  Estimator                                         ML
+  Minimum Function Test Statistic                2.936
+  Degrees of freedom                                 2
+  P-value (Chi-square)                           0.230
+
+Model test baseline model:
+
+  Minimum Function Test Statistic               77.657
+  Degrees of freedom                                 9
+  P-value                                        0.000
+
+User model versus baseline model:
+
+  Comparative Fit Index (CFI)                    0.986
+  Tucker-Lewis Index (TLI)                       0.939
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)               -266.687
+  Loglikelihood unrestricted model (H1)       -265.219
+
+  Number of free parameters                          9
+  Akaike (AIC)                                 551.373
+  Bayesian (BIC)                               580.922
+  Sample-size adjusted Bayesian (BIC)          552.410
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.049
+  90 Percent Confidence Interval          0.000  0.158
+  P-value RMSEA <= 0.05                          0.385
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.023
+
+Parameter estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+                   Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+Regressions:
+  ATP ~
+    NUMPROCE (a1)     0.072    0.032    2.236    0.025    0.072    0.148
+    PCTUPDAT (a4)    -0.197    0.038   -5.134    0.000   -0.197   -0.372
+    PCTREAD  (a5)    -0.155    0.045   -3.479    0.001   -0.155   -0.252
+  MAXMPL ~
+    ATP      (b1)     0.262    0.104    2.530    0.011    0.262    0.168
+    NUMPROCE (c2)     0.192    0.048    3.961    0.000    0.192    0.254
+    ACTROWPO (c3)    -0.130    0.052   -2.510    0.012   -0.130   -0.159
+    PCTUPDAT (c4)     0.262    0.054    4.809    0.000    0.262    0.317
+
+Variances:
+    ATP               0.033    0.003                      0.033    0.857
+    MAXMPL            0.073    0.007                      0.073    0.795
+
+R-Square:
+
+    ATP               0.143
+    MAXMPL            0.205
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a1*NUMPROCESSORS+c3*ACTROWPOOL+a3*PK+a4*PCTUPDATE+a5*PCTREAD
+    # dependent variable
+      MAXMPL ~ c1*ATP+c2*NUMPROCESSORS+c3*ACTROWPOOL+c4*PK+c5*PCTUPDATE+c6*PCTREAD
+    # interactions
+     #INT_1 := a3*a4
+     #INT_2 := a3*a5
+     #INT_3 := a1*a2
+     '
+fit <- sem(thrashing_model, estimator="DWLS", orthogonal = TRUE, data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 
+
+	lavaan (0.5-17) converged normally after  60 iterations
+
+	  Number of observations                           197
+
+	  Estimator                                       DWLS
+	  Minimum Function Test Statistic               13.529
+	  Degrees of freedom                                 4
+	  P-value (Chi-square)                           0.009
+
+	Model test baseline model:
+
+	  Minimum Function Test Statistic               54.328
+	  Degrees of freedom                                 9
+	  P-value                                        0.000
+
+	User model versus baseline model:
+
+	  Comparative Fit Index (CFI)                    0.790
+	  Tucker-Lewis Index (TLI)                       0.527
+
+	Root Mean Square Error of Approximation:
+
+	  RMSEA                                          0.110
+	  90 Percent Confidence Interval          0.049  0.177
+	  P-value RMSEA <= 0.05                          0.051
+
+	Standardized Root Mean Square Residual:
+
+	  SRMR                                           0.204
+
+	Parameter estimates:
+
+	  Information                                 Expected
+	  Standard Errors                             Standard
+
+		           Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+	Regressions:
+	  ATP ~
+	    PK       (a3)     0.033    0.018    1.871    0.061    0.033    0.314
+	    NUMPROCE (a2)     0.080    0.029    2.817    0.005    0.080    0.609
+	    PCTREAD  (a4)    -0.064    0.023   -2.842    0.004   -0.064   -0.383
+	  MAXMPL ~
+	    ATP      (c1)     2.536    0.901    2.815    0.005    2.536    0.445
+	    ACTROWPO (c2)    -0.129    0.060   -2.151    0.031   -0.129   -0.159
+
+	Covariances:
+	  PK ~~
+	    NUMPROCESSORS     0.007    0.014    0.458    0.647    0.007    0.033
+	    PCTREAD          -0.005    0.011   -0.468    0.640   -0.005   -0.033
+	    ACTROWPOOL        0.004    0.013    0.282    0.778    0.004    0.020
+	  NUMPROCESSORS ~~
+	    PCTREAD           0.002    0.010    0.239    0.811    0.002    0.018
+	    ACTROWPOOL        0.003    0.011    0.284    0.776    0.003    0.020
+	  PCTREAD ~~
+	    ACTROWPOOL       -0.004    0.008   -0.507    0.612   -0.004   -0.035
+
+	Variances:
+	    ATP               0.001    0.001                      0.001    0.372
+	    MAXMPL            0.072    0.014                      0.072    0.781
+	    PK                0.251    0.001                      0.251    1.000
+	    NUMPROCESSORS     0.162    0.009                      0.162    1.000
+	    PCTREAD           0.101    0.017                      0.101    1.000
+	    ACTROWPOOL        0.140    0.008                      0.140    1.000
+
+	Defined parameters:
+	    INT_1            -0.002    0.001   -1.500    0.134   -0.002   -0.120
+
+	R-Square:
+
+	    ATP               0.628
+	    MAXMPL            0.219
 
 
 library(mediation)

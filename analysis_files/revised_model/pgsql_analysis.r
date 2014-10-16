@@ -13,6 +13,61 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 library(lavaan)
 thrashing_model <- '
      # mediator
+      ATP ~ a3*PK+a4*PCTUPDATE+a5*PCTREAD
+    # dependent variable
+      MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c4*PCTUPDATE + c5*PCTREAD + c6*PK
+    # interactions
+     INT_1 := a3*a4'
+fit <- sem(thrashing_model, data = x)
+summary(fit, standardized=TRUE, rsq=T) 
+
+	lavaan (0.5-17) converged normally after  24 iterations
+
+	  Number of observations                           191
+
+	  Estimator                                         ML
+	  Minimum Function Test Statistic                1.403
+	  Degrees of freedom                                 1
+	  P-value (Chi-square)                           0.236
+
+	Parameter estimates:
+
+	  Information                                 Expected
+	  Standard Errors                             Standard
+
+		           Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+	Regressions:
+	  ATP ~
+	    PK       (a3)    -0.150    0.027   -5.515    0.000   -0.150   -0.283
+	    PCTUPDAT (a4)    -0.363    0.040   -9.025    0.000   -0.363   -0.515
+	    PCTREAD  (a5)     0.165    0.044    3.780    0.000    0.165    0.216
+	  MAXMPL ~
+	    ATP      (b1)     0.269    0.115    2.333    0.020    0.269    0.170
+	    NUMPROCE (c2)    -0.224    0.054   -4.129    0.000   -0.224   -0.213
+	    PCTUPDAT (c4)    -0.229    0.077   -2.988    0.003   -0.229   -0.205
+	    PCTREAD  (c5)    -0.161    0.072   -2.231    0.026   -0.161   -0.133
+	    PK       (c6)     0.564    0.047   12.055    0.000    0.564    0.669
+
+	Variances:
+	    ATP               0.035    0.004                      0.035    0.502
+	    MAXMPL            0.089    0.009                      0.089    0.507
+
+	Defined parameters:
+	    INT_1             0.054    0.011    4.765    0.000    0.054    0.146
+
+	R-Square:
+
+	    ATP               0.498
+	    MAXMPL            0.493
+
+
+
+
+
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
       ATP ~ a1*NUMPROCESSORS+a2*ACTROWPOOL+a3*PK+a4*PCTUPDATE+a5*PCTREAD
     # dependent variable
       MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c3*ACTROWPOOL + c4*PCTUPDATE + c5*PCTREAD + c6*PK

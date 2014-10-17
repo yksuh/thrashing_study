@@ -1,0 +1,248 @@
+# plotting
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+
+pdf("pk_atpt.pdf")
+plot(x$PK, x$ATP, col="black", main='Presence of Primary keys vs. ATP Time (raw data)', xlab='Presence of Primary Keys', ylab=expression('ATP Time (ms)'))
+dev.off()
+
+pdf("normalized_pk_atpt.pdf")
+plot(x$PK, x$ATP, col="black", main='Presence of Primary keys vs. ATP Time (standardized data)', xlab='Presence of Primary Keys', ylab=expression('ATP Time'))
+dev.off()
+
+pdf("np_atpt.pdf")
+plot(x$NUMPROCESSORS, x$ATP, col="black", main='# of Processors vs. ATP Time (raw data)', xlab='# of Processors', ylab=expression('ATP Time (ms)'))
+dev.off()
+
+pdf("normalized_np_atpt.pdf")
+plot(x$NUMPROCESSORS, x$ATP, col="black", main='# of Processors vs. ATP Time (standardized data)', xlab='# of Processors', ylab=expression('ATP Time'))
+dev.off()
+
+x<- subset(x, x$PCTUPDATE != 0)
+pdf("pu_atpt.pdf")
+plot(x$PCTUPDATE, x$ATP, xlim=c(0,max(x$PCTUPDATE)), col="black", main='Pct. of Rows from UPDATE vs. ATP Time (raw data)', xlab='Pct. of Rows from UPDATE', ylab=expression('ATP Time (ms)'))
+dev.off()
+
+x<- subset(x, x$PCTUPDATE != 0)
+pdf("normalized_pu_atpt.pdf")
+plot(x$PCTUPDATE, x$ATP, xlim=c(0,max(x$PCTUPDATE)), col="black", main='Pct. of Rows from UPDATE vs. ATP Time (standardized data)', xlab='Pct. of Rows from UPDATE', ylab=expression('ATP Time'))
+dev.off()
+
+
+x<- subset(x, x$PCTREAD != 0)
+pdf("ps_atpt.pdf")
+plot(x$PCTREAD, x$ATP, xlim=c(0,max(x$PCTREAD)), col="black", main='Pct. of Rows from SELECT vs. ATP Time (raw data)', xlab='Pct. of Rows from SELECT', ylab=expression('ATP Time (ms)'))
+dev.off()
+
+x<- subset(x, x$PCTREAD != 0)
+pdf("normalized_ps_atpt.pdf")
+plot(x$PCTREAD, x$ATP, xlim=c(0,max(x$PCTREAD)), col="black", main='Pct. of Rows from SELECT vs. ATP Time (standardized data)', xlab='Pct. of Rows from SELECT', ylab=expression('ATP Time'))
+dev.off()
+
+------
+
+pdf("arp_mplc.pdf")
+plot(x$ACTROWPOOL*100, x$ATP, col="black", main='Active Row Pool vs. MPL Capability (raw data)', xlab='Active Row Pool (%)', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("np_mplc.pdf")
+plot(x$NUMPROCESSORS, x$ATP, col="black", main='# of Processors vs. MPL Capability (raw data)', xlab='# of Processors', ylab=expression('MPL Capability'))
+dev.off()
+
+x<- subset(x, x$PCTUPDATE != 0)
+pdf("pu_mplc.pdf")
+plot(x$PCTUPDATE, x$MAXMPL, col="black", main='Pct. of Rows from UPDATE vs. MPL Capability (raw data)', xlab='Percentage of Rows from UPDATE (%)', ylab=expression('MPL Capability'))
+dev.off()
+
+x<- subset(x, x$PCTREAD != 0)
+pdf("ps_mplc.pdf")
+plot(x$PCTREAD, x$MAXMPL, col="black", main='Pct. of Rows from SELECT vs. MPL Capability (raw data)', xlab='Percentage of Rows from SELECT (%)', ylab=expression('MPL Capability'))
+dev.off()
+
+# Overall: 33.4% (close to suboptimal)
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+# ATP normalization
+# db2
+db2 <- subset(x, x$DBMS=='db2')
+db2$ATP = (db2$ATP-min(db2$ATP))/(max(db2$ATP)-min(db2$ATP))
+db2$MAXMPL = (db2$MAXMPL-min(db2$MAXMPL))/(max(db2$MAXMPL)-min(db2$MAXMPL))
+# oracle
+oracle <- subset(x, x$DBMS=='oracle')
+oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
+oracle$MAXMPL = (oracle$MAXMPL-min(oracle$MAXMPL))/(max(oracle$MAXMPL)-min(oracle$MAXMPL))
+# mysql
+mysql <- subset(x, x$DBMS=='mysql')
+mysql$ATP = (mysql$ATP-min(mysql$ATP))/(max(mysql$ATP)-min(pgsql$ATP))
+mysql$MAXMPL = (mysql$MAXMPL-min(mysql$MAXMPL))/(max(mysql$MAXMPL)-min(mysql$MAXMPL))
+# pgsql
+pgsql <- subset(x, x$DBMS=='pgsql')
+pgsql$ATP = (pgsql$ATP-min(pgsql$ATP))/(max(pgsql$ATP)-min(pgsql$ATP))
+pgsql$MAXMPL = (pgsql$MAXMPL-min(pgsql$MAXMPL))/(max(pgsql$MAXMPL)-min(pgsql$MAXMPL))
+# sqlserver
+sqlserver <- subset(x, x$DBMS=='sqlserver')
+sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
+sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
+# combine all
+x = rbind(db2,oracle,mysql,pgsql,sqlserver) 
+
+pdf("normalized_atpt_mplc.pdf")
+plot(x$ATP, x$MAXMPL, col="black", main='ATP time vs. MPL Capability (standardized data)', xlab='ATP time', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("normalized_arp_mplc.pdf")
+plot(x$ACTROWPOOL, x$MAXMPL, col="black", main='Active Row Pool vs. MPL Capability (standarized data)', xlab='Active Row Pool', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("normalized_np_mplc.pdf")
+plot(x$NUMPROCESSORS, x$MAXMPL, col="black", main='# of Processors vs. MPL Capability (standardized data)', xlab='# of Processors', ylab=expression('MPL Capability'))
+dev.off()
+
+x<- subset(x, x$PCTUPDATE != 0)
+pdf("normalized_pu_mplc.pdf")
+plot(x$PCTUPDATE, x$MAXMPL, col="black", main='Pct. of Rows from UPDATE vs. MPL Capability (standardized data)', xlab='Percentage of Rows from UPDATE', ylab=expression('MPL Capability'))
+dev.off()
+
+x<- subset(x, x$PCTREAD != 0)
+pdf("normalized_ps_mplc.pdf")
+plot(x$PCTREAD, x$MAXMPL, col="black", main='Pct. of Rows from SELECT vs. MPL Capability (standardized data)', xlab='Percentage of Rows from SELECT', ylab=expression('MPL Capability'))
+dev.off()
+
+
+pdf("normalized_pk_mplc.pdf")
+plot(x$PK, x$MAXMPL, col="black", main='Presence of primary keys vs. MPL Capability (standardized data)', xlab='Presence of Primary Keys', ylab=expression('MPL Capability'))
+dev.off()
+
+
+# plotting
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+pdf("atpt_mplc.pdf")
+plot(x$ATP, x$MAXMPL, col="black", main='ATP time vs. MPL Capability (raw data)', xlab='ATP time (msec)', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("arp_mplc.pdf")
+plot(x$ACTROWPOOL*100, x$MAXMPL, col="black", main='Active Row Pool vs. MPL Capability (raw data)', xlab='Active Row Pool (%)', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("np_mplc.pdf")
+plot(x$NUMPROCESSORS, x$MAXMPL, col="black", main='# of Processors vs. MPL Capability (raw data)', xlab='# of Processors', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("pu_mplc.pdf")
+plot(x$PCTUPDATE, x$MAXMPL, col="black", main='Pct. of Rows from UPDATE vs. MPL Capability (raw data)', xlab='Percentage of Rows from UPDATE (%)', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("ps_mplc.pdf")
+plot(x$PCTREAD*100, x$MAXMPL, col="black", main='Pct. of Rows from SELECT vs. MPL Capability (raw data)', xlab='Percentage of Rows from SELECT (%)', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("pk_mplc.pdf")
+plot(x$PK, x$MAXMPL, col="black", main='Presence of primary keys vs. MPL Capability (raw data)', xlab='Presence of Primary Keys', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("normalized_atpt_mplc.pdf")
+plot(x$ATP, x$MAXMPL, col="black", main='ATP time vs. MPL Capability (standardized data)', xlab='ATP time', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("normalized_arp_mplc.pdf")
+plot(x$ACTROWPOOL, x$MAXMPL, col="black", main='Active Row Pool vs. MPL Capability (standarized data)', xlab='Active Row Pool', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("normalized_np_mplc.pdf")
+plot(x$NUMPROCESSORS, x$MAXMPL, col="black", main='# of Processors vs. MPL Capability (standardized data)', xlab='# of Processors', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("normalized_pu_mplc.pdf")
+plot(x$PCTUPDATE, x$MAXMPL, col="black", main='Pct. of Rows from UPDATE vs. MPL Capability (standardized data)', xlab='Percentage of Rows from UPDATE', ylab=expression('MPL Capability'))
+dev.off()
+
+pdf("normalized_ps_mplc.pdf")
+plot(x$PCTREAD*100, x$MAXMPL, col="black", main='Pct. of Rows from SELECT vs. MPL Capability (standardized data)', xlab='Percentage of Rows from SELECT', ylab=expression('MPL Capability'))
+dev.off()
+
+
+pdf("normalized_pk_mplc.pdf")
+plot(x$PK, x$MAXMPL, col="black", main='Presence of primary keys vs. MPL Capability (standardized data)', xlab='Presence of Primary Keys', ylab=expression('MPL Capability'))
+dev.off()
+
+
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      #ATP ~ c6*NUMPROCESSORS+c5*PCTUPDATE+c4*PK
+    # dependent variable
+      MAXMPL ~ c1*PCTUPDATE
+    # interactions
+       #INT_1 := c5*c4
+     '
+fit <- sem(thrashing_model,  data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 
+
+
+x$ACTROWPOOL = (x$ACTROWPOOL-min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)-min(x$ACTROWPOOL))
+x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
+x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
+x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
+
+MAXMPL ~ b1*ATP + c3*ACTROWPOOL + c4*PCTUPDATE + c5*PCTREAD 
+b1*ATP + c4*PCTUPDATE + c5*PCTREAD  + 
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ b1*PK
+    # dependent variable
+     
+    # interactions
+     '
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T) 
+
+  MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c3*ACTROWPOOL + c4*PCTUPDATE + c5*PCTREAD + c6*PK
+
+dependant variable
+	DBMS
+		A variable(s): p < 0.05
+		A variable(s): p >= 0.05
+ATP	
+	Overall
+		
+ATP
+	db2
+		PCTUPDATE, PCTREAD, PK, NUMPROCESSORS
+		ACTROWPOOL
+	mysql
+		PK, ACTROWPOOL	
+		NUMPROCESSORS, PCTUPDATE, PCTREAD
+	oracle
+		PK, PCTUPDATE, PCTREAD
+		ACTROWPOOL, NUMPROCESSORS
+	sqlserver
+		NUMPROCESSORS,PCTUPDATE
+		PK, ACTROWPOOL, PCTREAD
+	pgsql
+		PCTUPDATE, PK, PCTREAD	
+		NUMPROCESSORS, ACTROWPOOL
+
+Common:PK
+ 
+Union: PCTUPDATE,  PCTREAD, NUMPROCESSORS, ACTROWPOOL, ATP, PK
+
+MAXMPL
+	db2
+		PCTUPDATE, PCTREAD, NUMPROCESSORS, ACTROWPOOL
+		PK, ATP
+	mysql
+		PCTUPDATE, PCTREAD, ACTROWPOOL, ATP
+		NUMPROCESSORS, PK
+	oracle
+		PCTUPDATE, NUMPROCESSORS
+		ATP, PCTREAD, ACTROWPOOL, PK
+	sqlserver
+		ATP, PCTUPDATE, NUMPROCESSORS
+		PCTREAD, ACTROWPOOL, PK		
+	pgsql
+		PK, NUMPROCESSORS,PCTUPDATE
+		ACTROWPOOL, PCTREAD, ATP
+
+Common:PCTUPDATE
+ 
+Union: PCTUPDATE,  PCTREAD, NUMPROCESSORS, ACTROWPOOL, ATP, PK

@@ -1,0 +1,83 @@
+***
+Mediation effects
+- db2: No significant mediation effect. A weak mediation effect is carried by PCTUPDATE or NUMPROCESSORS through ATP.
+- oracle: NUMPROCESSORS most strong. No significant mediation effect. Probably weak mediation through PCTUPDATE (highest).
+- mysql: NUMPROCESSORS no effect. PK most strong direct and indirect effects. ATP could have the most strong direct effect.
+- postgres:   NUMPROCESSORS has strong direct effect. PCTUPDATE most strong on mediation. NUMPROCESSORS has direct effect. 
+- sqlserver: NUMPROCESSORS most strong. PK didn't have much strength on thrashing. 
+
+- commercial DBMSes: number of processors or update
+- open-source DBMSes: Primary Key
+
+
+- high number of processors or high updates carries negative effect on DBMS thrashing, especially in commercial DBMSes. 
+ - In the meantime, PK didn't have much effect on DBMS thrashing.
+- without primary key DBMS thrashing will be likely to occur in open source DBMSes. In addition, high PCTUPDATE could be bad.
+ - In the meantime, the high number of processors  or high updates didn't have much effect on DBMS thrashing.
+
+- PCTUPDATE is common variable strongly affecting DBMS thrashing.
+
+- common
+med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+
+db2:
+	#med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTUPDATE + PK:PCTREAD + PK:PCTUPDATE, data = x)
+	med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PK:PCTUPDATE, data = x)
+	out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS + ACTROWPOOL + PCTUPDATE, data = x)
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", sims = 200)
+	sens.out <- medsens(med.out, effect.type = "indirect")
+	#> sens.out$r.square.y
+	#[1] 0.2016719
+	#> sens.out$r.square.m
+	#[1] 0.130046
+	> sens.out$r.square.y
+	[1] 0.2016719
+	> sens.out$r.square.m
+	[1] 0.1221305
+
+oracle:
+	#med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTUPDATE + PK:PCTREAD + PK:PCTUPDATE, data = x)
+	med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PK:PCTUPDATE, data = x)
+	out.fit <- lm(MAXMPL ~ ATP + PCTUPDATE + NUMPROCESSORS, data = x)
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", robustSE=TRUE)
+	sens.out <- medsens(med.out, effect.type = "indirect")
+	> sens.out$r.square.y
+	[1] 0.2372113
+	> sens.out$r.square.m
+	[1] 0.415412
+	#> sens.out$r.square.y
+	#[1] 0.2372113
+	#> sens.out$r.square.m
+	#[1] 0.4414493
+
+mysql:
+	med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PK:PCTUPDATE, data = x)
+	out.fit <- lm(MAXMPL ~ PCTUPDATE + ATP + PK, data = x)
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
+	sens.out <- medsens(med.out, effect.type = "indirect")
+	> sens.out$r.square.y
+	[1] 0.4357475
+	> sens.out$r.square.m
+	[1] 0.7228946
+
+postgres:
+	med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+	out.fit <- lm(formula = MAXMPL ~ PK + PCTUPDATE + NUMPROCESSORS + ATP + PCTREAD, data = x)
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE")  
+	sens.out <- medsens(med.out, effect.type = "indirect")
+	> sens.out$r.square.y
+	[1] 0.4953713
+	> sens.out$r.square.m
+	[1] 0.5333131
+
+sqlserver:
+	med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+	out.fit <- lm(formula = MAXMPL ~ PCTUPDATE + NUMPROCESSORS + ATP, data = x)
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE")
+	sens.out <- medsens(med.out, effect.type = "indirect")
+	> sens.out$r.square.y
+	[1] 0.2662033
+	> sens.out$r.square.m
+	[1] 0.3307787

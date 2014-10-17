@@ -9,6 +9,19 @@ thrashing_model <- '
 fit <- sem(thrashing_model, data = x)
 summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
 
+pdf("pgsql_pk_atp_raw.pdf")
+plot(x$PK, x$ATP, col="black", main='PK vs. ATP time (raw data)', xlab='ATP time', ylab=expression('ATP time'))
+dev.off()
+
+pdf("pgsql_pk_atp_normal.pdf")
+plot(x$PK, x$ATP, col="black", main='PK vs. ATP time (raw data)', xlab='ATP time', ylab=expression('ATP time'))
+dev.off()
+
+
+
+pdf("test2.pdf")
+plot(x$ATP, x$MAXMPL, col="black", main='ATP time vs. MPL Capability (raw data)', xlab='ATP time', ylab=expression('MPL Capability'))
+dev.off()
 
 pdf("test2.pdf")
 plot(x$ATP, x$MAXMPL, col="black", main='ATP time vs. MPL Capability (raw data)', xlab='ATP time', ylab=expression('MPL Capability'))

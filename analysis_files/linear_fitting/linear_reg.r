@@ -29,7 +29,12 @@ x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+out.fit <- lm(MAXMPL ~ ATP + PK + PCTREAD, data = x)
+
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 out.fit <- lm(MAXMPL ~ ATP + PK, data = x)
+#med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = TRUE, sim = 50)
 med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = TRUE)
 sens.out <- medsens(med.out, effect.type = "indirect")
 summary(med.out)
@@ -139,6 +144,19 @@ summary(sens.out)
 sens.out$r.square.y
 [1] 0.02931289
 sens.out$r.square.m
+[1] 0.1047084
+
+plot(sens.out, sens.par = "rho", main = "ATP", ylim=c(-0.2, 0.2))
+plot(sens.out, sens.par = "R2", r.type = "total", sign.prod = "negative")
+
+> out.fit <- lm(MAXMPL ~ ATP + PK, data = x)
+> med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+> out.fit <- lm(MAXMPL ~ ATP + PK, data = x)
+> med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE=TRUE)
+> sens.out <- medsens(med.out, effect.type = "indirect")
+> sens.out$r.square.y
+[1] 0.02931289
+> sens.out$r.square.m
 [1] 0.1047084
 
 -----------
@@ -360,3 +378,48 @@ res <- multimed("MAXMPL", "ATP", data = x, treat = "PCTUPDATE", design = "single
 
 out.fit <- lm(MAXMPL ~ ATP + PCTUPDATE, data = x)
 
+### best fit for MAXMPL
+## forward
+out.fit  <- lm(MAXMPL ~ 1, data = x)
+out.fit <- step(out.fit, direction="forward", scope=( ~ ATP + NUMPROCESSORS + ACTROWPOOL + PCTUPDATE + PK + PCTREAD), data = x)
+summary(out.fit)
+out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS + PCTUPDATE + PK, data = x)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE", robustSE = TRUE)
+sens.out <- medsens(med.out, effect.type = "indirect")
+summary(med.out)
+summary(sens.out)
+sens.out$r.square.y
+sens.out$r.square.m
+
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+sens.out <- medsens(med.out, effect.type = "indirect")
+summary(sens.out)
+sens.out$r.square.y
+sens.out$r.square.m
+
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
+sens.out <- medsens(med.out, effect.type = "indirect")
+summary(sens.out)
+sens.out$r.square.y
+sens.out$r.square.m
+
+## backward
+out.fit <- lm(MAXMPL ~ ATP + PCTUPDATE + PK + NUMPROCESSORS, data = x)
+out.fit <- step(out.fit, direction="backward", data = x)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE")
+sens.out <- medsens(med.out, effect.type = "indirect")
+summary(sens.out)
+sens.out$r.square.y
+sens.out$r.square.m
+
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+sens.out <- medsens(med.out, effect.type = "indirect")
+summary(sens.out)
+sens.out$r.square.y
+sens.out$r.square.m
+
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
+sens.out <- medsens(med.out, effect.type = "indirect")
+summary(sens.out)
+sens.out$r.square.y
+sens.out$r.square.m

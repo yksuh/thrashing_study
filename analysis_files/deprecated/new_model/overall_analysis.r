@@ -24,9 +24,33 @@ sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMP
 # combine all
 x = rbind(db2,oracle,mysql,pgsql,sqlserver) 
 x$ACTROWPOOL = (x$ACTROWPOOL-min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)-min(x$ACTROWPOOL))
-x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
+#x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
 x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
+
+> cor(x$NUMPROCESSORS, x$ATP)
+[1] -0.122788
+> cor(x$PCTREAD, x$ATP)
+[1] 0.08402555
+> cor(x$PCTUPDATE, x$ATP)
+[1] -0.145902
+> cor(x$PK, x$ATP)
+[1] -0.2029692
+> cor(x$ACTROWPOOL, x$ATP)
+[1] 0.07663052
+
+> cor(x$ATP, x$MAXMPL)
+[1] -0.07951011
+> cor(x$NUMPROCESSORS, x$MAXMPL)
+[1] -0.02375046
+> cor(x$PCTREAD, x$MAXMPL)
+[1] -0.059297
+> cor(x$PCTUPDATE, x$MAXMPL)
+[1] 0.01913866
+> cor(x$ACTROWPOOL, x$MAXMPL)
+[1] -0.0620389
+> cor(x$PK, x$MAXMPL)
+[1] 0.1646099
 
 ### mediation test
 ### regression on ATP 

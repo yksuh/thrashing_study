@@ -28,6 +28,39 @@ x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
 x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
 
+> cor(x$NUMPROCESSORS, x$ATP)
+[1] -0.122788
+> cor(x$PCTREAD, x$ATP)
+[1] 0.08402555
+> cor(x$PCTUPDATE, x$ATP)
+[1] -0.145902
+> cor(x$PK, x$ATP)
+[1] -0.2029692
+> cor(x$ACTROWPOOL, x$ATP)
+[1] 0.07663052
+
+> cor(x$ATP, x$MAXMPL)
+[1] -0.07951011
+> cor(x$NUMPROCESSORS, x$MAXMPL)
+[1] -0.02375046
+> cor(x$PCTREAD, x$MAXMPL)
+[1] -0.059297
+> cor(x$PCTUPDATE, x$MAXMPL)
+[1] 0.01913866
+> cor(x$ACTROWPOOL, x$MAXMPL)
+[1] -0.0620389
+> cor(x$PK, x$MAXMPL)
+[1] 0.1646099
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE, data = x)
+summary(med.fit)
+out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
+summary(out.fit)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", robustSE = TRUE, conf.level=.1, sims = 100)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = TRUE, conf.level = .1, sims = 100)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE", robustSE = TRUE, conf.level = .1, sims = 100)
+sens.out <- medsens(med.out, effect.type = "both")
+
 > med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PK:PCTUPDATE, data = x)
 > summary(med.fit)
 
@@ -241,7 +274,7 @@ Mediation Sensitivity Analysis for Average Causal Mediation Effect
 > sens.out$r.square.m
 [1] 0.1047084
 ############################################################################################################################
-
+> library(mediation)
 > med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE", robustSE = TRUE)
 > summary(med.out)
 
@@ -261,4 +294,4 @@ Sample Size Used: 1004
 Simulations: 1000 
 
 
-
+> test.modmed(med.out, covariates.1 = list (x$PK == 1), covariates.2 = list (x$PK == 0), data = x)

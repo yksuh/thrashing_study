@@ -23,8 +23,8 @@ sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlse
 sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
 # combine all
 x = rbind(db2,oracle,mysql,pgsql,sqlserver) 
-x$ATP = (x$ATP-min(x$ATP))/(max(x$ATP)-min(x$ATP))
-x$MAXMPL = (x$MAXMPL-min(x$MAXMPL))/(max(x$MAXMPL)-min(x$MAXMPL))
+#x$ATP = (x$ATP-min(x$ATP))/(max(x$ATP)-min(x$ATP))
+#x$MAXMPL = (x$MAXMPL-min(x$MAXMPL))/(max(x$MAXMPL)-min(x$MAXMPL))
 x$ACTROWPOOL = (x$ACTROWPOOL-min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)-min(x$ACTROWPOOL))
 x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
 x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
@@ -33,45 +33,42 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 library(lavaan)
 thrashing_model <- '
      # mediator
-      ATP ~ a1*NUMPROCESSORS+a2*ACTROWPOOL+a3*PK+a4*PCTUPDATE
+      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
     # dependent variable
-      MAXMPL ~ b1*ATP
+      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c3*PK+c4*PCTUPDATE+c5*PCTREAD
    # interactions
        INT_1 := a3*a4
-       INT_2 := a1*a2
      '
 fit <- sem(thrashing_model, estimator="DWLS", data = x)
 summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
 
-lavaan (0.5-17) converged normally after  56 iterations
-
   Number of observations                          1004
 
   Estimator                                       DWLS
-  Minimum Function Test Statistic               26.022
-  Degrees of freedom                                 4
-  P-value (Chi-square)                           0.000
+  Minimum Function Test Statistic                5.272
+  Degrees of freedom                                 2
+  P-value (Chi-square)                           0.072
 
 Model test baseline model:
 
-  Minimum Function Test Statistic              127.818
-  Degrees of freedom                                 9
+  Minimum Function Test Statistic              137.152
+  Degrees of freedom                                11
   P-value                                        0.000
 
 User model versus baseline model:
 
-  Comparative Fit Index (CFI)                    0.815
-  Tucker-Lewis Index (TLI)                       0.583
+  Comparative Fit Index (CFI)                    0.974
+  Tucker-Lewis Index (TLI)                       0.857
 
 Root Mean Square Error of Approximation:
 
-  RMSEA                                          0.074
-  90 Percent Confidence Interval          0.049  0.102
-  P-value RMSEA <= 0.05                          0.059
+  RMSEA                                          0.040
+  90 Percent Confidence Interval          0.000  0.084
+  P-value RMSEA <= 0.05                          0.568
 
 Standardized Root Mean Square Residual:
 
-  SRMR                                           0.035
+  SRMR                                           0.014
 
 Parameter estimates:
 
@@ -81,39 +78,49 @@ Parameter estimates:
                    Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
 Regressions:
   ATP ~
-    NUMPROCE (a1)    -0.076    0.021   -3.623    0.000   -0.076   -0.114
-    ACTROWPO (a2)     0.073    0.030    2.404    0.016    0.073    0.079
-    PK       (a3)    -0.111    0.016   -6.808    0.000   -0.111   -0.213
-    PCTUPDAT (a4)    -0.101    0.023   -4.394    0.000   -0.101   -0.144
+    NUMPROCE (a1)    -0.079    0.021   -3.788    0.000   -0.079   -0.119
+    PK       (a3)    -0.105    0.016   -6.392    0.000   -0.105   -0.200
+    PCTUPDAT (a4)    -0.107    0.021   -4.994    0.000   -0.107   -0.152
   MAXMPL ~
-    ATP      (b1)    -0.161    0.043   -3.728    0.000   -0.161   -0.109
+    ATP      (b1)    -0.074    0.050   -1.484    0.138   -0.074   -0.051
+    NUMPROCE (c1)    -0.033    0.033   -1.014    0.311   -0.033   -0.034
+    ACTROWPO (c2)    -0.061    0.033   -1.822    0.068   -0.061   -0.059
+    PK       (c3)     0.118    0.026    4.595    0.000    0.118    0.152
+    PCTUPDAT (c4)    -0.017    0.046   -0.384    0.701   -0.017   -0.017
+    PCTREAD  (c5)    -0.070    0.053   -1.323    0.186   -0.070   -0.059
 
 Covariances:
   NUMPROCESSORS ~~
-    ACTROWPOOL       -0.001    0.003   -0.203    0.839   -0.001   -0.006
-    PK                0.006    0.006    0.912    0.362    0.006    0.029
-    PCTUPDATE        -0.001    0.005   -0.223    0.823   -0.001   -0.007
-  ACTROWPOOL ~~
-    PK               -0.002    0.004   -0.371    0.711   -0.002   -0.012
-    PCTUPDATE        -0.001    0.003   -0.216    0.829   -0.001   -0.007
+    PK                0.006    0.006    0.901    0.368    0.006    0.028
+    PCTUPDATE        -0.001    0.005   -0.254    0.799   -0.001   -0.008
+    ACTROWPOOL       -0.002    0.005   -0.462    0.644   -0.002   -0.014
+    PCTREAD           0.003    0.004    0.783    0.434    0.003    0.025
   PK ~~
-    PCTUPDATE         0.003    0.006    0.431    0.667    0.003    0.014
+    PCTUPDATE         0.002    0.006    0.376    0.707    0.002    0.012
+    ACTROWPOOL       -0.005    0.006   -0.816    0.415   -0.005   -0.025
+    PCTREAD          -0.004    0.005   -0.803    0.422   -0.004   -0.025
+  PCTUPDATE ~~
+    ACTROWPOOL       -0.002    0.004   -0.549    0.583   -0.002   -0.017
+    PCTREAD          -0.052    0.003  -14.996    0.000   -0.052   -0.429
+  ACTROWPOOL ~~
+    PCTREAD          -0.001    0.004   -0.205    0.837   -0.001   -0.006
 
 Variances:
-    ATP               0.062    0.004                      0.062    0.912
-    MAXMPL            0.147    0.004                      0.147    0.988
+    ATP               0.063    0.004                      0.063    0.921
+    MAXMPL            0.143    0.004                      0.143    0.963
     NUMPROCESSORS     0.154    0.004                      0.154    1.000
-    ACTROWPOOL        0.079    0.002                      0.079    1.000
     PK                0.250    0.001                      0.250    1.000
     PCTUPDATE         0.140    0.004                      0.140    1.000
+    ACTROWPOOL        0.140    0.004                      0.140    1.000
+    PCTREAD           0.104    0.008                      0.104    1.000
 
 Defined parameters:
-    INT_1             0.011    0.003    3.689    0.000    0.011    0.031
+    INT_1             0.011    0.003    3.944    0.000    0.011    0.030
 
 R-Square:
 
-    ATP               0.088
-    MAXMPL            0.012
+    ATP               0.079
+    MAXMPL            0.037
 
 
 

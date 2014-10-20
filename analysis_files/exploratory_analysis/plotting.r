@@ -1,14 +1,3 @@
-library(lavaan)
-thrashing_model <- '
-     # mediator
-     # ATP ~ a1*NUMPROCESSORS+a2*ACTROWPOOL+a3*PK+a4*PCTUPDATE+a5*PCTREAD
-    # dependent variable
-      ATP ~ c2*PK
-    # interactions
-     '
-fit <- sem(thrashing_model, data = x)
-summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
-
 # Overall: 33.4% (close to suboptimal)
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 
@@ -25,11 +14,11 @@ plot(x$NUMPROCESSORS, x$ATP, col="black", main='# of Procs (raw) vs. ATP time (r
 dev.off()
 
 pdf("raw_pk_atp.pdf")
-plot(x$PK, x$ATP, col="black", main='Primary Key vs. ATP time (raw)', xlab='Primary Key Presence', ylab=expression('ATP time (ms)'))
+plot(x$PK, x$ATP, col="black", main='Primary Key (raw) vs. ATP time (raw)', xlab='Primary Key Presence', ylab=expression('ATP time (ms)'))
 dev.off()
 
 pdf("raw_pk_mpl.pdf")
-plot(x$PK, x$MAXMPL, col="black", main='Primary Key vs. MPL Capability (raw)', xlab='Primary Key Presence', ylab=expression('MPL Capability'))
+plot(x$PK, x$MAXMPL, col="black", main='Primary Key (raw) vs. MPL Capability (raw)', xlab='Primary Key Presence', ylab=expression('MPL Capability'))
 dev.off()
 
 # db2
@@ -68,11 +57,11 @@ plot(x$NUMPROCESSORS, x$ATP, col="black", main='# of Procs (scaled) vs. ATP time
 dev.off()
 
 pdf("feature_scaled_pk_atp.pdf")
-plot(x$PK, x$ATP, col="black", main='PK (scaled) vs. ATP time (scaled)', xlab='Primary Key Presence', ylab=expression('ATP time'))
+plot(x$PK, x$ATP, col="black", main='Primary Key (scaled) vs. ATP time (scaled)', xlab='Primary Key Presence', ylab=expression('ATP time'))
 dev.off()
 
 pdf("feature_scaled_pk_maxmpl.pdf")
-plot(x$PK, x$MAXMPL, col="black", main='PK (scaled) vs. MPL Capability (scaled)', xlab='Primary Key Presence', ylab=expression('ATP time'))
+plot(x$PK, x$MAXMPL, col="black", main='Primary Key (scaled) vs. MPL Capability (scaled)', xlab='Primary Key Presence', ylab=expression('MPL Capability'))
 dev.off()
 
 # Overall

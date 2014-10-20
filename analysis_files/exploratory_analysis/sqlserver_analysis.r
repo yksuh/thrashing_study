@@ -9,6 +9,28 @@ x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
 x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
 
+y <- subset(x, x$PK == 0)
+cor(y$PCTUPDATE, y$MAXMPL)
+y <- subset(x, x$PK == 1)
+cor(y$PCTUPDATE, y$MAXMPL)
+y <- subset(x, x$PK == 0)
+cor(y$PCTUPDATE, y$ATP)
+y <- subset(x, x$PK == 1)
+cor(y$PCTUPDATE, y$ATP)
+
+> y <- subset(x, x$PK == 0)
+> cor(y$PCTUPDATE, y$MAXMPL)
+[1] -0.1330634
+> y <- subset(x, x$PK == 1)
+> cor(y$PCTUPDATE, y$MAXMPL)
+[1] -0.2025411
+> y <- subset(x, x$PK == 0)
+> cor(y$PCTUPDATE, y$ATP)
+[1] 0.1795936
+> y <- subset(x, x$PK == 1)
+> cor(y$PCTUPDATE, y$ATP)
+[1] 0.1472567
+
 med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE  + PK + PK:PCTUPDATE, data = x)
 summary(med.fit)
 

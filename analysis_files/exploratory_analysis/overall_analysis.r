@@ -52,12 +52,27 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 [1] -0.0620389
 > cor(x$PK, x$MAXMPL)
 [1] 0.1646099
+> cor(y$PCTUPDATE, y$MAXMPL)
+[1] 0.1510572
+
+> y <- subset(x, x$PK == 0)
+> cor(y$PCTUPDATE, y$MAXMPL)
+[1] 0.1510572
+> y <- subset(x, x$PK == 1)
+> cor(y$PCTUPDATE, y$MAXMPL)
+[1] -0.1450092
+> y <- subset(x, x$PK == 0)
+> cor(y$PCTUPDATE, y$ATP)
+[1] -0.274344
+> y <- subset(x, x$PK == 1)
+> cor(y$PCTUPDATE, y$ATP)
+[1] 0.02332855
 
 <<<<<<< Updated upstream
 =======
 ###### alternative
 
-med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE + PK, data = x)
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PCTUPDATE:PK, data = x)
 summary(med.fit)
 out.fit <- lm(MAXMPL ~ PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS + PCTUPDATE, data = x)
 summary(out.fit)
@@ -73,18 +88,10 @@ thrashing_model <- '
 fit <- sem(thrashing_model, estimator="DWLS", data = x)
 summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
 
-db2: 8.6/19.9
-ss: 33.1/26.8
-pgsql: 95.6 / 57.5
-mysql: 49.7 / 32.4
-oracle: 29.0 / 23.8
-
-avg: 43.2 / 32.04
-overall: 7.28 / 0.86
 
 ##### expected ...
 
-med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE, data = x)
+med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 summary(med.fit)
 out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
 summary(out.fit)
@@ -326,5 +333,105 @@ Sample Size Used: 1004
 
 Simulations: 1000 
 
+y <- subset(x, x$PK == 0)
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE, data = y)
+summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE, data = y)
+
+	Residuals:
+	    Min      1Q  Median      3Q     Max 
+	-0.3158 -0.2056 -0.1011  0.2409  0.8371 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.31606    0.02025  15.605  < 2e-16 ***
+	NUMPROCESSORS -0.07346    0.03029  -2.425   0.0156 *  
+	PCTUPDATE     -0.20429    0.03131  -6.525 1.62e-10 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2685 on 520 degrees of freedom
+	Multiple R-squared:  0.08561,	Adjusted R-squared:  0.08209 
+	F-statistic: 24.34 on 2 and 520 DF,  p-value: 7.846e-11
+
+out.fit <- lm(MAXMPL ~ PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS + PCTUPDATE, data = y)
+summary(out.fit)
+
+	Call:
+	lm(formula = MAXMPL ~ PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS + 
+	    PCTUPDATE, data = y)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.70199 -0.40446 -0.00471  0.38930  0.57964 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.56637    0.04515  12.545   <2e-16 ***
+	PCTREAD       -0.09485    0.05800  -1.635   0.1026    
+	ACTROWPOOL    -0.04236    0.04629  -0.915   0.3606    
+	ATP           -0.03914    0.06452  -0.607   0.5443    
+	NUMPROCESSORS  0.02007    0.04478   0.448   0.6542    
+	PCTUPDATE      0.11603    0.05247   2.211   0.0275 *  
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.3944 on 517 degrees of freedom
+	Multiple R-squared:  0.03086,	Adjusted R-squared:  0.02148 
+	F-statistic: 3.292 on 5 and 517 DF,  p-value: 0.006162
+
+
+y <- subset(x, x$PK == 1)
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE, data = y)
+summary(med.fit)
+
+Call:
+lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE, data = y)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.14557 -0.12085 -0.09503 -0.04984  0.90130 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    0.13358    0.01848   7.229 1.94e-12 ***
+NUMPROCESSORS -0.08140    0.02609  -3.120  0.00192 ** 
+PCTUPDATE      0.01236    0.02785   0.444  0.65737    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2276 on 478 degrees of freedom
+Multiple R-squared:  0.02049,	Adjusted R-squared:  0.01639 
+F-statistic: 4.999 on 2 and 478 DF,  p-value: 0.007104
+
+out.fit <- lm(MAXMPL ~ PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS + PCTUPDATE, data = y)
+summary(out.fit)
+
+Call:
+lm(formula = MAXMPL ~ PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS + 
+    PCTUPDATE, data = y)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.8286 -0.2515  0.1864  0.2900  0.4875 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    0.84099    0.03975  21.159  < 2e-16 ***
+PCTREAD       -0.03542    0.05681  -0.624  0.53323    
+ACTROWPOOL    -0.08032    0.04351  -1.846  0.06549 .  
+ATP           -0.01651    0.07191  -0.230  0.81849    
+NUMPROCESSORS -0.08390    0.04114  -2.039  0.04196 *  
+PCTUPDATE     -0.15491    0.04792  -3.233  0.00131 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3551 on 475 degrees of freedom
+Multiple R-squared:  0.0374,	Adjusted R-squared:  0.02727 
+F-statistic: 3.691 on 5 and 475 DF,  p-value: 0.002751
 
 > test.modmed(med.out, covariates.1 = list (x$PK == 1), covariates.2 = list (x$PK == 0), data = x)
+
+

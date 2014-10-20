@@ -53,6 +53,47 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 > cor(x$PK, x$MAXMPL)
 [1] 0.1646099
 
+<<<<<<< Updated upstream
+=======
+###### alternative
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE + PK, data = x)
+summary(med.fit)
+out.fit <- lm(MAXMPL ~ PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS + PCTUPDATE, data = x)
+summary(out.fit)
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
+    # dependent variable
+      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c4*PCTUPDATE+c5*PCTREAD
+   # interactions
+     '
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+db2: 8.6/19.9
+ss: 33.1/26.8
+pgsql: 95.6 / 57.5
+mysql: 49.7 / 32.4
+oracle: 29.0 / 23.8
+
+avg: 43.2 / 32.04
+overall: 7.28 / 0.86
+
+##### expected ...
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE, data = x)
+summary(med.fit)
+out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
+summary(out.fit)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", robustSE = TRUE, conf.level=.1, sims = 100)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = TRUE, conf.level = .1, sims = 100)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE", robustSE = TRUE, conf.level = .1, sims = 100)
+sens.out <- medsens(med.out, effect.type = "both")
+
+>>>>>>> Stashed changes
 > med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PK:PCTUPDATE, data = x)
 > summary(med.fit)
 

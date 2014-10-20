@@ -18,6 +18,93 @@ thrashing_model <- '
    # interactions
        INT_1 := a3*a4
      '
+fit <- sem(thrashing_model, estimator="ML", data = x)
+#fit <- sem(thrashing_model, data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+lavaan (0.5-17) converged normally after  24 iterations
+
+  Number of observations                           199
+
+  Estimator                                         ML
+  Minimum Function Test Statistic                5.788
+  Degrees of freedom                                 2
+  P-value (Chi-square)                           0.055
+
+Model test baseline model:
+
+  Minimum Function Test Statistic              122.450
+  Degrees of freedom                                11
+  P-value                                        0.000
+
+User model versus baseline model:
+
+  Comparative Fit Index (CFI)                    0.966
+  Tucker-Lewis Index (TLI)                       0.813
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)               -418.763
+  Loglikelihood unrestricted model (H1)       -415.869
+
+  Number of free parameters                         11
+  Akaike (AIC)                                 859.526
+  Bayesian (BIC)                               895.753
+  Sample-size adjusted Bayesian (BIC)          860.904
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.098
+  90 Percent Confidence Interval          0.000  0.195
+  P-value RMSEA <= 0.05                          0.142
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.026
+
+Parameter estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+                   Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+Regressions:
+  ATP ~
+    NUMPROCE (a1)     0.053    0.024    2.263    0.024    0.053    0.137
+    PK       (a3)    -0.109    0.018   -5.931    0.000   -0.109   -0.360
+    PCTUPDAT (a4)    -0.148    0.024   -6.073    0.000   -0.148   -0.368
+  MAXMPL ~
+    ATP      (b1)    -0.383    0.207   -1.850    0.064   -0.383   -0.134
+    NUMPROCE (c1)    -0.461    0.070   -6.606    0.000   -0.461   -0.415
+    ACTROWPO (c2)     0.025    0.072    0.351    0.725    0.025    0.022
+    PK       (c3)     0.001    0.058    0.023    0.982    0.001    0.002
+    PCTUPDAT (c4)    -0.256    0.086   -2.987    0.003   -0.256   -0.223
+    PCTREAD  (c5)     0.004    0.089    0.043    0.966    0.004    0.003
+
+Variances:
+    ATP               0.017    0.002                      0.017    0.730
+    MAXMPL            0.143    0.014                      0.143    0.762
+
+Defined parameters:
+    INT_1             0.016    0.004    4.192    0.000    0.016    0.132
+
+R-Square:
+
+    ATP               0.270
+    MAXMPL            0.238
+
+
+#######
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
+    # dependent variable
+      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c3*PK+c4*PCTUPDATE+c5*PCTREAD
+   # interactions
+       INT_1 := a3*a4
+     '
 fit <- sem(thrashing_model, estimator="DWLS", data = x)
 summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
 

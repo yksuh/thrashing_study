@@ -1,3 +1,12 @@
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE, data = x)
+summary(med.fit)
+out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
+summary(out.fit)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", robustSE = TRUE, conf.level=.1, sims = 100)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = TRUE, conf.level = .1, sims = 100)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE", robustSE = TRUE, conf.level = .1, sims = 100)
+sens.out <- medsens(med.out, effect.type = "both")
+
 cor(x$NUMPROCESSORS, x$ATP)
 cor(x$PCTREAD, x$ATP)
 cor(x$PCTUPDATE, x$ATP)

@@ -1328,6 +1328,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					long elapsedTime = System.currentTimeMillis()- xactStartTime;
 					
 					if(!_clientRunStats[_clientNum].timeOut){
+						if(elapsedTime/1000 > batchRunTime) break;
 						_sumRunTime += elapsedTime;
 						// stmtRunTimeVec.add(stmtRunTimePerXactVec);
 						xactRunTimeVec.add(new Long(elapsedTime));

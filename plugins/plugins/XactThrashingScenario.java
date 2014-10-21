@@ -779,6 +779,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							//}
 						}else{
 							if(!_conn.isClosed()){ 
+								_conn.setAutoCommit(false);
 								_conn.commit();
 								if (_stmt != null) {
 //									long start		 = System.currentTimeMillis();
@@ -1191,6 +1192,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			try {
 				if (_conn != null && !_conn.isClosed()){
 					startTime = System.currentTimeMillis();
+					_conn.setAutoCommit(false);
 					_conn.commit();
 				}
 			} catch (SQLException e) {
@@ -2276,7 +2278,10 @@ Main._logger.outputDebug(batchSetQuery);
 			if(_conn != null){
 				long startCommit = System.currentTimeMillis();
 				try {
-					if(!_conn.isClosed()) _conn.commit();
+					if(!_conn.isClosed()) {
+						_conn.setAutoCommit(false);
+						_conn.commit();
+					}
 				} catch (SQLException e) {
 					commitTime = System.currentTimeMillis() - startCommit;
 					//if(_clientNum % 10 == 0)

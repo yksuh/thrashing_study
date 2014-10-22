@@ -132,6 +132,23 @@ summary(med.out)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME            -0.0272      -0.0799       0.0159    0.26
+	ADE              0.5690       0.4728       0.6686    0.00
+	Total Effect     0.5418       0.4477       0.6420    0.00
+	Prop. Mediated  -0.0475      -0.1535       0.0289    0.26
+
+	Sample Size Used: 191 
+
+
+	Simulations: 1000 
+
+----
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
 	ACME           -0.04048     -0.08516     -0.00114    0.04
 	ADE             0.56402      0.47539      0.65257    0.00
 	Total Effect    0.52353      0.44141      0.60700    0.00
@@ -144,6 +161,34 @@ summary(med.out)
 
 sens.out <- medsens(med.out, effect.type = "both")
 summary(sens.out)
+
+	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+	Sensitivity Region
+
+	     Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] 0.0 -0.0519      -0.1350       0.0312         0.00       0.0000
+	[2,] 0.1 -0.0084      -0.0904       0.0737         0.01       0.0026
+	[3,] 0.2  0.0365      -0.0463       0.1192         0.04       0.0104
+	[4,] 0.3  0.0832      -0.0023       0.1687         0.09       0.0235
+
+	Rho at which ACME = 0: 0.1
+	R^2_M*R^2_Y* at which ACME = 0: 0.01
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0026 
+
+
+	Mediation Sensitivity Analysis for Average Direct Effect
+
+	Sensitivity Region
+
+	     Rho   ADE 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] 0.9 0.081      -0.1187       0.2807         0.81       0.2112
+
+	Rho at which ADE = 0: 0.9
+	R^2_M*R^2_Y* at which ADE = 0: 0.81
+	R^2_M~R^2_Y~ at which ADE = 0: 0.2112 
+
+---
 	
 	Mediation Sensitivity Analysis for Average Causal Mediation Effect
 
@@ -169,6 +214,13 @@ summary(sens.out)
 	Rho at which ADE = 0: 0.9
 	R^2_M*R^2_Y* at which ADE = 0: 0.81
 	R^2_M~R^2_Y~ at which ADE = 0: 0.1897
+
+> sens.out$r.square.y
+[1] 0.4810706
+> sens.out$r.square.m
+[1] 0.4974394
+
+----
 
 > sens.out$r.square.y
 [1] 0.4985336

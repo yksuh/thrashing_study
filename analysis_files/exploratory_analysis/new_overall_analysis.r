@@ -4,6 +4,18 @@ x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 # db2
 db2 <- subset(x, x$DBMS=='db2')
 db2$ATP = (db2$ATP-min(db2$ATP))/(max(db2$ATP)-min(db2$ATP))
+db2$ATP[db2$ATP > 0.8 & db2$ATP <= 1] <- 5
+db2$ATP[db2$ATP > 0.6 & db2$ATP <= 0.8] <- 4
+db2$ATP[db2$ATP > 0.4 & db2$ATP <= 0.6] <- 3
+db2$ATP[db2$ATP > 0.2 & db2$ATP <= 0.4] <- 2
+db2$ATP[db2$ATP <= 0.2 ] <- 1
+db2$ATP = (db2$ATP-min(db2$ATP))/(max(db2$ATP)-min(db2$ATP))
+db2$MAXMPL = (db2$MAXMPL-min(db2$MAXMPL))/(max(db2$MAXMPL)-min(db2$MAXMPL))
+db2$MAXMPL[db2$MAXMPL == 1] <- 5
+db2$MAXMPL[db2$MAXMPL > 0.75 & db2$MAXMPL <= 1] <- 4
+db2$MAXMPL[db2$MAXMPL > 0.5 & db2$MAXMPL <= 0.75] <- 3
+db2$MAXMPL[db2$MAXMPL > 0.25 & db2$MAXMPL <= 0.50] <- 2
+db2$MAXMPL[db2$MAXMPL<=0.25] <- 1
 db2$MAXMPL = (db2$MAXMPL-min(db2$MAXMPL))/(max(db2$MAXMPL)-min(db2$MAXMPL))
 db2$ACTROWPOOL = (db2$ACTROWPOOL-min(db2$ACTROWPOOL))/(max(db2$ACTROWPOOL)-min(db2$ACTROWPOOL))
 db2$PCTREAD = (db2$PCTREAD-min(db2$PCTREAD))/(max(db2$PCTREAD)-min(db2$PCTREAD))
@@ -12,6 +24,18 @@ db2$NUMPROCESSORS = (db2$NUMPROCESSORS-min(db2$NUMPROCESSORS))/(max(db2$NUMPROCE
 # oracle
 oracle <- subset(x, x$DBMS=='oracle')
 oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
+oracle$ATP[oracle$ATP > 0.8 & oracle$ATP <= 1] <- 5
+oracle$ATP[oracle$ATP > 0.6 & oracle$ATP <= 0.8] <- 4
+oracle$ATP[oracle$ATP > 0.4 & oracle$ATP <= 0.6] <- 3
+oracle$ATP[oracle$ATP > 0.2 & oracle$ATP <= 0.4] <- 2
+oracle$ATP[oracle$ATP <= 0.2 ] <- 1
+oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
+oracle$MAXMPL = (oracle$MAXMPL-min(oracle$MAXMPL))/(max(oracle$MAXMPL)-min(oracle$MAXMPL))
+oracle$MAXMPL[oracle$MAXMPL == 1] <- 5
+oracle$MAXMPL[oracle$MAXMPL > 0.75 & oracle$MAXMPL <= 1] <- 4
+oracle$MAXMPL[oracle$MAXMPL > 0.5 & oracle$MAXMPL <= 0.75] <- 3
+oracle$MAXMPL[oracle$MAXMPL > 0.25 & oracle$MAXMPL <= 0.50] <- 2
+oracle$MAXMPL[oracle$MAXMPL<=0.25] <- 1
 oracle$MAXMPL = (oracle$MAXMPL-min(oracle$MAXMPL))/(max(oracle$MAXMPL)-min(oracle$MAXMPL))
 oracle$ACTROWPOOL = (oracle$ACTROWPOOL-min(oracle$ACTROWPOOL))/(max(oracle$ACTROWPOOL)-min(oracle$ACTROWPOOL))
 oracle$PCTREAD = (oracle$PCTREAD-min(oracle$PCTREAD))/(max(oracle$PCTREAD)-min(oracle$PCTREAD))
@@ -20,6 +44,18 @@ oracle$NUMPROCESSORS = (oracle$NUMPROCESSORS-min(oracle$NUMPROCESSORS))/(max(ora
 # mysql
 mysql <- subset(x, x$DBMS=='mysql')
 mysql$ATP = (mysql$ATP-min(mysql$ATP))/(max(mysql$ATP)-min(mysql$ATP))
+mysql$ATP[mysql$ATP > 0.8 & mysql$ATP <= 1] <- 5
+mysql$ATP[mysql$ATP > 0.6 & mysql$ATP <= 0.8] <- 4
+mysql$ATP[mysql$ATP > 0.4 & mysql$ATP <= 0.6] <- 3
+mysql$ATP[mysql$ATP > 0.2 & mysql$ATP <= 0.4] <- 2
+mysql$ATP[mysql$ATP <= 0.2 ] <- 1
+mysql$ATP = (mysql$ATP-min(mysql$ATP))/(max(mysql$ATP)-min(mysql$ATP))
+mysql$MAXMPL = (mysql$MAXMPL-min(mysql$MAXMPL))/(max(mysql$MAXMPL)-min(mysql$MAXMPL))
+mysql$MAXMPL[mysql$MAXMPL == 1] <- 5
+mysql$MAXMPL[mysql$MAXMPL > 0.75 & mysql$MAXMPL <= 1] <- 4
+mysql$MAXMPL[mysql$MAXMPL > 0.5 & mysql$MAXMPL <= 0.75] <- 3
+mysql$MAXMPL[mysql$MAXMPL > 0.25 & mysql$MAXMPL <= 0.50] <- 2
+mysql$MAXMPL[mysql$MAXMPL<=0.25] <- 1
 mysql$MAXMPL = (mysql$MAXMPL-min(mysql$MAXMPL))/(max(mysql$MAXMPL)-min(mysql$MAXMPL))
 mysql$ACTROWPOOL = (mysql$ACTROWPOOL-min(mysql$ACTROWPOOL))/(max(mysql$ACTROWPOOL)-min(mysql$ACTROWPOOL))
 mysql$PCTREAD = (mysql$PCTREAD-min(mysql$PCTREAD))/(max(mysql$PCTREAD)-min(mysql$PCTREAD))
@@ -28,6 +64,18 @@ mysql$NUMPROCESSORS = (mysql$NUMPROCESSORS-min(mysql$NUMPROCESSORS))/(max(mysql$
 # pgsql
 pgsql <- subset(x, x$DBMS=='pgsql')
 pgsql$ATP = (pgsql$ATP-min(pgsql$ATP))/(max(pgsql$ATP)-min(pgsql$ATP))
+pgsql$ATP[pgsql$ATP > 0.8 & pgsql$ATP <= 1] <- 5
+pgsql$ATP[pgsql$ATP > 0.6 & pgsql$ATP <= 0.8] <- 4
+pgsql$ATP[pgsql$ATP > 0.4 & pgsql$ATP <= 0.6] <- 3
+pgsql$ATP[pgsql$ATP > 0.2 & pgsql$ATP <= 0.4] <- 2
+pgsql$ATP[pgsql$ATP <= 0.2 ] <- 1
+pgsql$ATP = (pgsql$ATP-min(pgsql$ATP))/(max(pgsql$ATP)-min(pgsql$ATP))
+pgsql$MAXMPL = (pgsql$MAXMPL-min(pgsql$MAXMPL))/(max(pgsql$MAXMPL)-min(pgsql$MAXMPL))
+pgsql$MAXMPL[pgsql$MAXMPL == 1] <- 5
+pgsql$MAXMPL[pgsql$MAXMPL > 0.75 & pgsql$MAXMPL <= 1] <- 4
+pgsql$MAXMPL[pgsql$MAXMPL > 0.5 & pgsql$MAXMPL <= 0.75] <- 3
+pgsql$MAXMPL[pgsql$MAXMPL > 0.25 & pgsql$MAXMPL <= 0.50] <- 2
+pgsql$MAXMPL[pgsql$MAXMPL<=0.25] <- 1
 pgsql$MAXMPL = (pgsql$MAXMPL-min(pgsql$MAXMPL))/(max(pgsql$MAXMPL)-min(pgsql$MAXMPL))
 pgsql$ACTROWPOOL = (pgsql$ACTROWPOOL-min(pgsql$ACTROWPOOL))/(max(pgsql$ACTROWPOOL)-min(pgsql$ACTROWPOOL))
 pgsql$PCTREAD = (pgsql$PCTREAD-min(pgsql$PCTREAD))/(max(pgsql$PCTREAD)-min(pgsql$PCTREAD))
@@ -40,8 +88,24 @@ sqlserver$PCTREAD = (sqlserver$PCTREAD-min(sqlserver$PCTREAD))/(max(sqlserver$PC
 sqlserver$PCTUPDATE = (sqlserver$PCTUPDATE-min(sqlserver$PCTUPDATE))/(max(sqlserver$PCTUPDATE)-min(sqlserver$PCTUPDATE))
 sqlserver$NUMPROCESSORS = (sqlserver$NUMPROCESSORS-min(sqlserver$NUMPROCESSORS))/(max(sqlserver$NUMPROCESSORS)-min(sqlserver$NUMPROCESSORS))
 sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
+sqlserver$ATP[sqlserver$ATP > 0.8 & sqlserver$ATP <= 1] <- 5
+sqlserver$ATP[sqlserver$ATP > 0.6 & sqlserver$ATP <= 0.8] <- 4
+sqlserver$ATP[sqlserver$ATP > 0.4 & sqlserver$ATP <= 0.6] <- 3
+sqlserver$ATP[sqlserver$ATP > 0.2 & sqlserver$ATP <= 0.4] <- 2
+sqlserver$ATP[sqlserver$ATP <= 0.2 ] <- 1
+sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
+sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
+sqlserver$MAXMPL[sqlserver$MAXMPL == 1] <- 5
+sqlserver$MAXMPL[sqlserver$MAXMPL > 0.75 & sqlserver$MAXMPL <= 1] <- 4
+sqlserver$MAXMPL[sqlserver$MAXMPL > 0.5 & sqlserver$MAXMPL <= 0.75] <- 3
+sqlserver$MAXMPL[sqlserver$MAXMPL > 0.25 & sqlserver$MAXMPL <= 0.50] <- 2
+sqlserver$MAXMPL[sqlserver$MAXMPL<=0.25] <- 1
 sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
 x = rbind(db2,oracle,mysql,pgsql,sqlserver) 
+x$ACTROWPOOL = (x$ACTROWPOOL-min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)-min(x$ACTROWPOOL))
+x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
+x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
+x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
 
 > cor(x$NUMPROCESSORS, x$ATP)
 [1] -0.1262903
@@ -66,61 +130,6 @@ x = rbind(db2,oracle,mysql,pgsql,sqlserver)
 > cor(x$PK, x$MAXMPL)
 [1] 0.1547508
 
-----
-
-> cor(x$NUMPROCESSORS, x$ATP)
-[1] -0.122788
-> cor(x$PCTREAD, x$ATP)
-[1] 0.08402555
-> cor(x$PCTUPDATE, x$ATP)
-[1] -0.145902
-> cor(x$PK, x$ATP)
-[1] -0.2029692
-> cor(x$ACTROWPOOL, x$ATP)
-[1] 0.07663052
-
-> cor(x$ATP, x$MAXMPL)
-[1] -0.07951011
-> cor(x$NUMPROCESSORS, x$MAXMPL)
-[1] -0.02375046
-> cor(x$PCTREAD, x$MAXMPL)
-[1] -0.059297
-> cor(x$PCTUPDATE, x$MAXMPL)
-[1] 0.01913866
-> cor(x$ACTROWPOOL, x$MAXMPL)
-[1] -0.0620389
-> cor(x$PK, x$MAXMPL)
-[1] 0.1646099
-
-> cor(y$PCTUPDATE, y$MAXMPL)
-[1] 0.1510572
-
-> y <- subset(x, x$PK == 0)
-> cor(y$PCTUPDATE, y$MAXMPL)
-[1] 0.1510572
-> y <- subset(x, x$PK == 1)
-> cor(y$PCTUPDATE, y$MAXMPL)
-[1] -0.1450092
-> y <- subset(x, x$PK == 0)
-> cor(y$PCTUPDATE, y$ATP)
-[1] -0.274344
-> y <- subset(x, x$PK == 1)
-> cor(y$PCTUPDATE, y$ATP)
-[1] 0.02332855
-
-library(lavaan)
-thrashing_model <- '
-     # mediator
-      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
-    # dependent variable
-      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c4*PCTUPDATE+c5*PCTREAD
-   # interactions
-     '
-fit <- sem(thrashing_model, estimator="DWLS", data = x)
-summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
-
-
-##### expected ...
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 summary(med.fit)
 
@@ -146,7 +155,7 @@ summary(med.fit)
 	Multiple R-squared:  0.08805,	Adjusted R-squared:  0.0844 
 	F-statistic: 24.11 on 4 and 999 DF,  p-value: < 2.2e-16
 
-----
+	-----
 
 	Call:
 	lm(formula = ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, 
@@ -169,6 +178,7 @@ summary(med.fit)
 	Residual standard error: 0.2497 on 999 degrees of freedom
 	Multiple R-squared:  0.09942,	Adjusted R-squared:  0.09581 
 	F-statistic: 27.57 on 4 and 999 DF,  p-value: < 2.2e-16
+
 
 out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
 summary(out.fit)
@@ -197,7 +207,7 @@ summary(out.fit)
 	Multiple R-squared:  0.03472,	Adjusted R-squared:  0.02892 
 	F-statistic: 5.978 on 6 and 997 DF,  p-value: 3.759e-06
 
------
+	-----
 
 	Call:
 	lm(formula = MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + 
@@ -228,8 +238,27 @@ med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = 
 med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE", robustSE = TRUE, conf.level = .1, sims = 100)
 sens.out <- medsens(med.out, effect.type = "both")
 
-> med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", robustSE = TRUE, conf.level=.1, sims = 100)
+> med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", robustSE = TRUE)
 > summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME            0.00854      0.00106      0.01852    0.02
+	ADE            -0.01067     -0.07685      0.05372    0.74
+	Total Effect   -0.00213     -0.06775      0.06101    0.94
+	Prop. Mediated -0.06342     -3.56913      4.56808    0.95
+
+	Sample Size Used: 1004 
+
+
+	Simulations: 1000 
+
+----
+	> med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS", robustSE = TRUE, conf.level=.1, sims = 100)
+	> summary(med.out)
 
 	Causal Mediation Analysis 
 
@@ -246,7 +275,7 @@ sens.out <- medsens(med.out, effect.type = "both")
 
 	Simulations: 100 
 
-
+sens.out <- medsens(med.out, effect.type = "both")
 ### conflicting mediation effects made by PK (positive) and NUMPROCESSORS (negative) on DBMS thrashing
 ### no mediation looks happening.
 ### If we gather data, direct effects from PK or NUMPROCESSORS are too strong, the indirect effects through ATP time seem hidden. 
@@ -254,6 +283,41 @@ sens.out <- medsens(med.out, effect.type = "both")
 
 > sens.out <- medsens(med.out, effect.type = "both")
 > summary(sens.out)
+
+	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+	Sensitivity Region
+
+	      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] -0.1 -0.0044      -0.0125       0.0037         0.01       0.0088
+	[2,]  0.0  0.0087      -0.0001       0.0175         0.00       0.0000
+
+	Rho at which ACME = 0: -0.1
+	R^2_M*R^2_Y* at which ACME = 0: 0.01
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0088 
+
+
+	Mediation Sensitivity Analysis for Average Direct Effect
+
+	Sensitivity Region
+
+	       Rho     ADE 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	 [1,] -0.5  0.0652      -0.0096       0.1400         0.25       0.2201
+	 [2,] -0.4  0.0464      -0.0249       0.1178         0.16       0.1408
+	 [3,] -0.3  0.0301      -0.0390       0.0993         0.09       0.0792
+	 [4,] -0.2  0.0154      -0.0524       0.0833         0.04       0.0352
+	 [5,] -0.1  0.0017      -0.0656       0.0689         0.01       0.0088
+	 [6,]  0.0 -0.0116      -0.0789       0.0556         0.00       0.0000
+	 [7,]  0.1 -0.0249      -0.0927       0.0430         0.01       0.0088
+	 [8,]  0.2 -0.0385      -0.1075       0.0305         0.04       0.0352
+	 [9,]  0.3 -0.0530      -0.1239       0.0180         0.09       0.0792
+	[10,]  0.4 -0.0689      -0.1426       0.0048         0.16       0.1408
+
+	Rho at which ADE = 0: -0.1
+	R^2_M*R^2_Y* at which ADE = 0: 0.01
+	R^2_M~R^2_Y~ at which ADE = 0: 0.0088 
+
+-------------------------------------------------------
 
 Mediation Sensitivity Analysis for Average Causal Mediation Effect
 
@@ -287,15 +351,73 @@ Mediation Sensitivity Analysis for Average Causal Mediation Effect
 	R^2_M*R^2_Y* at which ADE = 0: 0.09
 	R^2_M~R^2_Y~ at which ADE = 0: 0.0779 
 
+------
 > sens.out$r.square.y
-[1] 0.03378934
+[1] 0.0347248
 > sens.out$r.square.m
-[1] 0.1047084
+[1] 0.0880479
 
-> sens.out$r.square.m
-[1] 0.09941911
+-----
+
 > sens.out$r.square.y
-[1] 0.03378934
+[1] 0.03652878
+> sens.out$r.square.m
+[1] 0.09941995
+
+----
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = TRUE)
+summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME            0.01216      0.00125      0.02491    0.03
+	ADE             0.11808      0.06184      0.17516    0.00
+	Total Effect    0.13024      0.07633      0.18473    0.00
+	Prop. Mediated  0.09120      0.00957      0.21887    0.03
+
+	Sample Size Used: 1004 
+
+
+	Simulations: 1000 
+
+sens.out <- medsens(med.out, effect.type = "both")
+summary(sens.out)
+
+	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+	Sensitivity Region
+
+	      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] -0.1 -0.0093      -0.0261       0.0075         0.01       0.0088
+
+	Rho at which ACME = 0: -0.1
+	R^2_M*R^2_Y* at which ACME = 0: 0.01
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0088 
+
+
+	Mediation Sensitivity Analysis for Average Direct Effect
+
+	Sensitivity Region
+
+	     Rho     ADE 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] 0.4  0.0390      -0.0184       0.0963         0.16       0.1408
+	[2,] 0.5  0.0137      -0.0468       0.0741         0.25       0.2201
+	[3,] 0.6 -0.0173      -0.0824       0.0478         0.36       0.3169
+	[4,] 0.7 -0.0587      -0.1311       0.0138         0.49       0.4313
+
+	Rho at which ADE = 0: 0.5
+	R^2_M*R^2_Y* at which ADE = 0: 0.25
+	R^2_M~R^2_Y~ at which ADE = 0: 0.2201 
+
+>  sens.out$r.square.y
+[1] 0.0347248
+>  sens.out$r.square.m
+[1] 0.0880479
+
+----
 
 > med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = TRUE, conf.level = .1, sims = 100)
 > summary(med.out)
@@ -336,59 +458,65 @@ Mediation Sensitivity Analysis for Average Causal Mediation Effect
 > sens.out$r.square.m
 [1] 0.1047084
 
-############################################################################################################################
-> med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", robustSE = TRUE)
+------
+
+> med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE", robustSE = TRUE)
 > summary(med.out)
 
 	Causal Mediation Analysis 
 
 	Quasi-Bayesian Confidence Intervals
 
-		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME            0.00712     -0.00183      0.01673    0.11
-	ADE             0.12076      0.07244      0.17041    0.00
-	Total Effect    0.12787      0.07967      0.17671    0.00
-	Prop. Mediated  0.05410     -0.01319      0.14533    0.11
+		        Estimate 95% CI Lower 95% CI Upper p-value
+	ACME            0.008062     0.000107     0.018812    0.04
+	ADE            -0.031368    -0.110182     0.039066    0.44
+	Total Effect   -0.023306    -0.102525     0.048560    0.56
+	Prop. Mediated -0.123874    -2.758395     2.908508    0.58
 
 	Sample Size Used: 1004 
 
 
-	Simulations: 1000
+	Simulations: 1000 
 
-> sens.out <- medsens(med.out, effect.type = "both")
-> summary(sens.out)
+sens.out <- medsens(med.out, effect.type = "both")
+summary(sens.out)
 
-	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+Mediation Sensitivity Analysis for Average Causal Mediation Effect
 
-	Sensitivity Region
+Sensitivity Region
 
-	      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
-	[1,] -0.1 -0.0145      -0.0300       0.0011         0.01       0.0087
-	[2,]  0.0  0.0126      -0.0033       0.0286         0.00       0.0000
+      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+[1,] -0.1 -0.0081       -0.023       0.0067         0.01       0.0088
 
-	Rho at which ACME = 0: 0
-	R^2_M*R^2_Y* at which ACME = 0: 0
-	R^2_M~R^2_Y~ at which ACME = 0: 0 
+Rho at which ACME = 0: -0.1
+R^2_M*R^2_Y* at which ACME = 0: 0.01
+R^2_M~R^2_Y~ at which ACME = 0: 0.0088 
 
 
-	Mediation Sensitivity Analysis for Average Direct Effect
+Mediation Sensitivity Analysis for Average Direct Effect
 
-	Sensitivity Region
+Sensitivity Region
 
-	     Rho     ADE 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
-	[1,] 0.5  0.0320      -0.0228       0.0869         0.25       0.2163
-	[2,] 0.6  0.0058      -0.0533       0.0649         0.36       0.3114
-	[3,] 0.7 -0.0292      -0.0950       0.0367         0.49       0.4239
+       Rho     ADE 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+ [1,] -0.7  0.0896      -0.0087       0.1880         0.49       0.4313
+ [2,] -0.6  0.0613      -0.0278       0.1504         0.36       0.3169
+ [3,] -0.5  0.0401      -0.0434       0.1236         0.25       0.2201
+ [4,] -0.4  0.0228      -0.0572       0.1027         0.16       0.1408
+ [5,] -0.3  0.0078      -0.0700       0.0856         0.09       0.0792
+ [6,] -0.2 -0.0057      -0.0822       0.0709         0.04       0.0352
+ [7,] -0.1 -0.0182      -0.0943       0.0578         0.01       0.0088
+ [8,]  0.0 -0.0304      -0.1066       0.0459         0.00       0.0000
+ [9,]  0.1 -0.0424      -0.1194       0.0346         0.01       0.0088
+[10,]  0.2 -0.0548      -0.1332       0.0236         0.04       0.0352
+[11,]  0.3 -0.0679      -0.1485       0.0126         0.09       0.0792
+[12,]  0.4 -0.0824      -0.1661       0.0013         0.16       0.1408
 
-	Rho at which ADE = 0: 0.6
-	R^2_M*R^2_Y* at which ADE = 0: 0.36
-	R^2_M~R^2_Y~ at which ADE = 0: 0.3114 
+Rho at which ADE = 0: -0.2
+R^2_M*R^2_Y* at which ADE = 0: 0.04
+R^2_M~R^2_Y~ at which ADE = 0: 0.0352 
 
-> sens.out$r.square.y
-[1] 0.03378934
-> sens.out$r.square.m
-[1] 0.1047084
-############################################################################################################################
+-----
+
 > library(mediation)
 > med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTUPDATE", robustSE = TRUE)
 > summary(med.out)
@@ -509,4 +637,131 @@ F-statistic: 3.691 on 5 and 475 DF,  p-value: 0.002751
 
 > test.modmed(med.out, covariates.1 = list (x$PK == 1), covariates.2 = list (x$PK == 0), data = x)
 
+	Test of ACME(covariates.1) - ACME(covariates.2) = 0
 
+data:  estimates from med.out
+ACME(covariates.1) - ACME(covariates.2) = 1e-04, p-value = 0.992
+alternative hypothesis: true ACME(covariates.1) - ACME(covariates.2) is not equal to 0
+95 percent confidence interval:
+ -0.01236105  0.01267306
+
+
+	Test of ADE(covariates.1) - ADE(covariates.2) = 0
+
+data:  estimates from med.out
+ADE(covariates.1) - ADE(covariates.2) = 8e-04, p-value = 0.968
+alternative hypothesis: true ADE(covariates.1) - ADE(covariates.2) is not equal to 0
+95 percent confidence interval:
+ -0.1045509  0.1084276
+
+
+-----
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
+    # dependent variable
+     # MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c4*PCTUPDATE+c5*PCTREAD+c3*PK
+      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c4*PCTUPDATE+c5*PCTREAD+c3*PK
+   # interactions
+    # INT_1 := a3*a4
+	'
+#fit <- sem(thrashing_model, estimator="DWLS", data = x)
+#fit <- sem(thrashing_model, data = x)
+fit <- sem(thrashing_model,estimator="WLSMV", data = x)
+#fit <- sem(thrashing_model,estimator="MLMVS", data = x)
+#fit <- sem(thrashing_model,estimator="MLR", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+---
+
+lavaan (0.5-17) converged normally after  72 iterations
+
+  Number of observations                          1004
+
+  Estimator                                       DWLS      Robust
+  Minimum Function Test Statistic                4.729       6.394
+  Degrees of freedom                                 2           2
+  P-value (Chi-square)                           0.094       0.041
+  Scaling correction factor                                  0.743
+  Shift parameter                                            0.032
+    for simple second-order correction (Mplus variant)
+
+Model test baseline model:
+
+  Minimum Function Test Statistic              129.741     120.370
+  Degrees of freedom                                11          11
+  P-value                                        0.000       0.000
+
+User model versus baseline model:
+
+  Comparative Fit Index (CFI)                    0.977       0.960
+  Tucker-Lewis Index (TLI)                       0.874       0.779
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.037       0.047
+  90 Percent Confidence Interval          0.000  0.081       0.008  0.090
+  P-value RMSEA <= 0.05                          0.618       0.471
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.011       0.011
+
+Parameter estimates:
+
+  Information                                 Expected
+  Standard Errors                           Robust.sem
+
+                   Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+Regressions:
+  ATP ~
+    NUMPROCE (a1)    -0.089    0.021   -4.186    0.000   -0.089   -0.122
+    PK       (a3)    -0.123    0.017   -7.089    0.000   -0.123   -0.213
+    PCTUPDAT (a4)    -0.083    0.024   -3.407    0.001   -0.083   -0.109
+  MAXMPL ~
+    ATP      (b1)    -0.107    0.045   -2.346    0.019   -0.107   -0.072
+    NUMPROCE (c1)    -0.013    0.034   -0.369    0.712   -0.013   -0.012
+    ACTROWPO (c2)    -0.064    0.035   -1.815    0.069   -0.064   -0.057
+    PCTUPDAT (c4)    -0.032    0.039   -0.814    0.416   -0.032   -0.028
+    PCTREAD  (c5)    -0.081    0.045   -1.792    0.073   -0.081   -0.062
+    PK       (c3)     0.116    0.027    4.313    0.000    0.116    0.137
+
+Covariances:
+  NUMPROCESSORS ~~
+    PK                0.006    0.006    0.899    0.369    0.006    0.028
+    PCTUPDATE        -0.001    0.005   -0.236    0.813   -0.001   -0.007
+    ACTROWPOOL       -0.002    0.005   -0.457    0.648   -0.002   -0.015
+    PCTREAD           0.003    0.004    0.820    0.412    0.003    0.027
+  PK ~~
+    PCTUPDATE         0.002    0.006    0.406    0.684    0.002    0.013
+    ACTROWPOOL       -0.005    0.006   -0.810    0.418   -0.005   -0.026
+    PCTREAD          -0.004    0.005   -0.707    0.480   -0.004   -0.023
+  PCTUPDATE ~~
+    ACTROWPOOL       -0.002    0.004   -0.444    0.657   -0.002   -0.014
+    PCTREAD          -0.052    0.003  -14.781    0.000   -0.052   -0.427
+  ACTROWPOOL ~~
+    PCTREAD          -0.001    0.004   -0.205    0.838   -0.001   -0.006
+
+Intercepts:
+    ATP               0.285    0.020   14.534    0.000    0.285    0.994
+    MAXMPL            0.594    0.038   15.694    0.000    0.594    1.401
+    NUMPROCESSORS     0.399    0.012   32.181    0.000    0.399    1.016
+    PK                0.479    0.016   30.357    0.000    0.479    0.959
+    PCTUPDATE         0.377    0.012   31.929    0.000    0.377    1.008
+    ACTROWPOOL        0.499    0.012   42.189    0.000    0.499    1.332
+    PCTREAD           0.137    0.010   13.394    0.000    0.137    0.423
+
+Variances:
+    ATP               0.076    0.005                      0.076    0.926
+    MAXMPL            0.174    0.004                      0.174    0.965
+    NUMPROCESSORS     0.154    0.004                      0.154    1.000
+    PK                0.250    0.001                      0.250    1.000
+    PCTUPDATE         0.140    0.004                      0.140    1.000
+    ACTROWPOOL        0.140    0.004                      0.140    1.000
+    PCTREAD           0.104    0.008                      0.104    1.000
+
+R-Square:
+
+    ATP               0.074
+    MAXMPL            0.035

@@ -1,3 +1,44 @@
+overall:
+
+>  sens.out$r.square.y
+[1] 0.0347248
+>  sens.out$r.square.m
+[1] 0.0880479
+
+
+db2:
+> sens.out$r.square.y
+[1] 0.2097827
+> sens.out$r.square.m
+[1] 0.1108249
+
+mysql:
+
+> sens.out$r.square.y
+[1] 0.3739004
+> sens.out$r.square.m
+[1] 0.7127983
+
+> sens.out$r.square.y
+[1] 0.4810706
+> sens.out$r.square.m
+[1] 0.4974394
+
+oracle:
+> sens.out$r.square.y
+[1] 0.2376887
+> sens.out$r.square.m
+[1] 0.415412
+
+sqlserver:
+> sens.out$r.square.y
+[1] 0.3403505
+> sens.out$r.square.m
+[1] 0.3120641
+
+avg: 40.97 / 32.8
+overall: 8.8 / 3.47
+
 db2: 12.21 / 21.78 (8.6/19.9)
 ss: 27.17 / 33.07 (33.1/26.8)
 pgsql: 49.85 / 53.30 (95.6 / 57.5)

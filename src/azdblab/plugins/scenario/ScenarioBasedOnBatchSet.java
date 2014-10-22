@@ -681,16 +681,16 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 							batchSetNumToRun, dNmRwsFrmSLCT*100, (int)(dNmRwsFrmUPT*100), (int)(dActRowPlSz*100));
 					Main._logger.outputLog(str);
 					
-					if(batchSetNumToRun == 1){
-						if(dNmRwsFrmSLCT == 0 && dNmRwsFrmUPT == 0.25 && dActRowPlSz == 0.25){
-							
-						}else{
-							System.out.println("batchset number is wrong");
-							System.exit(-1);
-						}
-					}
+//					if(batchSetNumToRun == 1){
+//						if(dNmRwsFrmSLCT == 0 && dNmRwsFrmUPT == 0.25 && dActRowPlSz == 0.25){
+//							
+//						}else{
+//							System.out.println("batchset number is wrong");
+//							System.exit(-1);
+//						}
+//					}
 					
-					if(batchSetNumToRun > 16){
+					if(batchSetNumToRun < 21){
 						continue;
 					}
 					

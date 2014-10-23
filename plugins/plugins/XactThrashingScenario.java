@@ -2082,10 +2082,18 @@ Main._logger.outputDebug(batchSetQuery);
 				for (Client c : clients) {
 //					c.setStartTime(startTime);
 					c.start();
+					if(c.getClientNumber() == clients.length){
+						elapsedTimeMillis = System.currentTimeMillis() - startTime;
+						Main._logger.outputLog("All clients got launched at " + elapsedTimeMillis + " (ms)");
+					}
 				}
 				runStarted = true;
 			}
+			if(elapsedTimeMillis/1000 > batchRunTime){ 
+				break;
+			}
 		}
+		Main._logger.outputLog("BatchRunTime: " + elapsedTimeMillis + "(ms)");
 		
 //		boolean runAgain = false;
 		// inspect elapsed time

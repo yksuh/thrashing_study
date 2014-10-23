@@ -779,8 +779,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							//}
 						}else{
 							if(!_conn.isClosed()){ 
-								_conn.setAutoCommit(false);
-								_conn.commit();
+								try{
+									_conn.setAutoCommit(false);
+									_conn.commit();
+								}catch(Exception ex){
+									Main._logger.reportErrorNotOnConsole("timeout-Client #"+_clientNum+":" + ex.getMessage());
+								}
 								if (_stmt != null) {
 //									long start		 = System.currentTimeMillis();
 									try{
@@ -1199,7 +1203,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				// e.printStackTrace();
 				long elapsedTime = System.currentTimeMillis()-startTime;
 //				if(_clientNum % 100 == 0)
-//					Main._logger.reportErrorNotOnConsole("run()-#"+_clientNum+"=>"+e.getMessage() + ", commit time: "+ elapsedTime +"(ms)");
+					Main._logger.reportErrorNotOnConsole("run()-#"+_clientNum+"=>"+e.getMessage() + ", commit time: "+ elapsedTime +"(ms)");
 			}
 		}
 
@@ -2076,24 +2080,41 @@ Main._logger.outputDebug(batchSetQuery);
 		//batchRunTime = 30;
 		long elapsedTimeMillis = 0;
 		boolean runStarted = false;
+		int quater = 4;
+		boolean q1 = false, q2 = false, q3 = false, q4 = false;
 		long startTime = System.currentTimeMillis();
 		while ((elapsedTimeMillis = (System.currentTimeMillis() - startTime)) < batchRunTime * 1000) {// global timer
 			if (!runStarted){
 				for (Client c : clients) {
 //					c.setStartTime(startTime);
-					c.start();
-					if(c.getClientNumber() == clients.length){
-						elapsedTimeMillis = System.currentTimeMillis() - startTime;
-						Main._logger.outputLog("All clients got launched at " + elapsedTimeMillis + " (ms)");
-					}
-					if(elapsedTimeMillis/1000 > batchRunTime){ 
-						break;
+					c.run();
+					elapsedTimeMillis = System.currentTimeMillis() - startTime;
+					if(c.getClientNumber()%100 == 0){
+						Main._logger.outputLog("Client #"+c.getClientNumber()+ " launched at " + elapsedTimeMillis + " (ms)");
 					}
 				}
+				elapsedTimeMillis = System.currentTimeMillis() - startTime;
+				Main._logger.outputLog("All clients got launched at " + elapsedTimeMillis + " (ms)");
 				runStarted = true;
 			}
+			elapsedTimeMillis = System.currentTimeMillis() - startTime;
 			if(elapsedTimeMillis/1000 > batchRunTime){ 
 				break;
+			}else{
+				if(!q1 && elapsedTimeMillis/1000 < batchRunTime/quater){
+					q1 = true;
+					Main._logger.outputLog("q1 - Elapsed: " + elapsedTimeMillis + " (ms)");
+				}
+				else if(!q2 && elapsedTimeMillis/1000 > batchRunTime/quater){
+					q2 = true;
+					Main._logger.outputLog("q2 - Elapsed: " + elapsedTimeMillis + " (ms)");
+				}else if(!q3 && elapsedTimeMillis/1000 > batchRunTime/(2*quater)){
+					q3 = true;
+					Main._logger.outputLog("q3 - Elapsed: " + elapsedTimeMillis + " (ms)");
+				}else if(!q4 && elapsedTimeMillis/1000 > batchRunTime/(3*quater)){
+					q4 = true;
+					Main._logger.outputLog("q4 - Elapsed: " + elapsedTimeMillis + " (ms)");
+				}
 			}
 		}
 		Main._logger.outputLog("BatchRunTime: " + elapsedTimeMillis + "(ms)");

@@ -2086,6 +2086,9 @@ Main._logger.outputDebug(batchSetQuery);
 						elapsedTimeMillis = System.currentTimeMillis() - startTime;
 						Main._logger.outputLog("All clients got launched at " + elapsedTimeMillis + " (ms)");
 					}
+					if(elapsedTimeMillis/1000 > batchRunTime){ 
+						break;
+					}
 				}
 				runStarted = true;
 			}

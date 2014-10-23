@@ -2086,8 +2086,7 @@ Main._logger.outputDebug(batchSetQuery);
 		while ((elapsedTimeMillis = (System.currentTimeMillis() - startTime)) < batchRunTime * 1000) {// global timer
 			if (!runStarted){
 				for (Client c : clients) {
-//					c.setStartTime(startTime);
-					c.run();
+					c.start();
 					elapsedTimeMillis = System.currentTimeMillis() - startTime;
 					if(c.getClientNumber()%100 == 0){
 						Main._logger.outputLog("Client #"+c.getClientNumber()+ " launched at " + elapsedTimeMillis + " (ms)");

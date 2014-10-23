@@ -2107,10 +2107,10 @@ Main._logger.outputDebug(batchSetQuery);
 				else if(!q2 && elapsedTimeMillis/1000 > batchRunTime/quater){
 					q2 = true;
 					Main._logger.outputLog("q2 - Elapsed: " + elapsedTimeMillis + " (ms)");
-				}else if(!q3 && elapsedTimeMillis/1000 > batchRunTime/(2*quater)){
+				}else if(!q3 && elapsedTimeMillis/1000 > 2*batchRunTime/quater){
 					q3 = true;
 					Main._logger.outputLog("q3 - Elapsed: " + elapsedTimeMillis + " (ms)");
-				}else if(!q4 && elapsedTimeMillis/1000 > batchRunTime/(3*quater)){
+				}else if(!q4 && elapsedTimeMillis/1000 > 3*batchRunTime/quater){
 					q4 = true;
 					Main._logger.outputLog("q4 - Elapsed: " + elapsedTimeMillis + " (ms)");
 				}

@@ -783,7 +783,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 									try{
 										_stmt.cancel();
 									}catch(Exception ex){
-										Main._logger.reportErrorNotOnConsole("run-cancel()-Client #"+_clientNum+"=>"+ex.getMessage());
+										//Main._logger.reportErrorNotOnConsole("run-cancel()-Client #"+_clientNum+"=>"+ex.getMessage());
 									}
 									throw new SQLException("Batch run timeout");
 								} 
@@ -2192,7 +2192,11 @@ Main._logger.outputDebug(batchSetQuery);
 			while(true){
 	            try {
 	                //do something
+<<<<<<< HEAD
 	                Thread.sleep(1000); // do a one-second check!
+=======
+	                Thread.sleep(100); // do a one-second check!
+>>>>>>> MySQLOverSession
 	                //do something after waking up
 	            } catch (InterruptedException e) {
 	            }

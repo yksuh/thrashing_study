@@ -2192,11 +2192,7 @@ Main._logger.outputDebug(batchSetQuery);
 			while(true){
 	            try {
 	                //do something
-<<<<<<< HEAD
-	                Thread.sleep(1000); // do a one-second check!
-=======
 	                Thread.sleep(100); // do a one-second check!
->>>>>>> MySQLOverSession
 	                //do something after waking up
 	            } catch (InterruptedException e) {
 	            }

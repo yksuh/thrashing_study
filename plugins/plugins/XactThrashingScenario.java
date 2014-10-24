@@ -2158,12 +2158,15 @@ Main._logger.outputDebug(batchSetQuery);
 			elapsedTimeMillis = System.currentTimeMillis() - startTime;
 			Main._logger.outputLog("BatchRunTime: " + elapsedTimeMillis + "(ms), sleepTime: " + sleepTime + "(ms)");
 			if(elapsedTimeMillis/1000 > batchRunTime){
-				throw new Exception("elapsed time exceeds session duration!");
+//					throw new Exception("elapsed time exceeds session duration!");
+				Main._logger.outputLog("[WARNING] elapsed time exceeds session duration!");
 			}
-			if(elapsedTimeMillis > sleepTime+clientLaunchingTime){
-				throw new Exception("elapsed time exceeds sleep+client-launching time!");
+			if(elapsedTimeMillis/1000 > (sleepTime+clientLaunchingTime)/1000){
+//					throw new Exception("elapsed time exceeds sleep+client-launching time!");
+				Main._logger.outputLog("[WARNING] elapsed time exceeds sleep+client-launching time!");
 			}
 		}
+
 //		boolean runAgain = false;
 		// inspect elapsed time
 //		long elapsedTimeInSec = elapsedTimeMillis / 1000;

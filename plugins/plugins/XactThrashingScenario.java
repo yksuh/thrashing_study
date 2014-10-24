@@ -2070,6 +2070,7 @@ Main._logger.outputDebug(batchSetQuery);
 		clients = new Client[numClients];
 		// initialize transaction run stat
 		_clientRunStats = new XactRunStatPerClient[numClients+1];		
+		if(batchID == 13831) return 1;
 		for (int i = 0; i < numClients; i++) {
 			// assign client number
 			int clientNum = i + 1;
@@ -2081,7 +2082,7 @@ Main._logger.outputDebug(batchSetQuery);
 			String strPassword = experimentSubject.getPassword();
 			// Main._logger.outputLog("Client " + (clientNum) +
 			// " is being initialized...");
-			//if(batchID == 12652 && clientNum <= 168) continue;
+			if(batchID == 13833 && clientNum <= 198) continue;
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);

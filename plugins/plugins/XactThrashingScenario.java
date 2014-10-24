@@ -778,12 +778,31 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 								Main._logger.reportErrorNotOnConsole("Client #"+_clientNum+" rollback time: " + rollbackTime + "(ms)");
 							//}
 						}else{
+							if(experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
+								if (_stmt != null) {
+									try{
+										_stmt.cancel();
+									}catch(Exception ex){
+										Main._logger.reportErrorNotOnConsole("run-cancel()-Client #"+_clientNum+"=>"+ex.getMessage());
+									}
+									throw new SQLException("Batch run timeout");
+								} 
+								return;
+							}
 							if(!_conn.isClosed()){ 
 								try{
 									_conn.setAutoCommit(false);
 									_conn.commit();
 								}catch(Exception ex){
-									Main._logger.reportErrorNotOnConsole("timeout-Client #"+_clientNum+":" + ex.getMessage());
+									if(_clientNum == clients.length){
+										ex.printStackTrace();
+										return;
+									}
+									if(!ex.getMessage().toLowerCase().contains("closed") 
+									&& !ex.getMessage().toLowerCase().contains("after")
+									&& !ex.getMessage().toLowerCase().contains("allowed")
+									)
+										Main._logger.reportErrorNotOnConsole("timeout-Client #"+_clientNum+":" + ex.getMessage());
 								}
 								if (_stmt != null) {
 //									long start		 = System.currentTimeMillis();
@@ -1202,7 +1221,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			} catch (SQLException e) {
 				// e.printStackTrace();
 				long elapsedTime = System.currentTimeMillis()-startTime;
-//				if(_clientNum % 100 == 0)
+				if(!e.getMessage().toLowerCase().contains("connection closed"))
 					Main._logger.reportErrorNotOnConsole("run()-#"+_clientNum+"=>"+e.getMessage() + ", commit time: "+ elapsedTime +"(ms)");
 			}
 		}
@@ -2079,45 +2098,72 @@ Main._logger.outputDebug(batchSetQuery);
 		
 		//batchRunTime = 30;
 		long elapsedTimeMillis = 0;
-		boolean runStarted = false;
-		int quater = 4;
-		boolean q1 = false, q2 = false, q3 = false, q4 = false;
 		long startTime = System.currentTimeMillis();
-		while ((elapsedTimeMillis = (System.currentTimeMillis() - startTime)) < batchRunTime * 1000) {// global timer
-			if (!runStarted){
-				for (Client c : clients) {
-					c.start();
-					elapsedTimeMillis = System.currentTimeMillis() - startTime;
-					if(c.getClientNumber()%100 == 0){
-						Main._logger.outputLog("Client #"+c.getClientNumber()+ " launched at " + elapsedTimeMillis + " (ms)");
+		if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
+			boolean runStarted = false;
+//			int quater = 4;
+//			boolean q1 = false, q2 = false, q3 = false, q4 = false;	
+			while ((elapsedTimeMillis = (System.currentTimeMillis() - startTime)) < batchRunTime * 1000) {// global timer
+				if (!runStarted){
+					for (Client c : clients) {
+						c.start();
+						elapsedTimeMillis = System.currentTimeMillis() - startTime;
+//						if(c.getClientNumber()%100 == 0){
+//							Main._logger.outputLog("Client #"+c.getClientNumber()+ " launched at " + elapsedTimeMillis + " (ms)");
+//						}
 					}
+					elapsedTimeMillis = System.currentTimeMillis() - startTime;
+//					Main._logger.outputLog("All clients got launched at " + elapsedTimeMillis + " (ms)");
+					runStarted = true;
 				}
 				elapsedTimeMillis = System.currentTimeMillis() - startTime;
-				Main._logger.outputLog("All clients got launched at " + elapsedTimeMillis + " (ms)");
-				runStarted = true;
+				if(elapsedTimeMillis/1000 > batchRunTime){ 
+					break;
+				}
+//				else{
+//					if(!q1 && elapsedTimeMillis/1000 < batchRunTime/quater){
+//						q1 = true;
+//						Main._logger.outputLog("q1 - Elapsed: " + elapsedTimeMillis + " (ms)");
+//					}
+//					else if(!q2 && elapsedTimeMillis/1000 > batchRunTime/quater){
+//						q2 = true;
+//						Main._logger.outputLog("q2 - Elapsed: " + elapsedTimeMillis + " (ms)");
+//					}else if(!q3 && elapsedTimeMillis/1000 > 2*batchRunTime/quater){
+//						q3 = true;
+//						Main._logger.outputLog("q3 - Elapsed: " + elapsedTimeMillis + " (ms)");
+//					}else if(!q4 && elapsedTimeMillis/1000 > 3*batchRunTime/quater){
+//						q4 = true;
+//						Main._logger.outputLog("q4 - Elapsed: " + elapsedTimeMillis + " (ms)");
+//					}
+//				}
+			}
+		}else{ // for mysql
+			long clientLaunchStart = System.currentTimeMillis();
+			for (Client c : clients) {
+				c.start();
+				elapsedTimeMillis = System.currentTimeMillis() - startTime;
+				if(c.getClientNumber()%100 == 0){
+					Main._logger.outputLog("\t==>Client #"+c.getClientNumber()+ " launched at " + elapsedTimeMillis + " (ms)");
+				}
+				if(elapsedTimeMillis/1000 > batchRunTime){ 
+					break;
+				}
+			}
+			long clientLaunchingTime = System.currentTimeMillis() - clientLaunchStart;
+			long sleepTime = batchRunTime*1000 - clientLaunchingTime;
+			Main._logger.outputLog("\t===>ClientLanchingTime: " + clientLaunchingTime + "(ms), sleepTime: " + sleepTime +"(ms)");
+			if(sleepTime > 0){
+				Thread.sleep(sleepTime); // session duration
 			}
 			elapsedTimeMillis = System.currentTimeMillis() - startTime;
-			if(elapsedTimeMillis/1000 > batchRunTime){ 
-				break;
-			}else{
-				if(!q1 && elapsedTimeMillis/1000 < batchRunTime/quater){
-					q1 = true;
-					Main._logger.outputLog("q1 - Elapsed: " + elapsedTimeMillis + " (ms)");
-				}
-				else if(!q2 && elapsedTimeMillis/1000 > batchRunTime/quater){
-					q2 = true;
-					Main._logger.outputLog("q2 - Elapsed: " + elapsedTimeMillis + " (ms)");
-				}else if(!q3 && elapsedTimeMillis/1000 > 2*batchRunTime/quater){
-					q3 = true;
-					Main._logger.outputLog("q3 - Elapsed: " + elapsedTimeMillis + " (ms)");
-				}else if(!q4 && elapsedTimeMillis/1000 > 3*batchRunTime/quater){
-					q4 = true;
-					Main._logger.outputLog("q4 - Elapsed: " + elapsedTimeMillis + " (ms)");
-				}
+			Main._logger.outputLog("BatchRunTime: " + elapsedTimeMillis + "(ms), sleepTime: " + sleepTime + "(ms)");
+			if(elapsedTimeMillis/1000 > batchRunTime){
+				throw new Exception("elapsed time exceeds session duration!");
+			}
+			if(elapsedTimeMillis > sleepTime+clientLaunchingTime){
+				throw new Exception("elapsed time exceeds sleep+client-launching time!");
 			}
 		}
-		Main._logger.outputLog("BatchRunTime: " + elapsedTimeMillis + "(ms)");
-		
 //		boolean runAgain = false;
 		// inspect elapsed time
 //		long elapsedTimeInSec = elapsedTimeMillis / 1000;
@@ -2316,7 +2362,7 @@ Main._logger.outputDebug(batchSetQuery);
 					}
 				} catch (SQLException e) {
 					commitTime = System.currentTimeMillis() - startCommit;
-					//if(_clientNum % 10 == 0)
+					if(!e.getMessage().toLowerCase().contains("connection closed"))
 						Main._logger.reportErrorNotOnConsole("terminate()-Client #"+_clientNum+"=>"+e.getMessage() + ", commit: "+commitTime+"(ms)");
 				}
 				commitTime = System.currentTimeMillis() - startCommit;

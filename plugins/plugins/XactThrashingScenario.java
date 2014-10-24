@@ -698,10 +698,10 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// get transaction id
 			int xactID = -1;
 			ResultSet rs = null;
-			int succTrials = 1;
+//			int succTrials = 1;
 //			long wait = 10000;
-			do{
-				try {
+//			do{
+//				try {
 					rs = LabShelfManager.getShelf().executeQuerySQL(
 							"SELECT TransactionID " + "from azdblab_transaction"
 									+ " where clientid = " + clientID
@@ -710,22 +710,22 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 						xactID = rs.getInt(1);
 					}
 					rs.close();
-				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-					new Exception(e1.getMessage());
-				}
+//				} catch (SQLException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//					new Exception(e1.getMessage());
+//				}
 				if(xactID == -1){
-	Main._logger.outputDebug("azdblab_transaction neither accessible nor no record <= retry ("+succTrials+")");
+	//Main._logger.outputDebug("azdblab_transaction neither accessible nor no record <= retry ("+succTrials+")");
 //					try{
 //						Thread.sleep(wait);
 //					}catch(Exception ex){
 //						ex.printStackTrace();
 //					}
-					succTrials++;
+//					succTrials++;
 				}
-				else break;
-			} while(succTrials <= 3);
+//				else break;
+//			} while(succTrials <= 3);
 
 			// not existing ...
 			if (xactID == -1) {
@@ -2082,7 +2082,7 @@ Main._logger.outputDebug(batchSetQuery);
 			String strPassword = experimentSubject.getPassword();
 			// Main._logger.outputLog("Client " + (clientNum) +
 			// " is being initialized...");
-			if(batchID == 13833 && clientNum <= 198) continue;
+			if(batchID == 13835 && clientNum <= 82) continue;
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);

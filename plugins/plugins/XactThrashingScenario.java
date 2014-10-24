@@ -2192,14 +2192,14 @@ Main._logger.outputDebug(batchSetQuery);
 			while(true){
 	            try {
 	                //do something
-	                Thread.sleep(10000); // do 10-second check!
+	                Thread.sleep(1000); // do a one-second check!
 	                //do something after waking up
 	            } catch (InterruptedException e) {
-	            	elapsedTimeMillis = System.currentTimeMillis() - startTime;
-	            	if(elapsedTimeMillis > batchRunTime*1000){
-	            		break;
-	            	}
 	            }
+	            elapsedTimeMillis = System.currentTimeMillis() - startTime;
+            	if(elapsedTimeMillis > batchRunTime*1000){
+            		break;
+            	}
 	        }
 			sleepElapsedTime = System.currentTimeMillis() - sleepStart;
 	        elapsedTimeMillis = System.currentTimeMillis() - startTime;

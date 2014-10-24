@@ -2070,7 +2070,7 @@ Main._logger.outputDebug(batchSetQuery);
 		clients = new Client[numClients];
 		// initialize transaction run stat
 		_clientRunStats = new XactRunStatPerClient[numClients+1];		
-		if(batchID == 13831) return 1;
+		if(batchID == 13813) return 1;
 		for (int i = 0; i < numClients; i++) {
 			// assign client number
 			int clientNum = i + 1;

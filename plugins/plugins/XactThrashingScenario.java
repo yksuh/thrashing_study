@@ -2099,7 +2099,7 @@ Main._logger.outputDebug(batchSetQuery);
 		//batchRunTime = 30;
 		long elapsedTimeMillis = 0;
 		long startTime = System.currentTimeMillis();
-		if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
+//		if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
 			boolean runStarted = false;
 //			int quater = 4;
 //			boolean q1 = false, q2 = false, q3 = false, q4 = false;	
@@ -2108,18 +2108,18 @@ Main._logger.outputDebug(batchSetQuery);
 					for (Client c : clients) {
 						c.start();
 						elapsedTimeMillis = System.currentTimeMillis() - startTime;
-//						if(c.getClientNumber()%100 == 0){
-//							Main._logger.outputLog("Client #"+c.getClientNumber()+ " launched at " + elapsedTimeMillis + " (ms)");
-//						}
+						if(c.getClientNumber()%100 == 0){
+							Main._logger.outputLog("Client #"+c.getClientNumber()+ " launched at " + elapsedTimeMillis + " (ms)");
+						}
 					}
 					elapsedTimeMillis = System.currentTimeMillis() - startTime;
-//					Main._logger.outputLog("All clients got launched at " + elapsedTimeMillis + " (ms)");
+					Main._logger.outputLog("All clients got launched at " + elapsedTimeMillis + " (ms)");
 					runStarted = true;
 				}
-				elapsedTimeMillis = System.currentTimeMillis() - startTime;
-				if(elapsedTimeMillis/1000 > batchRunTime){ 
-					break;
-				}
+//				elapsedTimeMillis = System.currentTimeMillis() - startTime;
+//				if(elapsedTimeMillis/1000 > batchRunTime){ 
+//					break;
+//				}
 //				else{
 //					if(!q1 && elapsedTimeMillis/1000 < batchRunTime/quater){
 //						q1 = true;
@@ -2137,86 +2137,87 @@ Main._logger.outputDebug(batchSetQuery);
 //					}
 //				}
 			}
-		}else{ // for mysql
-			long clientLaunchStart = System.currentTimeMillis();
-			for (Client c : clients) {
-				c.start();
-				elapsedTimeMillis = System.currentTimeMillis() - startTime;
-				if(c.getClientNumber()%100 == 0){
-					Main._logger.outputLog("\t==>Client #"+c.getClientNumber()+ " launched at " + elapsedTimeMillis + " (ms)");
-				}
-				if(elapsedTimeMillis/1000 > batchRunTime){ 
-					break;
-				}
-			}
-			long clientLaunchingTime = System.currentTimeMillis() - clientLaunchStart;
-//			long sleepTime = batchRunTime*1000 - clientLaunchingTime;
-			Main._logger.outputLog("\t===>ClientLanchingTime: " + clientLaunchingTime + "(ms)");
-			
-//			long sleepElapsedTime = 0;
-//			if(sleepTime > 0){
-//				long sleepStart = System.currentTimeMillis();
-//				Thread.sleep(sleepTime); // session duration
-//				long sleepEnd = System.currentTimeMillis();
-//				sleepElapsedTime = (sleepEnd-sleepStart);
-//				if(sleepElapsedTime > sleepTime){
-//					Main._logger.outputLog("[WARNING] elapsed sleep time exceeds actual sleep time!");
-//					Main._logger.outputLog("[WARNING] Actual sleep time: " + sleepElapsedTime + " (ms), expected sleepTime: " + sleepTime + "(ms)");					
+//		}
+//			else{ // for mysql
+//			long clientLaunchStart = System.currentTimeMillis();
+//			for (Client c : clients) {
+//				c.start();
+//				elapsedTimeMillis = System.currentTimeMillis() - startTime;
+//				if(c.getClientNumber()%100 == 0){
+//					Main._logger.outputLog("\t==>Client #"+c.getClientNumber()+ " launched at " + elapsedTimeMillis + " (ms)");
+//				}
+//				if(elapsedTimeMillis/1000 > batchRunTime){ 
+//					break;
 //				}
 //			}
-			
-//			long start, end, slept;
-//		    boolean interrupted;
-//		    while(sleepTime > 0){
-//		        start=System.currentTimeMillis();
-//		        try{
-//		            Thread.sleep(sleepTime);
-//		            break;
-//		        }
-//		        catch(InterruptedException e){
-//		            //work out how much more time to sleep for
-//		            end=System.currentTimeMillis();
-//		            slept=end-start;
-//		            timeToSleep-=slept;
-//		            interrupted=true;
-//		        }
-//		    }
-//
-//		    if(interrupted){
-//		        //restore interruption before exit
-//		        Thread.currentThread().interrupt();
-//		    }
-			
-			long sleepElapsedTime = 0;
-			long sleepStart = System.currentTimeMillis();
-			while(true){
-	            try {
-	                //do something
-	                Thread.sleep(100); // do a one-second check!
-	                //do something after waking up
-	            } catch (InterruptedException e) {
-	            }
-	            elapsedTimeMillis = System.currentTimeMillis() - startTime;
-            	if(elapsedTimeMillis > batchRunTime*1000){
-            		break;
-            	}
-	        }
-			sleepElapsedTime = System.currentTimeMillis() - sleepStart;
-	        elapsedTimeMillis = System.currentTimeMillis() - startTime;
-//			Main._logger.outputLog("BatchRunTime: " + elapsedTimeMillis + "(ms), actual sleep time: " + sleepElapsedTime + "(ms), configured sleep time: " + sleepTime + "(ms)");
-			Main._logger.outputLog("BatchRunTime: " + elapsedTimeMillis + "(ms), actual sleep time: " + sleepElapsedTime + "(ms)");
-			if(sleepElapsedTime/1000 > batchRunTime){
-				Main._logger.outputLog("[WARNING] elapsed sleep time exceeds exceeds session duration!");
-			}
-			if(elapsedTimeMillis/1000 > batchRunTime){
-//					throw new Exception("elapsed time exceeds session duration!");
-				Main._logger.outputLog("[WARNING] elapsed time exceeds session duration!");
-			}
-//			if(elapsedTimeMillis/1000 > (sleepTime+clientLaunchingTime)/1000){
-////					throw new Exception("elapsed time exceeds sleep+client-launching time!");
-//				Main._logger.outputLog("[WARNING] elapsed time exceeds sleep+client-launching time!");
+//			long clientLaunchingTime = System.currentTimeMillis() - clientLaunchStart;
+////			long sleepTime = batchRunTime*1000 - clientLaunchingTime;
+//			Main._logger.outputLog("\t===>ClientLanchingTime: " + clientLaunchingTime + "(ms)");
+//			
+////			long sleepElapsedTime = 0;
+////			if(sleepTime > 0){
+////				long sleepStart = System.currentTimeMillis();
+////				Thread.sleep(sleepTime); // session duration
+////				long sleepEnd = System.currentTimeMillis();
+////				sleepElapsedTime = (sleepEnd-sleepStart);
+////				if(sleepElapsedTime > sleepTime){
+////					Main._logger.outputLog("[WARNING] elapsed sleep time exceeds actual sleep time!");
+////					Main._logger.outputLog("[WARNING] Actual sleep time: " + sleepElapsedTime + " (ms), expected sleepTime: " + sleepTime + "(ms)");					
+////				}
 ////			}
-		}
+//			
+////			long start, end, slept;
+////		    boolean interrupted;
+////		    while(sleepTime > 0){
+////		        start=System.currentTimeMillis();
+////		        try{
+////		            Thread.sleep(sleepTime);
+////		            break;
+////		        }
+////		        catch(InterruptedException e){
+////		            //work out how much more time to sleep for
+////		            end=System.currentTimeMillis();
+////		            slept=end-start;
+////		            timeToSleep-=slept;
+////		            interrupted=true;
+////		        }
+////		    }
+////
+////		    if(interrupted){
+////		        //restore interruption before exit
+////		        Thread.currentThread().interrupt();
+////		    }
+//			
+//			long sleepElapsedTime = 0;
+//			long sleepStart = System.currentTimeMillis();
+//			while(true){
+//	            try {
+//	                //do something
+//	                Thread.sleep(100); // do a one-second check!
+//	                //do something after waking up
+//	            } catch (InterruptedException e) {
+//	            }
+//	            elapsedTimeMillis = System.currentTimeMillis() - startTime;
+//            	if(elapsedTimeMillis > batchRunTime*1000){
+//            		break;
+//            	}
+//	        }
+//			sleepElapsedTime = System.currentTimeMillis() - sleepStart;
+//	        elapsedTimeMillis = System.currentTimeMillis() - startTime;
+////			Main._logger.outputLog("BatchRunTime: " + elapsedTimeMillis + "(ms), actual sleep time: " + sleepElapsedTime + "(ms), configured sleep time: " + sleepTime + "(ms)");
+//			Main._logger.outputLog("BatchRunTime: " + elapsedTimeMillis + "(ms), actual sleep time: " + sleepElapsedTime + "(ms)");
+//			if(sleepElapsedTime/1000 > batchRunTime){
+//				Main._logger.outputLog("[WARNING] elapsed sleep time exceeds exceeds session duration!");
+//			}
+//			if(elapsedTimeMillis/1000 > batchRunTime){
+////					throw new Exception("elapsed time exceeds session duration!");
+//				Main._logger.outputLog("[WARNING] elapsed time exceeds session duration!");
+//			}
+////			if(elapsedTimeMillis/1000 > (sleepTime+clientLaunchingTime)/1000){
+//////					throw new Exception("elapsed time exceeds sleep+client-launching time!");
+////				Main._logger.outputLog("[WARNING] elapsed time exceeds sleep+client-launching time!");
+//////			}
+//		}
 
 //		boolean runAgain = false;
 		// inspect elapsed time

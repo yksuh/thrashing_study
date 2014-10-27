@@ -119,6 +119,76 @@ thrashing_model <- '
 fit <- sem(thrashing_model, estimator="DWLS", data = x)
 summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
 
+library(nnet)
+med.fit <- multinom(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = ml)
+
+x$ATP <- relevel(x$ATP, data = x)
+med.fit <- multinom(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+med.fit <- glm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, family=quasibinomial, data = x)
+summary(med.fit)
+	Call:
+	glm(formula = ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, 
+	    family = quasibinomial, data = x)
+
+	Deviance Residuals: 
+	    Min       1Q   Median       3Q      Max  
+	-0.9158  -0.5110  -0.4163   0.2672   2.1622  
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    -0.6463     0.1141  -5.665 1.92e-08 ***
+	NUMPROCESSORS  -0.6423     0.1687  -3.808 0.000149 ***
+	PK             -1.3143     0.1819  -7.226 9.88e-13 ***
+	PCTUPDATE      -1.3770     0.2301  -5.984 3.02e-09 ***
+	PK:PCTUPDATE    1.5182     0.3618   4.196 2.96e-05 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	(Dispersion parameter for quasibinomial family taken to be 0.4932165)
+
+	    Null deviance: 484.33  on 1003  degrees of freedom
+	Residual deviance: 435.27  on  999  degrees of freedom
+	AIC: NA
+
+	Number of Fisher Scoring iterations: 5
+
+> 1-med.fit$deviance/med.fit$null.deviance
+[1] 0.1012974
+
+out.fit <- glm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, family=quasibinomial, data = x)
+summary(out.fit)
+1-out.fit$deviance/out.fit$null.deviance
+
+	Call:
+	glm(formula = MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + 
+	    NUMPROCESSORS + PK, family = quasibinomial, data = x)
+
+	Deviance Residuals: 
+	     Min        1Q    Median        3Q       Max  
+	-1.67301  -0.69287   0.06541   0.89993   1.21469  
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)     0.6155     0.1457   4.224 2.62e-05 ***
+	PCTREAD        -0.2972     0.1781  -1.669   0.0954 .  
+	PCTUPDATE      -0.0686     0.1581  -0.434   0.6645    
+	ACTROWPOOL     -0.2617     0.1420  -1.844   0.0655 .  
+	ATP            -0.2840     0.2064  -1.376   0.1692    
+	NUMPROCESSORS  -0.1411     0.1355  -1.042   0.2978    
+	PK              0.5243     0.1086   4.828 1.60e-06 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	(Dispersion parameter for quasibinomial family taken to be 0.6359494)
+
+	    Null deviance: 830.85  on 1003  degrees of freedom
+	Residual deviance: 807.17  on  997  degrees of freedom
+	AIC: NA
+
+	Number of Fisher Scoring iterations: 3
+
+	> 1-out.fit$deviance/out.fit$null.deviance
+	[1] 0.02850203
 
 ##### expected ...
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)

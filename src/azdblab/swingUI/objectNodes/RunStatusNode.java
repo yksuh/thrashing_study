@@ -103,7 +103,7 @@ public abstract class RunStatusNode extends CommentedObjectNode {
 				runLst.add(new RunInfo(new SimpleDateFormat(Constants.TIMEFORMAT).format(rs.getTimestamp(1)), rs.getString(2)));
 			}
 			rs.close();
-			Collections.sort(runLst);
+			//Collections.sort(runLst);
 			for (int i = 0; i < runLst.size(); i++) {
 
 				toRet += "<tr> <td>" + runLst.get(i).fullDateString

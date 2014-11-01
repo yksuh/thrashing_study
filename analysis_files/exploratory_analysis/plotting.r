@@ -30,6 +30,13 @@ db2$MAXMPL[db2$MAXMPL > 0.25 & db2$MAXMPL <= 0.50] <- 2
 db2$MAXMPL[db2$MAXMPL<=0.25] <- 1
 db2$MAXMPL = (db2$MAXMPL-min(db2$MAXMPL))/(max(db2$MAXMPL)-min(db2$MAXMPL))
 x = rbind(db2) 
+
+pdf("checking_assumptions.pdf")
+plot(out.fit, col="black", main='Checking assumptions', xlab='Regression for MPL Capability')
+par(mfrow=c(2,2))
+dev.off()
+
+
 pdf("db2_scaled_pk_atp.pdf")
 plot(x$PK, x$ATP, col="black", main='DB2 - Primary Key (scaled) vs. ATP time (scaled)', xlab='Primary Key Presence', ylab=expression('ATP time'))
 dev.off()

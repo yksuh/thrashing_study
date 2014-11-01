@@ -41,233 +41,71 @@ sqlserver$PCTUPDATE = (sqlserver$PCTUPDATE-min(sqlserver$PCTUPDATE))/(max(sqlser
 sqlserver$NUMPROCESSORS = (sqlserver$NUMPROCESSORS-min(sqlserver$NUMPROCESSORS))/(max(sqlserver$NUMPROCESSORS)-min(sqlserver$NUMPROCESSORS))
 sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
 sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
-x = rbind(db2,oracle,mysql,pgsql,sqlserver) 
+x = rbind(db2,mysql,oracle,pgsql,sqlserver) 
+#x$ATP<-round(x$ATP, 6)
+#write.table(x, "expl_normal.txt",row.names = TRUE, col.names = TRUE, sep="\t")
+#library(foreign)
+#write.foreign(format(x, digits=8), "expl_normal.txt", "expl_normal.sps",   package="SPSS")
 
-> cor(x$NUMPROCESSORS, x$ATP)
-[1] -0.1262903
-> cor(x$PCTREAD, x$ATP)
-[1] 0.05245677
-> cor(x$PK, x$ATP)
-[1] -0.2166788
-> cor(x$PCTUPDATE, x$ATP)
--0.1078481
-> cor(x$ACTROWPOOL, x$ATP)
-[1] 0.07394266
-> cor(x$ATP, x$MAXMPL)
-[1] -0.1007889
->  cor(x$NUMPROCESSORS, x$MAXMPL)
-[1] 0.0006660305
-> cor(x$PCTREAD, x$MAXMPL)
-[1] -0.05633367
->  cor(x$PCTUPDATE, x$MAXMPL)
-[1] 0.008980045
-> cor(x$ACTROWPOOL, x$MAXMPL)
-[1] -0.05982288
-> cor(x$PK, x$MAXMPL)
-[1] 0.1547508
-
-----
-
-> cor(x$NUMPROCESSORS, x$ATP)
-[1] -0.122788
-> cor(x$PCTREAD, x$ATP)
-[1] 0.08402555
-> cor(x$PCTUPDATE, x$ATP)
-[1] -0.145902
-> cor(x$PK, x$ATP)
-[1] -0.2029692
-> cor(x$ACTROWPOOL, x$ATP)
-[1] 0.07663052
-
-> cor(x$ATP, x$MAXMPL)
-[1] -0.07951011
-> cor(x$NUMPROCESSORS, x$MAXMPL)
-[1] -0.02375046
-> cor(x$PCTREAD, x$MAXMPL)
-[1] -0.059297
-> cor(x$PCTUPDATE, x$MAXMPL)
-[1] 0.01913866
-> cor(x$ACTROWPOOL, x$MAXMPL)
-[1] -0.0620389
-> cor(x$PK, x$MAXMPL)
-[1] 0.1646099
-
-> cor(y$PCTUPDATE, y$MAXMPL)
-[1] 0.1510572
-
-> y <- subset(x, x$PK == 0)
-> cor(y$PCTUPDATE, y$MAXMPL)
-[1] 0.1510572
-> y <- subset(x, x$PK == 1)
-> cor(y$PCTUPDATE, y$MAXMPL)
-[1] -0.1450092
-> y <- subset(x, x$PK == 0)
-> cor(y$PCTUPDATE, y$ATP)
-[1] -0.274344
-> y <- subset(x, x$PK == 1)
-> cor(y$PCTUPDATE, y$ATP)
-[1] 0.02332855
-
-library(lavaan)
-thrashing_model <- '
-     # mediator
-      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
-    # dependent variable
-      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c4*PCTUPDATE+c5*PCTREAD
-   # interactions
-     '
-fit <- sem(thrashing_model, estimator="DWLS", data = x)
-summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
-
-library(nnet)
-med.fit <- multinom(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = ml)
-
-x$ATP <- relevel(x$ATP, data = x)
-med.fit <- multinom(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
-med.fit <- glm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, family=quasibinomial, data = x)
-summary(med.fit)
-	Call:
-	glm(formula = ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, 
-	    family = quasibinomial, data = x)
-
-	Deviance Residuals: 
-	    Min       1Q   Median       3Q      Max  
-	-0.9158  -0.5110  -0.4163   0.2672   2.1622  
-
-	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    -0.6463     0.1141  -5.665 1.92e-08 ***
-	NUMPROCESSORS  -0.6423     0.1687  -3.808 0.000149 ***
-	PK             -1.3143     0.1819  -7.226 9.88e-13 ***
-	PCTUPDATE      -1.3770     0.2301  -5.984 3.02e-09 ***
-	PK:PCTUPDATE    1.5182     0.3618   4.196 2.96e-05 ***
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-	(Dispersion parameter for quasibinomial family taken to be 0.4932165)
-
-	    Null deviance: 484.33  on 1003  degrees of freedom
-	Residual deviance: 435.27  on  999  degrees of freedom
-	AIC: NA
-
-	Number of Fisher Scoring iterations: 5
-
-> 1-med.fit$deviance/med.fit$null.deviance
-[1] 0.1012974
-
-out.fit <- glm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, family=quasibinomial, data = x)
-summary(out.fit)
-1-out.fit$deviance/out.fit$null.deviance
+> med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+> summary(med.fit)
 
 	Call:
-	glm(formula = MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + 
-	    NUMPROCESSORS + PK, family = quasibinomial, data = x)
-
-	Deviance Residuals: 
-	     Min        1Q    Median        3Q       Max  
-	-1.67301  -0.69287   0.06541   0.89993   1.21469  
-
-	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)     0.6155     0.1457   4.224 2.62e-05 ***
-	PCTREAD        -0.2972     0.1781  -1.669   0.0954 .  
-	PCTUPDATE      -0.0686     0.1581  -0.434   0.6645    
-	ACTROWPOOL     -0.2617     0.1420  -1.844   0.0655 .  
-	ATP            -0.2840     0.2064  -1.376   0.1692    
-	NUMPROCESSORS  -0.1411     0.1355  -1.042   0.2978    
-	PK              0.5243     0.1086   4.828 1.60e-06 ***
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-	(Dispersion parameter for quasibinomial family taken to be 0.6359494)
-
-	    Null deviance: 830.85  on 1003  degrees of freedom
-	Residual deviance: 807.17  on  997  degrees of freedom
-	AIC: NA
-
-	Number of Fisher Scoring iterations: 3
-
-	> 1-out.fit$deviance/out.fit$null.deviance
-	[1] 0.02850203
-
-##### expected ...
-med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
-summary(med.fit)
-
-	Call:
-	lm(formula = ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, 
-	    data = x)
-
-	Residuals:
-	    Min      1Q  Median      3Q     Max 
-	-0.3167 -0.1438 -0.1008  0.1092  0.9638 
-
-	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.31675    0.01893  16.731  < 2e-16 ***
-	NUMPROCESSORS -0.08691    0.02207  -3.939 8.77e-05 ***
-	PK            -0.19367    0.02466  -7.854 1.03e-14 ***
-	PCTUPDATE     -0.17204    0.03200  -5.376 9.48e-08 ***
-	PK:PCTUPDATE   0.19096    0.04638   4.118 4.15e-05 ***
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-	Residual standard error: 0.2744 on 999 degrees of freedom
-	Multiple R-squared:  0.08805,	Adjusted R-squared:  0.0844 
-	F-statistic: 24.11 on 4 and 999 DF,  p-value: < 2.2e-16
-
-----
-
-	Call:
-	lm(formula = ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, 
-	    data = x)
+	lm(formula = ATP ~ NUMPROCESSORS + ACTROWPOOL + PK + PCTUPDATE + 
+	    PCTUPDATE:PK, data = x)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.31739 -0.13452 -0.09765  0.10099  0.90127 
+	-0.34249 -0.14386 -0.08926  0.10551  0.87560 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.31761    0.01722  18.440  < 2e-16 ***
-	NUMPROCESSORS -0.07736    0.02007  -3.854 0.000124 ***
-	PK            -0.18572    0.02243  -8.279 3.94e-16 ***
-	PCTUPDATE     -0.20427    0.02911  -7.016 4.19e-12 ***
-	PK:PCTUPDATE   0.21675    0.04219   5.137 3.35e-07 ***
+	(Intercept)    0.29173    0.02022  14.428  < 2e-16 ***
+	NUMPROCESSORS -0.07707    0.02003  -3.848 0.000126 ***
+	ACTROWPOOL     0.05102    0.02101   2.428 0.015341 *  
+	PK            -0.18532    0.02238  -8.281 3.88e-16 ***
+	PCTUPDATE     -0.20397    0.02904  -7.023 4.00e-12 ***
+	PK:PCTUPDATE   0.21684    0.04209   5.152 3.11e-07 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2497 on 999 degrees of freedom
-	Multiple R-squared:  0.09942,	Adjusted R-squared:  0.09581 
-	F-statistic: 27.57 on 4 and 999 DF,  p-value: < 2.2e-16
+	Residual standard error: 0.2491 on 998 degrees of freedom
+	Multiple R-squared:  0.1047,	Adjusted R-squared:  0.1002 
+	F-statistic: 23.34 on 5 and 998 DF,  p-value: < 2.2e-16
 
-out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
-summary(out.fit)
+
+> med.fit <- lm(ATP ~ NUMPROCESSORS + NUMPROCESSORS*ACTROWPOOL + ACTROWPOOL + PK + PCTREAD + PCTUPDATE + PCTUPDATE:PK + PCTREAD*PK, data = x)
+> summary(med.fit)
 
 	Call:
-	lm(formula = MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + 
-	    NUMPROCESSORS + PK, data = x)
+	lm(formula = ATP ~ NUMPROCESSORS + NUMPROCESSORS * ACTROWPOOL + 
+	    ACTROWPOOL + PK + PCTREAD + PCTUPDATE + PCTUPDATE:PK + PCTREAD * 
+	    PK, data = x)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.70530 -0.41064 -0.03958  0.39791  0.58366 
+	-0.36802 -0.14424 -0.08894  0.10677  0.87696 
 
 	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.59000    0.03612  16.333  < 2e-16 ***
-	PCTREAD       -0.08037    0.04521  -1.778   0.0758 .  
-	PCTUPDATE     -0.03035    0.03919  -0.775   0.4387    
-	ACTROWPOOL    -0.06100    0.03536  -1.725   0.0848 .  
-	ATP           -0.10025    0.04791  -2.092   0.0367 *  
-	NUMPROCESSORS -0.01162    0.03388  -0.343   0.7317    
-	PK             0.11776    0.02706   4.353 1.48e-05 ***
+		                 Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)               0.28052    0.02500  11.220  < 2e-16 ***
+	NUMPROCESSORS            -0.07219    0.03337  -2.164   0.0307 *  
+	ACTROWPOOL                0.05508    0.03002   1.835   0.0668 .  
+	PK                       -0.17712    0.02688  -6.590 7.11e-11 ***
+	PCTREAD                   0.03267    0.03663   0.892   0.3727    
+	PCTUPDATE                -0.19151    0.03223  -5.942 3.89e-09 ***
+	NUMPROCESSORS:ACTROWPOOL -0.01060    0.05358  -0.198   0.8432    
+	PK:PCTUPDATE              0.20595    0.04658   4.421 1.09e-05 ***
+	PK:PCTREAD               -0.02846    0.05413  -0.526   0.5992    
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.418 on 997 degrees of freedom
-	Multiple R-squared:  0.03472,	Adjusted R-squared:  0.02892 
-	F-statistic: 5.978 on 6 and 997 DF,  p-value: 3.759e-06
+	Residual standard error: 0.2493 on 995 degrees of freedom
+	Multiple R-squared:  0.1055,	Adjusted R-squared:  0.09829 
+	F-statistic: 14.67 on 8 and 995 DF,  p-value: < 2.2e-16
 
------
+> out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
+> summary(out.fit)
 
 	Call:
 	lm(formula = MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + 
@@ -579,4 +417,14 @@ F-statistic: 3.691 on 5 and 475 DF,  p-value: 0.002751
 
 > test.modmed(med.out, covariates.1 = list (x$PK == 1), covariates.2 = list (x$PK == 0), data = x)
 
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
+    # dependent variable
+      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c4*PCTUPDATE+c5*PCTREAD
+   # interactions
+     '
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
 

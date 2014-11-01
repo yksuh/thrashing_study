@@ -13,12 +13,107 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 library(lavaan)
 thrashing_model <- '
      # mediator
+<<<<<<< HEAD
       ATP ~ a2*ACTROWPOOL+a3*PK+a5*PCTREAD
     # dependent variable
       MAXMPL ~ b1*ATP + c4*PCTUPDATE + c6*PK
     # interactions'
 fit <- sem(thrashing_model, data = x)
 summary(fit, robust=TRUE, standardized=TRUE, rsq=T) 
+=======
+      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
+    # dependent variable
+      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c3*PK+c4*PCTUPDATE+c5*PCTREAD
+   # interactions
+       INT_1 := a3*a4
+     '
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+lavaan (0.5-17) converged normally after  79 iterations
+
+  Number of observations                           201
+
+  Estimator                                       DWLS
+  Minimum Function Test Statistic                8.290
+  Degrees of freedom                                 2
+  P-value (Chi-square)                           0.016
+
+Model test baseline model:
+
+  Minimum Function Test Statistic              325.282
+  Degrees of freedom                                11
+  P-value                                        0.000
+
+User model versus baseline model:
+
+  Comparative Fit Index (CFI)                    0.980
+  Tucker-Lewis Index (TLI)                       0.890
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.125
+  90 Percent Confidence Interval          0.046  0.219
+  P-value RMSEA <= 0.05                          0.057
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.039
+
+Parameter estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+                   Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+Regressions:
+  ATP ~
+    NUMPROCE (a1)    -0.040    0.051   -0.778    0.436   -0.040   -0.066
+    PK       (a3)    -0.336    0.024  -13.954    0.000   -0.336   -0.725
+    PCTUPDAT (a4)     0.017    0.054    0.322    0.748    0.017    0.028
+  MAXMPL ~
+    ATP      (b1)    -1.118    0.416   -2.689    0.007   -1.118   -0.673
+    NUMPROCE (c1)    -0.080    0.099   -0.814    0.416   -0.080   -0.081
+    ACTROWPO (c2)    -0.146    0.082   -1.769    0.077   -0.146   -0.142
+    PK       (c3)    -0.336    0.187   -1.792    0.073   -0.336   -0.436
+    PCTUPDAT (c4)     0.442    0.106    4.149    0.000    0.442    0.431
+    PCTREAD  (c5)    -0.190    0.157   -1.216    0.224   -0.190   -0.137
+
+Covariances:
+  NUMPROCESSORS ~~
+    PK                0.000    0.014    0.013    0.989    0.000    0.001
+    PCTUPDATE        -0.005    0.010   -0.512    0.609   -0.005   -0.036
+    ACTROWPOOL       -0.008    0.010   -0.741    0.459   -0.008   -0.052
+    PCTREAD           0.005    0.007    0.629    0.530    0.005    0.043
+  PK ~~
+    PCTUPDATE         0.010    0.013    0.744    0.457    0.010    0.052
+    ACTROWPOOL       -0.026    0.011   -2.507    0.012   -0.026   -0.141
+    PCTREAD          -0.009    0.009   -0.983    0.326   -0.009   -0.063
+  PCTUPDATE ~~
+    ACTROWPOOL        0.002    0.010    0.165    0.869    0.002    0.012
+    PCTREAD          -0.040    0.007   -5.625    0.000   -0.040   -0.388
+  ACTROWPOOL ~~
+    PCTREAD          -0.002    0.007   -0.263    0.793   -0.002   -0.019
+
+Variances:
+    ATP               0.025    0.006                      0.025    0.471
+    MAXMPL            0.078    0.024                      0.078    0.527
+    NUMPROCESSORS     0.151    0.010                      0.151    1.000
+    PK                0.250    0.002                      0.250    1.000
+    PCTUPDATE         0.141    0.008                      0.141    1.000
+    ACTROWPOOL        0.140    0.008                      0.140    1.000
+    PCTREAD           0.076    0.016                      0.076    1.000
+
+Defined parameters:
+    INT_1            -0.006    0.018   -0.320    0.749   -0.006   -0.020
+
+R-Square:
+
+    ATP               0.529
+    MAXMPL            0.473
+
+
+>>>>>>> AnalysisQuery
 
 lavaan (0.5-17) converged normally after  25 iterations
 

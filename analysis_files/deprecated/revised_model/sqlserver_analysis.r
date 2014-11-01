@@ -13,12 +13,132 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 library(lavaan)
 thrashing_model <- '
      # mediator
+<<<<<<< HEAD
+=======
+      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
+    # dependent variable
+      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c3*PK+c4*PCTUPDATE+c5*PCTREAD
+   # interactions
+       INT_1 := a3*a4
+     '
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+lavaan (0.5-17) converged normally after  71 iterations
+
+  Number of observations                           216
+
+  Estimator                                       DWLS
+  Minimum Function Test Statistic                0.018
+  Degrees of freedom                                 2
+  P-value (Chi-square)                           0.991
+
+Model test baseline model:
+
+  Minimum Function Test Statistic              191.741
+  Degrees of freedom                                11
+  P-value                                        0.000
+
+User model versus baseline model:
+
+  Comparative Fit Index (CFI)                    1.000
+  Tucker-Lewis Index (TLI)                       1.060
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.000
+  90 Percent Confidence Interval          0.000  0.000
+  P-value RMSEA <= 0.05                          0.995
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.002
+
+Parameter estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+                   Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+Regressions:
+  ATP ~
+    NUMPROCE (a1)    -0.450    0.056   -8.021    0.000   -0.450   -0.551
+    PK       (a3)     0.021    0.050    0.429    0.668    0.021    0.034
+    PCTUPDAT (a4)     0.130    0.057    2.268    0.023    0.130    0.155
+  MAXMPL ~
+    ATP      (b1)     0.164    0.099    1.661    0.097    0.164    0.182
+    NUMPROCE (c1)     0.417    0.085    4.905    0.000    0.417    0.569
+    ACTROWPO (c2)     0.009    0.057    0.150    0.881    0.009    0.011
+    PK       (c3)    -0.042    0.046   -0.917    0.359   -0.042   -0.074
+    PCTUPDAT (c4)    -0.138    0.082   -1.683    0.092   -0.138   -0.182
+    PCTREAD  (c5)     0.003    0.097    0.027    0.979    0.003    0.003
+
+Covariances:
+  NUMPROCESSORS ~~
+    PK                0.005    0.013    0.368    0.713    0.005    0.025
+    PCTUPDATE        -0.003    0.010   -0.329    0.742   -0.003   -0.022
+    ACTROWPOOL       -0.000    0.009   -0.033    0.973   -0.000   -0.002
+    PCTREAD           0.004    0.007    0.589    0.556    0.004    0.034
+  PK ~~
+    PCTUPDATE         0.007    0.013    0.537    0.591    0.007    0.036
+    ACTROWPOOL        0.000    0.013    0.002    0.999    0.000    0.000
+    PCTREAD          -0.008    0.011   -0.675    0.500   -0.008   -0.046
+  PCTUPDATE ~~
+    ACTROWPOOL        0.000    0.009    0.008    0.993    0.000    0.001
+    PCTREAD          -0.054    0.008   -7.161    0.000   -0.054   -0.430
+  ACTROWPOOL ~~
+    PCTREAD          -0.000    0.008   -0.000    1.000   -0.000   -0.000
+
+Variances:
+    ATP               0.067    0.014                      0.067    0.668
+    MAXMPL            0.059    0.010                      0.059    0.728
+    NUMPROCESSORS     0.150    0.009                      0.150    1.000
+    PK                0.251    0.001                      0.251    1.000
+    PCTUPDATE         0.141    0.008                      0.141    1.000
+    ACTROWPOOL        0.140    0.008                      0.140    1.000
+    PCTREAD           0.111    0.016                      0.111    1.000
+
+Defined parameters:
+    INT_1             0.003    0.006    0.428    0.668    0.003    0.005
+
+R-Square:
+
+    ATP               0.332
+    MAXMPL            0.272
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a1*NUMPROCESSORS+a4*PCTUPDATE
+    # dependent variable
+      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c4*PCTUPDATE
+   # interactions
+      # INT_1 := a3*a4
+     '
+#fit <- sem(thrashing_model, estimator="DWLS", data = x)
+fit <- sem(thrashing_model, data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+>>>>>>> AnalysisQuery
       ATP ~ a1*NUMPROCESSORS+a4*PCTUPDATE
     # dependent variable
       MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c4*PCTUPDATE
     # interactions'
+<<<<<<< HEAD
 fit <- sem(thrashing_model, data = x)
 summary(fit, standardized=TRUE, rsq=T) 
+=======
+#fit <- sem(thrashing_model, data = x)
+#summary(fit, standardized=TRUE, rsq=T) 
+fit <- sem(thrashing_model, estimator="DWLS", data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+>>>>>>> AnalysisQuery
 
 lavaan (0.5-17) converged normally after  20 iterations
 

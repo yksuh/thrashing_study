@@ -9,6 +9,39 @@ x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
 x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
 
+<<<<<<< HEAD
+=======
+> cor(x$NUMPROCESSORS, x$ATP)
+[1] 0.1098935
+> cor(x$PCTREAD, x$ATP)
+[1] 0.267628
+> cor(x$PCTUPDATE, x$ATP)
+[1] -0.355188
+> cor(x$ACTROWPOOL, x$ATP)
+[1] 0.1048952
+> cor(x$PK, x$ATP)
+[1] -0.3455648
+
+PCTUPDATE
+PK
+ACTROWPOOL
+PCTREAD
+NUMPROCESSORS
+
+> cor(x$ATP, x$MAXMPL)
+[1] -0.09787458
+> cor(x$NUMPROCESSORS, x$MAXMPL)
+[1] -0.4372105
+> cor(x$PCTREAD, x$MAXMPL)
+[1] 0.06340293
+> cor(x$PCTUPDATE, x$MAXMPL)
+[1] -0.1913905
+> cor(x$ACTROWPOOL, x$MAXMPL)
+[1] 0.01082654
+> cor(x$PK, x$MAXMPL)
+[1] 0.03558359
+
+>>>>>>> AnalysisQuery
 library(lavaan)
 thrashing_model <- '
      # mediator

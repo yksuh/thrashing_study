@@ -13,6 +13,107 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-m
 library(lavaan)
 thrashing_model <- '
      # mediator
+<<<<<<< HEAD
+=======
+      ATP ~ a1*NUMPROCESSORS+a3*PK+a4*PCTUPDATE
+    # dependent variable
+      MAXMPL ~ b1*ATP+c1*NUMPROCESSORS+c2*ACTROWPOOL+c3*PK+c4*PCTUPDATE+c5*PCTREAD
+   # interactions
+       INT_1 := a3*a4
+     '
+fit <- sem(thrashing_model, data = x)
+summary(fit, fit.measures = TRUE, standardized=TRUE, rsq=T)
+
+lavaan (0.5-17) converged normally after  28 iterations
+
+  Number of observations                           191
+
+  Estimator                                         ML
+  Minimum Function Test Statistic               14.155
+  Degrees of freedom                                 2
+  P-value (Chi-square)                           0.001
+
+Model test baseline model:
+
+  Minimum Function Test Statistic              264.779
+  Degrees of freedom                                11
+  P-value                                        0.000
+
+User model versus baseline model:
+
+  Comparative Fit Index (CFI)                    0.952
+  Tucker-Lewis Index (TLI)                       0.737
+
+Loglikelihood and Information Criteria:
+
+  Loglikelihood user model (H0)               -443.236
+  Loglikelihood unrestricted model (H1)       -436.158
+
+  Number of free parameters                         11
+  Akaike (AIC)                                 908.472
+  Bayesian (BIC)                               944.247
+  Sample-size adjusted Bayesian (BIC)          909.403
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.178
+  90 Percent Confidence Interval          0.099  0.271
+  P-value RMSEA <= 0.05                          0.006
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.034
+
+Parameter estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+                   Estimate  Std.err  Z-value  P(>|z|)   Std.lv  Std.all
+Regressions:
+  ATP ~
+    NUMPROCE (a1)    -0.037    0.035   -1.045    0.296   -0.037   -0.055
+    PK       (a3)    -0.147    0.028   -5.238    0.000   -0.147   -0.278
+    PCTUPDAT (a4)    -0.430    0.037  -11.530    0.000   -0.430   -0.612
+  MAXMPL ~
+    ATP      (b1)     0.272    0.111    2.441    0.015    0.272    0.170
+    NUMPROCE (c1)    -0.224    0.054   -4.119    0.000   -0.224   -0.211
+    ACTROWPO (c2)    -0.062    0.056   -1.098    0.272   -0.062   -0.056
+    PK       (c3)     0.563    0.046   12.157    0.000    0.563    0.665
+    PCTUPDAT (c4)    -0.230    0.080   -2.877    0.004   -0.230   -0.204
+    PCTREAD  (c5)    -0.163    0.070   -2.339    0.019   -0.163   -0.133
+
+Variances:
+    ATP               0.037    0.004                      0.037    0.537
+    MAXMPL            0.088    0.009                      0.088    0.497
+
+Defined parameters:
+    INT_1             0.063    0.013    4.818    0.000    0.063    0.170
+
+R-Square:
+
+    ATP               0.463
+    MAXMPL            0.503
+
+#####
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+      ATP ~ a3*PK+a4*PCTUPDATE+a2*NUMPROCESSORS
+    # dependent variable
+      MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c4*PCTUPDATE + c5*PCTREAD + c6*PK
+    # interactions
+     INT_1 := a3*a4'
+fit <- sem(thrashing_model, data = x)
+summary(fit, standardized=TRUE, rsq=T) 
+
+
+
+library(lavaan)
+thrashing_model <- '
+     # mediator
+>>>>>>> AnalysisQuery
       ATP ~ a3*PK+a4*PCTUPDATE+a5*PCTREAD
     # dependent variable
       MAXMPL ~ b1*ATP + c2*NUMPROCESSORS + c4*PCTUPDATE + c5*PCTREAD + c6*PK

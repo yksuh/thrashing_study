@@ -1,6 +1,7 @@
 # sqlserver
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 sqlserver <- subset(x, x$DBMS=='sqlserver')
+<<<<<<< HEAD
 sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
 sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
 x = rbind(sqlserver) 
@@ -8,6 +9,27 @@ x$ACTROWPOOL = (x$ACTROWPOOL-min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)-min(x$ACTROWP
 x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
 x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
+=======
+sqlserver$ACTROWPOOL = (sqlserver$ACTROWPOOL-min(sqlserver$ACTROWPOOL))/(max(sqlserver$ACTROWPOOL)-min(sqlserver$ACTROWPOOL))
+sqlserver$PCTREAD = (sqlserver$PCTREAD-min(sqlserver$PCTREAD))/(max(sqlserver$PCTREAD)-min(sqlserver$PCTREAD))
+sqlserver$PCTUPDATE = (sqlserver$PCTUPDATE-min(sqlserver$PCTUPDATE))/(max(sqlserver$PCTUPDATE)-min(sqlserver$PCTUPDATE))
+sqlserver$NUMPROCESSORS = (sqlserver$NUMPROCESSORS-min(sqlserver$NUMPROCESSORS))/(max(sqlserver$NUMPROCESSORS)-min(sqlserver$NUMPROCESSORS))
+sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
+sqlserver$ATP[sqlserver$ATP > 0.8 & sqlserver$ATP <= 1] <- 5
+sqlserver$ATP[sqlserver$ATP > 0.6 & sqlserver$ATP <= 0.8] <- 4
+sqlserver$ATP[sqlserver$ATP > 0.4 & sqlserver$ATP <= 0.6] <- 3
+sqlserver$ATP[sqlserver$ATP > 0.2 & sqlserver$ATP <= 0.4] <- 2
+sqlserver$ATP[sqlserver$ATP <= 0.2 ] <- 1
+sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
+sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
+sqlserver$MAXMPL[sqlserver$MAXMPL == 1] <- 5
+sqlserver$MAXMPL[sqlserver$MAXMPL > 0.75 & sqlserver$MAXMPL <= 1] <- 4
+sqlserver$MAXMPL[sqlserver$MAXMPL > 0.5 & sqlserver$MAXMPL <= 0.75] <- 3
+sqlserver$MAXMPL[sqlserver$MAXMPL > 0.25 & sqlserver$MAXMPL <= 0.50] <- 2
+sqlserver$MAXMPL[sqlserver$MAXMPL<=0.25] <- 1
+sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
+x = rbind(sqlserver) 
+>>>>>>> AnalysisQuery
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE  + PK + PK:PCTUPDATE, data = x)
 summary(med.fit)
@@ -18,6 +40,33 @@ summary(med.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
+<<<<<<< HEAD
+=======
+	-0.41677 -0.21621 -0.07117  0.15160  0.66611 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.28374    0.04356   6.514 5.28e-10 ***
+	NUMPROCESSORS -0.47278    0.05190  -9.110  < 2e-16 ***
+	PCTUPDATE      0.20057    0.07438   2.697  0.00757 ** 
+	PK             0.03743    0.05658   0.661  0.50906    
+	PCTUPDATE:PK  -0.04782    0.10718  -0.446  0.65594    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2948 on 211 degrees of freedom
+	Multiple R-squared:  0.3121,	Adjusted R-squared:  0.299 
+	F-statistic: 23.93 on 4 and 211 DF,  p-value: 2.465e-16
+
+----
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, 
+	    data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+>>>>>>> AnalysisQuery
 	-0.36827 -0.22070  0.00524  0.12718  0.61242 
 
 	Coefficients:
@@ -43,6 +92,35 @@ summary(out.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
+<<<<<<< HEAD
+=======
+	-0.56506 -0.14583  0.03651  0.15351  0.62003 
+
+	Coefficients:
+		       Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.402679   0.050867   7.916 1.42e-13 ***
+	NUMPROCESSORS  0.430120   0.055888   7.696 5.48e-13 ***
+	ATP           -0.008816   0.062876  -0.140 0.888627    
+	PCTREAD        0.009348   0.061176   0.153 0.878700    
+	PCTUPDATE     -0.215336   0.055036  -3.913 0.000123 ***
+	ACTROWPOOL     0.019457   0.049147   0.396 0.692590    
+	PK            -0.040056   0.036733  -1.090 0.276765    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2692 on 209 degrees of freedom
+	Multiple R-squared:  0.3404,	Adjusted R-squared:  0.3214 
+	F-statistic: 17.97 on 6 and 209 DF,  p-value: < 2.2e-16
+
+---
+
+	Call:
+	lm(formula = MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + 
+	    ACTROWPOOL + PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+>>>>>>> AnalysisQuery
 	-0.55858 -0.06339  0.02285  0.12832  0.52556 
 
 	Coefficients:
@@ -107,7 +185,45 @@ summary(sens.out)
 	R^2_M*R^2_Y* at which ADE = 0: 0.49
 	R^2_M~R^2_Y~ at which ADE = 0: 0.2388
 
+<<<<<<< HEAD
+=======
+
+----
+> sens.out$r.square.y
+[1] 0.3403505
+> sens.out$r.square.m
+[1] 0.3120641
+
+---
+
+>>>>>>> AnalysisQuery
 > sens.out$r.square.y
 [1] 0.2717694
 > sens.out$r.square.m
 [1] 0.3307554
+<<<<<<< HEAD
+=======
+
+
+y <- subset(x, x$PK == 0)
+cor(y$PCTUPDATE, y$MAXMPL)
+y <- subset(x, x$PK == 1)
+cor(y$PCTUPDATE, y$MAXMPL)
+y <- subset(x, x$PK == 0)
+cor(y$PCTUPDATE, y$ATP)
+y <- subset(x, x$PK == 1)
+cor(y$PCTUPDATE, y$ATP)
+
+> y <- subset(x, x$PK == 0)
+> cor(y$PCTUPDATE, y$MAXMPL)
+[1] -0.1330634
+> y <- subset(x, x$PK == 1)
+> cor(y$PCTUPDATE, y$MAXMPL)
+[1] -0.2025411
+> y <- subset(x, x$PK == 0)
+> cor(y$PCTUPDATE, y$ATP)
+[1] 0.1795936
+> y <- subset(x, x$PK == 1)
+> cor(y$PCTUPDATE, y$ATP)
+[1] 0.1472567
+>>>>>>> AnalysisQuery

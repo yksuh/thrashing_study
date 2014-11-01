@@ -2,15 +2,50 @@
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 oracle <- subset(x, x$DBMS=='oracle')
 oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
+oracle$ATP[oracle$ATP > 0.8 & oracle$ATP <= 1] <- 5
+oracle$ATP[oracle$ATP > 0.6 & oracle$ATP <= 0.8] <- 4
+oracle$ATP[oracle$ATP > 0.4 & oracle$ATP <= 0.6] <- 3
+oracle$ATP[oracle$ATP > 0.2 & oracle$ATP <= 0.4] <- 2
+oracle$ATP[oracle$ATP <= 0.2 ] <- 1
+oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
 oracle$MAXMPL = (oracle$MAXMPL-min(oracle$MAXMPL))/(max(oracle$MAXMPL)-min(oracle$MAXMPL))
+oracle$MAXMPL[oracle$MAXMPL == 1] <- 5
+oracle$MAXMPL[oracle$MAXMPL > 0.75 & oracle$MAXMPL <= 1] <- 4
+oracle$MAXMPL[oracle$MAXMPL > 0.5 & oracle$MAXMPL <= 0.75] <- 3
+oracle$MAXMPL[oracle$MAXMPL > 0.25 & oracle$MAXMPL <= 0.50] <- 2
+oracle$MAXMPL[oracle$MAXMPL<=0.25] <- 1
+oracle$MAXMPL = (oracle$MAXMPL-min(oracle$MAXMPL))/(max(oracle$MAXMPL)-min(oracle$MAXMPL))
+oracle$ACTROWPOOL = (oracle$ACTROWPOOL-min(oracle$ACTROWPOOL))/(max(oracle$ACTROWPOOL)-min(oracle$ACTROWPOOL))
+oracle$PCTREAD = (oracle$PCTREAD-min(oracle$PCTREAD))/(max(oracle$PCTREAD)-min(oracle$PCTREAD))
+oracle$PCTUPDATE = (oracle$PCTUPDATE-min(oracle$PCTUPDATE))/(max(oracle$PCTUPDATE)-min(oracle$PCTUPDATE))
+oracle$NUMPROCESSORS = (oracle$NUMPROCESSORS-min(oracle$NUMPROCESSORS))/(max(oracle$NUMPROCESSORS)-min(oracle$NUMPROCESSORS))
 x = rbind(oracle) 
-x$ACTROWPOOL = (x$ACTROWPOOL-min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)-min(x$ACTROWPOOL))
-x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
-x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
-x$NUMPROCESSORS = (x$NUMPROCESSORS-min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)-min(x$NUMPROCESSORS))
-
 med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, data = x)
 summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, 
+	    data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.22907 -0.04896 -0.00347  0.03017  0.81615 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.14994    0.02109   7.109 2.18e-11 ***
+	NUMPROCESSORS  0.07913    0.02421   3.268  0.00128 ** 
+	PCTUPDATE     -0.23707    0.03556  -6.667 2.65e-10 ***
+	PK            -0.18051    0.02723  -6.629 3.27e-10 ***
+	PCTUPDATE:PK   0.23761    0.04992   4.760 3.77e-06 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.1326 on 194 degrees of freedom
+	Multiple R-squared:  0.271,	Adjusted R-squared:  0.256 
+	F-statistic: 18.03 on 4 and 194 DF,  p-value: 1.318e-12
+
+----
 
 	Call:
 	lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, 
@@ -36,6 +71,32 @@ summary(med.fit)
 
 out.fit <- lm(MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + ACTROWPOOL + PK, data = x)
 summary(out.fit)
+
+	Call:
+	lm(formula = MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + 
+	    ACTROWPOOL + PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.76225 -0.35266 -0.08073  0.36065  0.86665 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.75312    0.07977   9.441  < 2e-16 ***
+	NUMPROCESSORS -0.45193    0.07858  -5.751 3.44e-08 ***
+	ATP           -0.24224    0.21929  -1.105    0.271    
+	PCTREAD       -0.02996    0.09989  -0.300    0.765    
+	PCTUPDATE     -0.22988    0.09173  -2.506    0.013 *  
+	ACTROWPOOL     0.01414    0.08149   0.174    0.862    
+	PK             0.01603    0.06275   0.256    0.799    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.4215 on 192 degrees of freedom
+	Multiple R-squared:  0.1928,	Adjusted R-squared:  0.1676 
+	F-statistic: 7.642 on 6 and 192 DF,  p-value: 2.27e-07
+
+----
 
 	Call:
 	lm(formula = MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + 

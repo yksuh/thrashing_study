@@ -853,8 +853,6 @@ public abstract class GeneralDBMS extends Plugin{
                                       columnDataTypes);
 Main._logger.writeIntoLog(insertSQL);	    
     _statement.executeUpdate(insertSQL);
-    if(insertSQL.contains("val1"))
-		System.exit(-1);
     return insertSQL;
   }
   

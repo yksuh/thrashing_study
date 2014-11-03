@@ -690,9 +690,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //						}
 //					}
 					
-					if(batchSetNumToRun < 21){
-						continue;
-					}
+//					if(batchSetNumToRun < 21){
+//						continue;
+//					}
 					
 					// get task number 
 					maxTaskNum = getMaxTaskNum(runID);

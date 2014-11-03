@@ -16,7 +16,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.sql.ResultSet;
 
 import azdblab.Constants;
@@ -854,6 +853,8 @@ public abstract class GeneralDBMS extends Plugin{
                                       columnDataTypes);
 Main._logger.writeIntoLog(insertSQL);	    
     _statement.executeUpdate(insertSQL);
+    if(insertSQL.contains("val1"))
+		System.exit(-1);
     return insertSQL;
   }
   

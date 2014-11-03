@@ -744,7 +744,6 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							},
 							TRANSACTION.columnDataTypes);
 					LabShelfManager.getShelf().commit();
-					System.exit(-1);
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 //					e.printStackTrace();

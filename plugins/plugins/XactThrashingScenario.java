@@ -529,7 +529,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// if integer column, set a random value
 			if (colName.contains("val")) {
 				String newStrVal = RandomAlphaNumericString((int) cols[chosenCol].mySize);
-				str += "SET " + colName + " = \'" + newStrVal + "\' ";
+				str += "SET " + colName + " = \'\'" + newStrVal + "\'\' ";
 			} else {
 				str += "SET " + colName + " = " + newValue + " ";
 			}
@@ -744,6 +744,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							},
 							TRANSACTION.columnDataTypes);
 					LabShelfManager.getShelf().commit();
+					System.exit(-1);
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 //					e.printStackTrace();

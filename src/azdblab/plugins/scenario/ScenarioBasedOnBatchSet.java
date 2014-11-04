@@ -656,6 +656,8 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
 		int totalBatchSets = (totalNumRealSel+totalNumUpdateSel)*totalActiveRowPools;
 		double dNmRwsFrmSLCT = 0; boolean flag = false;
+		
+		boolean firstLoading = true;
 		// transaction size
 //		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
 		while(dNmRwsFrmSLCT <= mxNumRowsFromSELECT){

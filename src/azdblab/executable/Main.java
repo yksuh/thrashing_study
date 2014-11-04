@@ -623,9 +623,9 @@ _logger.outputLog(line);
 //		double effDBSz = experiment.getEffectiveDBSize();
 //		duration = experiment.getDuration();
 
-		dbmsBuffCacheSizeMin = experiment.getDBMSBufferCacheMin();
-		dbmsBuffCacheSizeMax = experiment.getDBMSBufferCacheMax();
-		dbmsBuffCacheSizeIncr = experiment.getDBMSBufferCacheIncr();
+//		dbmsBuffCacheSizeMin = experiment.getDBMSBufferCacheMin();
+//		dbmsBuffCacheSizeMax = experiment.getDBMSBufferCacheMax();
+//		dbmsBuffCacheSizeIncr = experiment.getDBMSBufferCacheIncr();
 		numCores = experiment.getNumCores();
 		sessionDuration = experiment.getBatchRunTime();
 		minNumRowsFromSELECT = experiment.getTransactionSizeMin();
@@ -661,9 +661,9 @@ _logger.outputLog(line);
 //		_logger.outputLog("numIncrs = " + numIncr);
 //		_logger.outputLog("effective db size = " + String.format("%.2f", effDBSz));
 		
-		String str = String.format("DBMSBufferCacheSize: %.2f%%, %d%%, %.2f%%", dbmsBuffCacheSizeMin*100, (int)(dbmsBuffCacheSizeIncr*100), dbmsBuffCacheSizeMax*100);
-		_logger.outputLog(str);
-		str = String.format("Number of Cores: %d", numCores);
+//		String str = String.format("DBMSBufferCacheSize: %.2f%%, %d%%, %.2f%%", dbmsBuffCacheSizeMin*100, (int)(dbmsBuffCacheSizeIncr*100), dbmsBuffCacheSizeMax*100);
+//		_logger.outputLog(str);
+		String str = String.format("Number of Cores: %d", numCores);
 		_logger.outputLog(str);
 		str = String.format("Batch Run Time: %d", sessionDuration);
 		_logger.outputLog(str);

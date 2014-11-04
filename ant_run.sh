@@ -1,5 +1,5 @@
 #!/bin/sh
-git pull origin master
-ant -Dexec_dir=/cs/projects/tau/installations/azdblab/thrashing_study -Dplugins.dir=/cs/projects/tau/installations/azdblab/thrashing_study/plugins AZDBLAB xtplugin db2plugin oraplugin pgsqlplugin mysqlplugin xtsch
-cp /cs/projects/tau/installations/azdblab/thrashing_study/azdblab.jar ~/sqlserver/
-cp /cs/projects/tau/installations/azdblab/thrashing_study/plugins/Xact*.jar ~/sqlserver/
+git pull origin NewExperiment
+ant -Dexec_dir=/cs/projects/tau/installations/azdblab/dbms_thrashing -Dplugins.dir=/cs/projects/tau/installations/azdblab/dbms_thrashing/plugins AZDBLAB xtplugin db2plugin oraplugin pgsqlplugin mysqlplugin xtsch
+#cp /cs/projects/tau/installations/azdblab/dbms_thrashing/azdblab.jar ~/sqlserver/
+#cp /cs/projects/tau/installations/azdblab/dbms_thrashing/plugins/Xact*.jar ~/sqlserver/

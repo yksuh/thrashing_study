@@ -186,7 +186,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_VARCHAR
 			}, 
-			new int[] {10, 10, 10, 2000}, 
+			new int[] {10, 10, 10, 4000}, 
 			new int[] { 0, 0, 0, 0}, 
 			new String[] { "ClientID", "TransactionNum"}, // unique
 			new String[] { "TransactionID"}, 	// primary key
@@ -675,6 +675,8 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				
 				// effective db size
 				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
+//if(dActRowPlSz < mxActRowPlSz)
+//	continue;
 					//if(firstLoading) firstLoading = false;
 					batchSetNumToRun++;
 					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, hotspot ratio: %d%%)", 

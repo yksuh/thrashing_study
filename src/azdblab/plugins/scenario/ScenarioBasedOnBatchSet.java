@@ -655,9 +655,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 		int totalActiveRowPools = (int)((mxActRowPlSz-mnActRwPlSz)/actRwPlSzIncr)+1;
 //		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
 		int totalBatchSets = (totalNumRealSel+totalNumUpdateSel)*totalActiveRowPools;
-		double dNmRwsFrmSLCT = 0;
-		
-		boolean firstLoading = true;
+		double dNmRwsFrmSLCT = 0; boolean flag = false;
 		// transaction size
 //		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
 		while(dNmRwsFrmSLCT <= mxNumRowsFromSELECT){
@@ -669,8 +667,16 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				if(dNmRwsFrmSLCT == 0 && dNmRwsFrmUPT == 0){
 					continue;
 				}
-				if(dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
+//				if(dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
+//					continue;
+//				}
+				if(flag && dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
 					continue;
+				}
+				
+				if(!flag && dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT != 0){
+					dNmRwsFrmUPT = 0;
+					flag = true;
 				}
 				
 				// effective db size

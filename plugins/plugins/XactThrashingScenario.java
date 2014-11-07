@@ -3395,7 +3395,7 @@ if(clientNum % 100 == 0)
 	Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);
 //				LabShelfManager.getShelf().commit();
 			} else {
-if(clientNum % barrier.length == 0)
+if(clientNum % this.incrMPL == 0)
 	Main._logger.outputDebug("Client =>"+clientNum+" "+insertSQL);
 				String updateSQL = "Update " + Constants.TABLE_PREFIX
 						+ Constants.TABLE_CLIENTHASRESULT
@@ -3792,7 +3792,7 @@ if(clientNum % barrier.length == 0)
 				insertTransactionRunResult(clientRunResID, xactID, 0, -1, -1, -1, -1);
 				// print out run stat
 				String strStat = String.format("[numXacts: 0]");
-				if(clientID % barrier.length == 0)
+				if(clientID % this.incrMPL == 0)
 					Main._logger.writeIntoLog(str + "=>" + strStat);
 				return;
 			}
@@ -3833,7 +3833,7 @@ if(clientNum % barrier.length == 0)
 					.format("[numXacts: %d, min: %d(ms), max: %d(ms), sum: %d(ms), lw: %d(ms)]",
 							numExecXacts, minXactProcTime,
 							maxXactProcTime, sumXactProcTime, sumLockWaitTime);
-			if(clientID % barrier.length == 0)
+			if(clientID % this.incrMPL == 0)
 				Main._logger.outputLog(str + "=>" + strStat);
 //			Main._logger.outputLog("###<End>INSERT " + str + " run result => " + strStat);
 		} // end for

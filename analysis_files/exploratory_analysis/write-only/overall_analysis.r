@@ -1,4 +1,3 @@
-#http://www.ats.ucla.edu/stat/r/dae/logit.htm
 # Overall: 33.4% (close to suboptimal)
 library(aod)
 library(ggplot2)
@@ -44,26 +43,23 @@ x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWP
 x$PCTUPDATE = (x$PCTUPDATE/min(x$PCTUPDATE))/(max(x$PCTUPDATE)/min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 
-> nrow(x)
+nrow(x)
 [1] 608
 x <- subset(x, x$MAXMPL < 1)
-> nrow(x)
+nrow(x)
 [1] 301
 
-cor(x$PK, x$MAXMPL)
-[1] 0.08220043
+cor(x$NUMPROCESSORS, x$ATP)
+-0.33
 
-cor(x$ATP, x$MAXMPL)
-[1] -0.02
+cor(x$PCTUPDATE, x$ATP)
+-0.01
 
-cor(x$NUMPROCESSORS, x$MAXMPL)
-[1] -0.23
+cor(x$PK, x$ATP)
+0.18
 
-cor(x$ACTROWPOOL, x$MAXMPL)
-[1] -0.07
-
-cor(x$PCTUPDATE, x$MAXMPL)
-[1] -0.009013733
+cor(x$PCTUPDATE*x$PK, x$ATP)
+0.13
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 summary(med.fit)
@@ -89,6 +85,21 @@ summary(med.fit)
 	Residual standard error: 0.2954 on 296 degrees of freedom
 	Multiple R-squared:  0.1498,	Adjusted R-squared:  0.1383 
 	F-statistic: 13.04 on 4 and 296 DF,  p-value: 8.558e-10
+
+cor(x$PK, x$MAXMPL)
+[1] 0.08220043
+
+cor(x$ATP, x$MAXMPL)
+[1] -0.02
+
+cor(x$NUMPROCESSORS, x$MAXMPL)
+[1] -0.23
+
+cor(x$ACTROWPOOL, x$MAXMPL)
+[1] -0.07
+
+cor(x$PCTUPDATE, x$MAXMPL)
+[1] -0.009013733
 
 out.fit <- lm(MAXMPL ~ PK + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)

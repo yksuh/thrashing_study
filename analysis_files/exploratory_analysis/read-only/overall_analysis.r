@@ -1,4 +1,6 @@
 # Overall: 33.4% (close to suboptimal)
+library(aod)
+library(ggplot2)
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 # ATP normalization
 # db2
@@ -36,33 +38,28 @@ sqlserver_r <- subset(sqlserver_r, select = -PCTUPDATE)
 sqlserver_r$ATP = (sqlserver_r$ATP-min(sqlserver_r$ATP))/(max(sqlserver_r$ATP)-min(sqlserver_r$ATP))
 sqlserver_r$MAXMPL = (sqlserver_r$MAXMPL-min(sqlserver_r$MAXMPL))/(max(sqlserver_r$MAXMPL)-min(sqlserver_r$MAXMPL))
 sqlserver <- sqlserver_r
-x = rbind(db2,mysql,oracle,pgsql,sqlserver)]
+#### gother each DBMS' samples
+x = rbind(db2,mysql,oracle,pgsql,sqlserver)
 x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
 x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
-> nrow(x)
+nrow(x)
 [1] 401
 x <- subset(x, x$MAXMPL < 1)
-> nrow(x)
+nrow(x)
 [1] 198
 
-#x$MAXMPL <- round(x$MAXMPL, 1)
-#x$ATP <- round(x$ATP, 5)
+cor(x$NUMPROCESSORS, x$ATP)
+-0.09
 
-cor(x$PK, x$MAXMPL)
-[1] 0.2891473
+cor(x$PCTREAD, x$ATP)
+0.01
 
-cor(x$ATP, x$MAXMPL)
-[1] 0.02110625
+cor(x$PK, x$ATP)
+-0.36
 
-cor(x$NUMPROCESSORS, x$MAXMPL)
-[1] 0.08
-
-cor(x$ACTROWPOOL, x$MAXMPL)
-[1] -0.13
-
-cor(x$PCTREAD, x$MAXMPL)
-[1] 0.02
+cor(x$PCTREAD*x$PK, x$ATP)
+-0.23
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK, data = x)
 summary(med.fit)
@@ -88,6 +85,21 @@ summary(med.fit)
 	Residual standard error: 0.3034 on 193 degrees of freedom
 	Multiple R-squared:  0.1468,	Adjusted R-squared:  0.1292 
 	F-statistic: 8.305 on 4 and 193 DF,  p-value: 3.351e-06
+
+cor(x$PK, x$MAXMPL)
+[1] 0.2891473
+
+cor(x$ATP, x$MAXMPL)
+[1] 0.02110625
+
+cor(x$NUMPROCESSORS, x$MAXMPL)
+[1] 0.08
+
+cor(x$ACTROWPOOL, x$MAXMPL)
+[1] -0.13
+
+cor(x$PCTREAD, x$MAXMPL)
+[1] 0.02
 
 out.fit <- lm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
@@ -168,9 +180,6 @@ X2 = 79.0, df = 5, P(> X2) = 1.3e-15
 > 1-out.fit$deviance/out.fit$null.deviance
 [1] 0.16
 ###########################################################################################################################
-
-
-
 
 
 

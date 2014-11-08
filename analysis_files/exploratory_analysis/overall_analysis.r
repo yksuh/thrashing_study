@@ -1,7 +1,7 @@
 # Overall: 33.4% (close to suboptimal)
 library(aod)
 library(ggplot2)
-x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 # ATP normalization
 # db2
 db2 <- subset(x, x$DBMS=='db2')
@@ -44,22 +44,22 @@ x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWP
 x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 nrow(x)
-[1] 410
+[1] 401
 x <- subset(x, x$MAXMPL < 1)
 nrow(x)
-[1] 101
+[1] 198
 
 cor(x$NUMPROCESSORS, x$ATP)
-0.01
+-0.09
 
 cor(x$PCTREAD, x$ATP)
--0.32
+0.01
 
 cor(x$PK, x$ATP)
--0.48
+-0.36
 
 cor(x$PCTREAD*x$PK, x$ATP)
--0.37
+-0.23
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK, data = x)
 summary(med.fit)
@@ -70,36 +70,59 @@ summary(med.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.36310 -0.10358 -0.01467  0.14420  0.51751 
+	-0.49894 -0.19359 -0.04431  0.18873  0.79324 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.39741    0.03692  10.765  < 2e-16 ***
-	NUMPROCESSORS -0.01231    0.05038  -0.244  0.80756    
-	PK            -0.23832    0.04952  -4.813 5.54e-06 ***
-	PCTREAD       -0.16370    0.04921  -3.326  0.00125 ** 
-	PK:PCTREAD     0.09826    0.07767   1.265  0.20893    
+	(Intercept)    0.46835    0.04396  10.655  < 2e-16 ***
+	NUMPROCESSORS -0.12843    0.06842  -1.877 0.062030 .  
+	PK            -0.24476    0.06358  -3.850 0.000161 ***
+	PCTREAD        0.04689    0.05830   0.804 0.422244    
+	PK:PCTREAD    -0.05457    0.10474  -0.521 0.602933    
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.1747 on 96 degrees of freedom
-	Multiple R-squared:   0.32,	Adjusted R-squared:  0.2916 
-	F-statistic: 11.29 on 4 and 96 DF,  p-value: 1.496e-0
+	Residual standard error: 0.3034 on 193 degrees of freedom
+	Multiple R-squared:  0.1468,	Adjusted R-squared:  0.1292 
+	F-statistic: 8.305 on 4 and 193 DF,  p-value: 3.351e-06
+
+	##### Alternative
+		Call:
+		lm(formula = ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK, 
+		    data = x)
+
+		Residuals:
+		     Min       1Q   Median       3Q      Max 
+		-0.38983 -0.16678 -0.09557  0.22106  0.86543 
+
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.40162    0.03208  12.520  < 2e-16 ***
+		NUMPROCESSORS -0.09029    0.04189  -2.155   0.0317 *  
+		PK            -0.22177    0.03776  -5.873 9.08e-09 ***
+		PCTREAD       -0.02616    0.04581  -0.571   0.5683    
+		PK:PCTREAD     0.01310    0.06666   0.196   0.8443    
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+		Residual standard error: 0.2939 on 396 degrees of freedom
+		Multiple R-squared:  0.134,	Adjusted R-squared:  0.1252 
+		F-statistic: 15.31 on 4 and 396 DF,  p-value: 1.182e-11
 
 cor(x$PK, x$MAXMPL)
-[1] 0.19
+[1] 0.2891473
 
 cor(x$ATP, x$MAXMPL)
-[1] -0.53
+[1] 0.02110625
 
 cor(x$NUMPROCESSORS, x$MAXMPL)
-[1] 0.10
+[1] 0.08
 
 cor(x$ACTROWPOOL, x$MAXMPL)
-[1] 0.03
+[1] -0.13
 
 cor(x$PCTREAD, x$MAXMPL)
-[1] 0.16
+[1] 0.02
 
 out.fit <- lm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
@@ -110,32 +133,57 @@ summary(out.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.45397 -0.11783  0.00519  0.12364  0.42313 
+	-0.40790 -0.17473 -0.04705  0.16753  0.58213 
 
 	Coefficients:
-		       Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.398099   0.076218   5.223 1.04e-06 ***
-	PK            -0.039496   0.050131  -0.788    0.433    
-	PCTREAD       -0.008156   0.048542  -0.168    0.867    
-	ACTROWPOOL     0.087130   0.079159   1.101    0.274    
-	ATP           -0.694167   0.123641  -5.614 1.95e-07 ***
-	NUMPROCESSORS  0.066627   0.061046   1.091    0.278    
+		        Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.1884842  0.0548826   3.434 0.000728 ***
+	PK             0.1839099  0.0373362   4.926 1.81e-06 ***
+	PCTREAD       -0.0008194  0.0351120  -0.023 0.981407    
+	ACTROWPOOL    -0.1018733  0.0569082  -1.790 0.075008 .  
+	ATP            0.1142892  0.0520402   2.196 0.029277 *  
+	NUMPROCESSORS  0.0859572  0.0502261   1.711 0.088621 .  
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2115 on 95 degrees of freedom
-	Multiple R-squared:  0.3037,	Adjusted R-squared:  0.267 
-	F-statistic: 8.287 on 5 and 95 DF,  p-value: 1.569e-06
+	Residual standard error: 0.2195 on 192 degrees of freedom
+	Multiple R-squared:  0.1325,	Adjusted R-squared:  0.1099 
+	F-statistic: 5.865 on 5 and 192 DF,  p-value: 4.553e-05
+
+	#### alternative by mixed
+		Call:
+		lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
+		    data = x)
+
+		Residuals:
+		     Min       1Q   Median       3Q      Max 
+		-0.90529 -0.30327  0.08452  0.24560  0.68272 
+
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.53085    0.05999   8.848  < 2e-16 ***
+		PK             0.27769    0.03873   7.171  3.7e-12 ***
+		PCTREAD       -0.03380    0.04108  -0.823 0.411086    
+		ACTROWPOOL    -0.07471    0.06514  -1.147 0.252068    
+		ATP           -0.21788    0.06213  -3.507 0.000506 ***
+		NUMPROCESSORS  0.17039    0.05198   3.278 0.001137 ** 
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+		Residual standard error: 0.3625 on 395 degrees of freedom
+		Multiple R-squared:  0.221,	Adjusted R-squared:  0.2112 
+		F-statistic: 22.42 on 5 and 395 DF,  p-value: < 2.2e-16
 
 #### thrashing or not thrashing
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)
-x <- x[!is.na(x$MAXMPL),]
+x$MAXMPL[x$MAXMPL < 1] <- 0
 x$MAXMPL[x$MAXMPL == 1] <- 2
 x$MAXMPL[x$MAXMPL < 1] <- 1 ### thrashing
 x$MAXMPL[x$MAXMPL == 2] <- 0### no thrashing
 x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
 x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
+
 #out.fit <-  glm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, family="gaussian", data = x)
 #out.fit <-  glm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, family=gaussian(link = "identity"), data = x)
 #out.fit <-  glm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, family=binomial("logit"), data = x)
@@ -148,41 +196,39 @@ summary(out.fit)
 
 	Deviance Residuals: 
 	    Min       1Q   Median       3Q      Max  
-	-1.9406  -0.8281  -0.4891   0.9802   2.0908  
+	-2.0619  -0.8712  -0.5619   0.9602   1.9737  
 
 	Coefficients:
 		      Estimate Std. Error z value Pr(>|z|)    
-	(Intercept)     0.7363     0.2763   2.665 0.007701 ** 
-	PK             -0.9466     0.1778  -5.324 1.02e-07 ***
-	PCTREAD         0.3480     0.1811   1.921 0.054688 .  
-	ACTROWPOOL      0.2416     0.2871   0.842 0.400050    
-	ATP            -1.8401     0.2878  -6.393 1.63e-10 ***
-	NUMPROCESSORS  -0.8453     0.2329  -3.629 0.000284 ***
+	(Intercept)    0.25438    0.21940   1.159  0.24628    
+	PK            -0.75820    0.14040  -5.400 6.65e-08 ***
+	PCTREAD        0.18353    0.15280   1.201  0.22972    
+	ACTROWPOOL     0.07895    0.24189   0.326  0.74412    
+	ATP            1.04929    0.23139   4.535 5.77e-06 ***
+	NUMPROCESSORS -0.58779    0.19307  -3.044  0.00233 ** 
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 	(Dispersion parameter for binomial family taken to be 1)
 
-	    Null deviance: 403.56  on 325  degrees of freedom
-	Residual deviance: 333.74  on 320  degrees of freedom
-	AIC: 345.74
+	    Null deviance: 555.84  on 400  degrees of freedom
+	Residual deviance: 467.48  on 395  degrees of freedom
+	AIC: 479.48
 
-	Number of Fisher Scoring iterations: 6
+	Number of Fisher Scoring iterations: 4
 
 wald.test(b = coef(out.fit), Sigma = vcov(out.fit), Terms = 2:6)
 Wald test:
 ----------
 
 Chi-squared test:
-X2 = 56.4, df = 5, P(> X2) = 6.8e-11
+X2 = 79.0, df = 5, P(> X2) = 1.3e-15
 
 > 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.1730
+[1] 0.16
+###########################################################################################################################
 
-### update-only
-library(aod)
-library(ggplot2)
-x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 # ATP normalization
 # db2
 db2 <- subset(x, x$DBMS=='db2')
@@ -225,22 +271,22 @@ x$PCTUPDATE = (x$PCTUPDATE/min(x$PCTUPDATE))/(max(x$PCTUPDATE)/min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 
 nrow(x)
-[1] 624
+[1] 608
 x <- subset(x, x$MAXMPL < 1)
 nrow(x)
-[1] 238
+[1] 301
 
 cor(x$NUMPROCESSORS, x$ATP)
--0.22
+-0.33
 
 cor(x$PCTUPDATE, x$ATP)
-0.06
+-0.01
 
 cor(x$PK, x$ATP)
--0.22
+0.18
 
 cor(x$PCTUPDATE*x$PK, x$ATP)
--0.18
+0.13
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 summary(med.fit)
@@ -250,37 +296,37 @@ summary(med.fit)
 	    data = x)
 
 	Residuals:
-	    Min      1Q  Median      3Q     Max 
-	-0.5136 -0.3217 -0.1439  0.3538  0.6216 
+	     Min       1Q   Median       3Q      Max 
+	-0.38504 -0.23347 -0.08478  0.15969  0.85814 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.53312    0.10016   5.323  2.4e-07 ***
-	NUMPROCESSORS -0.24359    0.06910  -3.525 0.000509 ***
-	PK            -0.11123    0.12130  -0.917 0.360076    
-	PCTUPDATE      0.12896    0.13083   0.986 0.325314    
-	PK:PCTUPDATE  -0.09417    0.17387  -0.542 0.588609    
+	(Intercept)    0.28748    0.04505   6.382 6.74e-10 ***
+	NUMPROCESSORS -0.27942    0.04401  -6.348 8.16e-10 ***
+	PK             0.14174    0.05718   2.479   0.0137 *  
+	PCTUPDATE      0.02171    0.06477   0.335   0.7378    
+	PK:PCTUPDATE  -0.02964    0.09007  -0.329   0.7424    
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.3656 on 233 degrees of freedom
-	Multiple R-squared:  0.102,	Adjusted R-squared:  0.08657 
-	F-statistic: 6.615 on 4 and 233 DF,  p-value: 4.651e-05
+	Residual standard error: 0.2954 on 296 degrees of freedom
+	Multiple R-squared:  0.1498,	Adjusted R-squared:  0.1383 
+	F-statistic: 13.04 on 4 and 296 DF,  p-value: 8.558e-10
 
 cor(x$PK, x$MAXMPL)
-[1] -0.176
+[1] 0.08220043
 
 cor(x$ATP, x$MAXMPL)
-[1] -0.19
+[1] -0.02
 
 cor(x$NUMPROCESSORS, x$MAXMPL)
-[1] -0.0197
+[1] -0.23
 
 cor(x$ACTROWPOOL, x$MAXMPL)
-[1] -0.16
+[1] -0.07
 
 cor(x$PCTUPDATE, x$MAXMPL)
-[1] 0.049
+[1] -0.009013733
 
 out.fit <- lm(MAXMPL ~ PK + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
@@ -291,22 +337,22 @@ summary(out.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.43838 -0.17432 -0.02565  0.18911  0.55984 
+	-0.48433 -0.24118  0.08279  0.19517  0.48709 
 
 	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.51054    0.06151   8.299 8.62e-15 ***
-	PK            -0.10446    0.03001  -3.481 0.000597 ***
-	PCTUPDATE      0.04344    0.05258   0.826 0.409564    
-	ACTROWPOOL    -0.11456    0.05292  -2.165 0.031436 *  
-	ATP           -0.15412    0.03997  -3.856 0.000149 ***
-	NUMPROCESSORS -0.05459    0.04317  -1.265 0.207217    
+		        Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.4476441  0.0406450  11.013  < 2e-16 ***
+	PK             0.0634629  0.0299860   2.116   0.0351 *  
+	PCTUPDATE      0.0001043  0.0386918   0.003   0.9979    
+	ACTROWPOOL    -0.0478991  0.0395205  -1.212   0.2265    
+	ATP           -0.1026376  0.0500943  -2.049   0.0414 *  
+	NUMPROCESSORS -0.1867884  0.0402880  -4.636 5.33e-06 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2226 on 232 degrees of freedom
-	Multiple R-squared:  0.1131,	Adjusted R-squared:  0.09402 
-	F-statistic: 5.919 on 5 and 232 DF,  p-value: 3.586e-05
+	Residual standard error: 0.2539 on 295 degrees of freedom
+	Multiple R-squared:  0.08012,	Adjusted R-squared:  0.06453 
+	F-statistic: 5.139 on 5 and 295 DF,  p-value: 0.0001549
 
 #### thrashing or not thrashing
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)
@@ -328,25 +374,25 @@ summary(out.fit)
 	    family = binomial("probit"), data = x)
 
 	Deviance Residuals: 
-	    Min       1Q   Median       3Q      Max  
-	-1.4404  -0.9621  -0.7881   1.2278   1.8134  
+	   Min      1Q  Median      3Q     Max  
+	-1.449  -1.161  -0.896   1.143   1.555  
 
 	Coefficients:
-		      Estimate Std. Error z value Pr(>|z|)    
-	(Intercept)    -0.5876     0.2189  -2.684  0.00728 ** 
-	PK              0.1021     0.1074   0.950  0.34190    
-	PCTUPDATE       0.2295     0.1858   1.235  0.21677    
-	ACTROWPOOL      0.4421     0.1871   2.363  0.01811 *  
-	ATP            -0.6239     0.1585  -3.935 8.32e-05 ***
-	NUMPROCESSORS   0.2115     0.1637   1.292  0.19620    
+		      Estimate Std. Error z value Pr(>|z|)   
+	(Intercept)   -0.32732    0.19498  -1.679  0.09320 . 
+	PK             0.06753    0.10239   0.660  0.50954   
+	PCTUPDATE      0.18505    0.18369   1.007  0.31373   
+	ACTROWPOOL     0.28812    0.18302   1.574  0.11542   
+	ATP           -0.44943    0.17380  -2.586  0.00971 **
+	NUMPROCESSORS  0.23929    0.15464   1.547  0.12176   
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 	(Dispersion parameter for binomial family taken to be 1)
 
-	    Null deviance: 829.61  on 623  degrees of freedom
-	Residual deviance: 797.54  on 618  degrees of freedom
-	AIC: 809.54
+	    Null deviance: 842.81  on 607  degrees of freedom
+	Residual deviance: 828.68  on 602  degrees of freedom
+	AIC: 840.68
 
 	Number of Fisher Scoring iterations: 4
 
@@ -355,7 +401,9 @@ Wald test:
 ----------
 
 Chi-squared test:
-X2 = 31.2, df = 5, P(> X2) = 8.7e-06
+X2 = 13.8, df = 5, P(> X2) = 0.017
 
 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.03864955
+[1] 0.02
+
+###########################################################################################################################

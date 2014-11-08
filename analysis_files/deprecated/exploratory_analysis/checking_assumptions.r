@@ -13,6 +13,20 @@ qqPlot(out.fit , main="QQ Plot for checking outliers")
 leveragePlots(out.fit) 
 dev.off()
 
+# Normality of Residuals
+#par(mfrow=c(1,2));
+pdf("new_normal_res_qqplot.pdf")
+out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
+qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
+dev.off()
+pdf("new_normal_res_hist.pdf")
+h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,200))
+xfit<-seq(min(out.fit$res),max(out.fit$res),length=40) 
+yfit<-dnorm(xfit,mean=mean(out.fit$res),sd=sd(out.fit$res)) 
+yfit <- yfit*diff(h$mids[1:2])*length(out.fit$res) 
+lines(xfit, yfit, col="blue")
+dev.off()
+
 pdf("partial_regression.pdf")
 # Influential Observations
 # added variable plots 
@@ -80,19 +94,7 @@ pdf("influential_observeration.pdf")
 influencePlot(out.fit, main="Influence Plot", sub="Circle size is proportial to Cook's Distance" )
 dev.off()
 
-# Normality of Residuals
-#par(mfrow=c(1,2));
-pdf("normal_res_qqplot.pdf")
-out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
-qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
-dev.off()
-pdf("normal_res_hist.pdf")
-h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,200))
-xfit<-seq(min(out.fit$res),max(out.fit$res),length=40) 
-yfit<-dnorm(xfit,mean=mean(out.fit$res),sd=sd(out.fit$res)) 
-yfit <- yfit*diff(h$mids[1:2])*length(out.fit$res) 
-lines(xfit, yfit, col="blue")
-dev.off()
+
 
 ##Non-normality
 library(MASS)

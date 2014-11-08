@@ -1,5 +1,73 @@
 # oracle
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+x <- subset(x, x$MAXMPL<1100)
+oracle <- subset(x, x$DBMS=='oracle')
+oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
+oracle$MAXMPL = (oracle$MAXMPL-min(oracle$MAXMPL))/(max(oracle$MAXMPL)-min(oracle$MAXMPL))
+oracle$ACTROWPOOL = (oracle$ACTROWPOOL-min(oracle$ACTROWPOOL))/(max(oracle$ACTROWPOOL)-min(oracle$ACTROWPOOL))
+oracle$PCTREAD = (oracle$PCTREAD-min(oracle$PCTREAD))/(max(oracle$PCTREAD)-min(oracle$PCTREAD))
+oracle$PCTUPDATE = (oracle$PCTUPDATE-min(oracle$PCTUPDATE))/(max(oracle$PCTUPDATE)-min(oracle$PCTUPDATE))
+oracle$NUMPROCESSORS = (oracle$NUMPROCESSORS-min(oracle$NUMPROCESSORS))/(max(oracle$NUMPROCESSORS)-min(oracle$NUMPROCESSORS))
+x = rbind(oracle) 
+
+> nrow(x)
+[1] 112
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, data = x)
+summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, 
+	    data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.22953 -0.02315 -0.00034  0.01886  0.73300 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.25230    0.02896   8.711 4.15e-14 ***
+	NUMPROCESSORS  0.03431    0.03358   1.022    0.309    
+	PCTUPDATE     -0.34873    0.04855  -7.182 9.55e-11 ***
+	PK            -0.26231    0.03906  -6.716 9.31e-10 ***
+	PCTUPDATE:PK   0.35259    0.06777   5.203 9.54e-07 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.1349 on 107 degrees of freedom
+	Multiple R-squared:  0.4255,	Adjusted R-squared:  0.404 
+	F-statistic: 19.81 on 4 and 107 DF,  p-value: 3.142e-12
+
+out.fit <- lm(MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + ACTROWPOOL + PK, data = x)
+summary(out.fit)
+
+	Call:
+	lm(formula = MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + 
+	    ACTROWPOOL + PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.51374 -0.17722 -0.07631  0.19834  0.73600 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.45972    0.08374   5.490 2.81e-07 ***
+	NUMPROCESSORS -0.24618    0.07429  -3.314  0.00126 ** 
+	ATP           -0.11523    0.19613  -0.588  0.55810    
+	PCTREAD        0.05115    0.09722   0.526  0.59991    
+	PCTUPDATE     -0.17598    0.09006  -1.954  0.05335 .  
+	ACTROWPOOL    -0.01139    0.07724  -0.148  0.88301    
+	PK             0.05010    0.06175   0.811  0.41904    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2995 on 105 degrees of freedom
+	Multiple R-squared:  0.1757,	Adjusted R-squared:  0.1286 
+	F-statistic: 3.729 on 6 and 105 DF,  p-value: 0.002109
+
+----
+
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 oracle <- subset(x, x$DBMS=='oracle')
 oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
 oracle$ATP[oracle$ATP > 0.8 & oracle$ATP <= 1] <- 5

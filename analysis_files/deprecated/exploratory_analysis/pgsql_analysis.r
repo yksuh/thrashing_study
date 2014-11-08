@@ -1,6 +1,74 @@
 # pgsql
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
-# pgsql
+x <- subset(x, x$MAXMPL<1100)
+
+pgsql <- subset(x, x$DBMS=='pgsql')
+pgsql$ATP = (pgsql$ATP-min(pgsql$ATP))/(max(pgsql$ATP)-min(pgsql$ATP))
+pgsql$MAXMPL = (pgsql$MAXMPL-min(pgsql$MAXMPL))/(max(pgsql$MAXMPL)-min(pgsql$MAXMPL))
+pgsql$ACTROWPOOL = (pgsql$ACTROWPOOL-min(pgsql$ACTROWPOOL))/(max(pgsql$ACTROWPOOL)-min(pgsql$ACTROWPOOL))
+pgsql$PCTREAD = (pgsql$PCTREAD-min(pgsql$PCTREAD))/(max(pgsql$PCTREAD)-min(pgsql$PCTREAD))
+pgsql$PCTUPDATE = (pgsql$PCTUPDATE-min(pgsql$PCTUPDATE))/(max(pgsql$PCTUPDATE)-min(pgsql$PCTUPDATE))
+pgsql$NUMPROCESSORS = (pgsql$NUMPROCESSORS-min(pgsql$NUMPROCESSORS))/(max(pgsql$NUMPROCESSORS)-min(pgsql$NUMPROCESSORS))
+x = rbind(pgsql) 
+
+> nrow(x)
+[1] 122
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE  + PK + PK:PCTUPDATE, data = x)
+summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, 
+	    data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.38872 -0.10190 -0.01435  0.11736  0.78535 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.55846    0.04040  13.824  < 2e-16 ***
+	NUMPROCESSORS -0.11924    0.05223  -2.283   0.0242 *  
+	PCTUPDATE     -0.67444    0.05908 -11.415  < 2e-16 ***
+	PK            -0.40869    0.07304  -5.596 1.47e-07 ***
+	PCTUPDATE:PK   0.59899    0.12150   4.930 2.74e-06 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2147 on 117 degrees of freedom
+	Multiple R-squared:  0.5682,	Adjusted R-squared:  0.5534 
+	F-statistic: 38.48 on 4 and 117 DF,  p-value: < 2.2e-16
+
+out.fit <- lm(MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + ACTROWPOOL + PK, data = x)
+summary(out.fit)
+
+	Call:
+	lm(formula = MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + 
+	    ACTROWPOOL + PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.53124 -0.18448 -0.06815  0.17484  0.69620 
+
+	Coefficients:
+		       Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.357934   0.080725   4.434 2.13e-05 ***
+	NUMPROCESSORS  0.007206   0.067428   0.107   0.9151    
+	ATP           -0.004616   0.113409  -0.041   0.9676    
+	PCTREAD       -0.121653   0.089057  -1.366   0.1746    
+	PCTUPDATE     -0.198202   0.090518  -2.190   0.0306 *  
+	ACTROWPOOL    -0.077137   0.066918  -1.153   0.2514    
+	PK             0.292791   0.063577   4.605 1.07e-05 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.279 on 115 degrees of freedom
+	Multiple R-squared:  0.2078,	Adjusted R-squared:  0.1665 
+	F-statistic: 5.027 on 6 and 115 DF,  p-value: 0.0001305
+
+----
+
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 pgsql <- subset(x, x$DBMS=='pgsql')
 pgsql$ATP = (pgsql$ATP-min(pgsql$ATP))/(max(pgsql$ATP)-min(pgsql$ATP))
 pgsql$ATP[pgsql$ATP > 0.8 & pgsql$ATP <= 1] <- 5

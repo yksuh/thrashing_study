@@ -1,5 +1,74 @@
 # sqlserver
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+x <- subset(x, x$MAXMPL<1100)
+sqlserver <- subset(x, x$DBMS=='sqlserver')
+sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
+sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
+sqlserver$ACTROWPOOL = (sqlserver$ACTROWPOOL-min(sqlserver$ACTROWPOOL))/(max(sqlserver$ACTROWPOOL)-min(sqlserver$ACTROWPOOL))
+sqlserver$PCTREAD = (sqlserver$PCTREAD-min(sqlserver$PCTREAD))/(max(sqlserver$PCTREAD)-min(sqlserver$PCTREAD))
+sqlserver$PCTUPDATE = (sqlserver$PCTUPDATE-min(sqlserver$PCTUPDATE))/(max(sqlserver$PCTUPDATE)-min(sqlserver$PCTUPDATE))
+sqlserver$NUMPROCESSORS = (sqlserver$NUMPROCESSORS-min(sqlserver$NUMPROCESSORS))/(max(sqlserver$NUMPROCESSORS)-min(sqlserver$NUMPROCESSORS))
+x = rbind(sqlserver) 
+
+> nrow(x)
+[1] 165
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE  + PK + PK:PCTUPDATE, data = x)
+summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, 
+	    data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.39812 -0.21501 -0.04116  0.16654  0.59366 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.28028    0.05123   5.471 1.69e-07 ***
+	NUMPROCESSORS -0.55069    0.06313  -8.724 3.32e-15 ***
+	PCTUPDATE      0.19852    0.08831   2.248   0.0259 *  
+	PK             0.10512    0.07218   1.456   0.1472    
+	PCTUPDATE:PK  -0.13162    0.12241  -1.075   0.2839    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2888 on 160 degrees of freedom
+	Multiple R-squared:  0.3248,	Adjusted R-squared:  0.3079 
+	F-statistic: 19.24 on 4 and 160 DF,  p-value: 6.115e-13
+
+out.fit <- lm(MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + ACTROWPOOL + PK, data = x)
+summary(out.fit)
+
+	Call:
+	lm(formula = MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + 
+	    ACTROWPOOL + PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.65587 -0.12911  0.09189  0.18753  0.49284 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.51219    0.05709   8.972 8.03e-16 ***
+	NUMPROCESSORS  0.34215    0.06907   4.954 1.86e-06 ***
+	ATP            0.26908    0.07150   3.764 0.000236 ***
+	PCTREAD       -0.10332    0.07914  -1.306 0.193608    
+	PCTUPDATE      0.12806    0.06242   2.052 0.041864 *  
+	ACTROWPOOL    -0.03392    0.05470  -0.620 0.536118    
+	PK            -0.05176    0.04118  -1.257 0.210653    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2621 on 158 degrees of freedom
+	Multiple R-squared:  0.222,	Adjusted R-squared:  0.1924 
+	F-statistic: 7.514 on 6 and 158 DF,  p-value: 4.256e-07
+
+---
+
+# sqlserver
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 sqlserver <- subset(x, x$DBMS=='sqlserver')
 sqlserver$ACTROWPOOL = (sqlserver$ACTROWPOOL-min(sqlserver$ACTROWPOOL))/(max(sqlserver$ACTROWPOOL)-min(sqlserver$ACTROWPOOL))
 sqlserver$PCTREAD = (sqlserver$PCTREAD-min(sqlserver$PCTREAD))/(max(sqlserver$PCTREAD)-min(sqlserver$PCTREAD))

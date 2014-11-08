@@ -1,5 +1,78 @@
 # db2
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+x <- subset(x, x$MAXMPL<1100)
+db2 <- subset(x, x$DBMS=='db2')
+db2$ATP = (db2$ATP-min(db2$ATP))/(max(db2$ATP)-min(db2$ATP))
+db2$MAXMPL = (db2$MAXMPL-min(db2$MAXMPL))/(max(db2$MAXMPL)-min(db2$MAXMPL))
+db2$ACTROWPOOL = (db2$ACTROWPOOL-min(db2$ACTROWPOOL))/(max(db2$ACTROWPOOL)-min(db2$ACTROWPOOL))
+db2$PCTREAD = (db2$PCTREAD-min(db2$PCTREAD))/(max(db2$PCTREAD)-min(db2$PCTREAD))
+db2$PCTUPDATE = (db2$PCTUPDATE-min(db2$PCTUPDATE))/(max(db2$PCTUPDATE)-min(db2$PCTUPDATE))
+db2$NUMPROCESSORS = (db2$NUMPROCESSORS-min(db2$NUMPROCESSORS))/(max(db2$NUMPROCESSORS)-min(db2$NUMPROCESSORS))
+x = rbind(db2) 
+
+> nrow(x)
+[1] 60
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE  + PK + PK:PCTUPDATE, data = x)
+summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, 
+	    data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.20378 -0.03367  0.00363  0.01512  0.77929 
+
+	Coefficients:
+		       Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)   -0.003184   0.031068  -0.102    0.919    
+	NUMPROCESSORS  0.223893   0.051755   4.326 6.45e-05 ***
+	PCTUPDATE     -0.016337   0.061642  -0.265    0.792    
+	PK            -0.011393   0.041755  -0.273    0.786    
+	PCTUPDATE:PK  -0.077508   0.114939  -0.674    0.503    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.1357 on 55 degrees of freedom
+	Multiple R-squared:  0.2787,	Adjusted R-squared:  0.2262 
+	F-statistic: 5.312 on 4 and 55 DF,  p-value: 0.001088
+
+out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
+summary(out.fit)
+
+	Call:
+	lm(formula = MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + 
+	    NUMPROCESSORS + PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.55945 -0.16684  0.00742  0.13943  0.62087 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.56739    0.08036   7.060 3.61e-09 ***
+	PCTREAD       -0.17465    0.09591  -1.821   0.0742 .  
+	PCTUPDATE      0.15707    0.10549   1.489   0.1424    
+	ACTROWPOOL    -0.18743    0.09567  -1.959   0.0554 .  
+	ATP           -0.50122    0.25796  -1.943   0.0573 .  
+	NUMPROCESSORS  0.50727    0.11168   4.542 3.25e-05 ***
+	PK            -0.04559    0.06857  -0.665   0.5090    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2524 on 53 degrees of freedom
+	Multiple R-squared:  0.3653,	Adjusted R-squared:  0.2935 
+	F-statistic: 5.085 on 6 and 53 DF,  p-value: 0.000347
+
+-----
+
+
+
+
+
+
+
 db2 <- subset(x, x$DBMS=='db2')
 db2$ATP = (db2$ATP-min(db2$ATP))/(max(db2$ATP)-min(db2$ATP))
 db2$ATP[db2$ATP > 0.8 & db2$ATP <= 1] <- 5

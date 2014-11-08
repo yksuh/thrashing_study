@@ -3,199 +3,176 @@ x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 # ATP normalization
 # db2
 db2 <- subset(x, x$DBMS=='db2')
-db2$ATP = (db2$ATP-min(db2$ATP))/(max(db2$ATP)-min(db2$ATP))
-db2$MAXMPL = (db2$MAXMPL-min(db2$MAXMPL))/(max(db2$MAXMPL)-min(db2$MAXMPL))
+db2_r <- subset(db2, db2$PCTREAD!=0)
+db2_r <- subset(db2_r, select = -PCTUPDATE)
+db2_r$ATP = (db2_r$ATP-min(db2_r$ATP))/(max(db2_r$ATP)-min(db2_r$ATP))
+db2_r$MAXMPL = (db2_r$MAXMPL-min(db2_r$MAXMPL))/(max(db2_r$MAXMPL)-min(db2_r$MAXMPL))
+db2 <- db2_r
 # oracle
 oracle <- subset(x, x$DBMS=='oracle')
-oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
-oracle$MAXMPL = (oracle$MAXMPL-min(oracle$MAXMPL))/(max(oracle$MAXMPL)-min(oracle$MAXMPL))
+oracle_r <- subset(oracle, oracle$PCTREAD!=0)
+oracle_r <- subset(oracle_r, select = -PCTUPDATE)
+oracle_r$ATP = (oracle_r$ATP-min(oracle_r$ATP))/(max(oracle_r$ATP)-min(oracle_r$ATP))
+oracle_r$MAXMPL = (oracle_r$MAXMPL-min(oracle_r$MAXMPL))/(max(oracle_r$MAXMPL)-min(oracle_r$MAXMPL))
+oracle <- oracle_r
 # mysql
 mysql <- subset(x, x$DBMS=='mysql')
-mysql$ATP = (mysql$ATP-min(mysql$ATP))/(max(mysql$ATP)-min(mysql$ATP))
-mysql$MAXMPL = (mysql$MAXMPL-min(mysql$MAXMPL))/(max(mysql$MAXMPL)-min(mysql$MAXMPL))
+mysql_r <- subset(mysql, mysql$PCTREAD!=0)
+mysql_r <- subset(mysql_r, select = -PCTUPDATE)
+mysql_r$ATP = (mysql_r$ATP-min(mysql_r$ATP))/(max(mysql_r$ATP)-min(mysql_r$ATP))
+mysql_r$MAXMPL = (mysql_r$MAXMPL-min(mysql_r$MAXMPL))/(max(mysql_r$MAXMPL)-min(mysql_r$MAXMPL))
+mysql <- mysql_r
 # pgsql
 pgsql <- subset(x, x$DBMS=='pgsql')
-pgsql$ATP = (pgsql$ATP-min(pgsql$ATP))/(max(pgsql$ATP)-min(pgsql$ATP))
-pgsql$MAXMPL = (pgsql$MAXMPL-min(pgsql$MAXMPL))/(max(pgsql$MAXMPL)-min(pgsql$MAXMPL))
+pgsql_r <- subset(pgsql, pgsql$PCTREAD!=0)
+pgsql_r <- subset(pgsql_r, select = -PCTUPDATE)
+pgsql_r$ATP = (pgsql_r$ATP-min(pgsql_r$ATP))/(max(pgsql_r$ATP)-min(pgsql_r$ATP))
+pgsql_r$MAXMPL = (pgsql_r$MAXMPL-min(pgsql_r$MAXMPL))/(max(pgsql_r$MAXMPL)-min(pgsql_r$MAXMPL))
+pgsql <- pgsql_r
 # sqlserver
 sqlserver <- subset(x, x$DBMS=='sqlserver')
-sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
-sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
-x = rbind(db2,mysql,oracle,pgsql,sqlserver) 
+sqlserver_r <- subset(sqlserver, sqlserver$PCTREAD!=0)
+sqlserver_r <- subset(sqlserver_r, select = -PCTUPDATE)
+sqlserver_r$ATP = (sqlserver_r$ATP-min(sqlserver_r$ATP))/(max(sqlserver_r$ATP)-min(sqlserver_r$ATP))
+sqlserver_r$MAXMPL = (sqlserver_r$MAXMPL-min(sqlserver_r$MAXMPL))/(max(sqlserver_r$MAXMPL)-min(sqlserver_r$MAXMPL))
+sqlserver <- sqlserver_r
+x = rbind(db2,mysql,oracle,pgsql,sqlserver)]
 x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
-x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
-x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
+x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
-#x$ATP = round(x$ATP, 5)
-#x$MAXMPL = round(x$MAXMPL, 1)
-#x <- subset(x, select = -c(BATCHSETID,EXPERIMENTNAME,RUNID))
-#write.table(x, file = "out.dat")
-
+> nrow(x)
+[1] 401
 x <- subset(x, x$MAXMPL < 1)
+> nrow(x)
+[1] 198
+
+#x$MAXMPL <- round(x$MAXMPL, 1)
+#x$ATP <- round(x$ATP, 5)
+
+cor(x$PK, x$MAXMPL)
+[1] 0.2891473
+
+cor(x$ATP, x$MAXMPL)
+[1] 0.02110625
+
+cor(x$NUMPROCESSORS, x$MAXMPL)
+[1] 0.08
+
+cor(x$ACTROWPOOL, x$MAXMPL)
+[1] -0.13
+
 cor(x$PCTREAD, x$MAXMPL)
--0.07557618
-cor(x$PCTUPDATE, x$MAXMPL)
-0.1185504
+[1] 0.02
 
-re <- subset(x, x$PCTREAD!=0)
-re <- subset(re, select = -PCTUPDATE)
-cor(re$PCTREAD, re$MAXMPL)
-0.01324193
-cor(re$PCTREAD, re$ATP)
-0.002721708
-
-up <- subset(x, x$PCTUPDATE!=0)
-up <- subset(up, select = -PCTREAD)
-cor(up$PCTUPDATE, up$MAXMPL)
--0.009013733
-cor(up$PCTUPDATE, up$ATP)
--0.0427312
-db2,pgsql
-x = rbind(sqlserver) 
-out.fit <- lm(MAXMPL ~ ATP, data = x)
-summary(out.fit)
-
-med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK, data = x)
 summary(med.fit)
 
 	Call:
-	lm(formula = ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK + 
-	    PCTUPDATE + PCTUPDATE:PK, data = x)
+	lm(formula = ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK, 
+	    data = x)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.48515 -0.16271 -0.06826  0.12484  0.83495 
+	-0.49894 -0.19359 -0.04431  0.18873  0.79324 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.37848    0.02765  13.687  < 2e-16 ***
-	NUMPROCESSORS -0.16914    0.03138  -5.390 1.09e-07 ***
-	PK            -0.18988    0.04303  -4.413 1.25e-05 ***
-	PCTREAD        0.10692    0.04855   2.202   0.0281 *  
-	PCTUPDATE     -0.28457    0.04548  -6.256 8.57e-10 ***
-	PK:PCTREAD    -0.16975    0.08317  -2.041   0.0418 *  
-	PK:PCTUPDATE   0.32571    0.07173   4.541 7.05e-06 ***
+	(Intercept)    0.46835    0.04396  10.655  < 2e-16 ***
+	NUMPROCESSORS -0.12843    0.06842  -1.877 0.062030 .  
+	PK            -0.24476    0.06358  -3.850 0.000161 ***
+	PCTREAD        0.04689    0.05830   0.804 0.422244    
+	PK:PCTREAD    -0.05457    0.10474  -0.521 0.602933    
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2644 on 492 degrees of freedom
-	Multiple R-squared:  0.1981,	Adjusted R-squared:  0.1883 
-	F-statistic: 20.25 on 6 and 492 DF,  p-value: < 2.2e-16
+	Residual standard error: 0.3034 on 193 degrees of freedom
+	Multiple R-squared:  0.1468,	Adjusted R-squared:  0.1292 
+	F-statistic: 8.305 on 4 and 193 DF,  p-value: 3.351e-06
 
-out.fit <- lm(MAXMPL ~ PK + PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
+out.fit <- lm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
 
 	Call:
-	lm(formula = MAXMPL ~ PK + PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
+	lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
+	    data = x)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.44724 -0.22347  0.02838  0.21450  0.48959 
+	-0.40790 -0.17473 -0.04705  0.16753  0.58213 
 
 	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.31039    0.03032  10.236  < 2e-16 ***
-	PK             0.08403    0.02264   3.712 0.000229 ***
-	PCTREAD       -0.02235    0.03632  -0.615 0.538531    
-	PCTUPDATE      0.06942    0.03295   2.107 0.035651 *  
-	ACTROWPOOL    -0.06744    0.02946  -2.290 0.022463 *  
-	ATP            0.05863    0.03985   1.471 0.141935    
-	NUMPROCESSORS -0.06590    0.02947  -2.236 0.025776 *
+		        Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.1884842  0.0548826   3.434 0.000728 ***
+	PK             0.1839099  0.0373362   4.926 1.81e-06 ***
+	PCTREAD       -0.0008194  0.0351120  -0.023 0.981407    
+	ACTROWPOOL    -0.1018733  0.0569082  -1.790 0.075008 .  
+	ATP            0.1142892  0.0520402   2.196 0.029277 *  
+	NUMPROCESSORS  0.0859572  0.0502261   1.711 0.088621 .  
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2432 on 492 degrees of freedom
-	Multiple R-squared:  0.06322,	Adjusted R-squared:  0.05179 
-	F-statistic: 5.534 on 6 and 492 DF,  p-value: 1.455e-05
+	Residual standard error: 0.2195 on 192 degrees of freedom
+	Multiple R-squared:  0.1325,	Adjusted R-squared:  0.1099 
+	F-statistic: 5.865 on 5 and 192 DF,  p-value: 4.553e-05
 
 #### thrashing or not thrashing
-x = rbind(db2,mysql,oracle,pgsql,sqlserver) 
+x = rbind(db2,mysql,oracle,pgsql,sqlserver)
 x$MAXMPL[x$MAXMPL < 1] <- 0
-out.fit <-  glm(MAXMPL ~ PK + PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, family="binomial", data = x)
+x$MAXMPL[x$MAXMPL == 1] <- 2
+x$MAXMPL[x$MAXMPL < 1] <- 1 ### thrashing
+x$MAXMPL[x$MAXMPL == 2] <- 0### no thrashing
+x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
+x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
+
+#out.fit <-  glm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, family="gaussian", data = x)
+#out.fit <-  glm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, family=gaussian(link = "identity"), data = x)
+#out.fit <-  glm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, family=binomial("logit"), data = x)
+out.fit <-  glm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, family=binomial("probit"), data = x)
 summary(out.fit)
 
 	Call:
-	glm(formula = MAXMPL ~ PK + PCTREAD + PCTUPDATE + ACTROWPOOL + 
-	    ATP + NUMPROCESSORS, family = binomial(logit), data = x)
+	glm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
+	    family = binomial("probit"), data = x)
 
 	Deviance Residuals: 
 	    Min       1Q   Median       3Q      Max  
-	-1.4482  -1.1635   0.9353   1.1245   1.5450  
+	-2.0619  -0.8712  -0.5619   0.9602   1.9737  
 
 	Coefficients:
 		      Estimate Std. Error z value Pr(>|z|)    
-	(Intercept)     0.1678     0.1762   0.952 0.340997    
-	PK              0.4288     0.1304   3.289 0.001005 ** 
-	PCTREAD        -0.1924     0.2172  -0.886 0.375605    
-	PCTUPDATE      -0.2583     0.1913  -1.350 0.176968    
-	ACTROWPOOL     -0.2006     0.1714  -1.171 0.241750    
-	ATP            -0.8686     0.2587  -3.358 0.000786 ***
-	NUMPROCESSORS   0.0236     0.1643   0.144 0.885792    
+	(Intercept)    0.25438    0.21940   1.159  0.24628    
+	PK            -0.75820    0.14040  -5.400 6.65e-08 ***
+	PCTREAD        0.18353    0.15280   1.201  0.22972    
+	ACTROWPOOL     0.07895    0.24189   0.326  0.74412    
+	ATP            1.04929    0.23139   4.535 5.77e-06 ***
+	NUMPROCESSORS -0.58779    0.19307  -3.044  0.00233 ** 
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 	(Dispersion parameter for binomial family taken to be 1)
 
-	    Null deviance: 1398.7  on 1008  degrees of freedom
-	Residual deviance: 1366.9  on 1002  degrees of freedom
-	AIC: 1380.9
+	    Null deviance: 555.84  on 400  degrees of freedom
+	Residual deviance: 467.48  on 395  degrees of freedom
+	AIC: 479.48
 
 	Number of Fisher Scoring iterations: 4
 
+wald.test(b = coef(out.fit), Sigma = vcov(out.fit), Terms = 2:6)
+Wald test:
+----------
+
+Chi-squared test:
+X2 = 79.0, df = 5, P(> X2) = 1.3e-15
+
 > 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.02267041
-
-> confint(out.fit)
-Waiting for profiling to be done...
-                   2.5 %     97.5 %
-(Intercept)   -0.1773497  0.5140774
-PK             0.1735497  0.6847636
-PCTREAD       -0.6193774  0.2332071
-PCTUPDATE     -0.6343167  0.1161884
-ACTROWPOOL    -0.5370982  0.1351108
-ATP           -1.3810707 -0.3655368
-NUMPROCESSORS -0.2986157  0.3458155
-
-
-#############################################
-med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK + PCTUPDATE + PCTUPDATE:PK, data = x)
-summary(med.fit)
-
-out.fit <- lm(MAXMPL ~ PK + PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
-summary(out.fit)
-
-#### thrashing or not thrashing #############
-x = rbind(db2) 
-x$MAXMPL[x$MAXMPL < 1] <- 0
-out.fit <-  glm(MAXMPL ~ PK + PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, family="binomial", data = x)
-summary(out.fit)
-
-1-out.fit$deviance/out.fit$null.deviance
-
-confint(out.fit)
+[1] 0.16
+###########################################################################################################################
 
 
 
 
-y <- subset(x, x$MAXMPL < 1)
 
-cor(y$NUMPROCESSORS, y$MAXMPL)
--0.09
-
-cor(y$ACTROWPOOL, y$MAXMPL)
--0.0920812
-
-cor(y$PCTREAD, y$MAXMPL)
--0.07557618
-
-cor(y$PCTUPDATE, y$MAXMPL)
-0.12
-
-cor(y$ATP, y$MAXMPL)
--0.03
-
-cor(y$PK, y$MAXMPL)
--0.006
 
 pdf("scaled_var_rel_on_thrashing.pdf")
 par(mfrow=c(3,2), oma=c(0, 0, 2, 0))

@@ -1,7 +1,7 @@
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/15/14
--- Revision: 09/26/14, 09/27/14, 09/29/14
--- Description: Define step queries for analyzing DBMS thrashing
+-- Revision: 09/26/14, 09/27/14, 09/29/14, 11/8/14
+-- Description: Define step queries for confirmatory analysis
 
 -- DBMSes participating in the analysis
 -- Analysis_DMD: Analysis_DBMS_Metadata
@@ -348,7 +348,8 @@ CREATE TABLE Analysis_S0_TP  AS
         WHERE prev.runID      = next.runID
 	  and prev.batchSetID = next.batchSetID
 	  and prev.MPL 	      = next.MPL-next.batchSzIncr
-	  and prev.tps > (1+tt.threshold)*next.tps 
+	  --and prev.tps > (1+tt.threshold)*next.tps 
+	  and (prev.tps-tt.threshold*prev.tps) > next.tps
 	  and prev.tps > (SELECT max(TPS)
 			  FROM Analysis_S0_DBR t0
 			  WHERE t0.runID = next.runID

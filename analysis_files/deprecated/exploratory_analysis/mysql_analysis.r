@@ -1,5 +1,72 @@
 # mysql
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+x <- subset(x, x$MAXMPL<1100)
+mysql <- subset(x, x$DBMS=='mysql')
+mysql$ATP = (mysql$ATP-min(mysql$ATP))/(max(mysql$ATP)-min(mysql$ATP))
+mysql$MAXMPL = (mysql$MAXMPL-min(mysql$MAXMPL))/(max(mysql$MAXMPL)-min(mysql$MAXMPL))
+mysql$ACTROWPOOL = (mysql$ACTROWPOOL-min(mysql$ACTROWPOOL))/(max(mysql$ACTROWPOOL)-min(mysql$ACTROWPOOL))
+mysql$PCTREAD = (mysql$PCTREAD-min(mysql$PCTREAD))/(max(mysql$PCTREAD)-min(mysql$PCTREAD))
+mysql$PCTUPDATE = (mysql$PCTUPDATE-min(mysql$PCTUPDATE))/(max(mysql$PCTUPDATE)-min(mysql$PCTUPDATE))
+mysql$NUMPROCESSORS = (mysql$NUMPROCESSORS-min(mysql$NUMPROCESSORS))/(max(mysql$NUMPROCESSORS)-min(mysql$NUMPROCESSORS))
+x = rbind(mysql) 
+
+> nrow(x)
+[1] 79
+
+med.fit <- lm(ATP ~ NUMPROCESSORS + PCTUPDATE  + PK + PK:PCTUPDATE, data = x)
+summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PCTUPDATE + PK + PK:PCTUPDATE, 
+	    data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.25199 -0.07114 -0.03013  0.02152  0.35999 
+
+	Coefficients: (1 not defined because of singularities)
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.64999    0.02918  22.273  < 2e-16 ***
+	NUMPROCESSORS -0.06990    0.04353  -1.606    0.113    
+	PCTUPDATE      0.07596    0.07550   1.006    0.318    
+	PK            -0.43777    0.04882  -8.967 1.72e-13 ***
+	PCTUPDATE:PK        NA         NA      NA       NA    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.1478 on 75 degrees of freedom
+	Multiple R-squared:  0.6649,	Adjusted R-squared:  0.6515 
+	F-statistic: 49.61 on 3 and 75 DF,  p-value: < 2.2e-16
+
+out.fit <- lm(MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + ACTROWPOOL + PK, data = x)
+summary(out.fit)
+
+	Call:
+	lm(formula = MAXMPL ~ NUMPROCESSORS + ATP + PCTREAD + PCTUPDATE + 
+	    ACTROWPOOL + PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.46927 -0.19800 -0.09373  0.20728  0.76616 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.62135    0.16061   3.869 0.000238 ***
+	NUMPROCESSORS -0.15759    0.08935  -1.764 0.082035 .  
+	ATP           -0.43196    0.24964  -1.730 0.087851 .  
+	PCTREAD        0.15434    0.09742   1.584 0.117521    
+	PCTUPDATE      0.72612    0.16339   4.444 3.13e-05 ***
+	ACTROWPOOL    -0.10000    0.10442  -0.958 0.341433    
+	PK            -0.21960    0.15339  -1.432 0.156575    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2945 on 72 degrees of freedom
+	Multiple R-squared:  0.3801,	Adjusted R-squared:  0.3284 
+	F-statistic: 7.358 on 6 and 72 DF,  p-value: 3.704e-06
+
+---
+
 mysql <- subset(x, x$DBMS=='mysql')
 mysql$ATP = (mysql$ATP-min(mysql$ATP))/(max(mysql$ATP)-min(mysql$ATP))
 mysql$ATP[mysql$ATP > 0.8 & mysql$ATP <= 1] <- 5

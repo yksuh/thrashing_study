@@ -205,7 +205,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //	protected boolean timeOut = false;
 
 	static class TransactionGenerator {
-		private static double effectiveDBSz = 0;
+		private static double rowSubsetSz = 0;
 		private static double selectivity = 0;
 
 		/****
@@ -224,11 +224,11 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		/***
 		 * Transaction Size
 		 */
-		private static double xactSize = 0;
+		private static double readSel = 0;
 		/***
 		 * eXclusive Locks
 		 */
-		private static double xLocks = 0;
+		private static double updateSel = 0;
 
 		/*** For target table. Used for FROM and UPDATE clause ***/
 		private static RepeatableRandom repRandForTable = new RepeatableRandom();
@@ -260,20 +260,20 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		}
 
 		public static double getEffectiveDBRatio() {
-			return effectiveDBSz;
+			return rowSubsetSz;
 		}
 
-		public static double getSelectivity() {
-			return selectivity;
-		}
+//		public static double getSelectivity() {
+//			return selectivity;
+//		}
 
 		/****
 		 * Set transaction size (# of locks)
 		 * 
 		 * @param xactSz
 		 */
-		public static void setXactSize(double xactSz) {
-			xactSize = xactSz;
+		public static void setReadSelectivity(double rs) {
+			readSel = rs;
 		}
 
 		/****
@@ -281,8 +281,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * 
 		 * @param eXclusiveLocks
 		 */
-		public static void setXLocks(double eXclusiveLockRatio) {
-			xLocks = eXclusiveLockRatio;
+		public static void setUpdateSelectivity(double us) {
+			updateSel = us;
 		}
 
 		/**
@@ -312,12 +312,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		}
 
 		/***
-		 * Set effective database size
+		 * Set row subset size
 		 * 
 		 * @param edb_size
 		 */
-		public static void setEffectiveDBSz(double edb_size) {
-			effectiveDBSz = edb_size;
+		public static void setRowSubsetSize(double edb_size) {
+			rowSubsetSz = edb_size;
 		}
 
 		/*****
@@ -378,19 +378,19 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// control lock range with the first column
 			String idxCol = "id1";
 			int numChosenRows = 0;
-			// determine the number of requested locks using transaction size
-			if(xactSize == 0){
-				if(Constants.DEFAULT_UPT_ROWS == 0){
-					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
-					System.exit(-1);
-				}
-				numChosenRows = (int) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card);
-			}else{
-				numChosenRows = (int) (xactSize * (double) tbl.hy_min_card);
-			}
+//			// determine the number of requested locks using transaction size
+//			if(xactSize == 0){
+//				if(Constants.DEFAULT_UPT_ROWS == 0){
+//					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
+//					System.exit(-1);
+//				}
+//				numChosenRows = (int) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card);
+//			}else{
+				numChosenRows = (int) (readSel * (double) tbl.hy_min_card);
+//			}
 			int start = 0;
 			// determine end range using effective db size
-			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
+			int end = (int) ((double) tbl.hy_min_card * rowSubsetSz);
 			// compute low key
 			loKey = (long) ((double) getRandomNumber(repRandForWhereInSELECT,
 					start, end - numChosenRows));
@@ -425,6 +425,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * randomly-generated high key for select
 		 */
 		private static long hiKey = 0;
+		public static int workload_type;
 
 		/***
 		 * Reset keys
@@ -465,7 +466,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// if integer column, set a random value
 			if (colName.contains("val")) {
 				String newStrVal = RandomAlphaNumericString((int) cols[chosenCol].mySize);
-				str += "SET " + colName + " = \"" + newStrVal + "\" ";
+				str += "SET " + colName + " = \'\'" + newStrVal + "\'\' ";
 			} else {
 				str += "SET " + colName + " = " + newValue + " ";
 			}
@@ -527,16 +528,17 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 */
 		static String buildWhereForUpdate(Table tbl) {
 			String idxCol = "id1";
-			if(xactSize == 0){
-				if(Constants.DEFAULT_UPT_ROWS == 0){
-					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
-					System.exit(-1);
-				}
-			}	
-			int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * xLocks);
+//			if(readSel == 0){
+//				if(Constants.DEFAULT_UPT_ROWS == 0){
+//					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
+//					System.exit(-1);
+//				}
+//			}	
+//			int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * updateSel);
+			int numXLocks = (int) ((double) tbl.hy_min_card * updateSel);
 			int start = 0;
 			// determine end range using effective db size
-			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
+			int end = (int) ((double) tbl.hy_min_card * rowSubsetSz);
 			long loKeyForUpdate = (long) ((double) getRandomNumber(
 					repRandForWhereInUpdate, (int) start,
 					(int) (end - numXLocks)));
@@ -561,7 +563,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			int chosenTblNum = getRandomNumber(repRandForTable, 0,	myXactTables.length - 1);
 			Table tbl = myXactTables[chosenTblNum];
 
-			if(xactSize == 0){
+			if(workload_type == Constants.UPDATE_ONLY){
 //				// update only
 //				// construct update clause
 //				String strUPDATE = buildUPDATEForUpdate(tbl);
@@ -1673,15 +1675,15 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 	 * Analyze a batch set
 	 * @param runID
 	 *            runID
-	 * @param nCores
+	 * @param nProcs
 	 *            # of cores
 	 * @param buffCacheSz
 	 *            buffer space ratio
 	 * @param duration
 	 *            duration
-	 * @param nRwsFrmUPT
+	 * @param updateSel
 	 *            exclusive locks
-	 * @param actvRwPlSz
+	 * @param rowSubsetSize
 	 *            effective DB size
 	 * @param totalBatchSets
 	 *            number of batch sets
@@ -1690,24 +1692,32 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 	@Override
 	protected void studyBatchSet(
 			int runID, 
-			int nCores,
-			double buffCacheSz,
+			int pk,
+			int nProcs,
+//			double buffCacheSz,
 			int duration,
-			double nRwsFrmSLCT,
-			double nRwsFrmUPT, 
-			double actvRwPlSz) throws Exception {
+			double readSel,
+			double updateSel, 
+			double rowSubsetSize) throws Exception {
 		// insert batchset into database
-		int batchSetID = stepA(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz);
+		int batchSetID = stepA(readSel, updateSel, rowSubsetSize);
 		Main._logger.outputLog(String.format(
-				"Start the batchSet #%d(runID:%d,xactSz:%.2f%%/xLcks:%d%%/effDBSz:%d%%) analysis!",
-				batchSetID, runID, nRwsFrmSLCT*100, (int)(nRwsFrmUPT*100),
-				(int)(actvRwPlSz*100)));
+				"Start the batchSet #%d(runID:%d,rowSubSetSz:%.2f%%x/updateSel:%.2f%%/readSel:%.2f%%) analysis!",
+				batchSetID, runID, rowSubsetSize*100, updateSel*100, readSel*100));
 
 		// make a batchset run result
-		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, nCores, buffCacheSz, duration);
+		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, pk, nProcs, duration);
 		
 		// prepare for transaction generation
-		stepB(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz);
+		int type = 0;
+		if(readSel == 0){
+			type = Constants.UPDATE_ONLY;
+		}else if(updateSel == 0){
+			type = Constants.READ_ONLY;
+		}else{
+			type = Constants.MIXED;
+		}
+		stepB(type, readSel, updateSel, rowSubsetSize);
 				
 		// initialize and run this batch set atomically
 		// run as many clients as specified in MPL
@@ -1789,7 +1799,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 	 * @param batchSetID
 	 * @return
 	 */
-	private int insertBatchSetRunResult(int runID, int batchSetID, int numCores, double bufferSpace, int duration) 
+	private int insertBatchSetRunResult(int runID, int batchSetID, int pk, int numProcs, int duration) 
 	throws Exception{
 		Main._logger.outputLog("###<BEGIN>Make a batchsetrun record ################");
 		// get batchset run result id
@@ -1846,8 +1856,9 @@ Main._logger.outputLog(sql);
 								String.valueOf(batchSetRunResID),
 								String.valueOf(runID),
 								String.valueOf(batchSetID), 
-								String.valueOf(numCores), 
-								String.valueOf(String.format("%.2f", bufferSpace)), 
+								String.valueOf(pk), 
+								String.valueOf(numProcs), 
+//								String.valueOf(String.format("%.2f", bufferSpace)), 
 								String.valueOf(duration), 
 								null, 
 								null, },
@@ -2025,18 +2036,21 @@ Main._logger.outputDebug(batchSetQuery);
 	}
 
 	@Override
-	protected void stepB(double transactionSize,
-			double eXclusiveLcks, double effectiveDBSize) throws Exception {
+	protected void stepB(int type,
+			double readSel,
+			double updateSel, 
+			double rowSubsetSz) throws Exception {
 //		recordRunProgress(0, "Beginning batch (" + batchID
 //				+ ") initialization (MPL=" + MPL + ")");
 		// number of clients
 //		int numClients = MPL;
 		// set transaction size
-		TransactionGenerator.setXactSize(transactionSize);
+		TransactionGenerator.setReadSelectivity(readSel);
 		// set exclusive locks
-		TransactionGenerator.setXLocks(eXclusiveLcks);
+		TransactionGenerator.setUpdateSelectivity(updateSel);
 		// set effective db size
-		TransactionGenerator.setEffectiveDBSz(effectiveDBSize);
+		TransactionGenerator.setRowSubsetSize(rowSubsetSz);
+		TransactionGenerator.workload_type = type;
 //		recordRunProgress(100, "Done with batch (" + batchID
 //				+ ") initialization (MPL=" + MPL + ")");
 	}

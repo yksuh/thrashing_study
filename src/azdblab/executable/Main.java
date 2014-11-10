@@ -288,9 +288,9 @@ public class Main {
 			
 //			CheckSingleCore();
 			
-			if(!machineName.contains("sodb6") && !machineName.contains("sodb4")){
-				CheckExecutorAndDBMSRunning(dbms_name);
-			}
+//			if(!machineName.contains("sodb6") && !machineName.contains("sodb4")){
+//				CheckExecutorAndDBMSRunning(dbms_name);
+//			}
 //			CheckExecutorAndDBMSRunning(dbms_name);
 
 			
@@ -338,7 +338,7 @@ public class Main {
 	 * Check if the currect number of cores matches the one in the experiment spect. 
 	 * 
 	 */
-	private static boolean CheckNumCores(int cores) {
+	public static boolean CheckNumProcs(int cores) {
 		boolean desiredNumCores = true;
 		try {
 			/****
@@ -372,7 +372,7 @@ public class Main {
 	 * Never run two executors on the same machine 
 	 * @param dbms_name chosen dbms
 	 */
-	private static void CheckExecutorAndDBMSRunning(String dbms_name) {
+	public static void CheckExecutorAndDBMSRunning(String dbms_name) {
 		/******
 		 * 1) Check if any other executors are running.
 		 * 2) Check if any other DBMS is running. 
@@ -557,32 +557,35 @@ _logger.outputLog(line);
 //		int numIncr = 0;
 //		int duration = 0;
 		
+//		/***
+//		 * DBMS Buffer Cache Size
+//		 */
+//		double dbmsBuffCacheSizeMin = 0;
+//		double dbmsBuffCacheSizeMax = 0;
+//		double dbmsBuffCacheSizeIncr = 0;
 		/***
-		 * DBMS Buffer Cache Size
+		 * Number of Processors
 		 */
-		double dbmsBuffCacheSizeMin = 0;
-		double dbmsBuffCacheSizeMax = 0;
-		double dbmsBuffCacheSizeIncr = 0;
-		/***
-		 * Number of Cores
-		 */
-		int numCores = 0;
+		int incrProcs = 0;
+		int maxProcs = 0;
+		int minProcs = 0;
+		
 		/***
 		 * BatchRunTime
 		 */
-		int sessionDuration = 0;
+		int sessionDuration = Constants.SESSION_DURATION;
 		/***
 		 * Transaction Size
 		 */
-		double minNumRowsFromSELECT = 0;
-		double maxNumRowsFromSELECT = 0;
-		int incrNumRowsFromSELECT = 0;
+		double minReadSel = 0;
+		double maxReadSel = 0;
+		int incrReadSel = 0;
 		/***
 		 * Exclusive Locks
 		 */
-		double minNumRowsFromUPDATE = 0;
-		double maxNumRowsFromUPDATE = 0;
-		double incrNumRowsFromUPDATE = 0;
+		double minUpdateSel = 0;
+		double maxUpdateSel = 0;
+		double incrUpdateSel = 0;
 		/***
 		 * Terminal configuration
 		 */
@@ -592,9 +595,9 @@ _logger.outputLog(line);
 		/***
 		 * Effective DB size
 		 */
-		double minActiveRowPool = 0;
-		double maxActiveRowPool = 0;
-		double incrActiveRowPool = 0;
+		double minRowSubsetSz = 0;
+		double maxRowSubsetSz = 0;
+		double incrRowSubsetSz = 0;
 		
 		// LabShelf.getShelf().printTableSchema();
 		Experiment experiment = User.getUser(lab_user_name).getNotebook(
@@ -626,20 +629,24 @@ _logger.outputLog(line);
 //		dbmsBuffCacheSizeMin = experiment.getDBMSBufferCacheMin();
 //		dbmsBuffCacheSizeMax = experiment.getDBMSBufferCacheMax();
 //		dbmsBuffCacheSizeIncr = experiment.getDBMSBufferCacheIncr();
-		numCores = experiment.getNumCores();
+//		nProcs = experiment.getNumCores();
+		
+		minProcs = experiment.getMaxNumCores();
+		maxProcs = experiment.getMinNumCores();
+		incrProcs = experiment.getCoreIncr();
 		sessionDuration = experiment.getBatchRunTime();
-		minNumRowsFromSELECT = experiment.getTransactionSizeMin();
-		maxNumRowsFromSELECT = experiment.getTransactionSizeMax();
-		incrNumRowsFromSELECT = experiment.getTransactionSizeIncr();
-		minNumRowsFromUPDATE = experiment.getExclusiveLockPctMin();
-		maxNumRowsFromUPDATE = experiment.getExclusiveLockPctMax();
-		incrNumRowsFromUPDATE  = experiment.getExclusiveLockPctIncr();
+		minReadSel = experiment.getTransactionSizeMin();
+		maxReadSel = experiment.getTransactionSizeMax();
+		incrReadSel = experiment.getTransactionSizeIncr();
+		minUpdateSel = experiment.getExclusiveLockPctMin();
+		maxUpdateSel = experiment.getExclusiveLockPctMax();
+		incrUpdateSel  = experiment.getExclusiveLockPctIncr();
 		minMPL = experiment.getMPLMin();
 		maxMPL = experiment.getMPLMax();
 		incrMPL  = experiment.getMPLIncr();
-		minActiveRowPool = experiment.getEffectiveDBMin();
-		maxActiveRowPool = experiment.getEffectiveDBMax();
-		incrActiveRowPool  = experiment.getEffectiveDBIncr();	
+		minRowSubsetSz = experiment.getEffectiveDBMin();
+		maxRowSubsetSz = experiment.getEffectiveDBMax();
+		incrRowSubsetSz  = experiment.getEffectiveDBIncr();	
 		/*
 		 * Logging information containing user name, notebook name, experiment
 		 * name, scenario, logging time
@@ -663,24 +670,25 @@ _logger.outputLog(line);
 		
 //		String str = String.format("DBMSBufferCacheSize: %.2f%%, %d%%, %.2f%%", dbmsBuffCacheSizeMin*100, (int)(dbmsBuffCacheSizeIncr*100), dbmsBuffCacheSizeMax*100);
 //		_logger.outputLog(str);
-		String str = String.format("Number of Cores: %d", numCores);
+		String str = "";
+		str = String.format("Number of Processors: %d, %d, %d", minProcs, incrProcs, maxProcs);
 		_logger.outputLog(str);
 		str = String.format("Batch Run Time: %d", sessionDuration);
 		_logger.outputLog(str);
-		str = String.format("Transaction Size: %.2f%%, x%d, %.2f%%", minNumRowsFromSELECT*100, incrNumRowsFromSELECT, maxNumRowsFromSELECT*100);
+		str = String.format("Row Subset Size: %d%%, %d%%, %d%%", (int)(minRowSubsetSz*100), (int)(incrRowSubsetSz*100), (int)(maxRowSubsetSz*100));
 		_logger.outputLog(str);
-		str = String.format("Exclusive Lock Pct: %d%%, %d%%, %d%%", (int)(minNumRowsFromUPDATE*100), (int)(incrNumRowsFromUPDATE*100), (int)(maxNumRowsFromUPDATE*100));
+		str = String.format("Update Selectivity: %.2f%%, x%d, %.2f%%", minUpdateSel*100, incrUpdateSel, maxUpdateSel*100);
+		_logger.outputLog(str);
+		str = String.format("Read Selectivity: %.2f%%, x%d, %.2f%%", minReadSel*100, incrReadSel, maxReadSel*100);
 		_logger.outputLog(str);
 		str = String.format("Multiprogramming Level: %d, %d, %d", minMPL, incrMPL, maxMPL);
-		_logger.outputLog(str);
-		str = String.format("Effective DB: %d%%, %d%%, %d%%", (int)(minActiveRowPool*100), (int)(incrActiveRowPool*100), (int)(maxActiveRowPool*100));
 		_logger.outputLog(str);
 		minMPL = experiment.getMPLMin();
 		maxMPL = experiment.getMPLMax();
 		incrMPL  = experiment.getMPLIncr();
-		minActiveRowPool = experiment.getEffectiveDBMin();
-		maxActiveRowPool = experiment.getEffectiveDBMax();
-		incrActiveRowPool  = experiment.getEffectiveDBIncr();
+		minRowSubsetSz = experiment.getEffectiveDBMin();
+		maxRowSubsetSz = experiment.getEffectiveDBMax();
+		incrRowSubsetSz  = experiment.getEffectiveDBIncr();
 		_logger.outputLog("connectString: " + connectString);
 		_logger.outputLog("logging time: [" + transactionTime2 + "]");
 		_logger
@@ -850,22 +858,24 @@ _logger.outputLog(line);
 
 		try {
 			Scenario scen = experimentRun.getScenarioInstance();
-			if(!CheckNumCores(numCores)){
-				_logger.outputLog("Please check '/boot/grub/grub.conf' or any other grub file, to see if 'maxcpus="+numCores+"' is given in the kernel entry.");
-				System.exit(-1);
-			}
+//			if(!CheckNumCores(numCores)){
+//				_logger.outputLog("Please check '/boot/grub/grub.conf' or any other grub file, to see if 'maxcpus="+numCores+"' is given in the kernel entry.");
+//				System.exit(-1);
+//			}
 //			scen.setCores(numCores);
 //			scen.setDuration(duration);
 //			scen.setTerminals(numTerminals);
 //			scen.setIncrements(numIncr);
 //			scen.setEffectiveDBSz(effDBSz);
-			scen.setConfigParamters(dbmsBuffCacheSizeMin, dbmsBuffCacheSizeMax, dbmsBuffCacheSizeIncr, 
-					numCores, 
+			scen.setConfigParamters(
+//					dbmsBuffCacheSizeMin, dbmsBuffCacheSizeMax, dbmsBuffCacheSizeIncr, 
+					//nProcs, 
+					minProcs, maxProcs, incrProcs,
 					sessionDuration, 
-					minNumRowsFromSELECT, maxNumRowsFromSELECT, incrNumRowsFromSELECT,
-					minNumRowsFromUPDATE,  maxNumRowsFromUPDATE, incrNumRowsFromUPDATE,
+					minReadSel, maxReadSel, incrReadSel,
+					minUpdateSel,  maxUpdateSel, incrUpdateSel,
 					minMPL, maxMPL, incrMPL,
-					minActiveRowPool, maxActiveRowPool, incrActiveRowPool);
+					minRowSubsetSz, maxRowSubsetSz, incrRowSubsetSz);
 			scen.executeExperiment();
 			
 		} catch (InvalidExperimentRunException e) {

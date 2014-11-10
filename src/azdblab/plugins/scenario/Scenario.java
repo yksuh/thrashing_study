@@ -705,38 +705,46 @@ public abstract class Scenario extends Plugin{
 //		effectiveDBSz = effDBSz;
 //	}
 	
+//	/**
+//	 * DBMS cache size minimum, maximum, increments
+//	 */
+//	protected double dbmsBuffCacheSizeMin;
+//	protected double dbmsBuffCacheSizeMax;
+//	protected double dbmsBuffCacheSizeIncr;
+	
 	/**
-	 * DBMS cache size minimum, maximum, increments
+	 * Number of processors: minCores, maxCores, incrCores
 	 */
-	protected double dbmsBuffCacheSizeMin;
-	protected double dbmsBuffCacheSizeMax;
-	protected double dbmsBuffCacheSizeIncr;
+	protected int minProcs;
+	protected int maxProcs;
+	protected int incrProcs;
+	
 	/**
-	 * transaction size minimum, maximum, increments
+	 * read selectivity minimum, maximum, increments
 	 */
-	protected double mnNmRwsFrmSLCT;
-	protected double mxNumRowsFromSELECT;
-	protected double incrNmRwsFrmSLCT;
+	protected double minReadSelectivity;
+	protected double maxReadSelectivity;
+	protected double incReadSelectivity;
 	/**
-	 * eXclusive lock minimum, maximum, increments
+	 * update selectivity minimum, maximum, increments
 	 */
-	protected double mnNmRwsFrmUPT;
-	protected double mxNmRwsFrmUPT;
-	protected double incrNmRwsFrmUPT;
+	protected double minUpdateSelectivity;
+	protected double maxUpdateSelectivity;
+	protected double incUpdateSelectivity;
 	/**
-	 * effective database minimum, maximum, increments
+	 * row subset size minimum, maximum, increments
 	 */
-	protected double mnActRwPlSz;
-	protected double mxActRowPlSz;
-	protected double actRwPlSzIncr;
+	protected double minRowSubsetSz;
+	protected double maxRowSubsetSz;
+	protected double incRowSubsetSz;
 	/**
 	 * batch run time
 	 */
 	protected int batchRunTime;
-	/**
-	 * dbms buffer cache ratio
-	 */
-	protected double dbmsCacheBufferSize;
+//	/**
+//	 * dbms buffer cache ratio
+//	 */
+//	protected double dbmsCacheBufferSize;
 	/**
 	 * MPL minimum, maximum, increments
 	 */
@@ -745,33 +753,38 @@ public abstract class Scenario extends Plugin{
 	protected int incrMPL;
 	
 	public void setConfigParamters(
-		double dbcszMin,
-		double dbcszMax,
-		double dbcszIncr,
-		int nCores,
+//		double dbcszMin,
+//		double dbcszMax,
+//		double dbcszIncr,
+		//int nCores,
+		int mnProcs,
+		int mxProcs,
+		int inProcs,
 		int btRT,
-		double xsMin,
-		double xsMax,
-		double xsIncr,
-		double xlcksMin,
-		double xlcksMax,
-		double xlcksIncr,
+		double rsMin,
+		double rsMax,
+		double rsIncr,
+		double usMin,
+		double usMax,
+		double usIncr,
 		int mlMin,
 		int mlMax,
 		int mlIncr,
-		double edbMin,
-		double edbMax,
-		double edbIncr){
-		/***
-		 * DBMS Buffer Cache Size
-		 */
-		dbmsBuffCacheSizeMin = dbcszMin;
-		dbmsBuffCacheSizeMax = dbcszMax;
-		dbmsBuffCacheSizeIncr = dbcszIncr;
+		double rssMin,
+		double rssMax,
+		double rssIncr){
+//		/***
+//		 * DBMS Buffer Cache Size
+//		 */
+//		dbmsBuffCacheSizeMin = dbcszMin;
+//		dbmsBuffCacheSizeMax = dbcszMax;
+//		dbmsBuffCacheSizeIncr = ßdbcszIncr;
 		/***
 		 * Number of Cores
 		 */
-		numCores = nCores;
+		minProcs = mnProcs;
+		maxProcs = mxProcs;
+		incrProcs = inProcs;
 		/***
 		 * Duration
 		 */
@@ -779,15 +792,15 @@ public abstract class Scenario extends Plugin{
 		/***
 		 * Transaction Size
 		 */
-		mnNmRwsFrmSLCT = xsMin;
-		mxNumRowsFromSELECT = xsMax;
-		incrNmRwsFrmSLCT = xsIncr;
+		minReadSelectivity = rsMin;
+		maxReadSelectivity = rsMax;
+		incReadSelectivity = rsIncr;
 		/***
 		 * Exclusive Locks
 		 */
-		mnNmRwsFrmUPT = xlcksMin;
-		mxNmRwsFrmUPT = xlcksMax;
-		incrNmRwsFrmUPT = xlcksIncr;
+		minUpdateSelectivity = usMin;
+		maxUpdateSelectivity = usMax;
+		incUpdateSelectivity = usIncr;
 		/***
 		 * Terminal configuration
 		 */
@@ -795,10 +808,10 @@ public abstract class Scenario extends Plugin{
 		largestMPL = mlMax;
 		incrMPL = mlIncr;
 		/***
-		 * Effective DB size
+		 * Row Subset size
 		 */
-		mnActRwPlSz = edbMin;
-		mxActRowPlSz = edbMax;
-		actRwPlSzIncr = edbIncr;
+		minRowSubsetSz = rssMin;
+		maxRowSubsetSz = rssMax;
+		incRowSubsetSz = rssIncr;
 	}
 }

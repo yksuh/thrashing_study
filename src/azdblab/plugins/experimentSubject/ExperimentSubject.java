@@ -832,6 +832,11 @@ protected String getProcDiff(Socket procMonSock) throws ProcMonitorException {
   public abstract String[] getPlanOperators();
     
   /**
+   * Installs transaction tables
+   */    
+  public abstract void installXactTables(DataDefinition myDataDef, String myPrefix, int primaryKeyPresence);
+ 
+  /**
    * Installs the tables necessary for an experiment
    */    
   public abstract void installExperimentTables(DataDefinition myDataDef, String myPrefix);

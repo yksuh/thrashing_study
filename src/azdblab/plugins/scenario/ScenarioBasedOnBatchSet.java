@@ -1,10 +1,16 @@
 package azdblab.plugins.scenario;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.SQLException;
 
 import azdblab.Constants;
 import azdblab.exception.PausedExecutor.PausedExecutorException;
 import azdblab.exception.PausedRun.PausedRunException;
+import azdblab.exception.analysis.ColumnAttributeException;
+import azdblab.exception.analysis.DataDefinitionValidationException;
+import azdblab.exception.analysis.NameResolutionException;
 import azdblab.executable.Main;
 import azdblab.labShelf.GeneralDBMS;
 import azdblab.labShelf.InternalTable;
@@ -88,8 +94,8 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					"BatchSetID", 
 					"ExperimentID",		// experiment id 
 					"BatchSzIncr", 		// batch size increments
-					"XactSz", 			// # of rows for reads
-					"XLockRatio", 		// # of rows for writes
+					"readSel", 			// # of rows for reads
+					"updateSel", 		// # of rows for writes
 					"EffectiveDBSz"	// effective database size (active row pool)
 			},
 			new int[] { 
@@ -102,7 +108,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 			}, 
 			new int[] {10,10, 10,10,10,10}, 
 			new int[] {0,0, 0,0,0,0}, 
-			new String[] {"ExperimentID", "BatchSzIncr", "XactSz", "XLockRatio", "EffectiveDBSz"}, // unique
+			new String[] {"ExperimentID", "BatchSzIncr", "readSel", "updateSel", "EffectiveDBSz"}, // unique
 			new String[] {"BatchSetID" }, 	// primary key
 			new ForeignKey[] { 
 					new ForeignKey(
@@ -271,8 +277,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					"BatchSetRunResID", // batchset run result identifier
 					"RunID", 			// runID
 					"BatchSetID",		// batchset identifier
-					"NumCores", 		// number of cores
-					"BufferSpace", 		// buffer space
+					"PK", 				// primary key
+					"NumProcs", 		// number of cores
+					//"BufferSpace", 		// buffer space
 					"Duration", 		// run duration
 					"AvgXactProcTime", 	// average xact processing time
 					"MaxMPL"			// maximum MPL
@@ -284,11 +291,12 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
+					//GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER,
 					GeneralDBMS.I_DATA_TYPE_NUMBER
 			}, 
-			new int[] {10, 10, 10,10,10,10,10,10}, 
-			new int[] { 0,  0, 0,0,0, 0,1,1}, 
+			new int[] {10, 10, 10,10,10,10,10,10,10}, 
+			new int[] { 0,  0, 0,0,0,0, 0,1,1}, 
 			new String[] { "BatchSetID", "RunID"}, // unique
 			new String[] { "BatchSetRunResID" }, 	// primary key
 			new ForeignKey[] { 
@@ -519,11 +527,11 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //			new String[] { 
 //					"BatchSetID", 		// batch set ID
 //					"BufferSpace", 		// buffer space
-//					"NumCores", 		// number of cores
+//					"NumProcs", 		// number of cores
 //					"BatchSzIncr", 		// batch size increments
 //					"Duration", 		// run duration
-//					"XactSz", 			// # of rows for reads
-//					"XLockRatio", 		// # of rows for writes
+//					"readSel", 			// # of rows for reads
+//					"updateSel", 		// # of rows for writes
 //					"EffectiveDBSz"	// effective database size (active row pool)	 
 //			}, 
 //			new int[] { 
@@ -597,8 +605,8 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	/******
 	 * Study a batch set
 	 * @param runID runID
-	 * @param numCores number of cores
-	 * @param bufferSpace buffer space ratio
+	 * @param primary key
+	 * @param numProcs number of processors
 	 * @param duration duration
 	 * @param transactionSize transaction size
 	 * @param eXclusiveLocks exclusive locks
@@ -606,8 +614,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	 * @throws Exception
 	 */
 	protected abstract void studyBatchSet(int runID,
-											int numCores,
-											double bufferSpace,
+											int PK,
+											int numProcs,
+											//double bufferSpace,
 											int duration,
 											double transactionSize, 
 											double eXclusiveLocks, 
@@ -627,9 +636,19 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	 * Initialize as many clients as MPL for each batch in this batch set
 	 * @throws Exception
 	 */
-	protected abstract void stepB(double transactionSize, 
-								  double eXclusiveLcks, 
-								  double effectiveDBSize) throws Exception;
+	
+	/*****
+	 * 
+	 * @param type workload type
+	 * @param readSelectivity 
+	 * @param updateSelectivity
+	 * @param rowSubsetSize
+	 * @throws Exception
+	 */
+	protected abstract void stepB(int type,
+								  double readSelectivity, 
+								  double updateSelectivity, 
+								  double rowSubsetSize) throws Exception;
 	/***
 	 * Runs transactions per client in a batch
 	 * @throws Exception
@@ -642,6 +661,87 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	 */
 	protected abstract void stepD() throws Exception;
 	
+	private void runBatchset(int runID,
+							 int batchSetNumToRun, 
+							 int pk,
+							 int numProcs,
+							 double rowSubsetSz,
+							 double updateSel,
+							 double readSel) throws Exception{
+		String str = String.format("batchSet #%d (row subset size: %d%%, updateSel: %d%%, readSel: %.2f%%)", 
+				batchSetNumToRun, (int)(rowSubsetSz*100), (int)(updateSel*100), readSel*100);
+		Main._logger.outputLog(str);
+		// get task number 
+		int maxTaskNum = getMaxTaskNum(runID);
+		if(batchSetNumToRun <= maxTaskNum-1){
+			Main._logger.outputLog("batchSet #" + batchSetNumToRun +" studied already" );
+			return;
+		} // end if
+		else{
+			boolean pausedExecutorByUserRequest = false;
+			boolean pausedRunByUserRequest = false;
+			
+			// check if this run has been paused 
+			if (checkToBePaused()){
+				pausedRunByUserRequest = true;
+			}
+			
+			// check if this executor has been paused 
+			if (checkExecutorOnPause()) {
+				pausedExecutorByUserRequest = true;
+			}
+			
+			// if the pause by user request took place, then an exception is thrown.
+			if(pausedRunByUserRequest || pausedExecutorByUserRequest){
+				Main._logger.outputLog("paused by user request !!!");
+				if(pausedRunByUserRequest){
+					throw new PausedRunException("Run paused by user request");
+				}else{
+					throw new PausedExecutorException("Executor paused by user request");	
+				}
+			}
+			
+			int currTrialCnt = 1, currExpBackoffWaitTime = Constants.WAIT_TIME;
+			
+			studyBatchSet(runID,
+						  pk,
+						  numProcs,
+	//					  dbmsBuffCacheSizeMin, // min buffer cache
+						  batchRunTime,
+						  readSel,
+						  updateSel,
+						  rowSubsetSz);
+			
+			// insert a completed task associated with the query number
+			Main._logger.outputLog("before the insertion of the next task number");
+			while(currTrialCnt <= Constants.TRY_COUNTS){	
+				try {
+					// record progress
+					recordRunProgress(100, String.format("Analyzed #%d BatchSet", batchSetNumToRun));
+					// store next task number
+					putNextTaskNum(runID, batchSetNumToRun+1);
+					break;
+				}catch(Exception ex){
+					ex.printStackTrace();
+					Main._logger.reportError(ex.getMessage());
+					currTrialCnt++;
+					currExpBackoffWaitTime *= 2;
+					Main._logger.outputLog("Exponential backoff for last stage is performed for : " + currExpBackoffWaitTime + " (ms)");
+					try {
+						Thread.sleep(currExpBackoffWaitTime);
+					} catch (InterruptedException e) {}
+				}
+			}
+			// if we fail after 10 times, then an exception is eventually made.
+			if(currTrialCnt > Constants.TRY_COUNTS) throw new Exception("JDBC in the last stage is not stable.");
+			currTrialCnt = 1; currExpBackoffWaitTime = Constants.WAIT_TIME;
+			Main._logger.outputLog("after the insertion  of the next task number");
+			
+			// reset experiment subject
+			experimentSubject.reset();
+		} // else
+	}
+	
 	/**
 	 * @see azdblab.plugins.scenario.Scenario#executeSpecificExperiment()
 	 */
@@ -650,131 +750,87 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 		int maxTaskNum = -1;
 		// generate batchsets
 		int batchSetNumToRun = 0;
-		int totalNumRealSel = (int)Math.log10(mxNumRowsFromSELECT/mnNmRwsFrmSLCT)+1+1; //The last 1 for update only.
-		int totalNumUpdateSel = (int)((mxNmRwsFrmUPT-mnNmRwsFrmUPT)/incrNmRwsFrmUPT)+1;
-		int totalActiveRowPools = (int)((mxActRowPlSz-mnActRwPlSz)/actRwPlSzIncr)+1;
-//		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
-		int totalBatchSets = (totalNumRealSel+totalNumUpdateSel)*totalActiveRowPools;
-		double dNmRwsFrmSLCT = 0; boolean flag = false;
-		
-		boolean firstLoading = true;
-		// transaction size
-//		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
-		while(dNmRwsFrmSLCT <= mxNumRowsFromSELECT){
-			if(dNmRwsFrmSLCT == 0) // update only
-				Constants.DEFAULT_UPT_ROWS = mxNumRowsFromSELECT; // set maximum selectivity for update only
-			// exclusive locks
-			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT+=incrNmRwsFrmUPT){
-				// skip this
-				if(dNmRwsFrmSLCT == 0 && dNmRwsFrmUPT == 0){
-					continue;
+
+		// The number of processors is correct.
+		for(int numProcs=minProcs;numProcs<=maxProcs;numProcs+=incrProcs){
+			String machineName = "";
+			String dbmsName = experimentSubject.getDBMSName().toLowerCase();
+			try {
+//				System.out.println("dbms:" + dbms_name);
+				if(dbmsName.contains("sqlserver")){
+					machineName = "sodb6.cs.arizona.edu";
+				}else{
+					machineName = InetAddress.getLocalHost().getHostName();
 				}
-//				if(dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
-//					continue;
-//				}
-				if(flag && dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
-					continue;
-				}
-				
-				if(!flag && dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT != 0){
-					dNmRwsFrmUPT = 0;
-					flag = true;
-				}
-				
-				// effective db size
-				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
-//if(dActRowPlSz < mxActRowPlSz)
-//	continue;
-					//if(firstLoading) firstLoading = false;
-					batchSetNumToRun++;
-					
-					if(batchSetNumToRun > 2) return;
-					
-					String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, hotspot ratio: %d%%)", 
-							batchSetNumToRun, dNmRwsFrmSLCT*100, (int)(dNmRwsFrmUPT*100), (int)(dActRowPlSz*100));
-					Main._logger.outputLog(str);
-					// get task number 
-					maxTaskNum = getMaxTaskNum(runID);
-					if(batchSetNumToRun <= maxTaskNum-1){
-						Main._logger.outputLog("batchSet #" + batchSetNumToRun +" studied already" );
-					} // end if
-					else{
-						boolean pausedExecutorByUserRequest = false;
-						boolean pausedRunByUserRequest = false;
-						
-						// check if this run has been paused 
-						if (checkToBePaused()){
-							pausedRunByUserRequest = true;
-						}
-						
-						// check if this executor has been paused 
-						if (checkExecutorOnPause()) {
-							pausedExecutorByUserRequest = true;
-						}
-						
-						// if the pause by user request took place, then an exception is thrown.
-						if(pausedRunByUserRequest || pausedExecutorByUserRequest){
-							Main._logger.outputLog("paused by user request !!!");
-							if(pausedRunByUserRequest){
-								throw new PausedRunException("Run paused by user request");
-							}else{
-								throw new PausedExecutorException("Executor paused by user request");	
-							}
-						}
-						
-						int currTrialCnt = 1, currExpBackoffWaitTime = Constants.WAIT_TIME;
-						
-						// initialize experiment tables 
-						preStep(firstLoading);
-						if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
-							if(firstLoading) firstLoading = false;
-						}
-						
-						// analyze this batch set
-						studyBatchSet(runID,
-										numCores,
-										dbmsBuffCacheSizeMin, // min buffer cache
-										batchRunTime,
-										dNmRwsFrmSLCT,
-										dNmRwsFrmUPT,
-										dActRowPlSz);
-						
-						// insert a completed task associated with the query number
-						Main._logger.outputLog("before the insertion of the next task number");
-						while(currTrialCnt <= Constants.TRY_COUNTS){	
-							try {
-								// record progress
-								recordRunProgress(100, String.format("Analyzed #%d BatchSet (total: %d)", batchSetNumToRun, totalBatchSets));
-								// store next task number
-								putNextTaskNum(runID, batchSetNumToRun+1);
-								break;
-							}catch(Exception ex){
-								ex.printStackTrace();
-								Main._logger.reportError(ex.getMessage());
-								currTrialCnt++;
-								currExpBackoffWaitTime *= 2;
-								Main._logger.outputLog("Exponential backoff for last stage is performed for : " + currExpBackoffWaitTime + " (ms)");
-								try {
-									Thread.sleep(currExpBackoffWaitTime);
-								} catch (InterruptedException e) {}
-							}
-						}
-						// if we fail after 10 times, then an exception is eventually made.
-						if(currTrialCnt > Constants.TRY_COUNTS) throw new Exception("JDBC in the last stage is not stable.");
-						currTrialCnt = 1; currExpBackoffWaitTime = Constants.WAIT_TIME;
-						Main._logger.outputLog("after the insertion  of the next task number");
-						
-						// reset experiment subject
-						experimentSubject.reset();
-					} // else
-				} // effective db 
-			} // write selectivity
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
 			
-			if(dNmRwsFrmSLCT == 0) 
-				dNmRwsFrmSLCT = mnNmRwsFrmSLCT;
-			else
-				dNmRwsFrmSLCT*= incrNmRwsFrmSLCT;
-		} // read selectivity
+			// check if there's any other executor or DBMS running
+			if(!machineName.contains("sodb6") && !machineName.contains("sodb4")){
+				Main.CheckExecutorAndDBMSRunning(dbmsName);
+			}
+			
+			// check if the specified number of processors 
+			if(!Main.CheckNumProcs(numProcs)){
+				String str = "Please check '/boot/grub/grub.conf' or any other grub file, "
+						+ "to see if 'maxcpus="+numProcs+"' is given in the kernel entry.";
+				Main._logger.outputLog(str);
+				throw new PausedRunException("Run paused because of mismatching # of processors (next: " + numProcs+")");
+			}
+			
+			boolean firstLoading = true;
+			// primary key presence
+			for(int pk=1;pk>0;pk--){
+				// create transaction tables
+				createXactTables(pk);
+				
+				// initialize experiment tables 
+				preStep(firstLoading);
+				
+				// analyze this batch set
+				if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
+					if(firstLoading) firstLoading = false;
+				}
+				
+				// update selectivity
+//				Constants.DEFAULT_UPT_ROWS = maxUpdateSelectivity;
+				for(double updateSel=minUpdateSelectivity;updateSel<=maxUpdateSelectivity;updateSel*=incUpdateSelectivity){
+					// row subset size
+					for(double rowSubsetSz=minRowSubsetSz;rowSubsetSz<=maxRowSubsetSz;rowSubsetSz+=incRowSubsetSz){
+						batchSetNumToRun++;
+						
+//						if(batchSetNumToRun > 2) return;
+						runBatchset(runID,
+									batchSetNumToRun, 
+									pk,
+									numProcs,
+									rowSubsetSz,
+									updateSel,
+									0);
+					} 
+				} // end update selectivity
+				
+				// read selectivity
+				for(double readSel=minReadSelectivity;readSel<=maxReadSelectivity;readSel*=incReadSelectivity){
+					// row subset size
+					for(double rowSubsetSz=minRowSubsetSz;rowSubsetSz<=maxRowSubsetSz;rowSubsetSz+=incRowSubsetSz){
+						batchSetNumToRun++;
+						
+//						if(batchSetNumToRun > 2) return;
+						runBatchset(runID,
+									batchSetNumToRun, 
+									pk,
+									numProcs,
+									rowSubsetSz,
+									0,
+									readSel);
+					} 
+				} // read selectivity
+			} // primary key presence
+			
+			if(numProcs == minProcs) numProcs -= 1; // have it start from two processors.
+		} // number of cores
 	}
 
 //	/****
@@ -881,11 +937,11 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //			e.printStackTrace();
 //			String updateSQL = "UPDATE " + Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " " + 
 //							   "SET BufferSpace = " + paramVal[2] + 
-//							   ", NumCores = " + paramVal[3] + 
+//							   ", NumProcs = " + paramVal[3] + 
 //							   ",  BatchSzIncr = " + paramVal[4] + 
 //							   ",  Duration = " + paramVal[5] + 
-//							   ",  XactSz = " + paramVal[6] + 
-//							   ",  XLockRatio = " + paramVal[7] + 
+//							   ",  readSel = " + paramVal[6] + 
+//							   ",  updateSel = " + paramVal[7] + 
 //							   ",  EffectiveDBSz = " + paramVal[8] +
 //							   " WHERE BatchSetID = " + paramVal[0];
 //Main._logger.outputDebug(updateSQL);			
@@ -902,6 +958,27 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 		myXactTables = experimentRun.getXactTables();
 	}
 
+	/*****
+	 * Create transaction tables
+	 * @param pk
+	 * @throws IOException
+	 * @throws DataDefinitionValidationException
+	 * @throws NameResolutionException
+	 * @throws ColumnAttributeException
+	 */
+	private void createXactTables(int pk) 
+			throws IOException, DataDefinitionValidationException, NameResolutionException, ColumnAttributeException {
+		for (int i = 0; i < myXactTables.length; i++) {
+			Table curr_table = myXactTables[i];
+			boolean flag = experimentSubject.tableExists(curr_table.table_name_with_prefix);
+			if (flag) {
+				Main._logger.outputLog(curr_table.table_name_with_prefix + " exists!!!");
+				experimentSubject.dropTable(curr_table.table_name_with_prefix);
+			}
+			experimentSubject.installXactTables(myDataDef, curr_table.table_prefix, pk);
+		}
+	}
+	
 	/**
 	 * Creating and populating experiment tables.
 	 * 
@@ -955,9 +1032,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //									   int bszMin,
 //									   int bszMax,
 //									   int bszIncr,
-//									   double xactSzMin,
-//									   double xactSzMax,
-//									   double xactSzIncr,
+//									   double readSelMin,
+//									   double readSelMax,
+//									   double readSelIncr,
 //									   double xlcksMin,
 //									   double xlcksMax,
 //									   double xlcksIncr,
@@ -970,9 +1047,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //		mplMin   = bszMin;
 //		mplMax   = bszMax;
 //		mplIncr  = bszIncr;
-//		minReadSel   = xactSzMin;
-//		maxReadSel   = xactSzMax;
-//		xactSizeIncr  = xactSzIncr;
+//		minReadSel   = readSelMin;
+//		maxReadSel   = readSelMax;
+//		xactSizeIncr  = readSelIncr;
 //		minUpdateSel   = xlcksMin;
 //		maxUpdateSel   = xlcksMax;
 //		updateSelIncr  = xlcksIncr;

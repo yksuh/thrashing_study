@@ -563,6 +563,51 @@ public class OracleSubject extends LabShelfManager {
 		}
 		return node;
 	}
+	
+	
+	/****
+	 * install transaction tables
+	 * @param myDataDef
+	 * @param myPrefix
+	 * @param primaryKeyPresence primary key specified
+	 */
+	public void installXactTables(DataDefinition myDataDef,
+			String myPrefix,
+			int primaryKeyPresence) {
+		if (Main.verbose)
+			Main._logger.outputLog("Installing Tables");
+		String[] myTables = myDataDef.getTables();
+		if (!isInstalled(myPrefix, myTables)) {
+			// initializeSubjectTables();
+			for (int i = 0; i < myTables.length; i++) {
+				String[] primary = null;
+				ForeignKey[] foreign = null;
+				// appending the column information to the CREATE TABLE
+				// statement.
+				String[] columns = myDataDef.getTableColumns(myTables[i]);
+				int[] columnDataTypes = new int[columns.length];
+				int[] columnDataTypeLengths = new int[columns.length];
+				for (int j = 0; j < columns.length; j++) {
+					columnDataTypes[j] = myDataDef.getColumnDataType(
+							myTables[i], columns[j]);
+					columnDataTypeLengths[j] = myDataDef.getColumnDataLength(
+							myTables[i], columns[j]);
+				}
+				// returning the pimary key and foreign key info
+				foreign = myDataDef.getTableForeignKeys(myTables[i]);
+				if(primaryKeyPresence == 1){
+					primary = myDataDef.getTablePrimaryKey(myTables[i]);
+				}else{
+					primary = null;
+				}
+				createTable(myPrefix + myTables[i], columns, columnDataTypes,
+						columnDataTypeLengths, primary, foreign);
+				commit();
+			}
+		}
+		commit();
+	}
+	
 
 	public void installExperimentTables(DataDefinition myDataDef,
 			String myPrefix) {

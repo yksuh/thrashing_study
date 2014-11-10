@@ -62,44 +62,25 @@
 						</xsd:complexType>
 					</xsd:element>
 				</xsd:choice>
-				<xsd:element name="dbmsBufferCacheSize" minOccurs="0" maxOccurs="1">
+				<xsd:element name="multiProcessorConfiguration" minOccurs="0" maxOccurs="1">
 					<xsd:complexType>
-						<xsd:attribute name="min" type="xsd:string" use="required" />
-						<xsd:attribute name="max" type="xsd:string" use="required" />
-						<xsd:attribute name="increment" type="xsd:string" use="required" />
-					</xsd:complexType>
-				</xsd:element>
-				<xsd:element name="multiCoreConfiguration" minOccurs="0" maxOccurs="1">
-					<xsd:complexType>
-						<xsd:attribute name="numberCores" type="xsd:string" use="required" />
-					</xsd:complexType>
-				</xsd:element>
-				<xsd:element name="duration" minOccurs="0" maxOccurs="1">
-					<xsd:complexType>
-						<xsd:attribute name="seconds" type="xsd:string" use="required" />
 						<xsd:attribute name="min" type="xsd:string" use="optional" />
 						<xsd:attribute name="max" type="xsd:string" use="optional" />
 						<xsd:attribute name="increment" type="xsd:string" use="optional" />
 					</xsd:complexType>
 				</xsd:element>
-				<xsd:element name="xactSize" minOccurs="0" maxOccurs="1">
+				<xsd:element name="readSel" minOccurs="0" maxOccurs="1">
 					<xsd:complexType>
 						<xsd:attribute name="min" type="xsd:string" use="required" />
 						<xsd:attribute name="max" type="xsd:string" use="required" />
 						<xsd:attribute name="increment" type="xsd:string" use="required" />
 					</xsd:complexType>
 				</xsd:element>
-				<xsd:element name="xLocks" minOccurs="0" maxOccurs="1">
+				<xsd:element name="updateSel" minOccurs="0" maxOccurs="1">
 					<xsd:complexType>
 						<xsd:attribute name="min" type="xsd:string" use="required" />
 						<xsd:attribute name="max" type="xsd:string" use="required" />
 						<xsd:attribute name="increment" type="xsd:string" use="required" />
-					</xsd:complexType>
-				</xsd:element>
-				<xsd:element name="terminalConfiguration" minOccurs="1" maxOccurs="1">
-					<xsd:complexType>
-						<xsd:attribute name="numberTerminals" type="xsd:string" use="required" />
-						<xsd:attribute name="increment" type="xsd:string" use="optional" />
 					</xsd:complexType>
 				</xsd:element>
 				<xsd:element name="multiProgrammingLevel" minOccurs="0" maxOccurs="1">
@@ -109,16 +90,11 @@
 						<xsd:attribute name="increment" type="xsd:string" use="required" />
 					</xsd:complexType>
 				</xsd:element>
-				<xsd:element name="effectiveDB" minOccurs="0" maxOccurs="1">
+				<xsd:element name="rowSubsetSize" minOccurs="0" maxOccurs="1">
 					<xsd:complexType>
 						<xsd:attribute name="min" type="xsd:string" use="required" />
 						<xsd:attribute name="max" type="xsd:string" use="required" />
 						<xsd:attribute name="increment" type="xsd:string" use="required" />
-					</xsd:complexType>
-				</xsd:element>
-				<xsd:element name="effectiveDBSz" minOccurs="0" maxOccurs="1">
-					<xsd:complexType>
-						<xsd:attribute name="ratio" type="xsd:string" use="required" />
 					</xsd:complexType>
 				</xsd:element>
 			</xsd:sequence>

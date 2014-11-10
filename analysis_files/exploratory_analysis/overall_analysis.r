@@ -421,11 +421,41 @@ Largest |rstudent|:
     rstudent unadjusted p-value Bonferonni p
 730 2.066567           0.039428           NA
 
+# Overall: 33.4% (close to suboptimal)
+x = read.csv(file="expl.dat",head=TRUE,sep="\t")
+# ATP normalization
+# db2
+db2 <- subset(x, x$DBMS=='db2')
+db2$ATP = (db2$ATP-min(db2$ATP))/(max(db2$ATP)-min(db2$ATP))
+db2$MAXMPL = (db2$MAXMPL-min(db2$MAXMPL))/(max(db2$MAXMPL)-min(db2$MAXMPL))
+# oracle
+oracle <- subset(x, x$DBMS=='oracle')
+oracle$ATP = (oracle$ATP-min(oracle$ATP))/(max(oracle$ATP)-min(oracle$ATP))
+oracle$MAXMPL = (oracle$MAXMPL-min(oracle$MAXMPL))/(max(oracle$MAXMPL)-min(oracle$MAXMPL))
+# mysql
+mysql <- subset(x, x$DBMS=='mysql')
+mysql$ATP = (mysql$ATP-min(mysql$ATP))/(max(mysql$ATP)-min(mysql$ATP))
+mysql$MAXMPL = (mysql$MAXMPL-min(mysql$MAXMPL))/(max(mysql$MAXMPL)-min(mysql$MAXMPL))
+# pgsql
+pgsql <- subset(x, x$DBMS=='pgsql')
+pgsql$ATP = (pgsql$ATP-min(pgsql$ATP))/(max(pgsql$ATP)-min(pgsql$ATP))
+pgsql$MAXMPL = (pgsql$MAXMPL-min(pgsql$MAXMPL))/(max(pgsql$MAXMPL)-min(pgsql$MAXMPL))
+# sqlserver
+sqlserver <- subset(x, x$DBMS=='sqlserver')
+sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlserver$ATP))
+sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
+x = rbind(db2,mysql,oracle,pgsql,sqlserver) 
+x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
+x$PCTREAD = (x$PCTREAD-min(x$PCTREAD))/(max(x$PCTREAD)-min(x$PCTREAD))
+x$PCTUPDATE = (x$PCTUPDATE-min(x$PCTUPDATE))/(max(x$PCTUPDATE)-min(x$PCTUPDATE))
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
+x <- subset(x, x$MAXMPL < 1)
+out.fit <- lm(MAXMPL ~ PK + PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 pdf("new_normal_res_qqplot.pdf")
 qqnorm(out.fit$res,main="",xlim=c(0,1), ylim=c(0,1)); qqline(out.fit$res);
 dev.off()
 pdf("new_normal_res_hist.pdf")
-h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,80))
+h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,100),xlim=c(-0.6,0.6))
 xfit<-seq(min(out.fit$res),max(out.fit$res),length=40) 
 yfit<-dnorm(xfit,mean=mean(out.fit$res),sd=sd(out.fit$res)) 
 yfit <- yfit*diff(h$mids[1:2])*length(out.fit$res) 
@@ -984,13 +1014,13 @@ Largest |rstudent|:
 #qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
 qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
 #dev.off()
-#pdf("new_normal_res_hist.pdf")
-h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,200))
+pdf("new_normal_res_hist.pdf")
+h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,100))
 xfit<-seq(min(out.fit$res),max(out.fit$res),length=40) 
 yfit<-dnorm(xfit,mean=mean(out.fit$res),sd=sd(out.fit$res)) 
 yfit <- yfit*diff(h$mids[1:2])*length(out.fit$res) 
 lines(xfit, yfit, col="blue")
-#dev.off()
+dev.off()
 plot(cooks.distance(out.fit), ylim=c(0,0.006), main="(CD shouldn't be greater than 1)", ylab="Cook's Distances (CDs)", xlab="Observeration Number")
 ncvTest(out.fit)
 	Non-constant Variance Score Test 

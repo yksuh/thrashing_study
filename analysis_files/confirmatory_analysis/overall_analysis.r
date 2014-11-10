@@ -396,29 +396,29 @@ summary(out.fit)
 	Multiple R-squared:  0.0902,	Adjusted R-squared:  0.07894 
 	F-statistic: 8.011 on 5 and 404 DF,  p-value: 3.238e-07
 
-	##### modified
-	out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-	summary(out.fit)
+		##### modified
+		out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+		summary(out.fit)
 
-	Call:
-	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+		Call:
+		lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 
-	Residuals:
-	     Min       1Q   Median       3Q      Max 
-	-0.87418  0.01171  0.13734  0.28646  0.46775 
+		Residuals:
+		     Min       1Q   Median       3Q      Max 
+		-0.87418  0.01171  0.13734  0.28646  0.46775 
 
-	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.48066    0.05288   9.089  < 2e-16 ***
-	PK             0.17401    0.04032   4.315 2.00e-05 ***
-	ATP            0.24419    0.05860   4.167 3.77e-05 ***
-	NUMPROCESSORS  0.20799    0.06113   3.403 0.000734 ***
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.48066    0.05288   9.089  < 2e-16 ***
+		PK             0.17401    0.04032   4.315 2.00e-05 ***
+		ATP            0.24419    0.05860   4.167 3.77e-05 ***
+		NUMPROCESSORS  0.20799    0.06113   3.403 0.000734 ***
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.4031 on 406 degrees of freedom
-	Multiple R-squared:  0.08155,	Adjusted R-squared:  0.07477 
-	F-statistic: 12.02 on 3 and 406 DF,  p-value: 1.494e-07
+		Residual standard error: 0.4031 on 406 degrees of freedom
+		Multiple R-squared:  0.08155,	Adjusted R-squared:  0.07477 
+		F-statistic: 12.02 on 3 and 406 DF,  p-value: 1.494e-07
 
 	#### only thrashing samples
 	Call:
@@ -444,26 +444,26 @@ summary(out.fit)
 	Multiple R-squared:  0.3037,	Adjusted R-squared:  0.267 
 	F-statistic: 8.287 on 5 and 95 DF,  p-value: 1.569e-06
 	
-	##### modified
-	out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-	summary(out.fit)
+		##### modified
+		out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+		summary(out.fit)
 	
-	Residuals:
-	     Min       1Q   Median       3Q      Max 
-	-0.46945 -0.09328 -0.00262  0.14747  0.42531 
+		Residuals:
+		     Min       1Q   Median       3Q      Max 
+		-0.46945 -0.09328 -0.00262  0.14747  0.42531 
 
-	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.43860    0.05574   7.869 5.09e-12 ***
-	PK            -0.03312    0.04954  -0.669    0.505    
-	ATP           -0.66883    0.11592  -5.770 9.49e-08 ***
-	NUMPROCESSORS  0.07031    0.06061   1.160    0.249    
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.43860    0.05574   7.869 5.09e-12 ***
+		PK            -0.03312    0.04954  -0.669    0.505    
+		ATP           -0.66883    0.11592  -5.770 9.49e-08 ***
+		NUMPROCESSORS  0.07031    0.06061   1.160    0.249    
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2107 on 97 degrees of freedom
-	Multiple R-squared:  0.2945,	Adjusted R-squared:  0.2727 
-	F-statistic:  13.5 on 3 and 97 DF,  p-value: 1.969e-07
+		Residual standard error: 0.2107 on 97 degrees of freedom
+		Multiple R-squared:  0.2945,	Adjusted R-squared:  0.2727 
+		F-statistic:  13.5 on 3 and 97 DF,  p-value: 1.969e-07
 
 #### thrashing or not thrashing
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)

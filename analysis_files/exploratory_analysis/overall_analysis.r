@@ -3,7 +3,7 @@ library(aod)
 library(ggplot2)
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
 #x$MAXMPL[x$MAXMPL == 1100] <- 100000
-x$MAXMPL[x$MAXMPL == 1100] <- 10000
+#x$MAXMPL[x$MAXMPL == 1100] <- 10000
 # ATP normalization
 # db2
 db2 <- subset(x, x$DBMS=='db2')
@@ -41,9 +41,12 @@ sqlserver_r$ATP = (sqlserver_r$ATP-min(sqlserver_r$ATP))/(max(sqlserver_r$ATP)-m
 sqlserver_r$MAXMPL = (sqlserver_r$MAXMPL-min(sqlserver_r$MAXMPL))/(max(sqlserver_r$MAXMPL)-min(sqlserver_r$MAXMPL))
 sqlserver <- sqlserver_r
 #### gother each DBMS' samples
+#x$ATP = (x$ATP-min(x$ATP))/(max(x$ATP)-min(x$ATP))
+#x$MAXMPL = (x$MAXMPL-min(x$MAXMPL))/(max(x$MAXMPL)-min(x$MAXMPL))
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)
 x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
-x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
+#x <- subset(x, x$PCTREAD!=0)
+#x <- subset(x, select = -PCTUPDATE)
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 
 nrow(x)
@@ -177,6 +180,29 @@ summary(med.fit)
 	Multiple R-squared:  0.134,	Adjusted R-squared:  0.1252 
 	F-statistic: 15.31 on 4 and 396 DF,  p-value: 1.182e-11
 
+	#### modified
+	> med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
+	> summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
+
+	Residuals:
+	    Min      1Q  Median      3Q     Max 
+	-0.3811 -0.1637 -0.1027  0.2229  0.8699 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.39273    0.02796  14.047  < 2e-16 ***
+	NUMPROCESSORS -0.09107    0.04178  -2.179   0.0299 *  
+	PK            -0.21713    0.02937  -7.392 8.58e-13 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2933 on 398 degrees of freedom
+	Multiple R-squared:  0.1331,	Adjusted R-squared:  0.1287 
+	F-statistic: 30.55 on 2 and 398 DF,  p-value: 4.543e-13
+
 	#####  only thrashing samples
 	Call:
 	lm(formula = ATP ~ NUMPROCESSORS + PK + PCTREAD + PCTREAD:PK, 
@@ -200,28 +226,28 @@ summary(med.fit)
 	Multiple R-squared:  0.1468,	Adjusted R-squared:  0.1292 
 	F-statistic: 8.305 on 4 and 193 DF,  p-value: 3.351e-06
 
-	##### Alternative
-	med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
-	summary(med.fit)
-	
+	#### modified
+	> med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
+	> summary(med.fit)
+
 	Call:
 	lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
 
 	Residuals:
-	    Min      1Q  Median      3Q     Max 
-	-0.3811 -0.1637 -0.1027  0.2229  0.8699 
+	     Min       1Q   Median       3Q      Max 
+	-0.46829 -0.19492 -0.03859  0.17963  0.79590 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.39273    0.02796  14.047  < 2e-16 ***
-	NUMPROCESSORS -0.09107    0.04178  -2.179   0.0299 *  
-	PK            -0.21713    0.02937  -7.392 8.58e-13 ***
+	(Intercept)    0.48446    0.03904  12.410  < 2e-16 ***
+	NUMPROCESSORS -0.12758    0.06812  -1.873   0.0626 .  
+	PK            -0.26441    0.04763  -5.551  9.2e-08 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2933 on 398 degrees of freedom
-	Multiple R-squared:  0.1331,	Adjusted R-squared:  0.1287 
-	F-statistic: 30.55 on 2 and 398 DF,  p-value: 4.543e-13
+	Residual standard error: 0.3024 on 195 degrees of freedom
+	Multiple R-squared:  0.144,	Adjusted R-squared:  0.1352 
+	F-statistic:  16.4 on 2 and 195 DF,  p-value: 2.622e-07
 
 #x <- subset(x, x$MAXMPL < 1)
 > cor.test(x$PK, x$MAXMPL)
@@ -247,7 +273,7 @@ summary(med.fit)
 	 0.1559954 0.4119782
 	sample estimates:
 	      cor 
-	0.2891473 
+	0.2891473  
 
 cor.test(x$ATP, x$MAXMPL)
 	#####  all samples
@@ -364,6 +390,30 @@ summary(out.fit)
 	Multiple R-squared:  0.2079,	Adjusted R-squared:  0.1979 
 	F-statistic: 20.74 on 5 and 395 DF,  p-value: < 2.2e-16
 
+	### modified
+	out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+	summary(out.fit)
+
+	Call:
+	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+
+	Residuals:
+	    Min      1Q  Median      3Q     Max 
+	-0.9183 -0.3086  0.0795  0.2314  0.7055 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.47305    0.04226  11.193  < 2e-16 ***
+	PK             0.27732    0.03872   7.163 3.87e-12 ***
+	ATP           -0.22121    0.06196  -3.570  0.00040 ***
+	NUMPROCESSORS  0.17048    0.05196   3.281  0.00112 ** 
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.3625 on 397 degrees of freedom
+	Multiple R-squared:  0.2171,	Adjusted R-squared:  0.2112 
+	F-statistic:  36.7 on 3 and 397 DF,  p-value: < 2.2e-16
+
 	#####  thrashing samples
 	Call:
 	lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
@@ -388,29 +438,29 @@ summary(out.fit)
 	Multiple R-squared:  0.1325,	Adjusted R-squared:  0.1099 
 	F-statistic: 5.865 on 5 and 192 DF,  p-value: 4.553e-05
 
-	#### when MAXMPL is given as 10K
+	### modified
+	out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+	summary(out.fit)
+	
 	Call:
-	lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
-	    data = x)
+	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 
 	Residuals:
-	    Min      1Q  Median      3Q     Max 
-	-0.8662 -0.3825  0.1312  0.3229  0.9120 
+	     Min       1Q   Median       3Q      Max 
+	-0.39931 -0.20072 -0.04322  0.17341  0.54733 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.40973    0.07415   5.526 5.96e-08 ***
-	PK             0.27656    0.04786   5.778 1.53e-08 ***
-	PCTREAD       -0.05413    0.05077  -1.066  0.28700    
-	ACTROWPOOL    -0.02794    0.08051  -0.347  0.72874    
-	ATP           -0.36297    0.07679  -4.727 3.18e-06 ***
-	NUMPROCESSORS  0.19492    0.06424   3.034  0.00257 ** 
+	(Intercept)    0.11902    0.03803   3.130  0.00202 ** 
+	PK             0.18357    0.03732   4.918 1.86e-06 ***
+	ATP            0.11566    0.05214   2.218  0.02770 *  
+	NUMPROCESSORS  0.09540    0.05004   1.906  0.05809 .  
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.448 on 395 degrees of freedom
-	Multiple R-squared:  0.2051,	Adjusted R-squared:  0.195 
-	F-statistic: 20.38 on 5 and 395 DF,  p-value: < 2.2e-16
+	Residual standard error: 0.2202 on 194 degrees of freedom
+	Multiple R-squared:  0.118,	Adjusted R-squared:  0.1044 
+	F-statistic: 8.651 on 3 and 194 DF,  p-value: 2.041e-05
 
 #### assumptions
 library(car)

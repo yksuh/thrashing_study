@@ -66,18 +66,18 @@ nrow(x)
 	-0.2900652
 
 	#### only thrashing samples
-	> cor.test(x$NUMPROCESSORS, x$ATP)
+	> cor.test(x$NUMPROCESSORS, x$MAXMPL)
 
-		Pearson's product-moment correlation
+	Pearson's product-moment correlation
 
-	data:  x$NUMPROCESSORS and x$ATP
-	t = 0.1405, df = 99, p-value = 0.8886
+	data:  x$NUMPROCESSORS and x$MAXMPL
+	t = 0.8276, df = 99, p-value = 0.4099
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.1818240  0.2089796
+	 -0.1144032  0.2738916
 	sample estimates:
 	       cor 
-	0.01411689 
+	0.08288937 
 
 > cor.test(x$PCTREAD, x$ATP)
 	#####  all  samples
@@ -287,13 +287,13 @@ cor.test(x$ATP, x$MAXMPL)
 	Pearson's product-moment correlation
 
 	data:  x$ATP and x$MAXMPL
-	t = -6.2014, df = 99, p-value = 1.299e-08
+	t = -6.3381, df = 99, p-value = 6.934e-09
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.6565121 -0.3719517
+	 -0.6630752 -0.3819233
 	sample estimates:
-	       cor 
-	-0.5289402
+	     cor 
+	-0.53726 
 
 cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	#### all samples
@@ -448,22 +448,25 @@ summary(out.fit)
 		out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 		summary(out.fit)
 	
+		Call:
+		lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+
 		Residuals:
-		     Min       1Q   Median       3Q      Max 
-		-0.46945 -0.09328 -0.00262  0.14747  0.42531 
+		      Min        1Q    Median        3Q       Max 
+		-0.046635 -0.009217 -0.000511  0.015232  0.043363 
 
 		Coefficients:
-			      Estimate Std. Error t value Pr(>|t|)    
-		(Intercept)    0.43860    0.05574   7.869 5.09e-12 ***
-		PK            -0.03312    0.04954  -0.669    0.505    
-		ATP           -0.66883    0.11592  -5.770 9.49e-08 ***
-		NUMPROCESSORS  0.07031    0.06061   1.160    0.249    
+			       Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.044735   0.005603   7.984 2.90e-12 ***
+		PK            -0.003350   0.004979  -0.673    0.503    
+		ATP           -0.068478   0.011653  -5.877 5.91e-08 ***
+		NUMPROCESSORS  0.005900   0.006093   0.968    0.335    
 		---
 		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-		Residual standard error: 0.2107 on 97 degrees of freedom
-		Multiple R-squared:  0.2945,	Adjusted R-squared:  0.2727 
-		F-statistic:  13.5 on 3 and 97 DF,  p-value: 1.969e-07
+		Residual standard error: 0.02118 on 97 degrees of freedom
+		Multiple R-squared:  0.3001,	Adjusted R-squared:  0.2785 
+		F-statistic: 13.86 on 3 and 97 DF,  p-value: 1.353e-07
 
 #### thrashing or not thrashing
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)

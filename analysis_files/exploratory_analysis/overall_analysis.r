@@ -451,23 +451,152 @@ summary(out.fit)
 	    data = x)
 
 	Residuals:
-	    Min      1Q  Median      3Q     Max 
-	-0.8294 -0.3684  0.1236  0.3156  0.8893 
+	     Min       1Q   Median       3Q      Max 
+	-0.90529 -0.30327  0.08452  0.24560  0.68272 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.42055    0.07240   5.809 1.30e-08 ***
-	PK             0.27681    0.04674   5.923 6.88e-09 ***
-	PCTREAD       -0.05229    0.04958  -1.055  0.29220    
-	ACTROWPOOL    -0.03229    0.07861  -0.411  0.68151    
-	ATP           -0.34940    0.07498  -4.660 4.34e-06 ***
-	NUMPROCESSORS  0.19238    0.06273   3.067  0.00231 ** 
+	(Intercept)    0.53085    0.05999   8.848  < 2e-16 ***
+	PK             0.27769    0.03873   7.171  3.7e-12 ***
+	PCTREAD       -0.03380    0.04108  -0.823 0.411086    
+	ACTROWPOOL    -0.07471    0.06514  -1.147 0.252068    
+	ATP           -0.21788    0.06213  -3.507 0.000506 ***
+	NUMPROCESSORS  0.17039    0.05198   3.278 0.001137 **
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.4375 on 395 degrees of freedom
-	Multiple R-squared:  0.2079,	Adjusted R-squared:  0.1979 
-	F-statistic: 20.74 on 5 and 395 DF,  p-value: < 2.2e-16
+	Residual standard error: 0.3625 on 395 degrees of freedom
+	Multiple R-squared:  0.221,	Adjusted R-squared:  0.2112 
+	F-statistic: 22.42 on 5 and 395 DF,  p-value: < 2.2e-16
+
+	### mediation of NUMPROCESSORS via ATP on MAXMPL 	
+	
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+	summary(med.out)
+	
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME           0.019290     0.000664     0.042906    0.04
+	ADE            0.173465     0.072097     0.280450    0.00
+	Total Effect   0.192755     0.093969     0.303783    0.00
+	Prop. Mediated 0.094703     0.003670     0.265453    0.04
+
+	Sample Size Used: 401 
+
+	sens.out <- medsens(med.out, effect.type = "both")
+	summary(sens.out)
+
+	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+	Sensitivity Region
+
+	       Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	 [1,] -0.6 -0.1179      -0.2373       0.0015         0.36       0.2417
+	 [2,] -0.5 -0.0785      -0.1681       0.0111         0.25       0.1679
+	 [3,] -0.4 -0.0474      -0.1094       0.0146         0.16       0.1074
+	 [4,] -0.3 -0.0229      -0.0593       0.0135         0.09       0.0604
+	 [5,] -0.2 -0.0041      -0.0200       0.0118         0.04       0.0269
+	 [6,] -0.1  0.0097      -0.0127       0.0321         0.01       0.0067
+	 [7,]  0.0  0.0190      -0.0256       0.0635         0.00       0.0000
+	 [8,]  0.1  0.0242      -0.0440       0.0924         0.01       0.0067
+	 [9,]  0.2  0.0258      -0.0663       0.1178         0.04       0.0269
+	[10,]  0.3  0.0243      -0.0916       0.1402         0.09       0.0604
+	[11,]  0.4  0.0204      -0.1196       0.1604         0.16       0.1074
+	[12,]  0.5  0.0150      -0.1495       0.1795         0.25       0.1679
+	[13,]  0.6  0.0098      -0.1802       0.1999         0.36       0.2417
+	[14,]  0.7  0.0079      -0.2102       0.2259         0.49       0.3290
+	[15,]  0.8  0.0168      -0.2359       0.2694         0.64       0.4297
+	[16,]  0.9  0.0656      -0.2473       0.3784         0.81       0.5439
+
+	Rho at which ACME = 0: -0.2
+	R^2_M*R^2_Y* at which ACME = 0: 0.04
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0269 
+
+
+	Mediation Sensitivity Analysis for Average Direct Effect
+
+	Sensitivity Region
+
+	     Rho     ADE 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] 0.5  0.1070      -0.0096       0.2237         0.25       0.1679
+	[2,] 0.6  0.0881      -0.0380       0.2143         0.36       0.2417
+	[3,] 0.7  0.0630      -0.0782       0.2041         0.49       0.3290
+	[4,] 0.8  0.0244      -0.1433       0.1921         0.64       0.4297
+	[5,] 0.9 -0.0555      -0.2857       0.1748         0.81       0.5439
+
+	Rho at which ADE = 0: 0.8
+	R^2_M*R^2_Y* at which ADE = 0: 0.64
+	R^2_M~R^2_Y~ at which ADE = 0: 0.4297 
+
+	### mediation of NUMPROCESSORS via PK on MAXMPL 
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
+	summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME             0.0466       0.0196       0.0756       0
+	ADE              0.2783       0.1987       0.3527       0
+	Total Effect     0.3249       0.2483       0.3943       0
+	Prop. Mediated   0.1420       0.0617       0.2512       0
+
+	Sample Size Used: 401 
+
+
+	Simulations: 1000 
+
+	sens.out <- medsens(med.out, effect.type = "both")
+	summary(sens.out)
+	
+	Sensitivity Region
+
+      	Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] -0.2 -0.0074      -0.0338       0.0190         0.04       0.0269
+	[2,] -0.1  0.0206      -0.0069       0.0481         0.01       0.0067
+
+	Rho at which ACME = 0: -0.2
+	R^2_M*R^2_Y* at which ACME = 0: 0.04
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0269 
+
+
+	Mediation Sensitivity Analysis for Average Direct Effect
+
+	Sensitivity Region
+
+	     Rho     ADE 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] 0.6  0.0774      -0.0147       0.1696         0.36       0.2417
+	[2,] 0.7  0.0162      -0.0861       0.1184         0.49       0.3290
+	[3,] 0.8 -0.0778      -0.1982       0.0427         0.64       0.4297
+
+	Rho at which ADE = 0: 0.7
+	R^2_M*R^2_Y* at which ADE = 0: 0.49
+	R^2_M~R^2_Y~ at which ADE = 0: 0.329 
+	
+	### moderated mediation of NUMPROCESSORS by ACTROWPOOL through ATP on MAXMPL
+	test.modmed(med.out, covariates.1 = list (x$ACTROWPOOL <= 0.5), covariates.2 = list (x$ACTROWPOOL > 0.5), data = x)
+
+		Test of ACME(covariates.1) - ACME(covariates.2) = 0
+
+	data:  estimates from med.out
+	ACME(covariates.1) - ACME(covariates.2) = -2e-04, p-value = 1
+	alternative hypothesis: true ACME(covariates.1) - ACME(covariates.2) is not equal to 0
+	95 percent confidence interval:
+	 -0.04330314  0.04359007
+
+	test.modmed(med.out, covariates.1 = list (x$PK == 0), covariates.2 = list (x$PK == 1), data = x)
+
+	Test of ADE(covariates.1) - ADE(covariates.2) = 0
+
+	data:  estimates from med.out
+	ADE(covariates.1) - ADE(covariates.2) = -0.0018, p-value = 0.978
+	alternative hypothesis: true ADE(covariates.1) - ADE(covariates.2) is not equal to 0
+	95 percent confidence interval:
+	 -0.1159878  0.1017726
 
 	### modified
 	out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
@@ -516,6 +645,47 @@ summary(out.fit)
 	Residual standard error: 0.2195 on 192 degrees of freedom
 	Multiple R-squared:  0.1325,	Adjusted R-squared:  0.1099 
 	F-statistic: 5.865 on 5 and 192 DF,  p-value: 4.553e-05
+
+		### mediation of NUMPROCESSORS via ATP on MAXMPL 
+		med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+		summary(med.out)
+
+		Causal Mediation Analysis 
+
+		Quasi-Bayesian Confidence Intervals
+
+			       Estimate 95% CI Lower 95% CI Upper p-value
+		ACME           -0.01505     -0.04060      0.00119    0.08
+		ADE             0.08478     -0.01418      0.18056    0.09
+		Total Effect    0.06973     -0.02523      0.16423    0.15
+		Prop. Mediated -0.16548     -2.10224      1.18040    0.22
+
+		Sample Size Used: 198 
+
+
+		Simulations: 1000
+
+		### mediation of PK via ATP on MAXMPL 
+		med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
+		summary(med.out)
+
+		Causal Mediation Analysis 
+
+		Quasi-Bayesian Confidence Intervals
+
+			       Estimate 95% CI Lower 95% CI Upper p-value
+		ACME           -0.03018     -0.06333     -0.00255    0.02
+		ADE             0.18419      0.11033      0.25815    0.00
+		Total Effect    0.15402      0.08902      0.22265    0.00
+		Prop. Mediated -0.19247     -0.49926     -0.01645    0.02
+
+		Sample Size Used: 198 
+
+
+		Simulations: 1000
+
+		med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTREAD")
+		summary(med.out)
 
 	### modified
 	out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
@@ -817,6 +987,58 @@ cor.test(x$PCTUPDATE*x$PK, x$ATP)
 	      cor 
 	0.1349953
 
+med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+summary(med.fit)
+	#####  all samples 
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + 
+	    PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.40831 -0.23509 -0.09757  0.20204  0.76985 
+
+	Coefficients:
+		                 Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)               0.25205    0.06391   3.944 8.97e-05 ***
+	NUMPROCESSORS            -0.13065    0.08685  -1.504   0.1330    
+	ACTROWPOOL                0.16408    0.07336   2.237   0.0257 *  
+	PK                       -0.05608    0.05894  -0.952   0.3417    
+	PCTUPDATE                 0.01298    0.06051   0.214   0.8303    
+	NUMPROCESSORS:ACTROWPOOL -0.07830    0.12665  -0.618   0.5366    
+	PK:PCTUPDATE              0.08753    0.08636   1.014   0.3112    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2971 on 601 degrees of freedom
+	Multiple R-squared:  0.05761,	Adjusted R-squared:  0.0482 
+	F-statistic: 6.123 on 6 and 601 DF,  p-value: 3.045e-06
+
+	#####  thrashing samples 
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + 
+	    PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.41857 -0.22947 -0.08114  0.16572  0.85120 
+
+	Coefficients:
+		                 Estimate Std. Error t value Pr(>|t|)  
+	(Intercept)               0.24528    0.09591   2.557   0.0110 *
+	NUMPROCESSORS            -0.27279    0.12561  -2.172   0.0307 *
+	ACTROWPOOL                0.11699    0.10988   1.065   0.2879  
+	PK                        0.14716    0.08331   1.766   0.0784 .
+	PCTUPDATE                 0.02969    0.08638   0.344   0.7313  
+	NUMPROCESSORS:ACTROWPOOL -0.07209    0.17982  -0.401   0.6888  
+	PK:PCTUPDATE             -0.03422    0.12019  -0.285   0.7761  
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2954 on 294 degrees of freedom
+	Multiple R-squared:  0.1552,	Adjusted R-squared:  0.138 
+	F-statistic: 9.005 on 6 and 294 DF,  p-value: 4.848e-09
+
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 summary(med.fit)
 	#####  all samples 
@@ -940,10 +1162,10 @@ cor.test(x$ATP, x$MAXMPL)
 	t = 2.7692, df = 606, p-value = 0.005792
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 0.0325583 0.1896148
+	 -0.0325583 -0.1896148
 	sample estimates:
 	      cor 
-	0.1117845
+	-0.1117845
 
 	#####  thrashing samples
 	Pearson's product-moment correlation
@@ -952,10 +1174,10 @@ cor.test(x$ATP, x$MAXMPL)
 	t = -0.2807, df = 299, p-value = 0.7791
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.12904560  0.09700021
+	 -0.12904560  -0.09700021
 	sample estimates:
 		cor 
-	-0.01623008
+	-0.05623008
 
 cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	#####  all samples 
@@ -1060,6 +1282,147 @@ summary(out.fit)
 	Multiple R-squared:  0.02396,	Adjusted R-squared:  0.01585 
 	F-statistic: 2.956 on 5 and 602 DF,  p-value: 0.01203
 	
+	### testing mediation
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+	summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME           -0.03091     -0.06144     -0.00746    0.01
+	ADE            -0.10390     -0.21404      0.01418    0.07
+	Total Effect   -0.13480     -0.24530     -0.01752    0.02
+	Prop. Mediated  0.22209      0.03500      0.97480    0.03
+
+	Sample Size Used: 608 
+
+
+	Simulations: 1000
+
+	sens.out <- medsens(med.out, effect.type = "both")
+	summary(sens.out)
+
+	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+	Sensitivity Region
+
+	       Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	 [1,] -0.4 -0.1292      -0.2683       0.0098         0.16       0.1472
+	 [2,] -0.3 -0.0964      -0.2082       0.0153         0.09       0.0828
+	 [3,] -0.2 -0.0687      -0.1536       0.0162         0.04       0.0368
+	 [4,] -0.1 -0.0444      -0.1030       0.0142         0.01       0.0092
+	 [5,]  0.0 -0.0222      -0.0556       0.0111         0.00       0.0000
+	 [6,]  0.1 -0.0011      -0.0176       0.0155         0.01       0.0092
+	 [7,]  0.2  0.0202      -0.0108       0.0513         0.04       0.0368
+	 [8,]  0.3  0.0429      -0.0143       0.1001         0.09       0.0828
+	 [9,]  0.4  0.0687      -0.0170       0.1544         0.16       0.1472
+	[10,]  0.5  0.1000      -0.0158       0.2158         0.25       0.2300
+	[11,]  0.6  0.1409      -0.0073       0.2892         0.36       0.3311
+
+	Rho at which ACME = 0: 0.1
+	R^2_M*R^2_Y* at which ACME = 0: 0.01
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0092 
+
+
+	Mediation Sensitivity Analysis for Average Direct Effect
+
+	Sensitivity Region
+
+	      Rho     ADE 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] -0.6  0.1164      -0.0259       0.2587         0.36       0.3311
+	[2,] -0.5  0.0664      -0.0653       0.1982         0.25       0.2300
+	[3,] -0.4  0.0257      -0.0991       0.1504         0.16       0.1472
+	[4,] -0.3 -0.0096      -0.1296       0.1105         0.09       0.0828
+	[5,] -0.2 -0.0415      -0.1585       0.0755         0.04       0.0368
+	[6,] -0.1 -0.0715      -0.1868       0.0438         0.01       0.0092
+	[7,]  0.0 -0.1005      -0.2153       0.0142         0.00       0.0000
+
+	Rho at which ADE = 0: -0.3
+	R^2_M*R^2_Y* at which ADE = 0: 0.09
+	R^2_M~R^2_Y~ at which ADE = 0: 0.0828
+
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
+	summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		        Estimate 95% CI Lower 95% CI Upper p-value
+	ACME           -0.000149    -0.008896     0.008359    0.99
+	ADE            -0.022472    -0.105942     0.055527    0.56
+	Total Effect   -0.022621    -0.106257     0.054872    0.55
+	Prop. Mediated  0.006491    -0.874544     1.054345    0.93
+
+	Sample Size Used: 608 
+
+
+	Simulations: 1000
+
+	sens.out <- medsens(med.out, effect.type = "both")
+	summary(sens.out)
+
+	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+	Sensitivity Region
+
+	       Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	 [1,] -0.9 -0.0386      -0.2684       0.1911         0.81       0.7450
+	 [2,] -0.8 -0.0466      -0.2290       0.1358         0.64       0.5887
+	 [3,] -0.7 -0.0494      -0.2043       0.1055         0.49       0.4507
+	 [4,] -0.6 -0.0487      -0.1815       0.0840         0.36       0.3311
+	 [5,] -0.5 -0.0456      -0.1583       0.0671         0.25       0.2300
+	 [6,] -0.4 -0.0406      -0.1343       0.0531         0.16       0.1472
+	 [7,] -0.3 -0.0342      -0.1093       0.0409         0.09       0.0828
+	 [8,] -0.2 -0.0267      -0.0835       0.0301         0.04       0.0368
+	 [9,] -0.1 -0.0184      -0.0570       0.0203         0.01       0.0092
+	[10,]  0.0 -0.0095      -0.0304       0.0113         0.00       0.0000
+	[11,]  0.1 -0.0005      -0.0077       0.0068         0.01       0.0092
+	[12,]  0.2  0.0086      -0.0106       0.0279         0.04       0.0368
+	[13,]  0.3  0.0175      -0.0203       0.0552         0.09       0.0828
+	[14,]  0.4  0.0257      -0.0316       0.0831         0.16       0.1472
+	[15,]  0.5  0.0331      -0.0449       0.1110         0.25       0.2300
+	[16,]  0.6  0.0391      -0.0609       0.1391         0.36       0.3311
+	[17,]  0.7  0.0432      -0.0816       0.1679         0.49       0.4507
+	[18,]  0.8  0.0444      -0.1112       0.1999         0.64       0.5887
+	[19,]  0.9  0.0409      -0.1664       0.2482         0.81       0.7450
+
+	Rho at which ACME = 0: 0.1
+	R^2_M*R^2_Y* at which ACME = 0: 0.01
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0092 
+
+
+	Mediation Sensitivity Analysis for Average Direct Effect
+
+	Sensitivity Region
+
+	       Rho     ADE 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	 [1,] -0.9 -0.0171      -0.1913       0.1570         0.81       0.7450
+	 [2,] -0.8 -0.0191      -0.1456       0.1074         0.64       0.5887
+	 [3,] -0.7 -0.0200      -0.1263       0.0863         0.49       0.4507
+	 [4,] -0.6 -0.0206      -0.1155       0.0743         0.36       0.3311
+	 [5,] -0.5 -0.0210      -0.1087       0.0666         0.25       0.2300
+	 [6,] -0.4 -0.0214      -0.1042       0.0614         0.16       0.1472
+	 [7,] -0.3 -0.0217      -0.1013       0.0578         0.09       0.0828
+	 [8,] -0.2 -0.0220      -0.0995       0.0555         0.04       0.0368
+	 [9,] -0.1 -0.0223      -0.0986       0.0540         0.01       0.0092
+	[10,]  0.0 -0.0226      -0.0985       0.0534         0.00       0.0000
+	[11,]  0.1 -0.0228      -0.0991       0.0535         0.01       0.0092
+	[12,]  0.2 -0.0231      -0.1006       0.0544         0.04       0.0368
+	[13,]  0.3 -0.0234      -0.1030       0.0562         0.09       0.0828
+	[14,]  0.4 -0.0237      -0.1065       0.0591         0.16       0.1472
+	[15,]  0.5 -0.0241      -0.1117       0.0636         0.25       0.2300
+	[16,]  0.6 -0.0245      -0.1194       0.0703         0.36       0.3311
+	[17,]  0.7 -0.0251      -0.1314       0.0811         0.49       0.4507
+	[18,]  0.8 -0.0260      -0.1525       0.1004         0.64       0.5887
+	[19,]  0.9 -0.0280      -0.2020       0.1461         0.81       0.7450
+
+	Rho at which ADE = 0: -0.9
+	R^2_M*R^2_Y* at which ADE = 0: 0.81
+	R^2_M~R^2_Y~ at which ADE = 0: 0.745
+
 		### modified
 		out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 		summary(out.fit)

@@ -429,3 +429,87 @@ summary(out.fit)
 		Residual standard error: 0.02055 on 36 degrees of freedom
 		Multiple R-squared:  0.3237,	Adjusted R-squared:  0.2673 
 		F-statistic: 5.743 on 3 and 36 DF,  p-value: 0.002565
+
+# update
+x = rbind(pgsql)
+x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
+x$PCTUPDATE = (x$PCTUPDATE/min(x$PCTUPDATE))/(max(x$PCTUPDATE)/min(x$PCTUPDATE))
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
+> nrow(x)
+[1] 111
+x <- subset(x, x$MAXMPL < 1)
+nrow(x)
+[1] 76
+
+cor.test(x$NUMPROCESSORS, x$ATP)
+
+	Pearson's product-moment correlation
+
+	data:  x$NUMPROCESSORS and x$ATP
+	t = -0.2143, df = 109, p-value = 0.8307
+	alternative hypothesis: true correlation is not equal to 0
+	95 percent confidence interval:
+	 -0.2061243  0.1665100
+	sample estimates:
+	       cor 
+	-0.0205198
+
+	Pearson's product-moment correlation
+
+	data:  x$NUMPROCESSORS and x$ATP
+	t = 0.0947, df = 74, p-value = 0.9248
+	alternative hypothesis: true correlation is not equal to 0
+	95 percent confidence interval:
+	 -0.2149768  0.2358824
+	sample estimates:
+	      cor 
+	0.0110125 
+
+cor.test(x$NUMPROCESSORS, x$MAXMPL)
+
+	Pearson's product-moment correlation
+
+	data:  x$NUMPROCESSORS and x$MAXMPL
+	t = -4.116, df = 109, p-value = 7.518e-05
+	alternative hypothesis: true correlation is not equal to 0
+	95 percent confidence interval:
+	 -0.5177641 -0.1936098
+	sample estimates:
+	      cor 
+	-0.366767
+
+	Pearson's product-moment correlation
+
+	data:  x$NUMPROCESSORS and x$MAXMPL
+	t = 1.046, df = 74, p-value = 0.299
+	alternative hypothesis: true correlation is not equal to 0
+	95 percent confidence interval:
+	 -0.1076841  0.3369870
+	sample estimates:
+	      cor 
+	0.1207018
+
+cor.test(x$ATP, x$MAXMPL)
+
+	Pearson's product-moment correlation
+
+	data:  x$ATP and x$MAXMPL
+	t = -0.3186, df = 109, p-value = 0.7506
+	alternative hypothesis: true correlation is not equal to 0
+	95 percent confidence interval:
+	 -0.2156691  0.1567819
+	sample estimates:
+		cor 
+	-0.03050238
+
+	Pearson's product-moment correlation
+
+	data:  x$ATP and x$MAXMPL
+	t = -1.5226, df = 74, p-value = 0.1321
+	alternative hypothesis: true correlation is not equal to 0
+	95 percent confidence interval:
+	 -0.38463295  0.05325671
+	sample estimates:
+	       cor 
+	-0.1742916 
+

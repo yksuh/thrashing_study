@@ -1,6 +1,6 @@
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/15/14
--- Revision: 09/26/14, 09/27/14, 09/29/14, 11/08/14
+-- Revision: 09/26/14, 09/27/14, 09/29/14, 11/08/14, 11/22/14
 -- Description: Define step queries for confirmatory analysis
 
 -- DBMSes participating in the analysis
@@ -32,12 +32,14 @@ ALTER TABLE Cnfm_LabShelf ADD PRIMARY KEY (version);
 DROP TABLE Cnfm_Runs CASCADE CONSTRAINTS;
 CREATE TABLE Cnfm_Runs AS
 	SELECT runid 
-	FROM AZDBLab_ExperimentRun 
-	WHERE runid IN (2389,2609,2949,2829, 2249,2529,2851,2769,2669, 2349,2449,2629,2589,2410, 2369,2610,2830,2749,2269) 
+	FROM AZDBLab_ExperimentRun -- pk runs
+	-- extra (3129(mysql), 3209(oracle))
+	WHERE runid IN (2309,2469,2889,2789,2809, 2069,2390,2850,2612,2649, 2229,2070,2750,2090,2409, 3009,3010,3029,3011,3150, 2289,2489,2089,2709,2049) 
 	UNION
 	SELECT runid 
-	FROM AZDBLab_ExperimentRun 
-	WHERE runid IN (2309,2469,2889,2789,2809, 2069,2390,2850,2612,2649, 2229,2070,2750,2090,2409, 2289,2489,2089,2709,2049) 
+	FROM AZDBLab_ExperimentRun  -- non pk runs
+	-- extra (3171(mysql), 3109(pgsql))
+	WHERE runid IN (2389,2609,2949,2829,2909, 2249,2529,2851,2769,2669, 2349,2449,2629,2589,2410, 3089,3069,3049,3070,3189, 2369,2610,2830,2749,2269) 
 	ORDER BY runid;
 ALTER TABLE Cnfm_Runs ADD PRIMARY KEY (runid);
 
@@ -114,6 +116,7 @@ INSERT INTO Cnfm_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(BatchSetID) as stepResultSize
 	FROM Cnfm_S0_ABSR
 	GROUP BY dbms, experimentname, runID;
+--select * from cnfm_runs minus select distinct runid from Cnfm_S0_ABSR
 --select dbms, runid, count(*) as numBSs from Cnfm_S0_ABSR group by dbms, runid;
 --select dbms, count(*) as numBSs from Cnfm_S0_ABSR group by dbms;
 --select runid, BatchSetID, pctRead, pctUpdate, actRowPool from Cnfm_S0_ABSR where runid = 1110 order by runid

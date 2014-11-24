@@ -113,7 +113,7 @@ SELECT dbmsname, round(sum(HOURS),2) FROM RTE_S4 group by dbmsname order by dbms
 ---------- -------------------
 --db2		       1670.91 (-230.70-249.8-299.65=-780.15) = 890.76
 --mysql			529.77 
---oracle	       1120.56 (-111.79-133.00-198.32=-443.11)=427.65
+--oracle	       1120.56 (-111.79-133.00-198.32=-443.11)=677.45
 --pgsql		       1242.45 (-140.21-114.3-122-114.3-171.82=-662.63)=579.8200000000001
 --sqlserver		620.25 (-88.4-82.5=-170.9)=449.35
 --SELECT runid, sum(HOURS) FROM RTE_S4 where runid IN (689, 949,849) group by runid

@@ -19,36 +19,10 @@ x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWP
 x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 nrow(x)
-[1] 84
+[1] 120
 x <- subset(x, x$MAXMPL < 1)
 nrow(x)
 0
-
-cor.test(x$NUMPROCESSORS, x$ATP)
-
-	Pearson's product-moment correlation
-
-	data:  x$NUMPROCESSORS and x$ATP
-	t = -5.2759, df = 82, p-value = 1.056e-06
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 -0.6478816 -0.3239837
-	sample estimates:
-	       cor 
-	-0.5034117
-
-cor.test(x$PK, x$ATP)
-
-	Pearson's product-moment correlation
-
-	data:  x$PK and x$ATP
-	t = 3.4017, df = 82, p-value = 0.001037
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 0.1484631 0.5263740
-	sample estimates:
-	      cor 
-	0.3516649
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
 summary(med.fit)
@@ -58,23 +32,19 @@ summary(med.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.33185 -0.22863 -0.04253  0.18471  0.59255 
+	-0.34119 -0.20854 -0.01934  0.15858  0.56843 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.27999    0.07219   3.879 0.000213 ***
-	NUMPROCESSORS -0.46436    0.09420  -4.930  4.3e-06 ***
-	PK             0.18551    0.06286   2.951 0.004139 ** 
+	(Intercept)    0.41151    0.04849   8.487 7.62e-14 ***
+	NUMPROCESSORS -0.58252    0.06994  -8.329 1.76e-13 ***
+	PK             0.09287    0.04478   2.074   0.0403 *  
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2809 on 81 degrees of freedom
-	Multiple R-squared:  0.3259,	Adjusted R-squared:  0.3093 
-	F-statistic: 19.58 on 2 and 81 DF,  p-value: 1.157e-07
-
-cor.test(x$NUMPROCESSORS, x$MAXMPL)
-
-cor.test(x$PK, x$MAXMPL)
+	Residual standard error: 0.2453 on 117 degrees of freedom
+	Multiple R-squared:  0.3864,	Adjusted R-squared:  0.3759 
+	F-statistic: 36.84 on 2 and 117 DF,  p-value: 3.904e-13
 
 out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
@@ -84,20 +54,20 @@ summary(out.fit)
 
 	Residuals:
 	       Min         1Q     Median         3Q        Max 
-	-8.413e-15 -2.000e-18  1.900e-18  7.200e-18  7.788e-16 
+	-2.378e-14 -1.349e-16  9.200e-18  1.802e-16  1.841e-15 
 
 	Coefficients:
 		        Estimate Std. Error    t value Pr(>|t|)    
-	(Intercept)    1.000e+00  2.746e-16  3.641e+15   <2e-16 ***
-	PK            -4.244e-18  2.311e-16 -1.800e-02    0.985    
-	ATP           -7.869e-16  3.882e-16 -2.027e+00    0.046 *  
-	NUMPROCESSORS -1.131e-17  3.753e-16 -3.000e-02    0.976    
+	(Intercept)    1.000e+00  5.750e-16  1.739e+15   <2e-16 ***
+	PK            -2.488e-16  4.254e-16 -5.850e-01   0.5598    
+	ATP           -1.905e-15  8.625e-16 -2.208e+00   0.0292 *  
+	NUMPROCESSORS -2.789e-16  8.235e-16 -3.390e-01   0.7354    
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 9.814e-16 on 80 degrees of freedom
-	Multiple R-squared:  0.5026,	Adjusted R-squared:  0.4839 
-	F-statistic: 26.94 on 3 and 80 DF,  p-value: 3.829e-12
+	Residual standard error: 2.288e-15 on 116 degrees of freedom
+	Multiple R-squared:    0.5,	Adjusted R-squared:  0.4871 
+	F-statistic: 38.67 on 3 and 116 DF,  p-value: < 2.2e-16
 
 ### update-only
 library(aod)
@@ -119,34 +89,10 @@ x$PCTUPDATE = (x$PCTUPDATE/min(x$PCTUPDATE))/(max(x$PCTUPDATE)/min(x$PCTUPDATE))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 
 nrow(x)
-[1] 112
+[1] 160
 x <- subset(x, x$MAXMPL < 1)
 > nrow(x)
-[1] 86
-
-> cor.test(x$NUMPROCESSORS, x$ATP)
-
-	Pearson's product-moment correlation
-
-	data:  x$NUMPROCESSORS and x$ATP
-	t = -7.1448, df = 110, p-value = 1.037e-10
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 -0.6777546 -0.4214782
-	sample estimates:
-	       cor 
-	-0.5630028
-
-	Pearson's product-moment correlation
-
-	data:  x$NUMPROCESSORS and x$ATP
-	t = -11.8386, df = 84, p-value < 2.2e-16
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 -0.8587370 -0.6953531
-	sample estimates:
-	       cor 
-	-0.7907314
+[1] 129
 
 > med.fit <- lm(ATP ~ NUMPROCESSORS, data = x)
 > summary(med.fit)
@@ -155,85 +101,37 @@ x <- subset(x, x$MAXMPL < 1)
 	lm(formula = ATP ~ NUMPROCESSORS, data = x)
 
 	Residuals:
-	    Min      1Q  Median      3Q     Max 
-	-0.2420 -0.2317 -0.1210  0.1008  0.6083 
+	     Min       1Q   Median       3Q      Max 
+	-0.28211 -0.19796 -0.02041  0.12734  0.55702 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.46205    0.04838   9.550 4.20e-16 ***
-	NUMPROCESSORS -0.56281    0.07877  -7.145 1.04e-10 ***
+	(Intercept)    0.52444    0.03804   13.79   <2e-16 ***
+	NUMPROCESSORS -0.65170    0.06187  -10.53   <2e-16 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2753 on 110 degrees of freedom
-	Multiple R-squared:  0.317,	Adjusted R-squared:  0.3108 
-	F-statistic: 51.05 on 1 and 110 DF,  p-value: 1.037e-10
+	Residual standard error: 0.2505 on 158 degrees of freedom
+	Multiple R-squared:  0.4125,	Adjusted R-squared:  0.4088 
+	F-statistic:   111 on 1 and 158 DF,  p-value: < 2.2e-16
 
 	Call:
 	lm(formula = ATP ~ NUMPROCESSORS, data = x)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.04429  0.00710  0.01016  0.01329  0.03867 
+	-0.08047 -0.06076 -0.01140  0.04744  0.25403 
 
 	Coefficients:
-		       Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.099744   0.005661   17.62   <2e-16 ***
-	NUMPROCESSORS -0.109868   0.009280  -11.84   <2e-16 ***
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.20947    0.01643  12.749   <2e-16 ***
+	NUMPROCESSORS -0.25684    0.02635  -9.749   <2e-16 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.02524 on 84 degrees of freedom
-	Multiple R-squared:  0.6253,	Adjusted R-squared:  0.6208 
-	F-statistic: 140.2 on 1 and 84 DF,  p-value: < 2.2e-16
-
-> cor.test(x$NUMPROCESSORS, x$MAXMPL)
-
-	Pearson's product-moment correlation
-
-	data:  x$NUMPROCESSORS and x$MAXMPL
-	t = -0.7, df = 110, p-value = 0.4854
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 -0.2490707  0.1204515
-	sample estimates:
-		cor 
-	-0.06659263
-
-	Pearson's product-moment correlation
-
-	data:  x$NUMPROCESSORS and x$MAXMPL
-	t = 11.8737, df = 84, p-value < 2.2e-16
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 0.6965589 0.8593497
-	sample estimates:
-	      cor 
-	0.7916061
-
-> cor.test(x$ATP, x$MAXMPL)
-
-	Pearson's product-moment correlation
-
-	data:  x$ATP and x$MAXMPL
-	t = 10.5478, df = 110, p-value < 2.2e-16
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 0.6028836 0.7906361
-	sample estimates:
-	     cor 
-	0.709112
-
-	Pearson's product-moment correlation
-
-	data:  x$ATP and x$MAXMPL
-	t = -19.6677, df = 84, p-value < 2.2e-16
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 -0.9381259 -0.8596284
-	sample estimates:
-	       cor 
-	-0.9064148 
+	Residual standard error: 0.0861 on 127 degrees of freedom
+	Multiple R-squared:  0.428,	Adjusted R-squared:  0.4235 
+	F-statistic: 95.04 on 1 and 127 DF,  p-value: < 2.2e-16
 
 out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
@@ -243,35 +141,35 @@ summary(out.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.27892 -0.10444  0.00755  0.02391  0.65047 
+	-0.25337 -0.15999  0.02367  0.07058  0.71206 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)   -0.24479    0.05621  -4.355 3.02e-05 ***
-	ATP            1.20038    0.08191  14.655  < 2e-16 ***
-	NUMPROCESSORS  0.59432    0.08188   7.258 6.10e-11 ***
+	(Intercept)   -0.30565    0.04965  -6.156 5.99e-09 ***
+	ATP            1.21753    0.06996  17.403  < 2e-16 ***
+	NUMPROCESSORS  0.59352    0.07098   8.361 3.14e-14 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2365 on 109 degrees of freedom
-	Multiple R-squared:  0.6648,	Adjusted R-squared:  0.6587 
-	F-statistic: 108.1 on 2 and 109 DF,  p-value: < 2.2e-16
+	Residual standard error: 0.2203 on 157 degrees of freedom
+	Multiple R-squared:  0.6683,	Adjusted R-squared:  0.6641 
+	F-statistic: 158.2 on 2 and 157 DF,  p-value: < 2.2e-16
 
 	Call:
 	lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 
 	Residuals:
 	      Min        1Q    Median        3Q       Max 
-	-0.040658 -0.000317  0.002692  0.003474  0.013226 
+	-0.046980 -0.009026 -0.001419  0.015779  0.025289 
 
 	Coefficients:
-		       Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.054246   0.004046  13.409  < 2e-16 ***
-	ATP           -0.371489   0.035982 -10.324  < 2e-16 ***
-	NUMPROCESSORS  0.013780   0.005000   2.756  0.00719 ** 
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)   0.015627   0.005707   2.738 0.007073 ** 
+	ATP           0.074126   0.020414   3.631 0.000409 ***
+	NUMPROCESSORS 0.039294   0.008014   4.903 2.85e-06 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.008323 on 83 degrees of freedom
-	Multiple R-squared:  0.8365,	Adjusted R-squared:  0.8326 
-	F-statistic: 212.4 on 2 and 83 DF,  p-value: < 2.2e-16
+	Residual standard error: 0.01981 on 126 degrees of freedom
+	Multiple R-squared:  0.162,	Adjusted R-squared:  0.1487 
+	F-statistic: 12.18 on 2 and 126 DF,  p-value: 1.462e-05

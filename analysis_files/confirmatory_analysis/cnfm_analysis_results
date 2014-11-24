@@ -1,0 +1,9 @@
+SQL> select dbmsName, sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S1_FBE' group by dbmsName;
+
+DBMSNAME   SUM(STEPRESULTSIZE)
+---------- -------------------
+mysql			   989
+pgsql			   634
+sqlserver		   142
+db2			   581
+oracle			   727

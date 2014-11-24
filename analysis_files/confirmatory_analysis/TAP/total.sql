@@ -513,6 +513,7 @@ INSERT INTO Cnfm_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Cnfm_S0
 	GROUP BY dbms, experimentname;
+-- select sum(stepResultSize) from Cnfm_RowCount where stepName IN ('Cnfm_S0')
 --select dbmsName, sum(stepResultSize) from Cnfm_RowCount where stepName IN ('Cnfm_S0') group by dbmsname
 --select dbmsName, exprName, stepName, sum(stepResultSize) as stepSize from Cnfm_RowCount where stepName IN ('Cnfm_S0') group by dbmsname, exprName, stepName order by dbmsName, exprName, stepSize desc
 
@@ -576,7 +577,8 @@ INSERT INTO Cnfm_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       SUM(numMBEPerRunBatchSet) as stepResultSize
 	FROM Cnfm_S1_MBE_PDE
 	GROUP BY dbms, experimentname;
---select * from Cnfm_RowCount where stepname = 'Cnfm_S1_MBE_PDE'
+--select sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S1_MB_PDE'
+--select sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S1_MBE_PDE'
 
 -- (4) Number of Other Executor Violations
 -- (5) Number of Other DBMS Process Violations
@@ -647,7 +649,7 @@ INSERT INTO Cnfm_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Cnfm_S1_SDV
 	GROUP BY dbms, experimentname;
-
+--select dbmsName, sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S1_SDV' group by db
 --select sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S1_SDV'
 
 -- (3) Excessive ATP time violations
@@ -660,12 +662,14 @@ CREATE TABLE Cnfm_ATP_Stat AS
 	        abe.runid,
 		abe.BatchSetID,
 		abe.MPL,		   
+		count(abe.totalExecXacts) as numValidBEs,
 		AVG(abe.totalProcTime / abe.totalExecXacts) as AvgATPtime,
-		STDDEV(abe.totalProcTime / abe.totalExecXacts)as STDATPtime          
+		STDDEV(abe.totalProcTime / abe.totalExecXacts)as STDATPtime      
 	FROM Cnfm_S0_ABE abe
-	WHERE abe.totalProcTime > 0
+	WHERE abe.totalExecXacts > 0
 	GROUP BY dbms, experimentName, runid, batchsetID, MPL;
 ALTER TABLE Cnfm_ATP_Stat ADD PRIMARY KEY (runid, batchsetID, MPL); 
+--select count(*) from Cnfm_RowCount where stepname = 'Cnfm_ATP_Stat'
 
 -- Cnfm_S1_EAV: Cnfm_S1_Excessive_ATP_time_Violations
 DROP TABLE Cnfm_S1_EAV CASCADE CONSTRAINTS;
@@ -682,9 +686,25 @@ CREATE TABLE Cnfm_S1_EAV AS
 	WHERE abe.runid      = aas.runid 
           and abe.batchsetid = aas.batchsetid 
 	  and abe.MPL	     = aas.MPL
+	  and abe.totalExecXacts > 0
 	  -- ATP time greater than the average + two standard deviations
-	  and (abe.totalProcTime / abe.totalExecXacts) > (aas.AvgATPtime + 2*aas.STDATPtime)
-          and abe.totalProcTime > 0;
+	  and ((abe.totalProcTime / abe.totalExecXacts) > (aas.AvgATPtime + 2*aas.STDATPtime) OR (abe.totalProcTime / abe.totalExecXacts) < (aas.AvgATPtime - 2*aas.STDATPtime))
+	UNION
+	SELECT  abe.dbms,
+		abe.experimentname,
+		abe.runid,
+		abe.BatchSetID,
+		abe.batchSzIncr,
+	        abe.MPL,		   
+		abe.IterNum	     -- iteration number
+	FROM Cnfm_S0_ABE abe,
+             Cnfm_ATP_Stat aas
+	WHERE abe.runid      = aas.runid 
+          and abe.batchsetid = aas.batchsetid 
+	  and abe.MPL	     = aas.MPL
+	  and abe.totalExecXacts = 0
+	  and ((aas.AvgATPtime + 2*aas.STDATPtime) > 0 OR (aas.AvgATPtime - 2*aas.STDATPtime) < 0)
+	;
 ALTER TABLE Cnfm_S1_EAV ADD PRIMARY KEY (runid, batchsetID, MPL, iternum); 
 DELETE FROM Cnfm_RowCount WHERE stepname = 'Cnfm_S1_EAV';
 INSERT INTO Cnfm_RowCount (dbmsName, exprName, stepName, stepResultSize)
@@ -694,7 +714,8 @@ INSERT INTO Cnfm_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Cnfm_S1_EAV
 	GROUP BY dbms, experimentname;
---select * from Cnfm_RowCount where stepname = 'Cnfm_S1_EAV'
+--select dbmsname, sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S1_EAV' group by dbmsname
+--select sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S1_EAV'
 
 -- Writer: Young-Kyoon Suh (yksuh@cs.arizona.edu)
 -- Date: 09/15/14
@@ -772,7 +793,7 @@ INSERT INTO Cnfm_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       COUNT(*) as stepResultSize
 	FROM Cnfm_S1_FBE
 	GROUP BY dbms, experimentname;
---select * from Cnfm_RowCount where stepname = 'Cnfm_S1_FBE'
+--select dbmsName, sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S1_FBE' group by dbmsName
 
 -- Cnfm_S2_BE: Cnfm_S2_Batch_Executions
 DROP TABLE Cnfm_S2_BE CASCADE CONSTRAINTS;
@@ -946,6 +967,8 @@ CREATE TABLE Cnfm_S3_FTP  AS
 	FROM Cnfm_S3_TP s2i
 	GROUP BY dbms, experimentName, runID, batchSetID;
 ALTER TABLE Cnfm_S3_FTP ADD PRIMARY KEY (runID, batchSetID);
+--select dbms, count(batchSetID) from Cnfm_S3_FTP where maxMPL < 500 group by dbms
+--select sum(count(batchSetID)) from Cnfm_S3_FTP where maxMPL < 500 group by dbms
 
 -- Get the TPS of the maximum MPL per batchset in a run
 -- Cnfm_S3_FTPE:  Cnfm_Step3_Final_Thrashing_Point
@@ -1025,6 +1048,16 @@ CREATE TABLE Cnfm_S3_TBS  AS
 	WHERE s3iii.runID = ftp.runID AND 
 	      s3iii.batchSetID = ftp.batchSetID;
 ALTER TABLE Cnfm_S3_TBS  ADD PRIMARY KEY (runID, batchSetID);
+DELETE FROM Cnfm_RowCount WHERE stepname = 'Cnfm_S3_TBS';
+INSERT INTO Cnfm_RowCount (dbmsName, exprName, stepName, stepResultSize)
+	SELECT dbms as dbmsName, 
+	       experimentname as exprName,
+	       'Cnfm_S3_TBS' as stepName,
+	       count(*) as stepResultSize
+	FROM Cnfm_S3_TBS
+	GROUP BY dbms, experimentname;
+--select dbmsName, sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S3_TBS' group by dbmsName
+--select sum(stepResultSize) from Cnfm_RowCount where stepname = 'Cnfm_S3_TBS'
 
 -- Find a batchset that showed no thrashing
 -- Cnfm_S3_NBS:  Cnfm_Step3_No_Thrashing_BatchSet
@@ -1051,8 +1084,6 @@ CREATE TABLE Cnfm_S3_NBS  AS
 	WHERE t0.runID = t3.runID
 	  AND t0.batchSetID = t3.batchSetID;
 ALTER TABLE Cnfm_S3_NBS ADD PRIMARY KEY (runID, batchSetID);
---select runid, count(*) as numThrashedBS from Cnfm_S3_TBS group by runid order by runid
---select runid, count(*) as numThrashedBS from Cnfm_S3_NBS group by runid order by runid
 
 -- Gather batchsets with/without thrashing 
 -- Cnfm_S3_UBS:  Cnfm_Step3_Union_BatchSet
@@ -1064,6 +1095,7 @@ CREATE TABLE Cnfm_S3_UBS  AS
 	SELECT *
 	FROM Cnfm_S3_NBS;
 ALTER TABLE Cnfm_S3_UBS ADD PRIMARY KEY (runID, batchSetID);
+--select sum(count(batchsetID)) from Cnfm_S3_UBS group by runid
 --select sum(count(batchsetID)) from Cnfm_S3_UBS group by runid
 
 -- Extend the measured stat of all the batchsets
@@ -1120,6 +1152,7 @@ INSERT INTO Cnfm_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	FROM Cnfm_S4
 	GROUP BY dbms, experimentname;
 -- select dbms, experimentname, runid, batchsetID, pk, numProcessors, actRowPool, pctRead, pctUpdate, ATP, maxMPL from Cnfm_S4 order by dbms, experimentname, runID, batchsetID, numProcessors,  actRowPool, pctRead, pctUpdate
+-- select dbms, experimentname, runid, batchsetID, pk, numProcessors, actRowPool, pctRead, pctUpdate, ATP, maxMPL from Cnfm_S0 order by dbms, experimentname, runID, batchsetID, numProcessors,  actRowPool, pctRead, pctUpdate
 -- select dbmsName, sum(stepResultSize) from Cnfm_RowCount where stepName IN ('Cnfm_S0') group by dbmsname
 -- select dbmsName, sum(stepResultSize) from Cnfm_RowCount where stepName IN ('Cnfm_S4') group by dbmsname
 -- select * from Cnfm_RowCount order by dbmsName, exprName, stepResultSize

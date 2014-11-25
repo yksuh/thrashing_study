@@ -116,7 +116,7 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(BatchSetID) as stepResultSize
 	FROM Analysis_S0_ABSR
 	GROUP BY dbms, experimentname, runID;
---select dbms, runid, count(*) as numBSs from Analysis_S0_ABSR group by dbms, runid;
+--select dbms, runid, count(*) as numBSs from Analysis_S0_ABSR group by dbms, runid
 --select dbms, count(*) as numBSs from Analysis_S0_ABSR group by dbms;
 --select runid, BatchSetID, pctRead, pctUpdate, actRowPool from Analysis_S0_ABSR where runid = 1110 order by runid
 --select runid, BatchSetID, pctRead, pctUpdate, actRowPool from Analysis_S0_ABSR where runid = 611 order by runid, pctread, pctupdate, actRowPool
@@ -290,7 +290,7 @@ CREATE TABLE Analysis_S0_DBR AS
 	       MPL,		
                avg(totalExecXacts) as numExecXacts, 
 	       avg(totalProcTime) as procTime,
-	       avg(totalExecXacts/ELAPSEDTIME) as tps
+	       avg((totalExecXacts/ELAPSEDTIME)*1000) as tps
 	FROM Analysis_S0_ABE abr
 	GROUP BY dbms, experimentname, runid, BatchSetID, dbms, batchSzIncr, MPL
 	ORDER BY dbms, experimentname, runid, BatchSetID, dbms, batchSzIncr, MPL asc;
@@ -670,7 +670,7 @@ CREATE TABLE Analysis_S1_EAV AS
 	 and abe.MPL	     = aas.MPL
 	-- ATP time greater than the average + two standard deviations
 	--  and (abe.totalProcTime / abe.totalExecXacts) > (aas.AvgATPtime + 2*aas.STDATPtime)
-        --  and abe.totalProcTime > 0
+          and abe.totalExecXacts > 0
 	-- ATP time greater or less than the average from two standard deviations
 	  and ((abe.totalProcTime / abe.totalExecXacts) > (aas.AvgATPtime + 2*aas.STDATPtime) OR (abe.totalProcTime / abe.totalExecXacts) < (aas.AvgATPtime - 2*aas.STDATPtime))
 	UNION
@@ -804,7 +804,7 @@ CREATE TABLE Analysis_S3_0 AS
 	       COALESCE(count(s2be.iternum), 0) as numBEs,
 	       avg(totalExecXacts) 		as numExecXacts, 
 	       avg(totalProcTime) 		as procTime,
-	       avg(totalExecXacts/ELAPSEDTIME)  as tps
+	       avg(totalExecXacts/ELAPSEDTIME*1000)  as tps
 	FROM Analysis_S2_BE s2be
 	GROUP BY dbms, experimentname, runid, batchsetid, batchSzIncr, MPL
 	Having count(s2be.iternum) > 0;
@@ -1111,7 +1111,7 @@ INSERT INTO Analysis_RowCount (dbmsName, exprName, stepName, stepResultSize)
 	       count(*) as stepResultSize
 	FROM Analysis_S4
 	GROUP BY dbms, experimentname;
--- select dbms, experimentname, runid, batchsetID, pk, numProcessors, actRowPool, pctRead, pctUpdate, ATP, maxMPL from Analysis_S4 order by dbms, experimentname, runID, batchsetID, numProcessors,  actRowPool, pctRead, pctUpdate
+-- select dbms, experimentname, runid, batchsetID, pk, numProcessors, actRowPool, pctRead, pctUpdate, round(ATP, 3), maxMPL from Analysis_S4 order by dbms, experimentname, runID, batchsetID, numProcessors,  actRowPool, pctRead, pctUpdate
 -- select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepName IN ('Analysis_S0') group by dbmsname
 -- select sum(stepResultSize) from Analysis_RowCount where stepName IN ('Analysis_S4')
 -- select dbmsName, sum(stepResultSize) from Analysis_RowCount where stepName IN ('Analysis_S4') group by dbmsname

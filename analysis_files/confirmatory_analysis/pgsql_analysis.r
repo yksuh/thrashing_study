@@ -1,7 +1,8 @@
 # Overall: 33.4% (close to suboptimal)
 library(aod)
 library(ggplot2)
-x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+#x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="raw_cnfm.dat",head=TRUE,sep="\t")
 x$MAXMPL[x$MAXMPL == 1100] <- 10000
 # ATP normalization
 # pgsql
@@ -13,6 +14,8 @@ pgsql_r$MAXMPL = (pgsql_r$MAXMPL-min(pgsql_r$MAXMPL))/(max(pgsql_r$MAXMPL)-min(p
 pgsql <- pgsql_r
 #### gother each DBMS' samples
 x = rbind(pgsql)
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
+
 nrow(x)
 108
 x <- subset(x, x$MAXMPL < 1)
@@ -41,6 +44,8 @@ summary(med.fit)
 	Multiple R-squared:  0.617,	Adjusted R-squared:  0.6097 
 	F-statistic: 84.59 on 2 and 105 DF,  p-value: < 2.2e-16
 
+#library(MASS)
+#step <- stepAIC(out.fit, direction="both")
 
 out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
@@ -57,13 +62,33 @@ summary(out.fit)
 	(Intercept)    0.855534   0.062152  13.765   <2e-16 ***
 	PK            -0.012276   0.018365  -0.668   0.5053    
 	ATP            0.130357   0.059640   2.186   0.0311 *  
-	NUMPROCESSORS  0.013856   0.005936   2.334   0.0215 *  
+	NUMPROCESSORS  0.013856   0.005936   2.334   0.0215 * 
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 	Residual standard error: 0.09459 on 104 degrees of freedom
 	Multiple R-squared:  0.06082,	Adjusted R-squared:  0.03373 
 	F-statistic: 2.245 on 3 and 104 DF,  p-value: 0.08746
+
+	Call:
+	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+
+	Residuals:
+	       Min         1Q     Median         3Q        Max 
+	-0.0077208 -0.0044928  0.0007008  0.0041208  0.0102266 
+
+	Coefficients:
+		       Estimate Std. Error t value Pr(>|t|)  
+	(Intercept)    0.167953   0.078920   2.128   0.0774 .
+	PK            -0.001799   0.005421  -0.332   0.7513  
+	ATP           -0.071459   0.064561  -1.107   0.3108  
+	NUMPROCESSORS -0.534549   0.216065  -2.474   0.0482 *
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.007153 on 6 degrees of freedom
+	Multiple R-squared:  0.8398,	Adjusted R-squared:  0.7597 
+	F-statistic: 10.48 on 3 and 6 DF,  p-value: 0.008438
 
 ### update-only
 library(aod)

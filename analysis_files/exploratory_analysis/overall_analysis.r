@@ -785,6 +785,7 @@ dwtest(out.fit, alternative="two.sided")
 
 #### thrashing or not thrashing
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)
+#x = rbind(db2,mysql,oracle,pgsql)
 x$MAXMPL[x$MAXMPL < 1] <- 0
 x$MAXMPL[x$MAXMPL == 1] <- 2
 x$MAXMPL[x$MAXMPL < 1] <- 1 ### thrashing
@@ -835,6 +836,12 @@ X2 = 79.0, df = 5, P(> X2) = 1.3e-15
 
 > 1-out.fit$deviance/out.fit$null.deviance
 [1] 0.16
+
+out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, family=binomial("probit"), data = x)
+summary(out.fit)
+> 1-out.fit$deviance/out.fit$null.deviance
+[1] 0.1518221
+
 ###########################################################################################################################
 
 #### update-only
@@ -1021,23 +1028,23 @@ summary(med.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.41857 -0.22947 -0.08114  0.16572  0.85120 
+	-0.42559 -0.22984 -0.08063  0.16767  0.84603 
 
 	Coefficients:
 		                 Estimate Std. Error t value Pr(>|t|)  
-	(Intercept)               0.24528    0.09591   2.557   0.0110 *
-	NUMPROCESSORS            -0.27279    0.12561  -2.172   0.0307 *
-	ACTROWPOOL                0.11699    0.10988   1.065   0.2879  
-	PK                        0.14716    0.08331   1.766   0.0784 .
-	PCTUPDATE                 0.02969    0.08638   0.344   0.7313  
-	NUMPROCESSORS:ACTROWPOOL -0.07209    0.17982  -0.401   0.6888  
-	PK:PCTUPDATE             -0.03422    0.12019  -0.285   0.7761  
+	(Intercept)               0.24461    0.09625   2.541   0.0116 *
+	NUMPROCESSORS            -0.27367    0.12572  -2.177   0.0303 *
+	ACTROWPOOL                0.12091    0.11003   1.099   0.2727  
+	PK                        0.14223    0.08387   1.696   0.0910 .
+	PCTUPDATE                 0.02931    0.08701   0.337   0.7365  
+	NUMPROCESSORS:ACTROWPOOL -0.07561    0.18009  -0.420   0.6749  
+	PK:PCTUPDATE             -0.02248    0.12101  -0.186   0.8527  
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2954 on 294 degrees of freedom
-	Multiple R-squared:  0.1552,	Adjusted R-squared:  0.138 
-	F-statistic: 9.005 on 6 and 294 DF,  p-value: 4.848e-09
+	Residual standard error: 0.2957 on 292 degrees of freedom
+	Multiple R-squared:  0.1568,	Adjusted R-squared:  0.1394 
+	F-statistic: 9.048 on 6 and 292 DF,  p-value: 4.432e-09
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 summary(med.fit)

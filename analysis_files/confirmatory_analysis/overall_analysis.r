@@ -1,8 +1,8 @@
 # Overall: 33.4% (close to suboptimal)
 library(aod)
 library(ggplot2)
-#x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-x = read.csv(file="new_cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+#x = read.csv(file="new_cnfm.dat",head=TRUE,sep="\t")
 #x = read.csv(file="raw_cnfm.dat",head=TRUE,sep="\t")
 x$MAXMPL[x$MAXMPL == 1100] <- 10000
 # ATP normalization
@@ -273,9 +273,10 @@ cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	      cor 
 	0.1304295
 
+
+	#### all samples
 out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
-	#### all samples
 	Call:
 	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 
@@ -322,6 +323,9 @@ summary(out.fit)
 			F-statistic: 5.653 on 5 and 533 DF,  p-value: 4.319e-05
 
 	#### only thrashing samples
+out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+summary(out.fit)
+
 	Call:
 	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 
@@ -342,6 +346,7 @@ summary(out.fit)
 	Multiple R-squared:  0.184,	Adjusted R-squared:  0.1654 
 	F-statistic:  9.92 on 3 and 132 DF,  p-value: 6.067e-06
 	
+	## old model
 			out.fit <- lm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 			summary(out.fit)
 
@@ -367,6 +372,135 @@ summary(out.fit)
 			Residual standard error: 0.02246 on 130 degrees of freedom
 			Multiple R-squared:  0.1896,	Adjusted R-squared:  0.1584 
 			F-statistic: 6.083 on 5 and 130 DF,  p-value: 4.284e-05
+
+### mediation analysis
+library(mediation)
+out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
+
+	### All samples
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+	summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME            -0.0732      -0.1161      -0.0360    0.00
+	ADE              0.1337       0.0207       0.2491    0.02
+	Total Effect     0.0605      -0.0449       0.1716    0.27
+	Prop. Mediated  -0.9179     -13.0938      11.9227    0.27
+
+	Sample Size Used: 539 
+
+
+	Simulations: 1000
+
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
+	summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME           -0.01953     -0.03810     -0.00593       0
+	ADE             0.13104      0.05830      0.20125       0
+	Total Effect    0.11152      0.03998      0.18048       0
+	Prop. Mediated -0.16683     -0.62948     -0.04378       0
+
+	Sample Size Used: 539 
+
+
+	Simulations: 1000 
+
+	### thrashing samples
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+	summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME            -0.0737      -0.1181      -0.0351    0.00
+	ADE              0.1372       0.0203       0.2496    0.03
+	Total Effect     0.0634      -0.0481       0.1728    0.23
+	Prop. Mediated  -0.9322     -11.3179      12.4926    0.23
+
+	Sample Size Used: 539 
+
+
+	Simulations: 1000
+
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
+	summary(med.out)
+
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME           -0.01956     -0.03878     -0.00591       0
+	ADE             0.13183      0.05880      0.20295       0
+	Total Effect    0.11228      0.03809      0.18412       0
+	Prop. Mediated -0.16933     -0.67014     -0.04660       0
+
+	Sample Size Used: 539 
+
+
+	Simulations: 1000 
+
+
+	Simulations: 1000
+
+### assumption testing #####
+library(car)
+out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+outlierTest(out.fit)
+#pdf("new_normales_qqplot.pdf")
+qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
+#dev.off()
+pdf("read_normal_res.pdf")
+h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,35),xlim=c(-0.06,0.06))
+xfit<-seq(min(out.fit$res),max(out.fit$res),length=40) 
+yfit<-dnorm(xfit,mean=mean(out.fit$res),sd=sd(out.fit$res)) 
+yfit <- yfit*diff(h$mids[1:2])*length(out.fit$res) 
+lines(xfit, yfit, col="blue")
+dev.off()
+
+pdf("read_cd.pdf")
+cd = cooks.distance(out.fit)
+plot(cd, ylim=c(0, 0.08), main="(CD shouldn't be greater than 1)", ylab="Cook's Distances (CDs)", xlab="Observeration Number")
+dev.off()
+
+ncvTest(out.fit)
+
+	Non-constant Variance Score Test 
+	Variance formula: ~ fitted.values 
+	Chisquare = 2.859574    Df = 1     p = 0.09083153
+
+# Evaluate Collinearity
+vif(out.fit) # variance inflation factors 
+           PK           ATP NUMPROCESSORS 
+     1.448892      1.440991      1.007356 
+
+sqrt(vif(out.fit)) > 2 # problem?
+           PK           ATP NUMPROCESSORS 
+     1.203699      1.200413      1.003671
+
+# Evaluate Nonlinearity
+# component + residual plot 
+pdf("linearity_assumption_testesult.pdf")
+crPlots(out.fit, main = "",)
+dev.off()
+
+# Test for Autocorrelated Errors
+durbinWatsonTest(out.fit)
+	 lag Autocorrelation D-W Statistic p-value
+	   1       0.1900665       1.59948   0.012
+	 Alternative hypothesis: rho != 0
 
 #### thrashing or not thrashing
 #x = rbind(db2,mysql,oracle,pgsql,sqlserver)
@@ -547,6 +681,26 @@ summary(med.fit)
 	Multiple R-squared:  0.03803,	Adjusted R-squared:  0.03514 
 	F-statistic: 13.13 on 1 and 332 DF,  p-value: 0.0003367
 
+		med.fit <- lm(ATP ~ PK + NUMPROCESSORS, data = x)
+		summary(med.fit)
+		Call:
+		lm(formula = ATP ~ PK + NUMPROCESSORS, data = x)
+
+		Residuals:
+		    Min      1Q  Median      3Q     Max 
+		-0.4580 -0.3358 -0.1182  0.3510  0.7163 
+
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.56362    0.04388  12.845  < 2e-16 ***
+		PK            -0.12168    0.03856  -3.155 0.001750 ** 
+		NUMPROCESSORS -0.21104    0.06050  -3.488 0.000552 ***
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+		Residual standard error: 0.3495 on 331 degrees of freedom
+		Multiple R-squared:  0.06613,	Adjusted R-squared:  0.06048 
+		F-statistic: 11.72 on 2 and 331 DF,  p-value: 1.21e-05
 
 cor.test(x$ATP, x$MAXMPL)
 	#####  all samples 
@@ -598,7 +752,7 @@ cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	      cor 
 	-0.144029
 
-out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
 
 	##### all samples 
@@ -665,42 +819,93 @@ summary(out.fit)
 		Multiple R-squared:  0.1093,	Adjusted R-squared:  0.1012 
 		F-statistic:  13.5 on 3 and 330 DF,  p-value: 2.499e-08
 
+### mediation analysis
+library(mediation)
+med.fit <- lm(ATP ~ NUMPROCESSORS, data = x)
+out.fit <- lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
+
+	### All samples
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+	summary(med.out)
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME           -0.00464     -0.02248      0.01129    0.54
+	ADE            -0.17268     -0.27622     -0.06977    0.00
+	Total Effect   -0.17732     -0.27703     -0.07673    0.00
+	Prop. Mediated  0.02410     -0.06578      0.16055    0.54
+
+	Sample Size Used: 800 
+
+
+	Simulations: 1000 
+
+	### thrashing samples
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+	summary(med.out)
+	
+	Causal Mediation Analysis 
+
+	Quasi-Bayesian Confidence Intervals
+
+		       Estimate 95% CI Lower 95% CI Upper p-value
+	ACME            0.00355      0.00142      0.00634    0.00
+	ADE            -0.01474     -0.02270     -0.00627    0.00
+	Total Effect   -0.01119     -0.01914     -0.00285    0.01
+	Prop. Mediated -0.30386     -1.17028     -0.09231    0.01
+
+	Sample Size Used: 334 
+
+
+	Simulations: 1000
+
+### assumption testing #####
 library(car)
-out.fit <- lm(MAXMPL ~ PK + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
-#out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
+out.fit <- lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 outlierTest(out.fit)
-#pdf("new_normal_res_qqplot.pdf")
-qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
 #dev.off()
-#pdf("new_normal_res_hist.pdf")
-h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,200))
+pdf("update_non_normal_res.pdf")
+#h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,35),xlim=c(-0.06,0.06))
+h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,70),xlim=c(-0.06,0.06))
 xfit<-seq(min(out.fit$res),max(out.fit$res),length=40) 
 yfit<-dnorm(xfit,mean=mean(out.fit$res),sd=sd(out.fit$res)) 
 yfit <- yfit*diff(h$mids[1:2])*length(out.fit$res) 
 lines(xfit, yfit, col="blue")
-#dev.off()
+dev.off()
+
+pdf("update_cd.pdf")
 cd = cooks.distance(out.fit)
-plot(cd, main="(CD shouldn't be greater than 1)", ylab="Cook's Distances (CDs)", xlab="Observeration Number")
+plot(cd, xlim=c(0, 350), ylim=c(0, 0.03), main="(CD shouldn't be greater than 1)", ylab="Cook's Distances (CDs)", xlab="Observeration Number")
+dev.off()
+
 ncvTest(out.fit)
+
 	Non-constant Variance Score Test 
 	Variance formula: ~ fitted.values 
-	Chisquare = 1.833295    Df = 1     p = 0.1757389
+	Chisquare = 2.859574    Df = 1     p = 0.6292605
+
 # Evaluate Collinearity
 vif(out.fit) # variance inflation factors 
+          ATP NUMPROCESSORS 
+     1.039537      1.03953 
+
 sqrt(vif(out.fit)) > 2 # problem?
+          ATP NUMPROCESSORS 
+     1.019577      1.01957
 
 # Evaluate Nonlinearity
 # component + residual plot 
-pdf("linearity_assumption_test_result.pdf")
+pdf("linearity_assumption_testesult.pdf")
 crPlots(out.fit, main = "",)
 dev.off()
 
 # Test for Autocorrelated Errors
 durbinWatsonTest(out.fit)
- 
-lag Autocorrelation D-W Statistic p-value
-   1       0.7448362     0.5092197       0
- Alternative hypothesis: rho != 0
+	 lag Autocorrelation D-W Statistic p-value
+	   1       0.1900665       0.9446755   0.012
+	 Alternative hypothesis: rho != 0
 
 #### thrashing or not thrashing
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)

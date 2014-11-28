@@ -1,8 +1,8 @@
 # Overall: 33.4% (close to suboptimal)
 library(aod)
 library(ggplot2)
-#x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-x = read.csv(file="raw_cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+#x = read.csv(file="raw_cnfm.dat",head=TRUE,sep="\t")
 x$MAXMPL[x$MAXMPL == 1100] <- 10000
 # ATP normalization
 # pgsql
@@ -153,6 +153,28 @@ nrow(x)
 	Residual standard error: 0.2388 on 137 degrees of freedom
 	Multiple R-squared:  0.02624,	Adjusted R-squared:  0.01914 
 	F-statistic: 3.692 on 1 and 137 DF,  p-value: 0.05674
+
+	> med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + PK, data = x)
+	> summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.60573 -0.06641  0.03619  0.13143  0.32553 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.88253    0.04014  21.989  < 2e-16 ***
+	NUMPROCESSORS -0.13098    0.05641  -2.322   0.0217 *  
+	PK            -0.21131    0.03649  -5.792 4.61e-08 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2147 on 136 degrees of freedom
+	Multiple R-squared:  0.2189,	Adjusted R-squared:  0.2074 
+	F-statistic: 19.06 on 2 and 136 DF,  p-value: 5.062e-08
 
 out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 summary(out.fit)

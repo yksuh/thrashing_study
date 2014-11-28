@@ -49,25 +49,6 @@ summary(med.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.33281 -0.15313 -0.03838  0.06913  0.67720 
-
-	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.46225    0.06111   7.564 8.03e-11 ***
-	NUMPROCESSORS -0.25536    0.08227  -3.104  0.00269 ** 
-	PK            -0.09752    0.05740  -1.699  0.09347 .  
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-	Residual standard error: 0.2509 on 75 degrees of freedom
-	Multiple R-squared:  0.1322,	Adjusted R-squared:  0.1091 
-	F-statistic: 5.712 on 2 and 75 DF,  p-value: 0.004907
-
-	Call:
-	lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
-
-	Residuals:
-	     Min       1Q   Median       3Q      Max 
 	-0.19844 -0.08359 -0.04143  0.07059  0.44577 
 
 	Coefficients:

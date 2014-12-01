@@ -1,16 +1,16 @@
 # Overall: 33.4% (close to suboptimal)
 library(aod)
 library(ggplot2)
-x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-x$MAXMPL[x$MAXMPL == 1100] <- 10000
+#x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="revised_cnfm.dat",head=TRUE,sep="\t")
+#x$MAXMPL[x$MAXMPL == 1100] <- 10000
 # ATP normalization
 # sqlserver
 sqlserver <- subset(x, x$DBMS=='sqlserver')
 sqlserver_r <- subset(sqlserver, sqlserver$PCTREAD!=0)
 sqlserver_r <- subset(sqlserver_r, select = -PCTUPDATE)
 sqlserver_r$ATP = (sqlserver_r$ATP-min(sqlserver_r$ATP))/(max(sqlserver_r$ATP)-min(sqlserver_r$ATP))
-#sqlserver_r$MAXMPL = (sqlserver_r$MAXMPL-min(sqlserver_r$MAXMPL))/(max(sqlserver_r$MAXMPL)-min(sqlserver_r$MAXMPL))
-sqlserver_r$MAXMPL <- 1
+sqlserver_r$MAXMPL = (sqlserver_r$MAXMPL-min(sqlserver_r$MAXMPL))/(max(sqlserver_r$MAXMPL)-min(sqlserver_r$MAXMPL))
 sqlserver <- sqlserver_r
 #### gother each DBMS' samples
 x = rbind(sqlserver)
@@ -22,7 +22,7 @@ nrow(x)
 [1] 120
 x <- subset(x, x$MAXMPL < 1)
 nrow(x)
-0
+12
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
 summary(med.fit)
@@ -53,21 +53,21 @@ summary(out.fit)
 	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 
 	Residuals:
-	       Min         1Q     Median         3Q        Max 
-	-2.378e-14 -1.349e-16  9.200e-18  1.802e-16  1.841e-15 
+	     Min       1Q   Median       3Q      Max 
+	-0.60273 -0.10586  0.03822  0.17831  0.31157 
 
 	Coefficients:
-		        Estimate Std. Error    t value Pr(>|t|)    
-	(Intercept)    1.000e+00  5.750e-16  1.739e+15   <2e-16 ***
-	PK            -2.488e-16  4.254e-16 -5.850e-01   0.5598    
-	ATP           -1.905e-15  8.625e-16 -2.208e+00   0.0292 *  
-	NUMPROCESSORS -2.789e-16  8.235e-16 -3.390e-01   0.7354    
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.70767    0.06260  11.305  < 2e-16 ***
+	PK             0.22540    0.04632   4.867 3.61e-06 ***
+	ATP           -0.27351    0.09391  -2.913   0.0043 ** 
+	NUMPROCESSORS  0.23092    0.08966   2.576   0.0113 *  
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 2.288e-15 on 116 degrees of freedom
-	Multiple R-squared:    0.5,	Adjusted R-squared:  0.4871 
-	F-statistic: 38.67 on 3 and 116 DF,  p-value: < 2.2e-16
+	Residual standard error: 0.2491 on 116 degrees of freedom
+	Multiple R-squared:  0.3333,	Adjusted R-squared:  0.3161 
+	F-statistic: 19.33 on 3 and 116 DF,  p-value: 3.113e-10
 
 ##### logistic by per-DBMS ####
 x = rbind(sqlserver)
@@ -84,10 +84,10 @@ Wald test:
 ----------
 
 Chi-squared test:
-X2 = 339.8, df = 3, P(> X2) = 0.0
+X2 = 58.0, df = 3, P(> X2) = 1.6e-12
 
 > 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.6853691
+[1] 0.3333082
 
 ### update-only
 library(aod)

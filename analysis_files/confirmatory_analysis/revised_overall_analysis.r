@@ -1,10 +1,7 @@
 # Overall: 33.4% (close to suboptimal)
 library(aod)
 library(ggplot2)
-x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-#x = read.csv(file="new_cnfm.dat",head=TRUE,sep="\t")
-#x = read.csv(file="raw_cnfm.dat",head=TRUE,sep="\t")
-x$MAXMPL[x$MAXMPL == 1100] <- 10000
+x = read.csv(file="revised_cnfm.dat",head=TRUE,sep="\t")
 # ATP normalization
 # db2
 db2 <- subset(x, x$DBMS=='db2')
@@ -40,10 +37,11 @@ sqlserver_r <- subset(sqlserver, sqlserver$PCTREAD!=0)
 sqlserver_r <- subset(sqlserver_r, select = -PCTUPDATE)
 sqlserver_r$ATP = (sqlserver_r$ATP-min(sqlserver_r$ATP))/(max(sqlserver_r$ATP)-min(sqlserver_r$ATP))
 sqlserver_r$MAXMPL = (sqlserver_r$MAXMPL-min(sqlserver_r$MAXMPL))/(max(sqlserver_r$MAXMPL)-min(sqlserver_r$MAXMPL))
+#sqlserver_r$MAXMPL <- 1
 sqlserver <- sqlserver_r
 #### gother each DBMS' samples
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)
-#x <- x[!is.na(x$MAXMPL),]
+#x = rbind(db2,mysql,oracle,pgsql)
 x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
 x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
@@ -51,7 +49,7 @@ nrow(x)
 [1] 539
 x <- subset(x, x$MAXMPL < 1)
 > nrow(x)
-[1] 148
+[1] 150
 
 > cor.test(x$NUMPROCESSORS, x$ATP)
 	##### all  samples
@@ -70,13 +68,13 @@ x <- subset(x, x$MAXMPL < 1)
 	Pearson's product-moment correlation
 
 	data:  x$NUMPROCESSORS and x$ATP
-	t = -1.2425, df = 146, p-value = 0.216
+	t = -0.8434, df = 148, p-value = 0.4004
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.25935551  0.06004267
+	 -0.22690552  0.09212368
 	sample estimates:
 	       cor 
-	-0.1022921
+	-0.0691589
 
 > cor.test(x$PK, x$ATP)
 	#####  all  samples
@@ -95,13 +93,13 @@ x <- subset(x, x$MAXMPL < 1)
 	Pearson's product-moment correlation
 
 	data:  x$PK and x$ATP
-	t = -8.6593, df = 146, p-value = 8.085e-15
+	t = -7.4051, df = 148, p-value = 9.19e-12
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.6799489 -0.4648548
+	 -0.6278886 -0.3923823
 	sample estimates:
 	       cor 
-	-0.5825096
+	-0.5199476
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
 summary(med.fit)
@@ -127,210 +125,152 @@ summary(med.fit)
 	F-statistic: 35.75 on 2 and 536 DF,  p-value: 2.655e-15
 
 	#### only thrashing samples
-	med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
-	summary(med.fit)
-
 	Call:
 	lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.36920 -0.09539 -0.00229  0.14871  0.49630 
+	-0.35282 -0.11545  0.01524  0.15311  0.48003 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.38990    0.02834  13.755  < 2e-16 ***
-	NUMPROCESSORS -0.06440    0.04396  -1.465    0.145    
-	PK            -0.26201    0.03018  -8.683 7.34e-15 ***
+	(Intercept)    0.36678    0.02898  12.657  < 2e-16 ***
+	NUMPROCESSORS -0.04439    0.04477  -0.991    0.323    
+	PK            -0.22764    0.03074  -7.406 9.39e-12 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.1774 on 145 degrees of freedom
-	Multiple R-squared:  0.349,	Adjusted R-squared:   0.34 
-	F-statistic: 38.86 on 2 and 145 DF,  p-value: 3.068e-14
-	
-	med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + PK + PCTREAD + PCTREAD:PK, data = x)
-	summary(med.fit)
-
-		Call:
-		lm(formula = ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + 
-		    PK + PCTREAD + PCTREAD:PK, data = x)
-
-		Call:
-		lm(formula = ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + 
-		    PK + PCTREAD + PCTREAD:PK, data = x)
-
-		Residuals:
-		     Min       1Q   Median       3Q      Max 
-		-0.42830 -0.10017  0.00194  0.12365  0.50267 
-
-		Coefficients:
-				         Estimate Std. Error t value Pr(>|t|)    
-		(Intercept)               0.34747    0.06437   5.398 2.78e-07 ***
-		NUMPROCESSORS            -0.02578    0.10363  -0.249  0.80388    
-		ACTROWPOOL                0.14350    0.09393   1.528  0.12882    
-		PK                       -0.29487    0.03966  -7.435 9.27e-12 ***
-		PCTREAD                  -0.12776    0.03964  -3.223  0.00158 ** 
-		NUMPROCESSORS:ACTROWPOOL -0.05462    0.15672  -0.349  0.72795    
-		PK:PCTREAD                0.08964    0.06348   1.412  0.16016    
-		---
-		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-		Residual standard error: 0.1701 on 141 degrees of freedom
-		Multiple R-squared:  0.418,	Adjusted R-squared:  0.3933 
-		F-statistic: 16.88 on 6 and 141 DF,  p-value: 1.255e-14
-
+	Residual standard error: 0.1814 on 147 degrees of freedom
+	Multiple R-squared:  0.2752,	Adjusted R-squared:  0.2653 
+	F-statistic: 27.91 on 2 and 147 DF,  p-value: 5.326e-11
+		
 > cor.test(x$PK, x$MAXMPL)
 	#### all samples
 	Pearson's product-moment correlation
 
 	data:  x$PK and x$MAXMPL
-	t = 4.2421, df = 537, p-value = 2.608e-05
+	t = 3.06, df = 537, p-value = 0.002324
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 0.0970890 0.2605617
+	 0.04697483 0.21301212
 	sample estimates:
 	      cor 
-	0.1800684 
+	0.1309114
 
 	#### only thrashing samples
 	Pearson's product-moment correlation
 
 	data:  x$PK and x$MAXMPL
-	t = 2.1619, df = 146, p-value = 0.03226
+	t = 3.6672, df = 148, p-value = 0.0003413
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 0.01520933 0.32814038
+	 0.1345769 0.4290310
 	sample estimates:
-	     cor 
-	0.176121
+	      cor 
+	0.2886138
 
-> cor.test(x$ATP, x$MAXMPL)
+cor.test(x$ATP, x$MAXMPL)
 	#### all samples
 	Pearson's product-moment correlation
 
 	data:  x$ATP and x$MAXMPL
-	t = 2.0988, df = 537, p-value = 0.0363
+	t = 2.8526, df = 537, p-value = 0.004504
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 0.0057878 0.1733350
+	 0.03811297 0.20452113
 	sample estimates:
-	       cor 
-	0.09019959 
+	      cor 
+	0.1221756
 
 	#### only thrashing samples
 	Pearson's product-moment correlation
 
 	data:  x$ATP and x$MAXMPL
-	t = -6.2381, df = 146, p-value = 4.53e-09
+	t = -6.4809, df = 148, p-value = 1.274e-09
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.5773518 -0.3211681
+	 -0.5862604 -0.3351678
 	sample estimates:
 	       cor 
-	-0.4587407
+	-0.4701741 
 
 cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	#### all samples
 	Pearson's product-moment correlation
 
 	data:  x$NUMPROCESSORS and x$MAXMPL
-	t = 2.5458, df = 537, p-value = 0.01118
+	t = 0.9968, df = 537, p-value = 0.3193
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 0.02497562 0.19188733
+	 -0.0416309  0.1269711
 	sample estimates:
-	      cor 
-	0.1092012 
+	       cor 
+	0.0429760
 
 	#### only thrashing samples
 	Pearson's product-moment correlation
 
 	data:  x$NUMPROCESSORS and x$MAXMPL
-	t = 2.8542, df = 146, p-value = 0.004942
+	t = 2.7549, df = 148, p-value = 0.006608
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 0.07118864 0.37724324
+	 0.06282196 0.36809264
 	sample estimates:
-	     cor 
-	0.229892
+	      cor 
+	0.2208599
 
 	#### all samples
 out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
+
 	Call:
 	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 
 	Residuals:
 	    Min      1Q  Median      3Q     Max 
-	-0.8652 -0.5113  0.1440  0.3118  0.5014 
+	-0.8218 -0.5123  0.1874  0.2845  0.4159 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.44711    0.05122   8.729  < 2e-16 ***
-	PK             0.17966    0.03654   4.917 1.17e-06 ***
-	ATP            0.21791    0.05704   3.820 0.000149 ***
-	NUMPROCESSORS  0.22920    0.05937   3.860 0.000127 ***
+	(Intercept)    0.54578    0.05038  10.833  < 2e-16 ***
+	PK             0.13148    0.03594   3.659 0.000279 ***
+	ATP            0.21733    0.05610   3.874 0.000120 ***
+	NUMPROCESSORS  0.13536    0.05840   2.318 0.020828 *  
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.4193 on 535 degrees of freedom
-	Multiple R-squared:  0.07115,	Adjusted R-squared:  0.06594 
-	F-statistic: 13.66 on 3 and 535 DF,  p-value: 1.344e-08
-
-			out.fit <- lm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
-			summary(out.fit)
-			Call:
-			lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
-			    data = x)
-
-			Residuals:
-			    Min      1Q  Median      3Q     Max 
-			-0.8827 -0.4892  0.1721  0.2987  0.5426 
-
-			Coefficients:
-				      Estimate Std. Error t value Pr(>|t|)    
-			(Intercept)    0.47027    0.06589   7.137 3.13e-12 ***
-			PK             0.17996    0.03651   4.929 1.11e-06 ***
-			PCTREAD       -0.06934    0.04152  -1.670 0.095498 .  
-			ACTROWPOOL     0.00606    0.06450   0.094 0.925183    
-			ATP            0.20722    0.05748   3.605 0.000341 ***
-			NUMPROCESSORS  0.22968    0.05934   3.871 0.000122 ***
-			---
-			Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-			Residual standard error: 0.419 on 533 degrees of freedom
-			Multiple R-squared:  0.076,	Adjusted R-squared:  0.06733 
-			F-statistic: 8.768 on 5 and 533 DF,  p-value: 5.248e-08
+	Residual standard error: 0.4124 on 535 degrees of freedom
+	Multiple R-squared:  0.04617,	Adjusted R-squared:  0.04082 
+	F-statistic: 8.632 on 3 and 535 DF,  p-value: 1.329e-05
 
 	#### only thrashing samples
-	out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-	summary(out.fit)
+out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+summary(out.fit)
 
 	Call:
 	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 
 	Residuals:
-	      Min        1Q    Median        3Q       Max 
-	-0.049137 -0.012522 -0.006282  0.018897  0.046423 
+	     Min       1Q   Median       3Q      Max 
+	-0.50568 -0.10339 -0.03047  0.19286  0.43917 
 
 	Coefficients:
-		       Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.040285   0.005295   7.608 3.32e-12 ***
-	PK            -0.006384   0.004578  -1.394   0.1653    
-	ATP           -0.058730   0.010219  -5.747 5.21e-08 ***
-	NUMPROCESSORS  0.013404   0.005449   2.460   0.0151 *  
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.33057    0.04988   6.627 6.18e-10 ***
+	PK             0.03609    0.04289   0.842  0.40143    
+	ATP           -0.49387    0.09822  -5.028 1.43e-06 ***
+	NUMPROCESSORS  0.14370    0.05349   2.686  0.00806 ** 
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.02183 on 144 degrees of freedom
-	Multiple R-squared:  0.2543,	Adjusted R-squared:  0.2388 
-	F-statistic: 16.37 on 3 and 144 DF,  p-value: 3.291e-09
+	Residual standard error: 0.216 on 146 degrees of freedom
+	Multiple R-squared:  0.2603,	Adjusted R-squared:  0.2451 
+	F-statistic: 17.13 on 3 and 146 DF,  p-value: 1.391e-09
 
 ### mediation analysis
 library(mediation)
-med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
 out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
 
 	### All samples
 	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
@@ -341,10 +281,10 @@ out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME            -0.0731      -0.1164      -0.0357       0
-	ADE              0.2288       0.1088       0.3416       0
-	Total Effect     0.1557       0.0387       0.2734       0
-	Prop. Mediated  -0.4672      -2.2310      -0.1824       0
+	ACME            -0.0732      -0.1161      -0.0360    0.00
+	ADE              0.1337       0.0207       0.2491    0.02
+	Total Effect     0.0605      -0.0449       0.1716    0.27
+	Prop. Mediated  -0.9179     -13.0938      11.9227    0.27
 
 	Sample Size Used: 539 
 
@@ -359,15 +299,15 @@ out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME           -0.01966     -0.03680     -0.00562       0
-	ADE             0.18059      0.10812      0.24707       0
-	Total Effect    0.16094      0.09091      0.22839       0
-	Prop. Mediated -0.11942     -0.31358     -0.03067       0
+	ACME           -0.01953     -0.03810     -0.00593       0
+	ADE             0.13104      0.05830      0.20125       0
+	Total Effect    0.11152      0.03998      0.18048       0
+	Prop. Mediated -0.16683     -0.62948     -0.04378       0
 
 	Sample Size Used: 539 
 
 
-	Simulations: 1000
+	Simulations: 1000 
 
 	### thrashing samples
 	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
@@ -378,12 +318,12 @@ out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME            0.00379     -0.00101      0.00931    0.12
-	ADE             0.01350      0.00226      0.02408    0.02
-	Total Effect    0.01729      0.00558      0.02885    0.00
-	Prop. Mediated  0.21500     -0.07237      0.60568    0.12
+	ACME             0.0221      -0.0184       0.0614    0.29
+	ADE              0.1424       0.0386       0.2458    0.01
+	Total Effect     0.1645       0.0573       0.2752    0.00
+	Prop. Mediated   0.1263      -0.2048       0.4560    0.29
 
-	Sample Size Used: 148 
+	Sample Size Used: 150 
 
 
 	Simulations: 1000
@@ -396,15 +336,15 @@ out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME            0.01529      0.00973      0.02175    0.00
-	ADE            -0.00623     -0.01512      0.00214    0.13
-	Total Effect    0.00906      0.00154      0.01727    0.02
-	Prop. Mediated  1.68425      0.80544      7.37686    0.02
+	ACME             0.1143       0.0648       0.1705    0.00
+	ADE              0.0342      -0.0468       0.1190    0.41
+	Total Effect     0.1485       0.0753       0.2270    0.00
+	Prop. Mediated   0.7686       0.3866       1.5676    0.00
 
-	Sample Size Used: 148 
+	Sample Size Used: 150 
 
 
-	Simulations: 1000
+	Simulations: 1000 
 
 ### assumption testing #####
 library(car)
@@ -452,7 +392,6 @@ durbinWatsonTest(out.fit)
 	 lag Autocorrelation D-W Statistic p-value
 	   1       0.1900665       1.59948   0.012
 	 Alternative hypothesis: rho != 0
-
 #### per-DBMS #####
 18.87 (0.01)\% for DBMS X, 
 27.54\% for MySQL, 
@@ -481,39 +420,39 @@ Wald test:
 ----------
 
 Chi-squared test:
-X2 = 40.5, df = 3, P(> X2) = 8.2e-09
+X2 = 27.7, df = 3, P(> X2) = 4.1e-06
 
 > 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.07044512
+[1] 0.04930364
 
 #### per-DBMS logistic #####
 x = rbind(db2)
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.2120741
+[1] 0.1409115
 x = rbind(mysql)
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.6009419
+[1] 0.5069013
 x = rbind(oracle)
 out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.1647835
+[1] 0.09636701
 x = rbind(pgsql)
 out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.06081725
+[1] 0.0414784
 x = rbind(sqlserver)
 out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.3333082
+[1] 0.3333084
 
 ### update-only
 library(aod)
 library(ggplot2)
-x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="revised_cnfm.dat",head=TRUE,sep="\t")
 x$MAXMPL[x$MAXMPL == 1100] <- 10000
 # ATP normalization
 # db2
@@ -560,7 +499,7 @@ nrow(x)
 [1] 800
 x <- subset(x, x$MAXMPL < 1)
 nrow(x)
-[1] 334
+[1] 335
 
 cor.test(x$NUMPROCESSORS, x$ATP)
 	#####  all samples 
@@ -579,13 +518,13 @@ cor.test(x$NUMPROCESSORS, x$ATP)
 	Pearson's product-moment correlation
 
 	data:  x$NUMPROCESSORS and x$ATP
-	t = -3.623, df = 332, p-value = 0.0003367
+	t = -3.0799, df = 333, p-value = 0.002243
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.29613904 -0.08958263
+	 -0.2687849 -0.0603462
 	sample estimates:
 	       cor 
-	-0.1950223
+	-0.1664241 
 
 cor.test(x$PK, x$ATP)
 	#####  all samples 
@@ -604,13 +543,13 @@ cor.test(x$PK, x$ATP)
 	Pearson's product-moment correlation
 
 	data:  x$PK and x$ATP
-	t = -3.302, df = 332, p-value = 0.001065
+	t = -2.8239, df = 333, p-value = 0.005029
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.28026675 -0.07238599
+	 -0.25589127 -0.04653917
 	sample estimates:
 	       cor 
-	-0.1783154
+	-0.1529306
 
 med.fit <- lm(ATP ~ NUMPROCESSORS, data = x)
 summary(med.fit)
@@ -639,18 +578,18 @@ summary(med.fit)
 
 	Residuals:
 	    Min      1Q  Median      3Q     Max 
-	-0.4461 -0.3215 -0.1280  0.3467  0.7198 
+	-0.4499 -0.3392 -0.1895  0.3707  0.6968 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.50196    0.03981  12.608  < 2e-16 ***
-	NUMPROCESSORS -0.22179    0.06122  -3.623 0.000337 ***
+	(Intercept)    0.50007    0.04159   12.02  < 2e-16 ***
+	NUMPROCESSORS -0.19685    0.06392   -3.08  0.00224 ** 
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.3542 on 332 degrees of freedom
-	Multiple R-squared:  0.03803,	Adjusted R-squared:  0.03514 
-	F-statistic: 13.13 on 1 and 332 DF,  p-value: 0.0003367
+	Residual standard error: 0.37 on 333 degrees of freedom
+	Multiple R-squared:  0.0277,	Adjusted R-squared:  0.02478 
+	F-statistic: 9.486 on 1 and 333 DF,  p-value: 0.002243
 
 		med.fit <- lm(ATP ~ PK + NUMPROCESSORS, data = x)
 		summary(med.fit)
@@ -690,13 +629,13 @@ cor.test(x$ATP, x$MAXMPL)
 	Pearson's product-moment correlation
 
 	data:  x$ATP and x$MAXMPL
-	t = -3.7311, df = 332, p-value = 0.0002242
+	t = -2.6388, df = 333, p-value = 0.00871
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.30143284 -0.09534567
+	 -0.2464931 -0.0365254
 	sample estimates:
 	       cor 
-	-0.2006076
+	-0.1431193
 
 cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	#####  all samples 
@@ -715,13 +654,13 @@ cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	Pearson's product-moment correlation
 
 	data:  x$NUMPROCESSORS and x$MAXMPL
-	t = -2.652, df = 332, p-value = 0.008386
+	t = -1.8417, df = 333, p-value = 0.06641
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.24751781 -0.03729086
+	 -0.205357269  0.006814555
 	sample estimates:
-	      cor 
-	-0.144029
+	       cor 
+	-0.1004128
 
 out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
@@ -753,19 +692,19 @@ summary(out.fit)
 
 	Residuals:
 	      Min        1Q    Median        3Q       Max 
-	-0.039537 -0.020929 -0.005472  0.016778  0.053876 
+	-0.038392 -0.023364 -0.001861  0.022683  0.047400 
 
 	Coefficients:
 		       Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.044274   0.003222  13.740  < 2e-16 ***
-	ATP           -0.016112   0.003653  -4.411 1.39e-05 ***
-	NUMPROCESSORS -0.014675   0.004154  -3.533  0.00047 ***
+	(Intercept)    0.041418   0.003196  12.959  < 2e-16 ***
+	ATP           -0.010580   0.003517  -3.009  0.00282 ** 
+	NUMPROCESSORS -0.009727   0.004160  -2.339  0.01995 *  
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.02357 on 331 degrees of freedom
-	Multiple R-squared:  0.07511,	Adjusted R-squared:  0.06953 
-	F-statistic: 13.44 on 2 and 331 DF,  p-value: 2.441e-06
+	Residual standard error: 0.02374 on 332 degrees of freedom
+	Multiple R-squared:  0.03636,	Adjusted R-squared:  0.03055 
+	F-statistic: 6.263 on 2 and 332 DF,  p-value: 0.002139
 
 	out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 	summary(out.fit)
@@ -822,10 +761,10 @@ out.fit <- lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME             0.0355       0.0143       0.0616    0.00
-	ADE             -0.1439      -0.2227      -0.0600    0.00
-	Total Effect    -0.1084      -0.1914      -0.0217    0.01
-	Prop. Mediated  -0.3170      -1.5833      -0.0969    0.01
+	ACME            0.00355      0.00142      0.00634    0.00
+	ADE            -0.01474     -0.02270     -0.00627    0.00
+	Total Effect   -0.01119     -0.01914     -0.00285    0.01
+	Prop. Mediated -0.30386     -1.17028     -0.09231    0.01
 
 	Sample Size Used: 334 
 
@@ -901,7 +840,7 @@ Wald test:
 ----------
 
 Chi-squared test:
-X2 = 10.9, df = 2, P(> X2) = 0.0042
+X2 = 10.8, df = 2, P(> X2) = 0.0045
 
 > 1-out.fit$deviance/out.fit$null.deviance
 [1] 0.01354031

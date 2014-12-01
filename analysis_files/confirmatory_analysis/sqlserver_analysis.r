@@ -69,6 +69,26 @@ summary(out.fit)
 	Multiple R-squared:    0.5,	Adjusted R-squared:  0.4871 
 	F-statistic: 38.67 on 3 and 116 DF,  p-value: < 2.2e-16
 
+##### logistic by per-DBMS ####
+x = rbind(sqlserver)
+x$MAXMPL[x$MAXMPL == 1] <- 2
+x$MAXMPL[x$MAXMPL < 1] <- 1 ### thrashing
+x$MAXMPL[x$MAXMPL == 2] <- 0### no thrashing
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
+library(aod)
+library(ggplot2)
+out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+summary(out.fit)
+wald.test(b = coef(out.fit), Sigma = vcov(out.fit), Terms = 2:4)
+Wald test:
+----------
+
+Chi-squared test:
+X2 = 339.8, df = 3, P(> X2) = 0.0
+
+> 1-out.fit$deviance/out.fit$null.deviance
+[1] 0.6853691
+
 ### update-only
 library(aod)
 library(ggplot2)

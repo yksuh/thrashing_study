@@ -14,6 +14,8 @@ pgsql_r$MAXMPL = (pgsql_r$MAXMPL-min(pgsql_r$MAXMPL))/(max(pgsql_r$MAXMPL)-min(p
 pgsql <- pgsql_r
 #### gother each DBMS' samples
 x = rbind(pgsql)
+x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
+x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 
 nrow(x)
@@ -89,6 +91,26 @@ summary(out.fit)
 	Residual standard error: 0.007153 on 6 degrees of freedom
 	Multiple R-squared:  0.8398,	Adjusted R-squared:  0.7597 
 	F-statistic: 10.48 on 3 and 6 DF,  p-value: 0.008438
+
+###### logistic ####
+x = rbind(pgsql)
+x$MAXMPL[x$MAXMPL == 1] <- 2
+x$MAXMPL[x$MAXMPL < 1] <- 1 ### thrashing
+x$MAXMPL[x$MAXMPL == 2] <- 0### no thrashing
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
+library(aod)
+library(ggplot2)
+out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+summary(out.fit)
+wald.test(b = coef(out.fit), Sigma = vcov(out.fit), Terms = 2:4)
+Wald test:
+----------
+
+Chi-squared test:
+X2 = 6.7, df = 3, P(> X2) = 0.081
+
+> 1-out.fit$deviance/out.fit$null.deviance
+[1] 0.06081725
 
 ### update-only
 library(aod)

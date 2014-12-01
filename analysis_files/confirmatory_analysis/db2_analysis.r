@@ -223,6 +223,24 @@ summary(out.fit)
 	Residual standard error: 0.02645 on 30 degrees of freedom
 	Multiple R-squared:  0.01039,	Adjusted R-squared:  -0.08857 
 	F-statistic: 0.105 on 3 and 30 DF,  p-value: 0.9565
+##### logistic by per-DBMS ####
+x = rbind(db2)
+x$MAXMPL[x$MAXMPL == 1] <- 2
+x$MAXMPL[x$MAXMPL < 1] <- 1 ### thrashing
+x$MAXMPL[x$MAXMPL == 2] <- 0### no thrashing
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
+library(aod)
+library(ggplot2)
+out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+summary(out.fit)
+wald.test(b = coef(out.fit), Sigma = vcov(out.fit), Terms = 2:4)
+Wald test:
+----------
+Chi-squared test:
+X2 = 27.2, df = 3, P(> X2) = 5.4e-06
+
+> 1-out.fit$deviance/out.fit$null.deviance
+[1] 0.2120741
 
 ### update-only
 library(aod)

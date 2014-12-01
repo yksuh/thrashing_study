@@ -226,6 +226,25 @@ summary(out.fit)
 	Residual standard error: 0.01501 on 41 degrees of freedom
 	Multiple R-squared:  0.3283,	Adjusted R-squared:  0.2791 
 	F-statistic:  6.68 on 3 and 41 DF,  p-value: 0.000893
+###### logistic ####
+x = rbind(mysql)
+x$MAXMPL[x$MAXMPL == 1] <- 2
+x$MAXMPL[x$MAXMPL < 1] <- 1 ### thrashing
+x$MAXMPL[x$MAXMPL == 2] <- 0### no thrashing
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
+library(aod)
+library(ggplot2)
+out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+summary(out.fit)
+wald.test(b = coef(out.fit), Sigma = vcov(out.fit), Terms = 2:4)
+Wald test:
+----------
+
+Chi-squared test:
+X2 = 152.3, df = 3, P(> X2) = 0.0
+
+> 1-out.fit$deviance/out.fit$null.deviance
+[1] 0.6035987
 
 ### update-only
 library(aod)
@@ -406,18 +425,18 @@ summary(out.fit)
 	lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 
 	Residuals:
-	     Min       1Q   Median       3Q      Max 
-	-0.93240  0.07092  0.11889  0.14749  0.31995 
+	      Min        1Q    Median        3Q       Max 
+	-0.021808 -0.007834 -0.007466  0.018971  0.051128 
 
 	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.63781    0.08926   7.145 6.56e-11 ***
-	ATP            0.31728    0.12312   2.577   0.0111 *  
-	NUMPROCESSORS  0.05823    0.09321   0.625   0.5333    
+		       Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)   -0.007375   0.010315  -0.715  0.47859    
+	ATP            0.014426   0.016676   0.865  0.39191    
+	NUMPROCESSORS  0.029044   0.006849   4.241  0.00012 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.3532 on 125 degrees of freedom
-	Multiple R-squared:  0.05265,	Adjusted R-squared:  0.03749 
-	F-statistic: 3.473 on 2 and 125 DF,  p-value: 0.03404
+	Residual standard error: 0.01504 on 42 degrees of freedom
+	Multiple R-squared:  0.3083,	Adjusted R-squared:  0.2754 
+	F-statistic: 9.362 on 2 and 42 DF,  p-value: 0.0004342
 

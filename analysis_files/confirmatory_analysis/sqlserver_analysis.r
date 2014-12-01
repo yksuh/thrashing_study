@@ -1,8 +1,8 @@
 # Overall: 33.4% (close to suboptimal)
 library(aod)
 library(ggplot2)
-#x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-x = read.csv(file="revised_cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+#x = read.csv(file="revised_cnfm.dat",head=TRUE,sep="\t")
 #x$MAXMPL[x$MAXMPL == 1100] <- 10000
 # ATP normalization
 # sqlserver

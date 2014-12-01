@@ -226,6 +226,7 @@ summary(out.fit)
 	Residual standard error: 0.01501 on 41 degrees of freedom
 	Multiple R-squared:  0.3283,	Adjusted R-squared:  0.2791 
 	F-statistic:  6.68 on 3 and 41 DF,  p-value: 0.000893
+
 ###### logistic ####
 x = rbind(mysql)
 x$MAXMPL[x$MAXMPL == 1] <- 2

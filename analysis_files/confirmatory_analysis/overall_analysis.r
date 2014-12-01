@@ -2,9 +2,7 @@
 library(aod)
 library(ggplot2)
 x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-#x = read.csv(file="new_cnfm.dat",head=TRUE,sep="\t")
-#x = read.csv(file="raw_cnfm.dat",head=TRUE,sep="\t")
-x$MAXMPL[x$MAXMPL == 1100] <- 10000
+#x$MAXMPL[x$MAXMPL == 1100] <- 10000
 # ATP normalization
 # db2
 db2 <- subset(x, x$DBMS=='db2')
@@ -197,13 +195,13 @@ summary(med.fit)
 	Pearson's product-moment correlation
 
 	data:  x$PK and x$MAXMPL
-	t = 2.1619, df = 146, p-value = 0.03226
+	t = 1.9917, df = 146, p-value = 0.04827
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 0.01520933 0.32814038
+	 0.001333675 0.315701911
 	sample estimates:
-	     cor 
-	0.176121
+	      cor 
+	0.1626425
 
 > cor.test(x$ATP, x$MAXMPL)
 	#### all samples
@@ -222,13 +220,13 @@ summary(med.fit)
 	Pearson's product-moment correlation
 
 	data:  x$ATP and x$MAXMPL
-	t = -6.2381, df = 146, p-value = 4.53e-09
+	t = -5.8995, df = 146, p-value = 2.437e-08
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 -0.5773518 -0.3211681
+	 -0.5604164 -0.2985325
 	sample estimates:
 	       cor 
-	-0.4587407
+	-0.4387437
 
 cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	#### all samples
@@ -247,13 +245,13 @@ cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	Pearson's product-moment correlation
 
 	data:  x$NUMPROCESSORS and x$MAXMPL
-	t = 2.8542, df = 146, p-value = 0.004942
+	t = 3.0963, df = 146, p-value = 0.00235
 	alternative hypothesis: true correlation is not equal to 0
 	95 percent confidence interval:
-	 0.07118864 0.37724324
+	 0.09051191 0.39380256
 	sample estimates:
-	     cor 
-	0.229892
+	      cor 
+	0.2482307
 
 	#### all samples
 out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
@@ -311,21 +309,21 @@ summary(out.fit)
 	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 
 	Residuals:
-	      Min        1Q    Median        3Q       Max 
-	-0.049137 -0.012522 -0.006282  0.018897  0.046423 
+	     Min       1Q   Median       3Q      Max 
+	-0.49105 -0.12868 -0.05987  0.19251  0.45980 
 
 	Coefficients:
-		       Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.040285   0.005295   7.608 3.32e-12 ***
-	PK            -0.006384   0.004578  -1.394   0.1653    
-	ATP           -0.058730   0.010219  -5.747 5.21e-08 ***
-	NUMPROCESSORS  0.013404   0.005449   2.460   0.0151 *  
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.39086    0.05308   7.363 1.27e-11 ***
+	PK            -0.06416    0.04589  -1.398  0.16422    
+	ATP           -0.56046    0.10244  -5.471 1.93e-07 ***
+	NUMPROCESSORS  0.14888    0.05462   2.726  0.00722 ** 
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.02183 on 144 degrees of freedom
-	Multiple R-squared:  0.2543,	Adjusted R-squared:  0.2388 
-	F-statistic: 16.37 on 3 and 144 DF,  p-value: 3.291e-09
+	Residual standard error: 0.2188 on 144 degrees of freedom
+	Multiple R-squared:  0.2445,	Adjusted R-squared:  0.2288 
+	F-statistic: 15.54 on 3 and 144 DF,  p-value: 8.273e-09
 
 ### mediation analysis
 library(mediation)
@@ -378,15 +376,15 @@ out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME            0.00379     -0.00101      0.00931    0.12
-	ADE             0.01350      0.00226      0.02408    0.02
-	Total Effect    0.01729      0.00558      0.02885    0.00
-	Prop. Mediated  0.21500     -0.07237      0.60568    0.12
+	ACME            0.03788     -0.00804      0.09185    0.11
+	ADE             0.15094      0.04905      0.25511    0.00
+	Total Effect    0.18882      0.08253      0.30328    0.00
+	Prop. Mediated  0.19346     -0.05123      0.53041    0.11
 
 	Sample Size Used: 148 
 
 
-	Simulations: 1000
+	Simulations: 1000 
 
 	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK")
 	summary(med.out)
@@ -396,10 +394,10 @@ out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME            0.01529      0.00973      0.02175    0.00
-	ADE            -0.00623     -0.01512      0.00214    0.13
-	Total Effect    0.00906      0.00154      0.01727    0.02
-	Prop. Mediated  1.68425      0.80544      7.37686    0.02
+	ACME            0.14507      0.08590      0.21045    0.00
+	ADE            -0.06445     -0.16478      0.03074    0.17
+	Total Effect    0.08062      0.00147      0.15603    0.04
+	Prop. Mediated  1.74345      0.65599     15.26999    0.04
 
 	Sample Size Used: 148 
 
@@ -413,8 +411,10 @@ outlierTest(out.fit)
 #pdf("new_normales_qqplot.pdf")
 qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
 #dev.off()
-pdf("read_normal_res.pdf")
-h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,35),xlim=c(-0.06,0.06))
+#pdf("read_normal_res.pdf")
+pdf("new_read_normal_res.pdf")
+#h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,50),xlim=c(-0.6,0.6))
+h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,50),xlim=c(-0.6,0.6))
 xfit<-seq(min(out.fit$res),max(out.fit$res),length=40) 
 yfit<-dnorm(xfit,mean=mean(out.fit$res),sd=sd(out.fit$res)) 
 yfit <- yfit*diff(h$mids[1:2])*length(out.fit$res) 
@@ -430,16 +430,16 @@ ncvTest(out.fit)
 
 	Non-constant Variance Score Test 
 	Variance formula: ~ fitted.values 
-	Chisquare = 2.859574    Df = 1     p = 0.09083153
+	Chisquare = 2.859574    Df = 1     p = 0.008315594 
 
 # Evaluate Collinearity
 vif(out.fit) # variance inflation factors 
            PK           ATP NUMPROCESSORS 
-     1.448892      1.440991      1.007356 
+     1.519995      1.535991      1.014853
 
-sqrt(vif(out.fit)) > 2 # problem?
+> sqrt(vif(out.fit)) > 2
            PK           ATP NUMPROCESSORS 
-     1.203699      1.200413      1.003671
+        FALSE         FALSE         FALSE
 
 # Evaluate Nonlinearity
 # component + residual plot 
@@ -450,7 +450,7 @@ dev.off()
 # Test for Autocorrelated Errors
 durbinWatsonTest(out.fit)
 	 lag Autocorrelation D-W Statistic p-value
-	   1       0.1900665       1.59948   0.012
+	   1       0.2091418      1.561056   0.006
 	 Alternative hypothesis: rho != 0
 
 #### per-DBMS #####
@@ -855,7 +855,7 @@ ncvTest(out.fit)
 
 	Non-constant Variance Score Test 
 	Variance formula: ~ fitted.values 
-	Chisquare = 2.859574    Df = 1     p = 0.6292605
+	Chisquare = 0.2330649    Df = 1     p = 0.6292605
 
 # Evaluate Collinearity
 vif(out.fit) # variance inflation factors 

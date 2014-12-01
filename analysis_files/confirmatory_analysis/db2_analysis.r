@@ -223,6 +223,7 @@ summary(out.fit)
 	Residual standard error: 0.02645 on 30 degrees of freedom
 	Multiple R-squared:  0.01039,	Adjusted R-squared:  -0.08857 
 	F-statistic: 0.105 on 3 and 30 DF,  p-value: 0.9565
+
 ##### logistic by per-DBMS ####
 x = rbind(db2)
 x$MAXMPL[x$MAXMPL == 1] <- 2

@@ -535,25 +535,20 @@ X2 = 26.2, df = 3, P(> X2) = 8.8e-06
 [1] 0.04661033
 
 #### per-DBMS logistic #####
-[1] 0.212 for DBMS X, 
-[1] 0.603 for MySQL, 
-[1] 0.165 for DBMS Y, 
-[1] 0.0608 for PostgreSQL, and 
-[1] 0.6853 for DBMS Z.
-
-###############################################
 x = rbind(db2)
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.1652343
+[1] 0.2120741
 x = rbind(mysql)
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.5354377
+[1] 0.6009419
 x = rbind(oracle)
 out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 1-out.fit$deviance/out.fit$null.deviance
-[1] 0.1314524
+[1] 0.1647835
 x = rbind(pgsql)
 out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 1-out.fit$deviance/out.fit$null.deviance
@@ -931,6 +926,13 @@ durbinWatsonTest(out.fit)
 	   1       0.1900665       0.9446755   0.012
 	 Alternative hypothesis: rho != 0
 
+#### per-DBMS #####
+17.13 (0.0048)\% for DBMS X, 
+27.54 % for MySQL, 
+31.38 % for DBMS Y, 
+20.93 % for PostgreSQL, and 
+14.87 % for DBMS Z.
+
 #### thrashing or not thrashing
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)
 x$MAXMPL[x$MAXMPL == 1] <- 2
@@ -957,6 +959,7 @@ x = rbind(db2)
 x$MAXMPL[x$MAXMPL == 1] <- 2
 x$MAXMPL[x$MAXMPL < 1] <- 1 ### thrashing
 x$MAXMPL[x$MAXMPL == 2] <- 0### no thrashing
+x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
 out.fit <-  glm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
 1-out.fit$deviance/out.fit$null.deviance

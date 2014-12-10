@@ -2039,7 +2039,7 @@ Main._logger.outputDebug(batchSetQuery);
 			paramVal[i++] = String.format("%d", incrMPL);
 //			paramVal[i++] = String.format("%d", batchRunTime);
 			paramVal[i++] = String.format("%.4f", transactionSize);
-			paramVal[i++] = String.format("%.2f", exclusiveLockRatio);
+			paramVal[i++] = String.format("%.2f", (exclusiveLockRatio*100));
 			paramVal[i++] = String.format("%.2f", effectiveDBRatio);
 			paramVal[i++] = String.format("%.2f", srtTxnRate);
 			insertBatchSet(paramVal);

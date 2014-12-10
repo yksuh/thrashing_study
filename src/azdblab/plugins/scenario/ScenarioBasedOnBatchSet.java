@@ -103,7 +103,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					GeneralDBMS.I_DATA_TYPE_NUMBER
 			}, 
 			new int[] {10,10, 10,10,10,10,10}, 
-			new int[] {0,0, 0,0,0,0}, 
+			new int[] {0,0, 0,0,0,0, 0}, 
 			new String[] {"ExperimentID", "BatchSzIncr", "XactSz", "XLockRatio", "EffectiveDBSz", "ShortTxnRate"}, // unique
 			new String[] {"BatchSetID" }, 	// primary key
 			new ForeignKey[] { 
@@ -875,10 +875,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						},
 						BATCHSET.columnDataTypes);
 			LabShelfManager.getShelf().commit();
-//Main._logger.outputDebug(insertSQL);			
+Main._logger.outputDebug(insertSQL);			
 		} catch (SQLException e) {
-//			Main._logger.reportError(e.getMessage());
-//			e.printStackTrace();
+			Main._logger.reportError(e.getMessage());
+			e.printStackTrace();
 //			String updateSQL = "UPDATE " + Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " " + 
 //							   "SET BufferSpace = " + paramVal[2] + 
 //							   ", NumCores = " + paramVal[3] + 

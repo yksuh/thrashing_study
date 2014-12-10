@@ -679,7 +679,7 @@ _logger.outputLog(line);
 		str = String.format("Read Selectivity Factor: %.2f%%, x%d, %.2f%%", minNumRowsFromSELECT*100, incrNumRowsFromSELECT, maxNumRowsFromSELECT*100);
 		_logger.outputLog(str);
 		//str = String.format("Exclusive Lock Pct: %d%%, %d%%, %d%%", (int)(minNumRowsFromUPDATE*100), (int)(incrNumRowsFromUPDATE*100), (int)(maxNumRowsFromUPDATE*100));
-		str = String.format("Update Selectivity Factor: %.2f%%, x%d, %.2f%%", minNumRowsFromUPDATE*100, incrNumRowsFromUPDATE, maxNumRowsFromUPDATE*100);
+		str = String.format("Update Selectivity Factor: %.2f%%, x%d, %.2f%%", minNumRowsFromUPDATE*100, (int)incrNumRowsFromUPDATE, maxNumRowsFromUPDATE*100);
 		_logger.outputLog(str);
 		str = String.format("Multiprogramming Level: %d, %d, %d", minMPL, incrMPL, maxMPL);
 		_logger.outputLog(str);

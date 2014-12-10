@@ -683,7 +683,7 @@ _logger.outputLog(line);
 		_logger.outputLog(str);
 		str = String.format("Effective DB: %d%%, %d%%, %d%%", (int)(minActiveRowPool*100), (int)(incrActiveRowPool*100), (int)(maxActiveRowPool*100));
 		_logger.outputLog(str);
-		str = String.format("Short Txn Rate: %d%%, %d%%, %d%%", (int)(minStr*100), (int)(minStr*100), (int)(strIncr*100));
+		str = String.format("Short Txn Rate: %d%%, %d%%, %d%%", (int)(minStr*100), (int)(maxStr*100), (int)(strIncr*100));
 		_logger.outputLog(str);
 		_logger.outputLog("connectString: " + connectString);
 		_logger.outputLog("logging time: [" + transactionTime2 + "]");

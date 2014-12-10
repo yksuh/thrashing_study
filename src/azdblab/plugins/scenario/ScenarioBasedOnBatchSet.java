@@ -722,10 +722,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 							int currTrialCnt = 1, currExpBackoffWaitTime = Constants.WAIT_TIME;
 							
 							// initialize experiment tables 
-							preStep(firstLoading);
-							if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
-								if(firstLoading) firstLoading = false;
-							}
+//							preStep(firstLoading);
+//							if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
+//								if(firstLoading) firstLoading = false;
+//							}
 							
 							// analyze this batch set
 							studyBatchSet(runID,

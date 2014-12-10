@@ -385,7 +385,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			String str = "";
 			// determine end range using effective db size
 			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
-			if(flag != Constants.SHORT){
+			if(flag == Constants.LONG){
 				// determine the number of requested locks using transaction size
 //				if(xactSize == 0){
 //					if(Constants.DEFAULT_UPT_ROWS == 0){
@@ -548,7 +548,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			String str = "";
 			int start = 0;
 			int end = (int) ((double) tbl.hy_min_card * xLocks * effectiveDBSz);
-			if(flag == Constants.SHORT){
+			if(flag == Constants.LONG){
 				int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * xLocks);
 				// determine end range using effective db size
 				long loKeyForUpdate = (long) ((double) getRandomNumber(
@@ -2092,7 +2092,7 @@ Main._logger.outputDebug(batchSetQuery);
 		_clientRunStats = new XactRunStatPerClient[numClients+1];	
 		int numSrtTxnCounts = (int)(numClients*srtTxnRate);
 		Main._logger.outputDebug("# of short xacts: " + numSrtTxnCounts + " ("+srtTxnRate+"/"+numClients+")");
-		boolean flag = Constants.SHORT;
+		//boolean flag = Constants.SHORT;
 		for (int i = 0; i < numClients; i++) {
 			// assign client number
 			int clientNum = i + 1;
@@ -2111,11 +2111,10 @@ Main._logger.outputDebug(batchSetQuery);
 			clients[i].setClientID(batchID, clientNum);
 			// set up client (i+1)
 //			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
-			if(flag != Constants.LONG && i > numSrtTxnCounts){
-				flag = Constants.LONG;
-			}
-			// configure this client
-			clients[i].setTransaction(flag);
+			if(i < numSrtTxnCounts)
+				clients[i].setTransaction(Constants.SHORT);
+			else
+				clients[i].setTransaction(Constants.LONG);
 		}
 		if(iterNum == 1) return iterNum;
 		// flush caches

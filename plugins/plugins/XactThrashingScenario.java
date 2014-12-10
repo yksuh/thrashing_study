@@ -1515,17 +1515,17 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //			int succTrials = 1;
 //			long wait = 10000;
 //			do{
-//				ResultSet rs = LabShelfManager.getShelf().executeQuerySQLOnce(query);
-//				try {
-//					while (rs.next()) {
-//						clientID = rs.getInt(1);
-//					}
-//					rs.close();
-//				} catch (SQLException e) {
-//					// TODO Auto-generated catch block
-//					Main._logger.reportError(query);
-//					e.printStackTrace();
-//				}
+				ResultSet rs = LabShelfManager.getShelf().executeQuerySQLOnce(query);
+				try {
+					while (rs.next()) {
+						clientID = rs.getInt(1);
+					}
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					Main._logger.reportError(query);
+					e.printStackTrace();
+				}
 //				if(clientID == -1){
 //					Main._logger.reportError("azdblab_client inaccessible <= retry (" + succTrials+")");
 //					succTrials++;
@@ -1559,7 +1559,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 											String.valueOf(batchID),
 											String.valueOf(clientNum) },
 									CLIENT.columnDataTypes);
-					// Main._logger.outputLog(insertSQL);
+//					Main._logger.outputLog(insertSQL);
 					LabShelfManager.getShelf().commit();
 					// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
 					// _clientNum, _batchID));

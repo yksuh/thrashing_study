@@ -672,7 +672,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //			if(dNmRwsFrmSLCT == 0) // update only
 //				Constants.DEFAULT_UPT_ROWS = mxNumRowsFromSELECT; // set maximum selectivity for update only
 			// exclusive locks
-			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT+=incrNmRwsFrmUPT){
+			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT*=incrNmRwsFrmUPT){
 				// skip mixed
 				if(dNmRwsFrmSLCT == 0 && dNmRwsFrmUPT == 0){
 					continue;
@@ -775,7 +775,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				} // effective db 
 				
 				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == 0){
-					break;
+					dNmRwsFrmUPT = mxNmRwsFrmUPT;
 				}
 			} // write selectivity
 			

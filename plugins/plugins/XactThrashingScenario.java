@@ -1739,7 +1739,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			int k = 1;
 //			while(k <= Constants.MAX_ITERS){
 //			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
-				Main._logger.outputLog(String.format("<<<<<< %d(/%d) iteration start!", k, Constants.MAX_ITERS));
+				Main._logger.outputLog(String.format("MPL: %d <<<<<< %d(/%d) iteration start!", MPL, k, Constants.MAX_ITERS));
 				
 				// run this batch for X times
 				int retry = stepC(batchSetRunResID, batchID, MPL, srtTxnRate, k);
@@ -2091,6 +2091,7 @@ Main._logger.outputDebug(batchSetQuery);
 		// initialize transaction run stat
 		_clientRunStats = new XactRunStatPerClient[numClients+1];	
 		int numSrtTxnCounts = (int)(numClients*srtTxnRate);
+		Main._logger.outputDebug("# of short xacts: " + numSrtTxnCounts + " ("+srtTxnRate+"/"+numClients+")");
 		boolean flag = Constants.SHORT;
 		for (int i = 0; i < numClients; i++) {
 			// assign client number
@@ -2099,17 +2100,17 @@ Main._logger.outputDebug(batchSetQuery);
 			assert(_clientRunStats[clientNum] != null);
 			
 			// ready for open connection
-			String strDrvName = experimentSubject.getDBMSDriverClassName();
-			String strConnStr = experimentSubject.getConnectionString();
-			String strUserName = experimentSubject.getUserName();
-			String strPassword = experimentSubject.getPassword();
+//			String strDrvName = experimentSubject.getDBMSDriverClassName();
+//			String strConnStr = experimentSubject.getConnectionString();
+//			String strUserName = experimentSubject.getUserName();
+//			String strPassword = experimentSubject.getPassword();
 			// Main._logger.outputLog("Client " + (clientNum) +
 			// " is being initialized...");
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);
 			// set up client (i+1)
-			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
+//			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
 			if(flag != Constants.LONG && i > numSrtTxnCounts){
 				flag = Constants.LONG;
 			}

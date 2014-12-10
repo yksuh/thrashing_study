@@ -867,6 +867,7 @@ public class Constants {
 	public static int FAILED_ITER = -1;
 	public static boolean SHORT = true;
 	public static boolean LONG = false;
+	public static int BS_DONE = 0;
 	public static final String TABLE_TPSRESULT_NAME = "AZDBLAB_XACTRUNSTAT";
 	public static final long MAX_EXECUTIONTIME = 9999999;
 	public static final String FIGURE_DIR = "work_docs/";

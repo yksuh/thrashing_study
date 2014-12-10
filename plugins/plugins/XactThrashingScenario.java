@@ -1571,7 +1571,25 @@ Main._logger.writeIntoLog(updateSQL);
 					e.printStackTrace();
 //					Main._logger.reportError(e.getMessage());
 //					System.exit(-1);
-					throw new Exception(e.getMessage());
+//					throw new Exception(e.getMessage());
+					if(e.getMessage().contains("unique")){
+						query = "SELECT clientID from azdblab_client where batchID = "
+								+ _batchID + " and clientNum = " + clientNum;
+						rs = LabShelfManager.getShelf().executeQuerySQLOnce(query);
+						try {
+							while (rs.next()) {
+								clientID = rs.getInt(1);
+							}
+							rs.close();
+						} catch (SQLException ex) {
+							// TODO Auto-generated catch block
+							Main._logger.reportError(query);
+							ex.printStackTrace();
+						}
+					}else{
+						throw new Exception(e.getMessage());
+					}
+					
 				}
 			}
 			// set client ID found in DB

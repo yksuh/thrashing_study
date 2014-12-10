@@ -1737,6 +1737,7 @@ Main._logger.writeIntoLog(updateSQL);
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
 		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
+			if(batchSetID == 9890 && MPL < 300) continue;
 			int batchID = insertBatch(batchSetID, MPL);
 
 			int k = 1;

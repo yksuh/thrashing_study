@@ -1724,7 +1724,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				(int)(actvRwPlSz*100)));
 
 		// make a batchset run result
-		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, nCores, buffCacheSz, duration);
+		int batchSetRunResID = -1;
+//		batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, nCores, buffCacheSz, duration);
 		
 		// prepare for transaction generation
 		stepB(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz);

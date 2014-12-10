@@ -1719,8 +1719,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		// insert batchset into database
 		int batchSetID = stepA(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz, srtTxnRate);
 		Main._logger.outputLog(String.format(
-				"Start the batchSet #%d(runID:%d,srtTxnRate:%.2f%%/xactSz:%.2f%%/xLcks:%d%%/effDBSz:%d%%) analysis!",
-				batchSetID, runID, (int)(srtTxnRate*100), nRwsFrmSLCT*100, (int)(nRwsFrmUPT*100),
+				"Start the batchSet #%d(runID:%d,srtTxnRate:%d%%/xactSz:%.2f%%/xLcks:%.2f%%/effDBSz:%d%%) analysis!",
+				batchSetID, runID, (int)(srtTxnRate*100), nRwsFrmSLCT*100, nRwsFrmUPT*100,
 				(int)(actvRwPlSz*100)));
 
 		// make a batchset run result

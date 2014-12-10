@@ -476,7 +476,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// if integer column, set a random value
 			if (colName.contains("val")) {
 				String newStrVal = RandomAlphaNumericString((int) cols[chosenCol].mySize);
-				str += "SET " + colName + " = \"" + newStrVal + "\" ";
+				str += "SET " + colName + " = \'\'" + newStrVal + "\'\' ";
 			} else {
 				str += "SET " + colName + " = " + newValue + " ";
 			}
@@ -547,17 +547,17 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			
 			String str = "";
 			int start = 0;
-			int end = (int) ((double) tbl.hy_min_card * xLocks * effectiveDBSz);
+			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
 			if(flag == Constants.LONG){
 				//int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * xLocks);
-				int numXLocks = (int) (((double) ((double) tbl.hy_min_card)) * xLocks);
-				// determine end range using effective db size
-				long loKeyForUpdate = (long) ((double) getRandomNumber(
-						repRandForWhereInUpdate, (int) start,
-						(int) (end - numXLocks)));
-				long hiKeyForUpdate = (loKeyForUpdate + numXLocks);
-				str = "WHERE " + idxCol + " >= " + loKeyForUpdate + " and "
-						+ idxCol + " < " + hiKeyForUpdate;
+				int numChosenRows = (int) (xLocks * (double) tbl.hy_min_card);
+				// compute low key
+				loKey = (long) ((double) getRandomNumber(repRandForWhereInSELECT,
+						start, end - numChosenRows));
+				// set high key
+				hiKey = (loKey + numChosenRows);
+				str = "WHERE " + idxCol + " >= " + loKey + " and " + idxCol
+						+ " < " + hiKey;
 			}else{
 				long keyVal = (long) ((double) getRandomNumber(
 						repRandForWhereInUpdate, 0, end));
@@ -1762,7 +1762,7 @@ Main._logger.writeIntoLog(updateSQL);
 //			}
 			
 			// close this batch
-			stepD();
+			//stepD();
 		}
 		Main._logger.outputLog(String.format(
 				"Update the batchset #%d(runID:%d) analysis!", batchSetID,

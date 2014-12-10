@@ -549,7 +549,8 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			int start = 0;
 			int end = (int) ((double) tbl.hy_min_card * xLocks * effectiveDBSz);
 			if(flag == Constants.LONG){
-				int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * xLocks);
+				//int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * xLocks);
+				int numXLocks = (int) (((double) ((double) tbl.hy_min_card)) * xLocks);
 				// determine end range using effective db size
 				long loKeyForUpdate = (long) ((double) getRandomNumber(
 						repRandForWhereInUpdate, (int) start,

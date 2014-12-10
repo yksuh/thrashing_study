@@ -1739,6 +1739,7 @@ Main._logger.writeIntoLog(updateSQL);
 			double srtTxnRate) throws Exception {
 		// insert batchset into database
 		int batchSetID = stepA(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz, srtTxnRate);
+//if(batchSetID == 9890) return;
 		Main._logger.outputLog(String.format(
 				"Start the batchSet #%d(runID:%d,srtTxnRate:%d%%/xactSz:%.2f%%/xLcks:%.2f%%/effDBSz:%d%%) analysis!",
 				batchSetID, runID, (int)(srtTxnRate*100), nRwsFrmSLCT*100, nRwsFrmUPT*100,
@@ -1755,7 +1756,6 @@ Main._logger.writeIntoLog(updateSQL);
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
 		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
-//			if(batchSetID == 9890 && MPL < 300) continue;
 			int batchID = insertBatch(batchSetID, MPL);
 
 			int k = 1;

@@ -664,13 +664,13 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
 		int totalBatchSets = totalSrtTxnRates*(totalNumReadSel+totalNumUpdateSel)*totalActiveRowPools;// 4*4*1=16
 		double dNmRwsFrmSLCT = 0;
-		
+				
 		boolean firstLoading = true;
 		// transaction size
 //		for(double currRS=minReadSel;currRS<=maxReadSel;currRS*=xactSizeIncr){
 		while(dNmRwsFrmSLCT <= mxNumRowsFromSELECT){
 //			if(dNmRwsFrmSLCT == 0) // update only
-				Constants.DEFAULT_UPT_ROWS = mxNumRowsFromSELECT; // set maximum selectivity for update only
+//				Constants.DEFAULT_UPT_ROWS = mxNumRowsFromSELECT; // set maximum selectivity for update only
 			// exclusive locks
 			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT+=incrNmRwsFrmUPT){
 				// skip mixed
@@ -678,7 +678,13 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					continue;
 				}
 				if(dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
-					continue;
+					if(dNmRwsFrmUPT < mxNmRwsFrmUPT){
+						continue;
+					}
+				}
+				
+				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == mxNmRwsFrmUPT){
+					dNmRwsFrmUPT = 0; // read only
 				}
 				
 				// effective db size
@@ -767,6 +773,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 						} // short xact rate
 					} // else
 				} // effective db 
+				
+				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == 0){
+					break;
+				}
 			} // write selectivity
 			
 			if(dNmRwsFrmSLCT == 0) 

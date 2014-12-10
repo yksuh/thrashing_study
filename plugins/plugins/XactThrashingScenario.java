@@ -677,11 +677,12 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 
 			// not existing ...
 			if (xactID == -1) {
+				String insertSQL = "";
 				// obtain a new batch set id
 				xactID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_TRANSACTION);
 				// add transaction
 				try {
-					LabShelfManager.getShelf().NewInsertTuple(
+					insertSQL = LabShelfManager.getShelf().NewInsertTuple(
 							Constants.TABLE_PREFIX
 									+ Constants.TABLE_TRANSACTION,
 							TRANSACTION.columns,
@@ -693,6 +694,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							TRANSACTION.columnDataTypes);
 					LabShelfManager.getShelf().commit();
 				} catch (SQLException e) {
+Main._logger.outputDebug(insertSQL);
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					throw new Exception(e.getMessage());
@@ -701,7 +703,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				String updateSQL = "UPDATE azdblab_transaction "
 						+ "SET TransactionStr = '" + xactStr + "' "
 						+ "WHERE TransactionID = " + xactID;
-				Main._logger.outputLog(updateSQL);
+Main._logger.writeIntoLog(updateSQL);
 				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
 			}
 

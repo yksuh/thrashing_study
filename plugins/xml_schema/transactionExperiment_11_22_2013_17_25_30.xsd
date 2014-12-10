@@ -121,7 +121,7 @@
 						<xsd:attribute name="ratio" type="xsd:string" use="required" />
 					</xsd:complexType>
 				</xsd:element>
-				<xsd:element name="srtTxnPct" minOccurs="0" maxOccurs="1">
+				<xsd:element name="srtTxnRate" minOccurs="0" maxOccurs="1">
 					<xsd:complexType>
 						<xsd:attribute name="min" type="xsd:string" use="required" />
 						<xsd:attribute name="max" type="xsd:string" use="required" />

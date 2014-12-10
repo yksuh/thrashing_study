@@ -593,7 +593,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	protected void preStep(boolean first) throws Exception {
 		initializeNotebookContent();
 		// populate fixed tables
-		initializeExperimentTables(first);
+		//initializeExperimentTables(first);
 	}
 	
 	/******

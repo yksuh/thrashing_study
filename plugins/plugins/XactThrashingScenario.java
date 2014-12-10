@@ -2008,7 +2008,7 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 				+ this.getExperimentRun().getMyExperiment().getExperimentID()
 				+ " and BatchSzIncr = " + this.incrMPL 
 				+ " and XactSz = " + transactionSize 
-				+ " and XLockRatio = " + exclusiveLockRatio
+				+ " and XLockRatio = " +  (exclusiveLockRatio*100)
 				+ " and ShortTxnRate = " + srtTxnRate
 				+ " and EffectiveDBSz = " + effectiveDBRatio;
 Main._logger.outputDebug(batchSetQuery);

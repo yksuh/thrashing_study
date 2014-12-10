@@ -593,7 +593,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	protected void preStep(boolean first) throws Exception {
 		initializeNotebookContent();
 		// populate fixed tables
-		//initializeExperimentTables(first);
+		initializeExperimentTables(first);
 	}
 	
 	/******
@@ -729,9 +729,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 							
 							// initialize experiment tables 
 							preStep(firstLoading);
-//							if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
-//								if(firstLoading) firstLoading = false;
-//							}
+							if(!experimentSubject.getDBMSName().toLowerCase().contains("mysql")){
+								if(firstLoading) firstLoading = false;
+							}
 							
 							// analyze this batch set
 							studyBatchSet(runID,

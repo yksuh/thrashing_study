@@ -1515,9 +1515,9 @@ Main._logger.writeIntoLog(updateSQL);
 					+ _batchID + " and clientNum = " + clientNum;
 //			Main._logger.writeIntoLog(query);
 			
-//			int succTrials = 1;
-//			long wait = 10000;
-//			do{
+			int succTrials = 1;
+			long wait = 10000;
+			do{
 				ResultSet rs = LabShelfManager.getShelf().executeQuerySQLOnce(query);
 				try {
 					while (rs.next()) {
@@ -1529,68 +1529,69 @@ Main._logger.writeIntoLog(updateSQL);
 					Main._logger.reportError(query);
 					e.printStackTrace();
 				}
-//				if(clientID == -1){
-//					Main._logger.reportError("azdblab_client inaccessible <= retry (" + succTrials+")");
-//					succTrials++;
-//					try {
-//						Thread.sleep(wait);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}else{
-//					break;
-//				}
-//			}while(succTrials <= 3);
+				if(clientID == -1){
+					Main._logger.reportError("azdblab_client inaccessible <= retry (" + succTrials+")");
+					succTrials++;
+					try {
+						Thread.sleep(wait);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}else{
+					break;
+				}
+			}while(succTrials <= 3);
 			
-//			if(clientID == -1){
-//				Main._logger.reportError("Tried more than ("+succTrials+") times. Gave up.");
-//				new Exception("azdblab_client not accessible");
-//			}
+			if(clientID == -1){
+				Main._logger.reportError("Tried more than ("+succTrials+") times. Gave up.");
+				new Exception("azdblab_client not accessible");
+			}
 			
 			// not existing ...
 			if (clientID == -1) {
-				// obtain a new batch set id
-				clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
-				try {
-					String insertSQL = LabShelfManager.getShelf()
-							.NewInsertTuple(
-									Constants.TABLE_PREFIX
-											+ Constants.TABLE_CLIENT,
-									CLIENT.columns,
-									new String[] { String.valueOf(clientID),
-											String.valueOf(batchID),
-											String.valueOf(clientNum) },
-									CLIENT.columnDataTypes);
-//					Main._logger.outputLog(insertSQL);
-					LabShelfManager.getShelf().commit();
-					// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
-					// _clientNum, _batchID));
-				} catch (SQLException e) {
-					// // TODO Auto-generated catch block
-					e.printStackTrace();
-//					Main._logger.reportError(e.getMessage());
-//					System.exit(-1);
-//					throw new Exception(e.getMessage());
-					if(e.getMessage().contains("unique")){
-						query = "SELECT clientID from azdblab_client where batchID = "
-								+ _batchID + " and clientNum = " + clientNum;
-						rs = LabShelfManager.getShelf().executeQuerySQLOnce(query);
-						try {
-							while (rs.next()) {
-								clientID = rs.getInt(1);
-							}
-							rs.close();
-						} catch (SQLException ex) {
-							// TODO Auto-generated catch block
-							Main._logger.reportError(query);
-							ex.printStackTrace();
-						}
-					}else{
-						throw new Exception(e.getMessage());
-					}
-					
-				}
+//				// obtain a new batch set id
+//				clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
+//				try {
+//					String insertSQL = LabShelfManager.getShelf()
+//							.NewInsertTuple(
+//									Constants.TABLE_PREFIX
+//											+ Constants.TABLE_CLIENT,
+//									CLIENT.columns,
+//									new String[] { String.valueOf(clientID),
+//											String.valueOf(batchID),
+//											String.valueOf(clientNum) },
+//									CLIENT.columnDataTypes);
+////					Main._logger.outputLog(insertSQL);
+//					LabShelfManager.getShelf().commit();
+//					// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
+//					// _clientNum, _batchID));
+//				} catch (SQLException e) {
+//					// // TODO Auto-generated catch block
+//					e.printStackTrace();
+////					Main._logger.reportError(e.getMessage());
+////					System.exit(-1);
+////					throw new Exception(e.getMessage());
+//					if(e.getMessage().contains("unique")){
+//						query = "SELECT clientID from azdblab_client where batchID = "
+//								+ _batchID + " and clientNum = " + clientNum;
+//						rs = LabShelfManager.getShelf().executeQuerySQLOnce(query);
+//						try {
+//							while (rs.next()) {
+//								clientID = rs.getInt(1);
+//							}
+//							rs.close();
+//						} catch (SQLException ex) {
+//							// TODO Auto-generated catch block
+//							Main._logger.reportError(query);
+//							ex.printStackTrace();
+//						}
+//					}else{
+//						throw new Exception(e.getMessage());
+//					}
+//					
+//				}
+				throw new Exception("ClientID does not exist!:" + query);
 			}
 			// set client ID found in DB
 			_clientID = clientID;
@@ -1628,56 +1629,55 @@ Main._logger.writeIntoLog(updateSQL);
 			long xactID = -1;
 			String xactStatements = "";
 			
-//			long succTrials = 0;
-//			long waitTime = 10000;
-//			do{
-//				ResultSet rs = null;
-//				try {
-////					rs = LabShelfManager.getShelf().executeQuerySQL(
-//					rs = LabShelfManager.getShelf().executeQuerySQLOnce(
-//									"SELECT TransactionID, TransactionStr from azdblab_transaction"
-//									+ " where clientid = " + clientID
-//									+ " and TransactionNum = " + xactNum);
-//					while (rs.next()) {
-//						xactID = rs.getInt(1);
-//						xactStatements = rs.getString(2);
-//					}
-//					rs.close();
-//				} catch (SQLException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//				if(xactID == -1){
-//					Main._logger.reportError("transaction record is unaccessible for unknown reason ("+succTrials+")");
-//					succTrials++;
-//					try{
-//						Thread.sleep(waitTime);
-//					}catch(Exception ex){
-//						ex.printStackTrace();
-//					}
-////					waitTime *= 2;
-//				}else
-//					break;
-//			}while(succTrials <= 3);
-//
-//			if (xactID == -1) {
-//				Main._logger.reportError("Tried more than ("+succTrials+") times. Gave up.");
-//				new Exception("azdblab_transaction not accessible");
-//			}
+			String xactQuery = "SELECT TransactionID, TransactionStr from azdblab_transaction"
+			+ " where clientid = " + clientID
+			+ " and TransactionNum = " + xactNum;
+			long succTrials = 0;
+			long waitTime = 10000;
+			do{
+				ResultSet rs = null;
+				try {
+					rs = LabShelfManager.getShelf().executeQuerySQLOnce(xactQuery);
+					while (rs.next()) {
+						xactID = rs.getInt(1);
+						xactStatements = rs.getString(2);
+					}
+					rs.close();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				if(xactID == -1){
+					Main._logger.reportError("transaction record is unaccessible for unknown reason ("+succTrials+")");
+					succTrials++;
+					try{
+						Thread.sleep(waitTime);
+					}catch(Exception ex){
+						ex.printStackTrace();
+					}
+//					waitTime *= 2;
+				}else
+					break;
+			}while(succTrials <= 3);
+
+			if (xactID == -1) {
+				//Main._logger.reportError("Tried more than ("+succTrials+") times. Gave up.");
+				new Exception("TransactionID is not accessible!: " + xactQuery);
+			}
 			
 			// not existing ...
-			if (xactID == -1) {
+//			if (xactID == -1) {
 				// generation transaction for this client
-				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(flag, _clientID, xactNum);
-				xactID = xactMap.keySet().iterator().next();
-				retXact = xactMap.values().iterator().next();
-			}else{
+//				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(flag, _clientID, xactNum);
+//				xactID = xactMap.keySet().iterator().next();
+//				retXact = xactMap.values().iterator().next();
+//			}else{
 				retXact = new Vector<String>();
 				String[] stmts = xactStatements.split(";");
 				for(int i=0;i<stmts.length;i++){
 					retXact.add(stmts[i]);
 				}
-			}
+//			}
 			
 			// build transaction number to ID map
 			Long xtNum = new Long(xactNum);
@@ -1746,8 +1746,7 @@ Main._logger.writeIntoLog(updateSQL);
 				(int)(actvRwPlSz*100)));
 
 		// make a batchset run result
-		int batchSetRunResID = -1;
-//		batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, nCores, buffCacheSz, duration);
+		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, nCores, buffCacheSz, duration);
 		
 		// prepare for transaction generation
 		stepB(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz);
@@ -1758,9 +1757,7 @@ Main._logger.writeIntoLog(updateSQL);
 		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
 			int batchID = insertBatch(batchSetID, MPL);
 
-			int k = 1;
-//			while(k <= Constants.MAX_ITERS){
-//			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
+			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
 				Main._logger.outputLog(String.format("MPL: %d <<<<<< %d(/%d) iteration start!", MPL, k, Constants.MAX_ITERS));
 				
 				// run this batch for X times
@@ -1777,11 +1774,11 @@ Main._logger.writeIntoLog(updateSQL);
 				}catch(Exception ex){
 					ex.printStackTrace();
 				}	
-//				k++;
-//			}
+				k++;
+			}
 			
 			// close this batch
-			//stepD();
+			stepD();
 		}
 		Main._logger.outputLog(String.format(
 				"Update the batchset #%d(runID:%d) analysis!", batchSetID,
@@ -1939,90 +1936,86 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 		String sql = "SELECT batchID from " + Constants.TABLE_PREFIX
 				+ Constants.TABLE_BATCH + " where batchSetID = " + batchSetID
 				+ " and MPL = " + MPL;
-//		int trials = 0;
-//		int succTrials = 0;
-//		boolean success = false;
-//		do{
-//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-//	//Main._logger.outputLog(sql);
-//			try {
-//				while (rs.next()) {
-//					batchID = rs.getInt(1);
-//				}
-//				rs.close();
-//				if(batchID == -1){
-//					succTrials++;
-//					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-//					if(succTrials > 5){
-//						success = true; // not existing
-//						break;
-//					}
-//					continue;
-//				}
-//				success = true;
-//				break;
-//			} catch (SQLException e2) {
-//				// TODO Auto-generated catch block
-//				e2.printStackTrace();
-//				trials++;
-//				Main._logger.writeIntoLog("failed retry " + trials + " <= " + e2.getMessage());
-//			}
-//		}while(trials < Constants.TRY_COUNTS);
-//		
-//		if(!success){
-//			throw new Exception ("Labshelf connection is not robust...");
-//		}
+		int trials = 0;
+		int succTrials = 0;
+		boolean success = false;
+		do{
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+	//Main._logger.outputLog(sql);
+			try {
+				while (rs.next()) {
+					batchID = rs.getInt(1);
+				}
+				rs.close();
+				if(batchID == -1){
+					succTrials++;
+					//Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+					if(succTrials > 5){
+						success = true; // not existing
+						break;
+					}
+					continue;
+				}
+				success = true;
+				break;
+			} catch (SQLException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+				trials++;
+				Main._logger.writeIntoLog("failed retry " + trials + " <= " + e2.getMessage());
+			}
+		}while(trials < Constants.TRY_COUNTS);
 		
-		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-		while (rs.next()) {
-			batchID = rs.getInt(1);
+		if(!success){
+			throw new Exception ("Labshelf connection is not robust...");
 		}
-		rs.close();
+		
 		
 		// not existing ...
 		if (batchID == -1) {
-			// obtain a new batch set id
-			batchID = LabShelfManager.getShelf().getSequencialID(
-					Constants.SEQUENCE_BATCH);
-			try {
-				String insertSQL = LabShelfManager.getShelf()
-						.NewInsertTuple(
-								Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
-								BATCH.columns,
-								new String[] { String.valueOf(batchID),
-										String.valueOf(batchSetID),
-										String.valueOf(MPL) },
-								BATCH.columnDataTypes);
-//Main._logger.outputDebug(insertSQL);
-				LabShelfManager.getShelf().commit();
-			} catch (Exception e) {
-				Main._logger.reportError(e.getMessage());
-				e.printStackTrace();
-				System.exit(-1);
-				// if((e.getMessage()).toLowerCase().contains("unique")){
-				// String sql =
-				// String.format("SELECT batchID from AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d",
-				// batchSetID, MPL);
-				// ResultSet rs2 =
-				// LabShelfManager.getShelf().executeQuerySQL(sql);
-				// try {
-				// while(rs2.next()){
-				// batchID = rs2.getInt(1);
-				// }
-				// rs2.close();
-				// } catch (SQLException e1) {
-				// // TODO Auto-generated catch block
-				// e1.printStackTrace();
-				// }
-				// }
-			}
+//			// obtain a new batch set id
+//			batchID = LabShelfManager.getShelf().getSequencialID(
+//					Constants.SEQUENCE_BATCH);
+//			try {
+//				String insertSQL = LabShelfManager.getShelf()
+//						.NewInsertTuple(
+//								Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
+//								BATCH.columns,
+//								new String[] { String.valueOf(batchID),
+//										String.valueOf(batchSetID),
+//										String.valueOf(MPL) },
+//								BATCH.columnDataTypes);
+////Main._logger.outputDebug(insertSQL);
+//				LabShelfManager.getShelf().commit();
+//			} catch (Exception e) {
+//				Main._logger.reportError(e.getMessage());
+//				e.printStackTrace();
+//				System.exit(-1);
+//				// if((e.getMessage()).toLowerCase().contains("unique")){
+//				// String sql =
+//				// String.format("SELECT batchID from AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d",
+//				// batchSetID, MPL);
+//				// ResultSet rs2 =
+//				// LabShelfManager.getShelf().executeQuerySQL(sql);
+//				// try {
+//				// while(rs2.next()){
+//				// batchID = rs2.getInt(1);
+//				// }
+//				// rs2.close();
+//				// } catch (SQLException e1) {
+//				// // TODO Auto-generated catch block
+//				// e1.printStackTrace();
+//				// }
+//				// }
+//			}
+			throw new Exception ("batchID does not exist!: " + sql);
 		}
 		return batchID;
 	}
 
 	@Override
 	protected int stepA(double transactionSize, double exclusiveLockRatio,
-			double effectiveDBRatio, double srtTxnRate) {
+			double effectiveDBRatio, double srtTxnRate) throws Exception {
 		int batchSetID = -1;
 		String batchSetQuery = "SELECT BatchSetID " + "FROM "
 				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " "
@@ -2034,37 +2027,59 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 				+ " and ShortTxnRate = " + srtTxnRate
 				+ " and EffectiveDBSz = " + effectiveDBRatio;
 Main._logger.outputDebug(batchSetQuery);
-		ResultSet rs = LabShelfManager.getShelf()
-				.executeQuerySQL(batchSetQuery);
-		try {
-			while (rs.next()) {
-				batchSetID = rs.getInt(1);
+
+		int trials = 0;
+		int succTrials = 0;
+		boolean success = false;
+		do{
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(batchSetQuery);
+			try {
+				while (rs.next()) {
+					batchSetID = rs.getInt(1);
+				}
+				rs.close();
+				if(batchSetID == -1){
+					succTrials++;
+		//			Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
+					if(succTrials > 5){
+						success = true; // not existing
+						break;
+					}
+					continue;
+				}
+				success = true;
+				break;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				trials++;
+		//		Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
 			}
-			rs.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+		}while(trials < Constants.TRY_COUNTS);
+		
+		if(!success)
+			new Exception("labshelf server is not robust");
 
 		// not existing ...
 		if (batchSetID == -1) {
 			// obtain a new batch set id
-			batchSetID = LabShelfManager.getShelf().getSequencialID(
-					Constants.SEQUENCE_BATCHSET);
-			// Now, let's insert parameter values into AZDBLab.
-			String[] paramVal = new String[BATCHSET.columns.length];
-			int i = 0;
-			paramVal[i++] = String.format("%d", batchSetID);
-			paramVal[i++] = String.format("%d", this.getExperimentRun()
-					.getMyExperiment().getExperimentID());
-//			paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
-//			paramVal[i++] = String.format("%d", numCores);
-			paramVal[i++] = String.format("%d", incrMPL);
-//			paramVal[i++] = String.format("%d", batchRunTime);
-			paramVal[i++] = String.format("%.4f", transactionSize);
-			paramVal[i++] = String.format("%.2f", (exclusiveLockRatio*100));
-			paramVal[i++] = String.format("%.2f", effectiveDBRatio);
-			paramVal[i++] = String.format("%.2f", srtTxnRate);
-			insertBatchSet(paramVal);
+//			batchSetID = LabShelfManager.getShelf().getSequencialID(
+//					Constants.SEQUENCE_BATCHSET);
+//			// Now, let's insert parameter values into AZDBLab.
+//			String[] paramVal = new String[BATCHSET.columns.length];
+//			int i = 0;
+//			paramVal[i++] = String.format("%d", batchSetID);
+//			paramVal[i++] = String.format("%d", this.getExperimentRun()
+//					.getMyExperiment().getExperimentID());
+////			paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
+////			paramVal[i++] = String.format("%d", numCores);
+//			paramVal[i++] = String.format("%d", incrMPL);
+////			paramVal[i++] = String.format("%d", batchRunTime);
+//			paramVal[i++] = String.format("%.4f", transactionSize);
+//			paramVal[i++] = String.format("%.2f", (exclusiveLockRatio*100));
+//			paramVal[i++] = String.format("%.2f", effectiveDBRatio);
+//			paramVal[i++] = String.format("%.2f", srtTxnRate);
+//			insertBatchSet(paramVal);
+			throw new Exception("Batch set does not exist!:" + batchSetQuery);
 		}
 		return batchSetID;
 	}
@@ -2122,23 +2137,23 @@ Main._logger.outputDebug(batchSetQuery);
 			assert(_clientRunStats[clientNum] != null);
 			
 			// ready for open connection
-//			String strDrvName = experimentSubject.getDBMSDriverClassName();
-//			String strConnStr = experimentSubject.getConnectionString();
-//			String strUserName = experimentSubject.getUserName();
-//			String strPassword = experimentSubject.getPassword();
+			String strDrvName = experimentSubject.getDBMSDriverClassName();
+			String strConnStr = experimentSubject.getConnectionString();
+			String strUserName = experimentSubject.getUserName();
+			String strPassword = experimentSubject.getPassword();
 			// Main._logger.outputLog("Client " + (clientNum) +
 			// " is being initialized...");
 			clients[i] = new Client(batchID, clientNum);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);
 			// set up client (i+1)
-//			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
+			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
 			if(i < numSrtTxnCounts)
 				clients[i].setTransaction(Constants.SHORT);
 			else
 				clients[i].setTransaction(Constants.LONG);
 		}
-		if(iterNum == 1) return iterNum;
+		//if(iterNum == 1) return iterNum;
 		// flush caches
 		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");

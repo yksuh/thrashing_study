@@ -681,9 +681,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					continue;
 				}
 				if(dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
-					//if(dNmRwsFrmUPT < mxNmRwsFrmUPT){
+					if(dNmRwsFrmUPT < mxNmRwsFrmUPT){
 						continue;
-					//}
+					}
 				}
 				
 				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == mxNmRwsFrmUPT){
@@ -697,9 +697,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					//for(double dShtTxnRate=mnSrtTxnRate;dShtTxnRate<=mxSrtTxnRate;dShtTxnRate+=srtTxnRateIncr){
 						//if(firstLoading) firstLoading = false;
 						batchSetNumToRun++;
-						String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, hotspot ratio: %d%%, " +
+						String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %.2f%%, hotspot ratio: %d%%, " +
 								"short txn ratio: %d%%)", 
-								batchSetNumToRun, dNmRwsFrmSLCT*100, (int)(dNmRwsFrmUPT*100), (int)(dActRowPlSz*100), (int)(dShtTxnRate*100));
+								batchSetNumToRun, dNmRwsFrmSLCT*100, (dNmRwsFrmUPT*100), (int)(dActRowPlSz*100), (int)(dShtTxnRate*100));
 						Main._logger.outputLog(str);
 						// get task number 
 						maxTaskNum = getMaxTaskNum(runID);

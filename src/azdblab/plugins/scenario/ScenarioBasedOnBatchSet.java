@@ -681,9 +681,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 					continue;
 				}
 				if(dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
-					//if(dNmRwsFrmUPT < mxNmRwsFrmUPT){
+					if(dNmRwsFrmUPT < mxNmRwsFrmUPT){
 						continue;
-					//}
+					}
 				}
 				
 				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == mxNmRwsFrmUPT){

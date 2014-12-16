@@ -1723,14 +1723,14 @@ public class Experiment extends TableDefinition {
 	 * Return max srtTxnRate 
 	 * @return max srtTxnRate
 	 */
-	public int getShortXactRateMax() {
+	public double getShortXactRateMax() {
 		NodeList nlst = elementExpDescription
 				.getElementsByTagName("srtTxnRate");
 		if (nlst == null) {
 			Main._logger.outputLog("no srtTxnRate element!");
 		}
 		try {
-			return Integer.parseInt(((Element) nlst.item(0))
+			return Double.parseDouble(((Element) nlst.item(0))
 					.getAttribute("max"));
 		} catch (Exception e) {
 			e.printStackTrace();

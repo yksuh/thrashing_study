@@ -657,12 +657,14 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 		int maxTaskNum = -1;
 		// generate batchsets
 		int batchSetNumToRun = 0;
-		int totalNumReadSel = (int)Math.log10(mxNumRowsFromSELECT/mnNmRwsFrmSLCT); //2
-		int totalNumUpdateSel = (int)Math.log10(mxNmRwsFrmUPT/mnNmRwsFrmUPT); // 2
-		int totalActiveRowPools = (int)((mxActRowPlSz/mnActRwPlSz)/actRwPlSzIncr)+1; // 1
-		int totalSrtTxnRates = (int)((mxSrtTxnRate-mnSrtTxnRate)/srtTxnRateIncr)+1; // 4
+		int totalNumReadSel = (int)Math.log10(mxNumRowsFromSELECT/mnNmRwsFrmSLCT)+1; //3
+//		int totalNumUpdateSel = (int)Math.log10(mxNmRwsFrmUPT/mnNmRwsFrmUPT); // 2
+		int totalNumUpdateSel = (int)((mxNmRwsFrmUPT-mnNmRwsFrmUPT)/incrNmRwsFrmUPT)+1; // 4
+//		int totalActiveRowPools = (int)((mxActRowPlSz/mnActRwPlSz)/actRwPlSzIncr)+1; // 1
+//		int totalSrtTxnRates = (int)((mxSrtTxnRate-mnSrtTxnRate)/srtTxnRateIncr)+1; // 4
 //		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
-		int totalBatchSets = totalSrtTxnRates*(totalNumReadSel+totalNumUpdateSel)*totalActiveRowPools;// 4*4*1=16
+//		int totalBatchSets = totalSrtTxnRates*(totalNumReadSel+totalNumUpdateSel)*totalActiveRowPools;// 4*4*1=16
+		int totalBatchSets = (totalNumReadSel+totalNumUpdateSel);// 4*4*1=16
 		double dNmRwsFrmSLCT = 0;
 				
 		boolean firstLoading = true;
@@ -672,15 +674,16 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //			if(dNmRwsFrmSLCT == 0) // update only
 //				Constants.DEFAULT_UPT_ROWS = mxNumRowsFromSELECT; // set maximum selectivity for update only
 			// exclusive locks
-			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT*=incrNmRwsFrmUPT){
+//			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT*=incrNmRwsFrmUPT){
+			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT+=incrNmRwsFrmUPT){
 				// skip mixed
 				if(dNmRwsFrmSLCT == 0 && dNmRwsFrmUPT == 0){
 					continue;
 				}
 				if(dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
-					if(dNmRwsFrmUPT < mxNmRwsFrmUPT){
+					//if(dNmRwsFrmUPT < mxNmRwsFrmUPT){
 						continue;
-					}
+					//}
 				}
 				
 				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == mxNmRwsFrmUPT){
@@ -688,8 +691,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				}
 				
 				// effective db size
-				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
-					for(double dShtTxnRate=mnSrtTxnRate;dShtTxnRate<=mxSrtTxnRate;dShtTxnRate+=srtTxnRateIncr){
+				//for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
+				double dActRowPlSz=mnActRwPlSz;
+				double dShtTxnRate=mnSrtTxnRate;
+					//for(double dShtTxnRate=mnSrtTxnRate;dShtTxnRate<=mxSrtTxnRate;dShtTxnRate+=srtTxnRateIncr){
 						//if(firstLoading) firstLoading = false;
 						batchSetNumToRun++;
 						String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, hotspot ratio: %d%%, " +
@@ -770,9 +775,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 							
 							// reset experiment subject
 							experimentSubject.reset();
-						} // short xact rate
+//						} // short xact rate
 					} // else
-				} // effective db 
+//				} // effective db 
 				
 				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == 0){
 					dNmRwsFrmUPT = mxNmRwsFrmUPT;

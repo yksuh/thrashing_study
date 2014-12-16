@@ -672,15 +672,16 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //			if(dNmRwsFrmSLCT == 0) // update only
 //				Constants.DEFAULT_UPT_ROWS = mxNumRowsFromSELECT; // set maximum selectivity for update only
 			// exclusive locks
-			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT*=incrNmRwsFrmUPT){
+//			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT*=incrNmRwsFrmUPT){
+			for(double dNmRwsFrmUPT=mnNmRwsFrmUPT;dNmRwsFrmUPT<=mxNmRwsFrmUPT;dNmRwsFrmUPT+=incrNmRwsFrmUPT){
 				// skip mixed
 				if(dNmRwsFrmSLCT == 0 && dNmRwsFrmUPT == 0){
 					continue;
 				}
 				if(dNmRwsFrmSLCT != 0 && dNmRwsFrmUPT != 0){
-					if(dNmRwsFrmUPT < mxNmRwsFrmUPT){
+					//if(dNmRwsFrmUPT < mxNmRwsFrmUPT){
 						continue;
-					}
+					//}
 				}
 				
 				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == mxNmRwsFrmUPT){
@@ -688,8 +689,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				}
 				
 				// effective db size
-				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
-					for(double dShtTxnRate=mnSrtTxnRate;dShtTxnRate<=mxSrtTxnRate;dShtTxnRate+=srtTxnRateIncr){
+				//for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
+				double dActRowPlSz=mnActRwPlSz;
+				double dShtTxnRate=mnSrtTxnRate;
+					//for(double dShtTxnRate=mnSrtTxnRate;dShtTxnRate<=mxSrtTxnRate;dShtTxnRate+=srtTxnRateIncr){
 						//if(firstLoading) firstLoading = false;
 						batchSetNumToRun++;
 						String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, hotspot ratio: %d%%, " +
@@ -770,9 +773,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 							
 							// reset experiment subject
 							experimentSubject.reset();
-						} // short xact rate
+					//	} // short xact rate
 					} // else
-				} // effective db 
+				//} // effective db 
 				
 				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == 0){
 					dNmRwsFrmUPT = mxNmRwsFrmUPT;

@@ -1779,7 +1779,6 @@ Main._logger.writeIntoLog(updateSQL);
 				}catch(Exception ex){
 					ex.printStackTrace();
 				}	
-//				k++;
 //			}
 			
 			// close this batch

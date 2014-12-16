@@ -646,7 +646,7 @@ _logger.outputLog(line);
 		maxActiveRowPool = experiment.getEffectiveDBMax();
 		incrActiveRowPool  = experiment.getEffectiveDBIncr();	
 		minStr = experiment.getShortXactRateMin();
-		maxStr = experiment.getShortXactRateMax();
+		maxStr = experiment.getShortXactRateMin();
 		strIncr  = experiment.getShortXactRateIncr();	
 		/*
 		 * Logging information containing user name, notebook name, experiment

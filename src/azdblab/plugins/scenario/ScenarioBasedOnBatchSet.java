@@ -691,9 +691,9 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				}
 				
 				// effective db size
-				//for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
-				double dActRowPlSz=mnActRwPlSz;
-				double dShtTxnRate=mnSrtTxnRate;
+				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
+				//double dActRowPlSz=mnActRwPlSz;
+						double dShtTxnRate=mnSrtTxnRate;
 					//for(double dShtTxnRate=mnSrtTxnRate;dShtTxnRate<=mxSrtTxnRate;dShtTxnRate+=srtTxnRateIncr){
 						//if(firstLoading) firstLoading = false;
 						batchSetNumToRun++;
@@ -777,7 +777,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 							experimentSubject.reset();
 					//	} // short xact rate
 					} // else
-				//} // effective db 
+				} // effective db 
 				
 				if(dNmRwsFrmSLCT > 0 && dNmRwsFrmUPT == 0){
 					dNmRwsFrmUPT = mxNmRwsFrmUPT;

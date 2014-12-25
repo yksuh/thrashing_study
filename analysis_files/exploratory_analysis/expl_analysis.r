@@ -9,6 +9,10 @@ x <- x_r
 #nrow(x)
 #[1] 456
 #[1] 396
+#x <- subset(x, x$ATP < 120000)
+#nrow(x)
+#nrow(x)
+#[1] 997
 #x <- subset(x, x$MAXMPL < 1100)
 #[1] 188
 # ATP normalization

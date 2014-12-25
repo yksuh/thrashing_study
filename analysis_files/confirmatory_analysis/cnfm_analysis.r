@@ -1,14 +1,16 @@
 # Overall: 33.4% (close to suboptimal)
 library(aod)
 library(ggplot2)
-#x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-x = read.csv(file="new_cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+#x = read.csv(file="new_cnfm.dat",head=TRUE,sep="\t")
 x_r <- subset(x, x$PCTREAD!=0)
 x_r <- subset(x_r, select = -PCTUPDATE)
 x <- x_r
 nrow(x)
 #[1] 539
 #[1] 577
+x <- subset(x, x$ATP < 120000)
+#[1] 526
 x <- subset(x, x$MAXMPL < 1100)
 #nrow(x)
 #[1] 148
@@ -600,9 +602,13 @@ x <- x_w
 nrow(x)
 #[1] 800
 #[1] 860
+x <- subset(x, x$ATP < 120000)
+#nrow(x)
+#[1] 761
 x <- subset(x, x$MAXMPL < 1100)
 #nrow(x)
 #[1] 334
+#[1] 333
 #[1] 369: 35 added
 # ATP normalization
 # db2
@@ -717,19 +723,19 @@ summary(med.fit)
 
 		Residuals:
 		     Min       1Q   Median       3Q      Max 
-		-0.52692 -0.36134  0.03229  0.31237  0.69157 
+		-0.53284 -0.36932  0.04707  0.31019  0.69231 
 
 		Coefficients:
 			      Estimate Std. Error t value Pr(>|t|)    
-		(Intercept)    0.69224    0.04362  15.868  < 2e-16 ***
-		PK            -0.13582    0.03834  -3.543 0.000453 ***
-		NUMPROCESSORS -0.33065    0.06015  -5.497 7.73e-08 ***
+		(Intercept)    0.69610    0.04351  15.998  < 2e-16 ***
+		PK            -0.14351    0.03827  -3.750 0.000209 ***
+		NUMPROCESSORS -0.32654    0.06001  -5.442 1.03e-07 ***
 		---
 		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-		Residual standard error: 0.3475 on 331 degrees of freedom
-		Multiple R-squared:  0.1199,	Adjusted R-squared:  0.1146 
-		F-statistic: 22.55 on 2 and 331 DF,  p-value: 6.582e-10
+		Residual standard error: 0.3465 on 330 degrees of freedom
+		Multiple R-squared:  0.1225,	Adjusted R-squared:  0.1171 
+		F-statistic: 23.02 on 2 and 330 DF,  p-value: 4.361e-10
 	
 	## extended
 	Call:
@@ -817,19 +823,19 @@ summary(out.fit)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.51345 -0.22493 -0.05196  0.18227  0.61979 
+	-0.51309 -0.22895 -0.05133  0.18175  0.61878 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.59891    0.03999  14.975  < 2e-16 ***
-	ATP           -0.12918    0.04356  -2.966  0.00328 ** 
-	NUMPROCESSORS -0.36976    0.05171  -7.151 7.17e-12 ***
+	(Intercept)    0.59802    0.04014  14.897  < 2e-16 ***
+	ATP           -0.12790    0.04391  -2.913  0.00386 ** 
+	NUMPROCESSORS -0.36867    0.05183  -7.113 9.11e-12 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2628 on 287 degrees of freedom
-	Multiple R-squared:  0.1595,	Adjusted R-squared:  0.1537 
-	F-statistic: 27.24 on 2 and 287 DF,  p-value: 1.473e-11
+	Residual standard error: 0.2632 on 286 degrees of freedom
+	Multiple R-squared:  0.1581,	Adjusted R-squared:  0.1522 
+	F-statistic: 26.86 on 2 and 286 DF,  p-value: 2.042e-11
 
 		## extended set
 		Call:

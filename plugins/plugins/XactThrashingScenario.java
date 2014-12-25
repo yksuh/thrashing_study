@@ -1741,7 +1741,7 @@ Main._logger.writeIntoLog(updateSQL);
 		int batchSetID = stepA(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz, srtTxnRate);
 //if(batchSetID == Constants.BS_DONE) // already generated
 //return;
-//		if(batchSetID <= 9921) return; // already generated
+		if(batchSetID <= 9921) return; // already generated
 		Main._logger.outputLog(String.format(
 				"Start the batchSet #%d(runID:%d,srtTxnRate:%d%%/xactSz:%.2f%%/xLcks:%.2f%%/effDBSz:%d%%) analysis!",
 				batchSetID, runID, (int)(srtTxnRate*100), nRwsFrmSLCT*100, nRwsFrmUPT*100,
@@ -2025,28 +2025,28 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 	protected int stepA(double transactionSize, double exclusiveLockRatio,
 			double effectiveDBRatio, double srtTxnRate) {
 		int batchSetID = -1;
-//		String batchSetQuery = "SELECT BatchSetID " + "FROM "
-//				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " "
-//				+ "WHERE ExperimentID = "
-//				+ this.getExperimentRun().getMyExperiment().getExperimentID()
-//				+ " and BatchSzIncr = " + this.incrMPL 
-//				+ " and XactSz = " + transactionSize 
-//				+ " and XLockRatio = " +  (exclusiveLockRatio*100)
-//				+ " and ShortTxnRate = " + srtTxnRate
-//				+ " and EffectiveDBSz = " + effectiveDBRatio;
-//Main._logger.outputDebug(batchSetQuery);
-//		ResultSet rs = LabShelfManager.getShelf()
-//				.executeQuerySQL(batchSetQuery);
-//		try {
-//			while (rs.next()) {
-//				batchSetID = rs.getInt(1);
-//			}
-//			rs.close();
-//			if(batchSetID != -1)
-//				return batchSetID;
-//		} catch (Exception ex) {
-//			ex.printStackTrace();
-//		}
+		String batchSetQuery = "SELECT BatchSetID " + "FROM "
+				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " "
+				+ "WHERE ExperimentID = "
+				+ this.getExperimentRun().getMyExperiment().getExperimentID()
+				+ " and BatchSzIncr = " + this.incrMPL 
+				+ " and XactSz = " + transactionSize 
+				+ " and XLockRatio = " +  (exclusiveLockRatio*100)
+				+ " and ShortTxnRate = " + srtTxnRate
+				+ " and EffectiveDBSz = " + effectiveDBRatio;
+Main._logger.outputDebug(batchSetQuery);
+		ResultSet rs = LabShelfManager.getShelf()
+				.executeQuerySQL(batchSetQuery);
+		try {
+			while (rs.next()) {
+				batchSetID = rs.getInt(1);
+			}
+			rs.close();
+			if(batchSetID != -1)
+				return batchSetID;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 
 		// not existing ...
 		if (batchSetID == -1) {

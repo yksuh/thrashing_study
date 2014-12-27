@@ -2,7 +2,9 @@
 library(aod)
 library(ggplot2)
 x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-x$MAXMPL[x$MAXMPL == 1100] <- 10000
+x <- subset(x, x$ATP < 120000)
+x <- subset(x, x$MAXMPL < 1100)
+#x$MAXMPL[x$MAXMPL == 1100] <- 10000
 # ATP normalization
 # oracle
 oracle <- subset(x, x$DBMS=='oracle')
@@ -17,49 +19,31 @@ x = rbind(oracle)
 x$ACTROWPOOL = (x$ACTROWPOOL/min(x$ACTROWPOOL))/(max(x$ACTROWPOOL)/min(x$ACTROWPOOL))
 x$PCTREAD = (x$PCTREAD/min(x$PCTREAD))/(max(x$PCTREAD)/min(x$PCTREAD))
 x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/min(x$NUMPROCESSORS))
-> nrow(x)
-[1] 102
-x <- subset(x, x$MAXMPL < 1)
-> nrow(x)
-[1] 56
+nrow(x)
+#[1] 102
+#x <- subset(x, x$MAXMPL < 1)
+nrow(x)
+#[1] 56
 
 med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
 summary(med.fit)
-	Call:
-	lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
-
-	Residuals:
-	     Min       1Q   Median       3Q      Max 
-	-0.32976 -0.11745 -0.03745  0.07165  0.69497 
-
-	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.47326    0.05260   8.998 1.68e-14 ***
-	NUMPROCESSORS -0.30566    0.06961  -4.391 2.83e-05 ***
-	PK            -0.11374    0.04498  -2.529    0.013 *  
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-	Residual standard error: 0.2254 on 99 degrees of freedom
-	Multiple R-squared:  0.192,	Adjusted R-squared:  0.1757 
-	F-statistic: 11.77 on 2 and 99 DF,  p-value: 2.605e-0
 
 	Call:
 	lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
 
 	Residuals:
 	     Min       1Q   Median       3Q      Max 
-	-0.19844 -0.08359 -0.04143  0.07059  0.44577 
+	-0.33304 -0.14029 -0.06953  0.11846  0.74812 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.30042    0.04223   7.114 2.96e-09 ***
-	NUMPROCESSORS -0.13956    0.05565  -2.508  0.01525 *  
-	PK            -0.10322    0.03556  -2.903  0.00538 ** 
+	(Intercept)    0.48367    0.07088   6.824 8.66e-09 ***
+	NUMPROCESSORS -0.23421    0.09340  -2.508  0.01525 *  
+	PK            -0.17324    0.05968  -2.903  0.00538 ** 
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.1301 on 53 degrees of freedom
+	Residual standard error: 0.2184 on 53 degrees of freedom
 	Multiple R-squared:  0.2003,	Adjusted R-squared:  0.1701 
 	F-statistic: 6.638 on 2 and 53 DF,  p-value: 0.002676
 
@@ -71,38 +55,18 @@ summary(out.fit)
 
 	Residuals:
 	    Min      1Q  Median      3Q     Max 
-	-0.6500 -0.3805 -0.1346  0.4424  0.8790 
+	-0.5925 -0.2436  0.0581  0.2373  0.5657 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.11430    0.14031   0.815   0.4173    
-	PK            -0.03310    0.09183  -0.360   0.7193    
-	ATP            0.81739    0.19885   4.111 8.21e-05 ***
-	NUMPROCESSORS  0.31846    0.15054   2.116   0.0369 *  
+	(Intercept)    0.68450    0.14108   4.852 1.15e-05 ***
+	PK            -0.16009    0.09331  -1.716   0.0922 .  
+	ATP           -0.36686    0.19948  -1.839   0.0716 .  
+	NUMPROCESSORS  0.11021    0.14345   0.768   0.4458    
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.446 on 98 degrees of freedom
-	Multiple R-squared:  0.1648,	Adjusted R-squared:  0.1392 
-	F-statistic: 6.445 on 3 and 98 DF,  p-value: 0.0004989
-
-	Call:
-	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-
-	Residuals:
-	      Min        1Q    Median        3Q       Max 
-	-0.041893 -0.017221  0.004108  0.016781  0.040000 
-
-	Coefficients:
-		       Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.048932   0.010175   4.809 1.34e-05 ***
-	PK            -0.011319   0.006598  -1.716   0.0922 .  
-	ATP           -0.043534   0.023671  -1.839   0.0716 .  
-	NUMPROCESSORS  0.007792   0.010143   0.768   0.4458    
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-	Residual standard error: 0.02243 on 52 degrees of freedom
+	Residual standard error: 0.3172 on 52 degrees of freedom
 	Multiple R-squared:  0.1203,	Adjusted R-squared:  0.06957 
 	F-statistic: 2.371 on 3 and 52 DF,  p-value: 0.08104
 
@@ -129,7 +93,8 @@ X2 = 19.4, df = 3, P(> X2) = 0.00023
 library(aod)
 library(ggplot2)
 x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-x$MAXMPL[x$MAXMPL == 1100] <- 10000
+x <- subset(x, x$ATP < 120000)
+x <- subset(x, x$MAXMPL < 1100)
 # ATP normalization
 # oracle
 oracle <- subset(x, x$DBMS=='oracle')
@@ -145,13 +110,13 @@ x$NUMPROCESSORS = (x$NUMPROCESSORS/min(x$NUMPROCESSORS))/(max(x$NUMPROCESSORS)/m
 
 nrow(x)
 [1] 160
-x <- subset(x, x$MAXMPL < 1)
+#x <- subset(x, x$MAXMPL < 1)
 nrow(x)
 [1] 30
 
 
-> med.fit <- lm(ATP ~ NUMPROCESSORS, data = x)
-> summary(med.fit)
+med.fit <- lm(ATP ~ NUMPROCESSORS, data = x)
+summary(med.fit)
 
 Call:
 lm(formula = ATP ~ NUMPROCESSORS, data = x)

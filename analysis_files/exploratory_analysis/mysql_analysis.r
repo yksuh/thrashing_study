@@ -2,8 +2,8 @@
 library(aod)
 library(ggplot2)
 x = read.csv(file="expl.dat",head=TRUE,sep="\t")
-#x$MAXMPL[x$MAXMPL == 1100] <- 100000
-x$MAXMPL[x$MAXMPL == 1100] <- 10000
+x <- subset(x, x$ATP < 120000)
+x <- subset(x, x$MAXMPL < 1100)
 # mysql
 mysql <- subset(x, x$DBMS=='mysql')
 mysql_r <- subset(mysql, mysql$PCTREAD!=0)
@@ -310,97 +310,29 @@ cor.test(x$PCTREAD, x$MAXMPL)
 out.fit <- lm(MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
 
-	Residuals:
-	     Min       1Q   Median       3Q      Max 
-	-0.81222 -0.03504  0.03247  0.10388  0.27276 
-
-	Coefficients:
-		       Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)   -0.141980   0.249414  -0.569  0.57109    
-	PK             1.122644   0.238106   4.715 1.27e-05 ***
-	PCTREAD       -0.208478   0.072365  -2.881  0.00532 ** 
-	ACTROWPOOL    -0.087311   0.088201  -0.990  0.32578    
-	ATP            0.429056   0.381929   1.123  0.26528    
-	NUMPROCESSORS -0.001333   0.079561  -0.017  0.98668    
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-	Residual standard error: 0.2082 on 67 degrees of freedom
-	Multiple R-squared:  0.8255,	Adjusted R-squared:  0.8124 
-	F-statistic: 63.37 on 5 and 67 DF,  p-value: < 2.2e-16
-
-		### modified
-		out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-		summary(out.fit)
-
-		Call:
-		lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-
-		Residuals:
-		     Min       1Q   Median       3Q      Max 
-		-0.87139 -0.01908  0.02045  0.10811  0.15391 
-
-		Coefficients:
-			      Estimate Std. Error t value Pr(>|t|)    
-		(Intercept)    0.15572    0.22934   0.679 0.499407    
-		PK             0.75112    0.21186   3.545 0.000709 ***
-		ATP           -0.18612    0.33588  -0.554 0.581274    
-		NUMPROCESSORS -0.06063    0.08005  -0.757 0.451372    
-		---
-		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-		Residual standard error: 0.2182 on 69 degrees of freedom
-		Multiple R-squared:  0.8024,	Adjusted R-squared:  0.7938 
-		F-statistic: 93.42 on 3 and 69 DF,  p-value: < 2.2e-16
-
 	### thrashing samples
 	Call:
 	lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
 	    data = x)
 
 	Residuals:
-	      Min        1Q    Median        3Q       Max 
-	-0.030851 -0.006796 -0.004175  0.008207  0.044431 
+	     Min       1Q   Median       3Q      Max 
+	-0.46462 -0.10706 -0.04066  0.14781  0.56683 
 
 	Coefficients:
-		       Estimate Std. Error t value Pr(>|t|)  
-	(Intercept)   -0.022389   0.021987  -1.018   0.3147  
-	PK             0.038150   0.022513   1.695   0.0979 .
-	PCTREAD       -0.004126   0.007306  -0.565   0.5754  
-	ACTROWPOOL     0.001185   0.007562   0.157   0.8762  
-	ATP            0.038697   0.032067   1.207   0.2346  
-	NUMPROCESSORS  0.018183   0.008526   2.133   0.0391 *
+		      Estimate Std. Error t value Pr(>|t|)  
+	(Intercept)    -0.2052     0.3520  -0.583   0.5636  
+	PK              0.4853     0.3506   1.384   0.1749  
+	PCTREAD        -0.1327     0.1105  -1.201   0.2375  
+	ACTROWPOOL      0.1003     0.1123   0.893   0.3777  
+	ATP             0.3039     0.5105   0.595   0.5554  
+	NUMPROCESSORS   0.2646     0.1239   2.135   0.0397 *
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.01417 on 40 degrees of freedom
-	Multiple R-squared:  0.1897,	Adjusted R-squared:  0.08844 
-	F-statistic: 1.873 on 5 and 40 DF,  p-value: 0.1207
-
-		### modified
-		out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-		summary(out.fit)
-
-		Call:
-		lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-
-		Residuals:
-		      Min        1Q    Median        3Q       Max 
-		-0.031055 -0.006601 -0.004184  0.005932  0.044354 
-
-		Coefficients:
-			       Estimate Std. Error t value Pr(>|t|)  
-		(Intercept)   -0.013784   0.016066  -0.858   0.3958  
-		PK             0.029156   0.015035   1.939   0.0592 .
-		ATP            0.026427   0.022552   1.172   0.2479  
-		NUMPROCESSORS  0.015381   0.006922   2.222   0.0317 *
-		---
-		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-		Residual standard error: 0.01389 on 42 degrees of freedom
-		Multiple R-squared:  0.1827,	Adjusted R-squared:  0.1244 
-		F-statistic:  3.13 on 3 and 42 DF,  p-value: 0.03553
-
+	Residual standard error: 0.1965 on 36 degrees of freedom
+	Multiple R-squared:  0.2632,	Adjusted R-squared:  0.1609 
+	F-statistic: 2.572 on 5 and 36 DF,  p-value: 0.04341
 
 # update
 x = rbind(mysql)

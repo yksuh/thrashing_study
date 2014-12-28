@@ -316,8 +316,23 @@ dev.off()
 
 	Simulations: 1000
 
-pdf("update_read_sens_pk.pdf")
-plot(sens.out, main = "", xlab=expression("Sensitivity Parameter (Correlation Factor of Error Terms):" ~ rho), ylab="Average Mediation Effect with 95% Confidence Intervals", xlim=c(-0.6, 0.6), ylim=c(-0.3, 0.3))
+	sens.out <-medsens(med.out)
+	summary(sens.out)
+
+	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+	Sensitivity Region
+
+	     Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] 0.1 -0.0015      -0.0095       0.0065         0.01       0.0082
+	[2,] 0.2  0.0083      -0.0011       0.0176         0.04       0.0326
+
+	Rho at which ACME = 0: 0.1
+	R^2_M*R^2_Y* at which ACME = 0: 0.01
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0082 
+
+pdf("read_sens_pk.pdf")
+plot(sens.out, main = "", xlab=expression("Sensitivity Parameter (Correlation Factor of Error Terms):" ~ rho), ylab="Average Mediation Effect with 95% Confidence Intervals", xlim=c(-0.4, 0.4), ylim=c(-0.3, 0.3))
 dev.off()
 
 	### thrashing samples
@@ -750,6 +765,9 @@ out.fit <- lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 
 
 	Simulations: 1000 
+
+	sens.out <-medsens(med.out)
+	summary(sens.out)
 
 pdf("update_sens_procs.pdf")
 plot(sens.out, main = "", xlab=expression("Sensitivity Parameter (Correlation Factor of Error Terms):" ~ rho), ylab="Average Mediation Effect with 95% Confidence Intervals", xlim=c(-0.6, 0.6), ylim=c(-0.3, 0.3))

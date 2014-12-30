@@ -218,21 +218,21 @@ summary(out.fit)
 	lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 
 	Residuals:
-	     Min       1Q   Median       3Q      Max 
-	-0.57415 -0.19994 -0.09816  0.28344  0.60993 
+	    Min      1Q  Median      3Q     Max 
+	-0.7010 -0.2157 -0.1013  0.2698  0.6548 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.27559    0.06680   4.125 6.70e-05 ***
-	PK            -0.06380    0.06536  -0.976   0.3309    
-	ATP           -0.17305    0.08177  -2.116   0.0363 *  
-	NUMPROCESSORS  0.36515    0.07756   4.708 6.53e-06 ***
+	(Intercept)    0.39534    0.07219   5.476 1.88e-07 ***
+	PK            -0.02569    0.06900  -0.372 0.710159    
+	ATP           -0.27968    0.08975  -3.116 0.002213 ** 
+	NUMPROCESSORS  0.33585    0.08427   3.986 0.000107 ***
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.293 on 125 degrees of freedom
-	Multiple R-squared:  0.172,	Adjusted R-squared:  0.1521 
-	F-statistic: 8.653 on 3 and 125 DF,  p-value: 2.913e-05
+	Residual standard error: 0.3398 on 144 degrees of freedom
+	Multiple R-squared:  0.1589,	Adjusted R-squared:  0.1414 
+	F-statistic: 9.068 on 3 and 144 DF,  p-value: 1.542e-05
 
 		### extended set
 		Call:
@@ -398,12 +398,12 @@ ncvTest(out.fit)
 
 	Non-constant Variance Score Test 
 	Variance formula: ~ fitted.values 
-	Chisquare = 2.859574    Df = 1     p = 0.008315594 
+	Chisquare = 4.093433    Df = 1     p = 0.04305013  
 
 # Evaluate Collinearity
 vif(out.fit) # variance inflation factors 
            PK           ATP NUMPROCESSORS 
-     1.519995      1.535991      1.014853
+     1.424948      1.426265      1.00180
 
 > sqrt(vif(out.fit)) > 2
            PK           ATP NUMPROCESSORS 
@@ -418,7 +418,7 @@ dev.off()
 # Test for Autocorrelated Errors
 durbinWatsonTest(out.fit)
 	 lag Autocorrelation D-W Statistic p-value
-	   1       0.2091418      1.561056   0.006
+	   1       0.2660653      1.442629       0
 	 Alternative hypothesis: rho != 0
 
 #### per-DBMS #####
@@ -777,6 +777,10 @@ dev.off()
 library(car)
 out.fit <- lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 outlierTest(out.fit)
+No Studentized residuals with Bonferonni p < 0.05
+Largest |rstudent|:
+    rstudent unadjusted p-value Bonferonni p
+620 2.382511           0.017851           NA
 #dev.off()
 pdf("update_non_normal_res.pdf")
 #h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,35),xlim=c(-0.06,0.06))
@@ -796,16 +800,16 @@ ncvTest(out.fit)
 
 	Non-constant Variance Score Test 
 	Variance formula: ~ fitted.values 
-	Chisquare = 0.2330649    Df = 1     p = 0.6292605
+	Chisquare = 0.5052569    Df = 1     p = 0.4771994
 
 # Evaluate Collinearity
 vif(out.fit) # variance inflation factors 
           ATP NUMPROCESSORS 
-     1.039537      1.03953 
+     1.027842      1.027842 
 
 sqrt(vif(out.fit)) > 2 # problem?
           ATP NUMPROCESSORS 
-     1.019577      1.01957
+        FALSE         FALSE
 
 # Evaluate Nonlinearity
 # component + residual plot 
@@ -816,7 +820,7 @@ dev.off()
 # Test for Autocorrelated Errors
 durbinWatsonTest(out.fit)
 	 lag Autocorrelation D-W Statistic p-value
-	   1       0.1900665       0.9446755   0.012
+	   1       0.4401782      1.111135       0
 	 Alternative hypothesis: rho != 0
 
 #### per-DBMS #####

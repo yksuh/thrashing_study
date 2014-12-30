@@ -282,6 +282,17 @@ out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
 	sens.out <-medsens(med.out)
 	summary(sens.out)
 
+	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+	Sensitivity Region
+
+	     Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] 0.1 -0.0055      -0.0349       0.0239         0.01       0.0082
+
+	Rho at which ACME = 0: 0.1
+	R^2_M*R^2_Y* at which ACME = 0: 0.01
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0082
+
 pdf("read_sens_procs.pdf")
 plot(sens.out, main = "", xlab=expression("Sensitivity Parameter (Correlation Factor of Error Terms):" ~ rho), ylab="Average Mediation Effect with 95% Confidence Intervals", xlim=c(-0.6, 0.6), ylim=c(-0.3, 0.3))
 dev.off()
@@ -306,33 +317,31 @@ dev.off()
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME           -0.01966     -0.03680     -0.00562       0
-	ADE             0.18059      0.10812      0.24707       0
-	Total Effect    0.16094      0.09091      0.22839       0
-	Prop. Mediated -0.11942     -0.31358     -0.03067       0
+	ACME             0.1167       0.0394       0.2036     0.0
+	ADE             -0.0242      -0.1549       0.1140     0.7
+	Total Effect     0.0925      -0.0238       0.2123     0.1
+	Prop. Mediated   1.1811      -3.9671      10.6847     0.1
 
-	Sample Size Used: 539 
+	Sample Size Used: 148 
 
 
-	Simulations: 1000
-
-	sens.out <-medsens(med.out)
-	summary(sens.out)
+	Simulations: 1000 
 
 	Mediation Sensitivity Analysis for Average Causal Mediation Effect
 
 	Sensitivity Region
 
-	     Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
-	[1,] 0.1 -0.0015      -0.0095       0.0065         0.01       0.0082
-	[2,] 0.2  0.0083      -0.0011       0.0176         0.04       0.0326
+	      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] -0.3 -0.0248      -0.0981       0.0486         0.09       0.0531
+	[2,] -0.2  0.0251      -0.0482       0.0985         0.04       0.0236
+	[3,] -0.1  0.0720      -0.0033       0.1472         0.01       0.0059
 
-	Rho at which ACME = 0: 0.1
-	R^2_M*R^2_Y* at which ACME = 0: 0.01
-	R^2_M~R^2_Y~ at which ACME = 0: 0.0082 
+	Rho at which ACME = 0: -0.3
+	R^2_M*R^2_Y* at which ACME = 0: 0.09
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0531 
 
 pdf("read_sens_pk.pdf")
-plot(sens.out, main = "", xlab=expression("Sensitivity Parameter (Correlation Factor of Error Terms):" ~ rho), ylab="Average Mediation Effect with 95% Confidence Intervals", xlim=c(-0.4, 0.4), ylim=c(-0.3, 0.3))
+plot(sens.out, main = "", xlab=expression("Sensitivity Parameter (Correlation Factor of Error Terms):" ~ rho), ylab="Average Mediation Effect with 95% Confidence Intervals", xlim=c(-0.6, 0.6), ylim=c(-0.6, 0.6))
 dev.off()
 
 	### thrashing samples
@@ -756,18 +765,30 @@ out.fit <- lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 	Quasi-Bayesian Confidence Intervals
 
 		       Estimate 95% CI Lower 95% CI Upper p-value
-	ACME             0.0664       0.0264       0.1120    0.00
-	ADE             -0.2290      -0.3480      -0.1102    0.00
-	Total Effect    -0.1625      -0.2796      -0.0409    0.01
-	Prop. Mediated  -0.4042      -1.8881      -0.1222    0.01
+	ACME             0.0617       0.0258       0.1047    0.00
+	ADE             -0.2192      -0.3379      -0.0970    0.00
+	Total Effect    -0.1575      -0.2756      -0.0349    0.01
+	Prop. Mediated  -0.3741      -1.9040      -0.1354    0.01
 
-	Sample Size Used: 334 
+	Sample Size Used: 333 
 
 
 	Simulations: 1000 
 
 	sens.out <-medsens(med.out)
 	summary(sens.out)
+
+	Mediation Sensitivity Analysis for Average Causal Mediation Effect
+
+	Sensitivity Region
+
+	      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+	[1,] -0.2 -0.0050      -0.0400       0.0300         0.04       0.0346
+	[2,] -0.1  0.0287      -0.0077       0.0651         0.01       0.0087
+
+	Rho at which ACME = 0: -0.2
+	R^2_M*R^2_Y* at which ACME = 0: 0.04
+	R^2_M~R^2_Y~ at which ACME = 0: 0.0346
 
 pdf("update_sens_procs.pdf")
 plot(sens.out, main = "", xlab=expression("Sensitivity Parameter (Correlation Factor of Error Terms):" ~ rho), ylab="Average Mediation Effect with 95% Confidence Intervals", xlim=c(-0.6, 0.6), ylim=c(-0.3, 0.3))

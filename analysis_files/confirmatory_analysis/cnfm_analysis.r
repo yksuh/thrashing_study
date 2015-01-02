@@ -2,19 +2,26 @@
 library(aod)
 library(ggplot2)
 x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+#nrow(x)
+#[1] 1339
 #x = read.csv(file="new_cnfm.dat",head=TRUE,sep="\t")
+#nrow(x)
+#[1] 1592
+#nrow(x)
+#[1] 120
 x_r <- subset(x, x$PCTREAD!=0)
 x_r <- subset(x_r, select = -PCTUPDATE)
 x <- x_r
 nrow(x)
 #[1] 539
-#[1] 577
+#[1] 641
 x <- subset(x, x$ATP < 120000)
 #[1] 526
+#[1] 628
 x <- subset(x, x$MAXMPL < 1100)
 #nrow(x)
 #[1] 148
-#[1] 165 (17 added)
+#[1] 182 (34 added)
 # ATP normalization
 # db2
 db2 <- subset(x, x$DBMS=='db2')
@@ -135,6 +142,84 @@ summary(med.fit)
 	Multiple R-squared:  0.2989,	Adjusted R-squared:  0.2892 
 	F-statistic:  30.9 on 2 and 145 DF,  p-value: 6.614e-12
 
+	### extended
+	Call:
+	lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.55633 -0.16488 -0.04928  0.26589  0.83446 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.57158    0.04266  13.397  < 2e-16 ***
+	NUMPROCESSORS -0.04089    0.06255  -0.654    0.514    
+	PK            -0.39581    0.04579  -8.644 2.99e-15 ***
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2984 on 179 degrees of freedom
+	Multiple R-squared:  0.2946,	Adjusted R-squared:  0.2867 
+	F-statistic: 37.37 on 2 and 179 DF,  p-value: 2.729e-14
+
+	# Stepwise Regression
+	library(MASS)	
+	med.fit <- lm(ATP ~ PK:PCTREAD + PK + PCTREAD + ACTROWPOOL + NUMPROCESSORS + NUMPROCESSORS:ACTROWPOOL, data = x)
+	summary(med.fit)
+	step <- stepAIC(med.fit, direction="both")
+	Start:  AIC=-345.08
+	ATP ~ PK:PCTREAD + PK + PCTREAD + ACTROWPOOL + NUMPROCESSORS + 
+	    NUMPROCESSORS:ACTROWPOOL
+
+		                   Df Sum of Sq    RSS     AIC
+	- ACTROWPOOL:NUMPROCESSORS  1   0.00227 13.081 -347.05
+	<none>                                  13.079 -345.08
+	- PK:PCTREAD                1   0.24710 13.326 -344.31
+
+	Step:  AIC=-347.05
+	ATP ~ PK + PCTREAD + ACTROWPOOL + NUMPROCESSORS + PK:PCTREAD
+
+		                   Df Sum of Sq    RSS     AIC
+	- NUMPROCESSORS             1   0.04001 13.121 -348.60
+	<none>                                  13.081 -347.05
+	- PK:PCTREAD                1   0.24691 13.328 -346.29
+	- ACTROWPOOL                1   0.33962 13.421 -345.26
+	+ ACTROWPOOL:NUMPROCESSORS  1   0.00227 13.079 -345.08
+
+	Step:  AIC=-348.6
+	ATP ~ PK + PCTREAD + ACTROWPOOL + PK:PCTREAD
+
+		        Df Sum of Sq    RSS     AIC
+	<none>                       13.121 -348.60
+	- PK:PCTREAD     1   0.23797 13.359 -347.94
+	+ NUMPROCESSORS  1   0.04001 13.081 -347.05
+	- ACTROWPOOL     1   0.34100 13.462 -346.80
+
+	med.fit <- lm(ATP ~ PK + PCTREAD + ACTROWPOOL + PK:PCTREAD, data = x)
+	summary(med.fit)
+
+	Call:
+	lm(formula = ATP ~ PK + PCTREAD + ACTROWPOOL + PK:PCTREAD, data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.69537 -0.20303 -0.04153  0.26864  0.86835 
+
+	Coefficients:
+		    Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)  0.52449    0.06825   7.685 2.23e-12 ***
+	PK          -0.48699    0.07043  -6.914 1.44e-10 ***
+	PCTREAD     -0.21750    0.07038  -3.090   0.0024 ** 
+	ACTROWPOOL   0.17305    0.08977   1.928   0.0559 .  
+	PK:PCTREAD   0.18186    0.11293   1.610   0.1095    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.3029 on 143 degrees of freedom
+	Multiple R-squared:  0.3581,	Adjusted R-squared:  0.3402 
+	F-statistic: 19.95 on 4 and 143 DF,  p-value: 4.553e-13
+
+
 > cor.test(x$PK, x$MAXMPL)
 	#### all samples
 	Pearson's product-moment correlation
@@ -254,6 +339,95 @@ summary(out.fit)
 		Residual standard error: 0.2767 on 140 degrees of freedom
 		Multiple R-squared:  0.1737,	Adjusted R-squared:  0.156 
 		F-statistic:  9.81 on 3 and 140 DF,  p-value: 6.465e-06
+
+		Call:
+		lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+
+		Residuals:
+		     Min       1Q   Median       3Q      Max 
+		-0.68005 -0.28921 -0.03892  0.29397  0.74176 
+
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.44604    0.06904   6.461 9.65e-10 ***
+		PK            -0.05318    0.06234  -0.853   0.3948    
+		ATP           -0.19313    0.08547  -2.260   0.0251 *  
+		NUMPROCESSORS  0.23401    0.07161   3.268   0.0013 ** 
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+		Residual standard error: 0.3412 on 178 degrees of freedom
+		Multiple R-squared:  0.08538,	Adjusted R-squared:  0.06996 
+		F-statistic: 5.538 on 3 and 178 DF,  p-value: 0.001172
+
+		# Stepwise Regression
+		library(MASS)	
+		out.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
+		step <- stepAIC(out.fit, direction="both")
+		
+		MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS
+
+                Df Sum of Sq    RSS     AIC
+		- PCTREAD        1   0.06132 20.628 -386.28
+		- PK             1   0.06573 20.633 -386.24
+		- ACTROWPOOL     1   0.09552 20.663 -385.97
+		<none>                       20.567 -384.82
+		- ATP            1   0.54428 21.111 -382.06
+		- NUMPROCESSORS  1   1.20728 21.774 -376.44
+
+		Step:  AIC=-386.28
+		MAXMPL ~ PK + ACTROWPOOL + ATP + NUMPROCESSORS
+
+				Df Sum of Sq    RSS     AIC
+		- PK             1   0.06304 20.691 -387.72
+		- ACTROWPOOL     1   0.09848 20.727 -387.41
+		<none>                       20.628 -386.28
+		+ PCTREAD        1   0.06132 20.567 -384.82
+		- ATP            1   0.49075 21.119 -384.00
+		- NUMPROCESSORS  1   1.21901 21.847 -377.83
+
+		Step:  AIC=-387.72
+		MAXMPL ~ ACTROWPOOL + ATP + NUMPROCESSORS
+
+				Df Sum of Sq    RSS     AIC
+		- ACTROWPOOL     1   0.12017 20.812 -388.67
+		<none>                       20.691 -387.72
+		+ PK             1   0.06304 20.628 -386.28
+		+ PCTREAD        1   0.05863 20.633 -386.24
+		- ATP            1   0.45405 21.145 -385.77
+		- NUMPROCESSORS  1   1.26202 21.953 -378.95
+
+		Step:  AIC=-388.67
+		MAXMPL ~ ATP + NUMPROCESSORS
+
+				Df Sum of Sq    RSS     AIC
+		<none>                       20.812 -388.67
+		+ ACTROWPOOL     1   0.12017 20.691 -387.72
+		+ PK             1   0.08473 20.727 -387.41
+		+ PCTREAD        1   0.06142 20.750 -387.20
+		- ATP            1   0.53285 21.344 -386.07
+		- NUMPROCESSORS  1   1.29701 22.109 -379.66
+
+		out.fit <- lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
+		summary(out.fit)
+		Call:
+		lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
+
+		Residuals:
+		     Min       1Q   Median       3Q      Max 
+		-0.64641 -0.29782 -0.03419  0.28926  0.70873 
+
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.40803    0.05270   7.743 6.92e-13 ***
+		ATP           -0.15357    0.07173  -2.141  0.03364 *  
+		NUMPROCESSORS  0.23838    0.07137   3.340  0.00102 ** 
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+		Residual standard error: 0.341 on 179 degrees of freedom
+		Multiple R-squared:  0.08164,	Adjusted R-squared:  0.07138 
+		F-statistic: 7.956 on 2 and 179 DF,  p-value: 0.0004895
 
 ### mediation analysis
 library(mediation)
@@ -533,7 +707,6 @@ out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS + PCTREAD + ACTROWPOOL, data =
 library(aod)
 library(ggplot2)
 x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
-#x = read.csv(file="extcnfm.dat",head=TRUE,sep="\t")
 #x = read.csv(file="new_cnfm.dat",head=TRUE,sep="\t")
 #x$MAXMPL[x$MAXMPL == 1100] <- 10000
 x_w <- subset(x, x$PCTUPDATE!=0)
@@ -541,15 +714,15 @@ x_w <- subset(x_w, select = -PCTREAD)
 x <- x_w
 nrow(x)
 #[1] 800
-#[1] 860
+#[1] 951
 x <- subset(x, x$ATP < 120000)
 #nrow(x)
 #[1] 761
+#[1] 912
 x <- subset(x, x$MAXMPL < 1100)
 #nrow(x)
-#[1] 334
-#[1] 333
-#[1] 369: 35 added
+#[1] 333: 43.75% thrashing
+#[1] 419: 48.13% thrashing
 # ATP normalization
 # db2
 db2 <- subset(x, x$DBMS=='db2')
@@ -635,6 +808,26 @@ summary(med.fit)
 	Multiple R-squared:  0.08506,	Adjusted R-squared:  0.0823 
 	F-statistic: 30.77 on 1 and 331 DF,  p-value: 5.943e-08
 
+		#####  extended samples 
+		Call:
+		lm(formula = ATP ~ NUMPROCESSORS, data = x)
+
+		Residuals:
+		     Min       1Q   Median       3Q      Max 
+		-0.51434 -0.32895  0.01123  0.31521  0.66940 
+
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.54139    0.03559  15.210  < 2e-16 ***
+		NUMPROCESSORS -0.21079    0.05390  -3.911  0.00011 ***
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+		Residual standard error: 0.3463 on 364 degrees of freedom
+		Multiple R-squared:  0.04033,	Adjusted R-squared:  0.03769 
+		F-statistic:  15.3 on 1 and 364 DF,  p-value: 0.0001096
+
+
 		## if revised model is tried
 		med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
 		summary(med.fit)
@@ -663,6 +856,36 @@ summary(med.fit)
 		Multiple R-squared:  0.1405,	Adjusted R-squared:  0.1246 
 		F-statistic: 8.878 on 6 and 326 DF,  p-value: 5.553e-09
 	
+		## stepwise regression
+		library(MASS)	
+		med.fit <- lm(ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+		step <- stepAIC(med.fit, direction="both")
+		summary(med.fit)
+
+			Call:
+			lm(formula = ATP ~ NUMPROCESSORS + ACTROWPOOL + NUMPROCESSORS:ACTROWPOOL + 
+			    PK + PCTUPDATE + PCTUPDATE:PK, data = x)
+
+			Residuals:
+			     Min       1Q   Median       3Q      Max 
+			-0.56173 -0.31129  0.01893  0.30109  0.66188 
+
+			Coefficients:
+						 Estimate Std. Error t value Pr(>|t|)    
+			(Intercept)               0.36511    0.10990   3.322 0.000984 ***
+			NUMPROCESSORS            -0.09764    0.12531  -0.779 0.436396    
+			ACTROWPOOL                0.20291    0.11397   1.780 0.075857 .  
+			PK                       -0.15167    0.08852  -1.713 0.087488 .  
+			PCTUPDATE                 0.21093    0.09790   2.154 0.031866 *  
+			NUMPROCESSORS:ACTROWPOOL -0.13863    0.16707  -0.830 0.407208    
+			PK:PCTUPDATE             -0.04801    0.12777  -0.376 0.707309    
+			---
+			Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+			Residual standard error: 0.3302 on 359 degrees of freedom
+			Multiple R-squared:  0.1395,	Adjusted R-squared:  0.1251 
+			F-statistic: 9.702 on 6 and 359 DF,  p-value: 6.588e-10
+
 cor.test(x$PK, x$MAXMPL)
 	#####  thrashing samples 
 	Pearson's product-moment correlation
@@ -728,6 +951,7 @@ summary(out.fit)
 		## original set
 		out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS + PCTUPDATE + ACTROWPOOL, data = x)
 		summary(out.fit)
+		
 		Call:
 		lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS + PCTUPDATE + 
 		    ACTROWPOOL, data = x)
@@ -750,6 +974,86 @@ summary(out.fit)
 		Residual standard error: 0.2607 on 283 degrees of freedom
 		Multiple R-squared:  0.1825,	Adjusted R-squared:  0.1681 
 		F-statistic: 12.64 on 5 and 283 DF,  p-value: 4.312e-11
+
+		### extended set
+		out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
+		summary(out.fit)
+
+		Call:
+		lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
+
+		Residuals:
+		     Min       1Q   Median       3Q      Max 
+		-0.50948 -0.24795 -0.02297  0.23071  0.64276 
+
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.54264    0.03644  14.892  < 2e-16 ***
+		ATP           -0.12294    0.04195  -2.930   0.0036 ** 
+		NUMPROCESSORS -0.26459    0.04404  -6.008 4.56e-09 ***
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+		Residual standard error: 0.2772 on 363 degrees of freedom
+		Multiple R-squared:  0.09746,	Adjusted R-squared:  0.09248 
+		F-statistic:  19.6 on 2 and 363 DF,  p-value: 8.271e-09
+
+		# Stepwise Regression
+		library(MASS)	
+		out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS + PCTUPDATE + ACTROWPOOL, data = x)
+		step <- stepAIC(out.fit, direction="both")
+		Start:  AIC=-937.51
+		MAXMPL ~ PK + ATP + NUMPROCESSORS + PCTUPDATE + ACTROWPOOL
+
+				Df Sum of Sq    RSS     AIC
+		- PCTUPDATE      1   0.01957 27.359 -939.25
+		- ACTROWPOOL     1   0.10965 27.449 -938.05
+		<none>                       27.340 -937.51
+		- PK             1   0.40195 27.742 -934.17
+		- ATP            1   0.78519 28.125 -929.15
+		- NUMPROCESSORS  1   2.86256 30.202 -903.07
+
+		Step:  AIC=-939.25
+		MAXMPL ~ PK + ATP + NUMPROCESSORS + ACTROWPOOL
+
+				Df Sum of Sq    RSS     AIC
+		- ACTROWPOOL     1   0.10594 27.465 -939.84
+		<none>                       27.359 -939.25
+		+ PCTUPDATE      1   0.01957 27.340 -937.51
+		- PK             1   0.40074 27.760 -935.93
+		- ATP            1   0.84248 28.202 -930.15
+		- NUMPROCESSORS  1   2.85196 30.211 -904.96
+
+		Step:  AIC=-939.84
+		MAXMPL ~ PK + ATP + NUMPROCESSORS
+
+				Df Sum of Sq    RSS     AIC
+		<none>                       27.465 -939.84
+		+ ACTROWPOOL     1   0.10594 27.359 -939.25
+		+ PCTUPDATE      1   0.01586 27.449 -938.05
+		- PK             1   0.42991 27.895 -936.15
+		- ATP            1   0.91580 28.381 -929.83
+		- NUMPROCESSORS  1   2.84556 30.311 -905.75
+	
+		Call:
+		lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+
+		Residuals:
+		     Min       1Q   Median       3Q      Max 
+		-0.49205 -0.22265 -0.01566  0.22434  0.67738 
+
+		Coefficients:
+			      Estimate Std. Error t value Pr(>|t|)    
+		(Intercept)    0.59762    0.04294  13.916  < 2e-16 ***
+		PK            -0.07195    0.03022  -2.380 0.017811 *  
+		ATP           -0.15020    0.04323  -3.474 0.000574 ***
+		NUMPROCESSORS -0.26813    0.04378  -6.124 2.38e-09 ***
+		---
+		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+		Residual standard error: 0.2754 on 362 degrees of freedom
+		Multiple R-squared:  0.1114,	Adjusted R-squared:  0.104 
+		F-statistic: 15.12 on 3 and 362 DF,  p-value: 2.715e-09
 
 ### mediation analysis
 library(mediation)

@@ -1741,7 +1741,7 @@ Main._logger.writeIntoLog(updateSQL);
 		int batchSetID = stepA(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz, srtTxnRate);
 //if(batchSetID == Constants.BS_DONE) // already generated
 //return;
-		if(batchSetID <= 9921) return; // already generated
+//		if(batchSetID <= 9921) return; // already generated
 		Main._logger.outputLog(String.format(
 				"Start the batchSet #%d(runID:%d,srtTxnRate:%d%%/xactSz:%.2f%%/xLcks:%.2f%%/effDBSz:%d%%) analysis!",
 				batchSetID, runID, (int)(srtTxnRate*100), nRwsFrmSLCT*100, nRwsFrmUPT*100,

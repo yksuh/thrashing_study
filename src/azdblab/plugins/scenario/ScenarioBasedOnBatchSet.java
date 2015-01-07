@@ -693,8 +693,8 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 				// effective db size
 				for(double dActRowPlSz=mnActRwPlSz;dActRowPlSz<=mxActRowPlSz;dActRowPlSz+=actRwPlSzIncr){
 				//double dActRowPlSz=mnActRwPlSz;
-					double dShtTxnRate=mnSrtTxnRate;
-					//for(double dShtTxnRate=mnSrtTxnRate;dShtTxnRate<=mxSrtTxnRate;dShtTxnRate+=srtTxnRateIncr){
+					//double dShtTxnRate=mnSrtTxnRate;
+					for(double dShtTxnRate=mnSrtTxnRate;dShtTxnRate<=mxSrtTxnRate;dShtTxnRate+=srtTxnRateIncr){
 						//if(firstLoading) firstLoading = false;
 						batchSetNumToRun++;
 						String str = String.format("batchSet #%d (xactSz: %.2f%%, xlocks: %d%%, hotspot ratio: %d%%, " +
@@ -775,7 +775,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 							
 							// reset experiment subject
 							experimentSubject.reset();
-//						} // short xact rate
+						} // short xact rate
 					} // else
 				} // effective db 
 				

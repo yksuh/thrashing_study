@@ -604,12 +604,21 @@ durbinWatsonTest(out.fit)
 	   1       0.2660653      1.442629       0
 	 Alternative hypothesis: rho != 0
 
-#### per-DBMS #####
+#### per-DBMS for ATP time ###
 18.87 (0.01)\% for DBMS X, 
 27.54\% for MySQL, 
 13.92 (6.96)\% for DBMS Y, 
+60.97\% for PostgreSQL, and 
+37.59\% for DBMS Z.
+
+
+#### per-DBMS for MaxMPL #####
+18.87 (0.01)\% for DBMS X, 
+       #3.35
+27.54\% for MySQL, 
+13.92 (6.96)\% for DBMS Y, 
 3.34\% for PostgreSQL, and 
-48.71\% for DBMS Z.
+31.61\% for DBMS Z.
 
 #### thrashing or not thrashing
 x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")

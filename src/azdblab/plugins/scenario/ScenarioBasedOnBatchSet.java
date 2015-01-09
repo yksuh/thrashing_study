@@ -661,10 +661,10 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 //		int totalNumUpdateSel = (int)Math.log10(mxNmRwsFrmUPT/mnNmRwsFrmUPT); // 2
 		int totalNumUpdateSel = (int)((mxNmRwsFrmUPT-mnNmRwsFrmUPT)/incrNmRwsFrmUPT)+1; // 4
 //		int totalActiveRowPools = (int)((mxActRowPlSz/mnActRwPlSz)/actRwPlSzIncr)+1; // 1
-//		int totalSrtTxnRates = (int)((mxSrtTxnRate-mnSrtTxnRate)/srtTxnRateIncr)+1; // 4
+		int totalSrtTxnRates = (int)((mxSrtTxnRate-mnSrtTxnRate)/srtTxnRateIncr)+1; // 4
 //		int totalBatchSets = totalNumRealSel*totalNumUpdateSel*totalActiveRowPools;
 //		int totalBatchSets = totalSrtTxnRates*(totalNumReadSel+totalNumUpdateSel)*totalActiveRowPools;// 4*4*1=16
-		int totalBatchSets = (totalNumReadSel+totalNumUpdateSel);// 4*4*1=16
+		int totalBatchSets = (totalNumReadSel+totalNumUpdateSel)*totalSrtTxnRates;// 4*4*1=16
 		double dNmRwsFrmSLCT = 0;
 				
 		boolean firstLoading = true;

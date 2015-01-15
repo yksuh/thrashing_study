@@ -65,7 +65,7 @@ MySQL
 DBMS Y
 => 17%
 PostgreSQL
-=> 41%
+=> N/A
 DBMS Z
 => 38%
 
@@ -77,7 +77,7 @@ MySQL
 DBMS Y
 => 7%
 PostgreSQL
-=> 6%
+=> N/A
 DBMS Z
 => 18%
 
@@ -311,7 +311,7 @@ out.fit <-  glm(MAXMPL ~ PK + ATP + NUMPROCESSORS + PCTREAD + ACTROWPOOL, data =
 ### update-only
 library(aod)
 library(ggplot2)
-x = read.csv(file="cnfm.dat",head=TRUE,sep="\t")
+x = read.csv(file="raw_cnfm.dat",head=TRUE,sep="\t")
 #x = read.csv(file="new_cnfm.dat",head=TRUE,sep="\t")
 #x$MAXMPL[x$MAXMPL == 1100] <- 10000
 x_w <- subset(x, x$PCTUPDATE!=0)
@@ -331,6 +331,8 @@ x <- subset(x, x$MAXMPL < 1100)
 # ATP normalization
 # db2
 db2 <- subset(x, x$DBMS=='db2')
+#nrow(db2)
+#db2 <- subset(db2, db2$MAXMPL < 1100)
 db2$ATP = (db2$ATP-min(db2$ATP))/(max(db2$ATP)-min(db2$ATP))
 db2$MAXMPL = (db2$MAXMPL-min(db2$MAXMPL))/(max(db2$MAXMPL)-min(db2$MAXMPL))
 nrow(db2)
@@ -371,7 +373,7 @@ out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
 
 ### ATP time ####
-DBMS X
+DBMS X: () 4 / 
 => 3%
 MySQL
 => 25%

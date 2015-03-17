@@ -1660,7 +1660,6 @@ public class Experiment extends TableDefinition {
 		}
 		return -1;
 	}
-	
 	/****
 	 * Return maximum effective DB
 	 * @return maximum effective DB
@@ -1699,6 +1698,66 @@ public class Experiment extends TableDefinition {
 		}
 		return -1;
 	}
+	
+	/****
+	 * Return min srtTxnRate
+	 * @return min srtTxnRate
+	 */
+	public double getShortXactRateMin() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("srtTxnRate");
+		if (nlst == null) {
+			Main._logger.outputLog("no srtTxnRate element!");
+		}
+
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("min"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	/****
+	 * Return max srtTxnRate 
+	 * @return max srtTxnRate
+	 */
+	public double getShortXactRateMax() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("srtTxnRate");
+		if (nlst == null) {
+			Main._logger.outputLog("no srtTxnRate element!");
+		}
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("max"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	/****
+	 * Return the increment of short Xact Rate
+	 * @return increment
+	 */
+	public double getShortXactRateIncr() {
+		NodeList nlst = elementExpDescription
+				.getElementsByTagName("srtTxnRate");
+		if (nlst == null) {
+			Main._logger.outputLog("no short transaction rate element!");
+		}
+
+		try {
+			return Double.parseDouble(((Element) nlst.item(0))
+					.getAttribute("increment"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
 	/*************************************************************/
 	
 	/************************************************************

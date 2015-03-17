@@ -166,6 +166,9 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
 							+ Constants.TABLE_BATCHSET
 							+ " MODIFY EffectiveDBSz NUMBER(10, 2)";
+					alterTblSQL = "ALTER TABLE " + Constants.TABLE_PREFIX
+							+ Constants.TABLE_BATCHSET
+							+ " MODIFY ShortTxnRate NUMBER(10, 2)";
 					LabShelfManager.getShelf().executeUpdateSQL(alterTblSQL);
 					LabShelfManager.getShelf().commitlabshelf();
 				}
@@ -374,30 +377,38 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 *            a chosen tbl
 		 * @return WHERE clause
 		 */
-		static String buildWHEREForSelect(Table tbl) {
+		static String buildWHEREForSelect(boolean flag, Table tbl) {
 			// control lock range with the first column
 			String idxCol = "id1";
-			int numChosenRows = 0;
-			// determine the number of requested locks using transaction size
-			if(xactSize == 0){
-				if(Constants.DEFAULT_UPT_ROWS == 0){
-					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
-					System.exit(-1);
-				}
-				numChosenRows = (int) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card);
-			}else{
-				numChosenRows = (int) (xactSize * (double) tbl.hy_min_card);
-			}
 			int start = 0;
+			int numChosenRows = 0;
+			String str = "";
 			// determine end range using effective db size
 			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
-			// compute low key
-			loKey = (long) ((double) getRandomNumber(repRandForWhereInSELECT,
-					start, end - numChosenRows));
-			// set high key
-			hiKey = (loKey + numChosenRows);
-			String str = "WHERE " + idxCol + " >= " + loKey + " and " + idxCol
-					+ " < " + hiKey;
+			if(flag == Constants.LONG){
+				// determine the number of requested locks using transaction size
+//				if(xactSize == 0){
+//					if(Constants.DEFAULT_UPT_ROWS == 0){
+//						Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
+//						System.exit(-1);
+//					}
+//					numChosenRows = (int) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card);
+//				}else{
+//					numChosenRows = (int) (xactSize * (double) tbl.hy_min_card);
+//				}
+				numChosenRows = (int) (xactSize * (double) tbl.hy_min_card);
+				// compute low key
+				loKey = (long) ((double) getRandomNumber(repRandForWhereInSELECT,
+						start, end - numChosenRows));
+				// set high key
+				hiKey = (loKey + numChosenRows);
+				str = "WHERE " + idxCol + " >= " + loKey + " and " + idxCol
+						+ " < " + hiKey;
+			}else{
+				long keyVal = (long) ((double) getRandomNumber(repRandForWhereInSELECT,
+						start, end));
+				str = "WHERE " + idxCol + " = " + keyVal;
+			}
 			return str;
 		}
 
@@ -465,7 +476,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			// if integer column, set a random value
 			if (colName.contains("val")) {
 				String newStrVal = RandomAlphaNumericString((int) cols[chosenCol].mySize);
-				str += "SET " + colName + " = \"" + newStrVal + "\" ";
+				str += "SET " + colName + " = \'\'" + newStrVal + "\'\' ";
 			} else {
 				str += "SET " + colName + " = " + newValue + " ";
 			}
@@ -525,24 +536,33 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * @param tbl
 		 * @return
 		 */
-		static String buildWhereForUpdate(Table tbl) {
+		static String buildWhereForUpdate(boolean flag, Table tbl) {
 			String idxCol = "id1";
-			if(xactSize == 0){
-				if(Constants.DEFAULT_UPT_ROWS == 0){
-					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
-					System.exit(-1);
-				}
-			}	
-			int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * xLocks);
+//			if(xactSize == 0){
+//				if(Constants.DEFAULT_UPT_ROWS == 0){
+//					Main._logger.reportError("default update selectivity is " + Constants.DEFAULT_UPT_ROWS);
+//					System.exit(-1);
+//				}
+//			}	
+			
+			String str = "";
 			int start = 0;
-			// determine end range using effective db size
 			int end = (int) ((double) tbl.hy_min_card * effectiveDBSz);
-			long loKeyForUpdate = (long) ((double) getRandomNumber(
-					repRandForWhereInUpdate, (int) start,
-					(int) (end - numXLocks)));
-			long hiKeyForUpdate = (loKeyForUpdate + numXLocks);
-			String str = "WHERE " + idxCol + " >= " + loKeyForUpdate + " and "
-					+ idxCol + " < " + hiKeyForUpdate;
+			if(flag == Constants.LONG){
+				//int numXLocks = (int) (((double) (Constants.DEFAULT_UPT_ROWS * (double) tbl.hy_min_card)) * xLocks);
+				int numChosenRows = (int) (xLocks * (double) tbl.hy_min_card);
+				// compute low key
+				loKey = (long) ((double) getRandomNumber(repRandForWhereInSELECT,
+						start, end - numChosenRows));
+				// set high key
+				hiKey = (loKey + numChosenRows);
+				str = "WHERE " + idxCol + " >= " + loKey + " and " + idxCol
+						+ " < " + hiKey;
+			}else{
+				long keyVal = (long) ((double) getRandomNumber(
+						repRandForWhereInUpdate, 0, end));
+				str = "WHERE " + idxCol + " = " + keyVal;
+			}
 			return str;
 		}
 		
@@ -552,7 +572,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * @param clientNum
 		 * @return a list of SQL statements
 		 */
-		public static HashMap<Long, Vector<String>> buildTransaction(int clientID, long xactNum) 
+		public static HashMap<Long, Vector<String>> buildTransaction(boolean flag, int clientID, long xactNum) 
 		throws Exception {
 			HashMap<Long, Vector<String>> recMap = new HashMap<Long, Vector<String>>();
 			// vector for SQL statements for this transaction
@@ -578,7 +598,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				// construct set clause
 				String strSET = buildSETForUpdate(tbl);
 				// construct where clause
-				String strWHERE2 = buildWhereForUpdate(tbl);
+				String strWHERE2 = buildWhereForUpdate(flag, tbl);
 				// add this update statement in this transaction
 				String strSQLStmt2 = String.format("%s %s %s", strUPDATE,
 						strSET, strWHERE2);
@@ -590,7 +610,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				// build from clause
 				String strFROM = buildFROMForSelect(tbl);
 				// build where clause
-				String strWHERE = buildWHEREForSelect(tbl);
+				String strWHERE = buildWHEREForSelect(flag, tbl);
 				// add this select statement in this transaction
 				String strSQLStmt = String.format("%s %s %s", strSELECT, strFROM, strWHERE);
 				// Main._logger.outputLog(strSQLStmt);
@@ -640,29 +660,30 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			}
 
 			// get transaction id
-//			int xactID = -1;
-//			ResultSet rs = null;
-//			try {
-//				rs = LabShelfManager.getShelf().executeQuerySQL(
-//						"SELECT TransactionID " + "from azdblab_transaction"
-//								+ " where clientid = " + clientID
-//								+ " and TransactionNum = " + xactNum);
-//				while (rs.next()) {
-//					xactID = rs.getInt(1);
-//				}
-//				rs.close();
-//			} catch (SQLException e1) {
-//				// TODO Auto-generated catch block
-//				// e1.printStackTrace();
-//			}
+			long xactID = -1;
+			ResultSet rs = null;
+			try {
+				rs = LabShelfManager.getShelf().executeQuerySQL(
+						"SELECT TransactionID " + "from azdblab_transaction"
+								+ " where clientid = " + clientID
+								+ " and TransactionNum = " + xactNum);
+				while (rs.next()) {
+					xactID = rs.getInt(1);
+				}
+				rs.close();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				// e1.printStackTrace();
+			}
 
 			// not existing ...
-//			if (xactID == -1) {
+			if (xactID == -1) {
+				String insertSQL = "";
 				// obtain a new batch set id
-				long xactID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_TRANSACTION);
+				xactID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_TRANSACTION);
 				// add transaction
 				try {
-					LabShelfManager.getShelf().NewInsertTuple(
+					insertSQL = LabShelfManager.getShelf().NewInsertTuple(
 							Constants.TABLE_PREFIX
 									+ Constants.TABLE_TRANSACTION,
 							TRANSACTION.columns,
@@ -674,17 +695,18 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 							TRANSACTION.columnDataTypes);
 					LabShelfManager.getShelf().commit();
 				} catch (SQLException e) {
+Main._logger.outputDebug(insertSQL);
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					throw new Exception(e.getMessage());
 				}
-//			} else { // update transaction string
-//				String updateSQL = "UPDATE azdblab_transaction "
-//						+ "SET TransactionStr = '" + xactStr + "' "
-//						+ "WHERE TransactionID = " + xactID;
-//				Main._logger.outputLog(updateSQL);
-//				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
-//			}
+			} else { // update transaction string
+				String updateSQL = "UPDATE azdblab_transaction "
+						+ "SET TransactionStr = '" + xactStr + "' "
+						+ "WHERE TransactionID = " + xactID;
+Main._logger.writeIntoLog(updateSQL);
+				LabShelfManager.getShelf().executeUpdateSQL(updateSQL);
+			}
 
 			// Main._logger.outputLog(String.format("Client %d's transaction(%d)-(%d)",
 			// clientID, xactNum, xactID));
@@ -1527,7 +1549,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			}
 			
 			// not existing ...
-//			if (clientID == -1) {
+			if (clientID == -1) {
 //				// obtain a new batch set id
 //				clientID = LabShelfManager.getShelf().getSequencialID(Constants.SEQUENCE_CLIENT);
 //				try {
@@ -1540,7 +1562,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //											String.valueOf(batchID),
 //											String.valueOf(clientNum) },
 //									CLIENT.columnDataTypes);
-//					// Main._logger.outputLog(insertSQL);
+////					Main._logger.outputLog(insertSQL);
 //					LabShelfManager.getShelf().commit();
 //					// Main._logger.outputLog(String.format("Client %d in Batch %d has been inserted ",
 //					// _clientNum, _batchID));
@@ -1549,9 +1571,28 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 //					e.printStackTrace();
 ////					Main._logger.reportError(e.getMessage());
 ////					System.exit(-1);
-//					throw new Exception(e.getMessage());
+////					throw new Exception(e.getMessage());
+//					if(e.getMessage().contains("unique")){
+//						query = "SELECT clientID from azdblab_client where batchID = "
+//								+ _batchID + " and clientNum = " + clientNum;
+//						rs = LabShelfManager.getShelf().executeQuerySQLOnce(query);
+//						try {
+//							while (rs.next()) {
+//								clientID = rs.getInt(1);
+//							}
+//							rs.close();
+//						} catch (SQLException ex) {
+//							// TODO Auto-generated catch block
+//							Main._logger.reportError(query);
+//							ex.printStackTrace();
+//						}
+//					}else{
+//						throw new Exception(e.getMessage());
+//					}
+//					
 //				}
-//			}
+				throw new Exception("ClientID does not exist!:" + query);
+			}
 			// set client ID found in DB
 			_clientID = clientID;
 		}
@@ -1559,10 +1600,10 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		/*****
 		 * Set transactions of clients
 		 */
-		public void setTransaction() throws Exception {
+		public void setTransaction(boolean flag) throws Exception {
 			// generating transactions
 			for (int xactNum = 0; xactNum < _numXactsToHave; xactNum++) {
-				Vector<String> transaction = retrieveTransaction(_clientID, xactNum);
+				Vector<String> transaction = retrieveTransaction(flag, _clientID, xactNum);
 				_transactionMap.put(new Long(xactNum), transaction);
 			}
 		}
@@ -1582,22 +1623,21 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		 * @param xactNum
 		 * @return
 		 */
-		public Vector<String> retrieveTransaction(int clientID, int xactNum) throws Exception {
+		public Vector<String> retrieveTransaction(boolean flag, int clientID, int xactNum) throws Exception {
 			Vector<String> retXact = null;
 			// get transaction id
 			long xactID = -1;
 			String xactStatements = "";
 			
+			String xactQuery = "SELECT TransactionID, TransactionStr from azdblab_transaction"
+			+ " where clientid = " + clientID
+			+ " and TransactionNum = " + xactNum;
 			long succTrials = 0;
 			long waitTime = 10000;
 			do{
 				ResultSet rs = null;
 				try {
-//					rs = LabShelfManager.getShelf().executeQuerySQL(
-					rs = LabShelfManager.getShelf().executeQuerySQLOnce(
-									"SELECT TransactionID, TransactionStr from azdblab_transaction"
-									+ " where clientid = " + clientID
-									+ " and TransactionNum = " + xactNum);
+					rs = LabShelfManager.getShelf().executeQuerySQLOnce(xactQuery);
 					while (rs.next()) {
 						xactID = rs.getInt(1);
 						xactStatements = rs.getString(2);
@@ -1621,14 +1661,14 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			}while(succTrials <= 3);
 
 			if (xactID == -1) {
-				Main._logger.reportError("Tried more than ("+succTrials+") times. Gave up.");
-				new Exception("azdblab_transaction not accessible");
+				//Main._logger.reportError("Tried more than ("+succTrials+") times. Gave up.");
+				new Exception("TransactionID is not accessible!: " + xactQuery);
 			}
 			
 			// not existing ...
 //			if (xactID == -1) {
-//				// generation transaction for this client
-//				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(_clientID, xactNum);
+				// generation transaction for this client
+//				HashMap<Long, Vector<String>> xactMap 	= TransactionGenerator.buildTransaction(flag, _clientID, xactNum);
 //				xactID = xactMap.keySet().iterator().next();
 //				retXact = xactMap.values().iterator().next();
 //			}else{
@@ -1695,12 +1735,14 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 			int duration,
 			double nRwsFrmSLCT,
 			double nRwsFrmUPT, 
-			double actvRwPlSz) throws Exception {
+			double actvRwPlSz,
+			double srtTxnRate) throws Exception {
 		// insert batchset into database
-		int batchSetID = stepA(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz);
+		int batchSetID = stepA(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz, srtTxnRate);
+//if(batchSetID == 9890) return;
 		Main._logger.outputLog(String.format(
-				"Start the batchSet #%d(runID:%d,xactSz:%.2f%%/xLcks:%d%%/effDBSz:%d%%) analysis!",
-				batchSetID, runID, nRwsFrmSLCT*100, (int)(nRwsFrmUPT*100),
+				"Start the batchSet #%d(runID:%d,srtTxnRate:%d%%/xactSz:%.2f%%/xLcks:%.2f%%/effDBSz:%d%%) analysis!",
+				batchSetID, runID, (int)(srtTxnRate*100), nRwsFrmSLCT*100, nRwsFrmUPT*100,
 				(int)(actvRwPlSz*100)));
 
 		// make a batchset run result
@@ -1715,13 +1757,11 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
 			int batchID = insertBatch(batchSetID, MPL);
 
-			int k = 1;
-			while(k <= Constants.MAX_ITERS){
-//			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
-				Main._logger.outputLog(String.format("<<<<<< %d(/%d) iteration start!", k, Constants.MAX_ITERS));
+			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
+				Main._logger.outputLog(String.format("MPL: %d <<<<<< %d(/%d) iteration start!", MPL, k, Constants.MAX_ITERS));
 				
 				// run this batch for X times
-				int retry = stepC(batchSetRunResID, batchID, MPL, k);
+				int retry = stepC(batchSetRunResID, batchID, MPL, srtTxnRate, k);
 				if(retry == Constants.FAILED_ITER){
 					continue;
 				}
@@ -1734,7 +1774,7 @@ public class XactThrashingScenario extends ScenarioBasedOnBatchSet {
 				}catch(Exception ex){
 					ex.printStackTrace();
 				}	
-				k++;
+				//k++;
 			}
 			
 			// close this batch
@@ -1896,90 +1936,86 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 		String sql = "SELECT batchID from " + Constants.TABLE_PREFIX
 				+ Constants.TABLE_BATCH + " where batchSetID = " + batchSetID
 				+ " and MPL = " + MPL;
-//		int trials = 0;
-//		int succTrials = 0;
-//		boolean success = false;
-//		do{
-//			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-//	//Main._logger.outputLog(sql);
-//			try {
-//				while (rs.next()) {
-//					batchID = rs.getInt(1);
-//				}
-//				rs.close();
-//				if(batchID == -1){
-//					succTrials++;
-//					Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
-//					if(succTrials > 5){
-//						success = true; // not existing
-//						break;
-//					}
-//					continue;
-//				}
-//				success = true;
-//				break;
-//			} catch (SQLException e2) {
-//				// TODO Auto-generated catch block
-//				e2.printStackTrace();
-//				trials++;
-//				Main._logger.writeIntoLog("failed retry " + trials + " <= " + e2.getMessage());
-//			}
-//		}while(trials < Constants.TRY_COUNTS);
-//		
-//		if(!success){
-//			throw new Exception ("Labshelf connection is not robust...");
-//		}
+		int trials = 0;
+		int succTrials = 0;
+		boolean success = false;
+		do{
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
+	//Main._logger.outputLog(sql);
+			try {
+				while (rs.next()) {
+					batchID = rs.getInt(1);
+				}
+				rs.close();
+				if(batchID == -1){
+					succTrials++;
+					//Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + sql);
+					if(succTrials > 5){
+						success = true; // not existing
+						break;
+					}
+					continue;
+				}
+				success = true;
+				break;
+			} catch (SQLException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+				trials++;
+				Main._logger.writeIntoLog("failed retry " + trials + " <= " + e2.getMessage());
+			}
+		}while(trials < Constants.TRY_COUNTS);
 		
-		ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(sql);
-		while (rs.next()) {
-			batchID = rs.getInt(1);
+		if(!success){
+			throw new Exception ("Labshelf connection is not robust...");
 		}
-		rs.close();
+		
 		
 		// not existing ...
 		if (batchID == -1) {
-			// obtain a new batch set id
-			batchID = LabShelfManager.getShelf().getSequencialID(
-					Constants.SEQUENCE_BATCH);
-			try {
-				String insertSQL = LabShelfManager.getShelf()
-						.NewInsertTuple(
-								Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
-								BATCH.columns,
-								new String[] { String.valueOf(batchID),
-										String.valueOf(batchSetID),
-										String.valueOf(MPL) },
-								BATCH.columnDataTypes);
-//Main._logger.outputDebug(insertSQL);
-				LabShelfManager.getShelf().commit();
-			} catch (Exception e) {
-				Main._logger.reportError(e.getMessage());
-				e.printStackTrace();
-				System.exit(-1);
-				// if((e.getMessage()).toLowerCase().contains("unique")){
-				// String sql =
-				// String.format("SELECT batchID from AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d",
-				// batchSetID, MPL);
-				// ResultSet rs2 =
-				// LabShelfManager.getShelf().executeQuerySQL(sql);
-				// try {
-				// while(rs2.next()){
-				// batchID = rs2.getInt(1);
-				// }
-				// rs2.close();
-				// } catch (SQLException e1) {
-				// // TODO Auto-generated catch block
-				// e1.printStackTrace();
-				// }
-				// }
-			}
+//			// obtain a new batch set id
+//			batchID = LabShelfManager.getShelf().getSequencialID(
+//					Constants.SEQUENCE_BATCH);
+//			try {
+//				String insertSQL = LabShelfManager.getShelf()
+//						.NewInsertTuple(
+//								Constants.TABLE_PREFIX + Constants.TABLE_BATCH,
+//								BATCH.columns,
+//								new String[] { String.valueOf(batchID),
+//										String.valueOf(batchSetID),
+//										String.valueOf(MPL) },
+//								BATCH.columnDataTypes);
+////Main._logger.outputDebug(insertSQL);
+//				LabShelfManager.getShelf().commit();
+//			} catch (Exception e) {
+//				Main._logger.reportError(e.getMessage());
+//				e.printStackTrace();
+//				System.exit(-1);
+//				// if((e.getMessage()).toLowerCase().contains("unique")){
+//				// String sql =
+//				// String.format("SELECT batchID from AZDBLAB_BATCH WHERE batchSetID = %d and MPL = %d",
+//				// batchSetID, MPL);
+//				// ResultSet rs2 =
+//				// LabShelfManager.getShelf().executeQuerySQL(sql);
+//				// try {
+//				// while(rs2.next()){
+//				// batchID = rs2.getInt(1);
+//				// }
+//				// rs2.close();
+//				// } catch (SQLException e1) {
+//				// // TODO Auto-generated catch block
+//				// e1.printStackTrace();
+//				// }
+//				// }
+//			}
+			throw new Exception ("batchID does not exist!: " + sql);
 		}
 		return batchID;
 	}
 
 	@Override
 	protected int stepA(double transactionSize, double exclusiveLockRatio,
-			double effectiveDBRatio) {
+			double effectiveDBRatio, double srtTxnRate) throws Exception {
 		int batchSetID = -1;
 		String batchSetQuery = "SELECT BatchSetID " + "FROM "
 				+ Constants.TABLE_PREFIX + Constants.TABLE_BATCHSET + " "
@@ -1987,39 +2023,63 @@ Main._logger.outputLog("###<END>Make a batchsetrun record ###################");
 				+ this.getExperimentRun().getMyExperiment().getExperimentID()
 				+ " and BatchSzIncr = " + this.incrMPL 
 				+ " and XactSz = " + transactionSize 
-				+ " and XLockRatio = " + exclusiveLockRatio
+				+ " and XLockRatio = " +  (exclusiveLockRatio*100)
+				+ " and ShortTxnRate = " + srtTxnRate
 				+ " and EffectiveDBSz = " + effectiveDBRatio;
 Main._logger.outputDebug(batchSetQuery);
-		ResultSet rs = LabShelfManager.getShelf()
-				.executeQuerySQL(batchSetQuery);
-		try {
-			while (rs.next()) {
-				batchSetID = rs.getInt(1);
+
+		int trials = 0;
+		int succTrials = 0;
+		boolean success = false;
+		do{
+			ResultSet rs = LabShelfManager.getShelf().executeQuerySQL(batchSetQuery);
+			try {
+				while (rs.next()) {
+					batchSetID = rs.getInt(1);
+				}
+				rs.close();
+				if(batchSetID == -1){
+					succTrials++;
+		//			Main._logger.writeIntoLog("successed retry: " + succTrials + " <= " + selectSQL);
+					if(succTrials > 5){
+						success = true; // not existing
+						break;
+					}
+					continue;
+				}
+				success = true;
+				break;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				trials++;
+		//		Main._logger.writeIntoLog("failed retry " + trials + " <= " + ex.getMessage());
 			}
-			rs.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+		}while(trials < Constants.TRY_COUNTS);
+		
+		if(!success)
+			new Exception("labshelf server is not robust");
 
 		// not existing ...
 		if (batchSetID == -1) {
 			// obtain a new batch set id
-			batchSetID = LabShelfManager.getShelf().getSequencialID(
-					Constants.SEQUENCE_BATCHSET);
-			// Now, let's insert parameter values into AZDBLab.
-			String[] paramVal = new String[BATCHSET.columns.length];
-			int i = 0;
-			paramVal[i++] = String.format("%d", batchSetID);
-			paramVal[i++] = String.format("%d", this.getExperimentRun()
-					.getMyExperiment().getExperimentID());
-//			paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
-//			paramVal[i++] = String.format("%d", numCores);
-			paramVal[i++] = String.format("%d", incrMPL);
-//			paramVal[i++] = String.format("%d", batchRunTime);
-			paramVal[i++] = String.format("%.4f", transactionSize);
-			paramVal[i++] = String.format("%.2f", exclusiveLockRatio);
-			paramVal[i++] = String.format("%.2f", effectiveDBRatio);
-			insertBatchSet(paramVal);
+//			batchSetID = LabShelfManager.getShelf().getSequencialID(
+//					Constants.SEQUENCE_BATCHSET);
+//			// Now, let's insert parameter values into AZDBLab.
+//			String[] paramVal = new String[BATCHSET.columns.length];
+//			int i = 0;
+//			paramVal[i++] = String.format("%d", batchSetID);
+//			paramVal[i++] = String.format("%d", this.getExperimentRun()
+//					.getMyExperiment().getExperimentID());
+////			paramVal[i++] = String.format("%.2f", dbmsCacheBufferSize);
+////			paramVal[i++] = String.format("%d", numCores);
+//			paramVal[i++] = String.format("%d", incrMPL);
+////			paramVal[i++] = String.format("%d", batchRunTime);
+//			paramVal[i++] = String.format("%.4f", transactionSize);
+//			paramVal[i++] = String.format("%.2f", (exclusiveLockRatio*100));
+//			paramVal[i++] = String.format("%.2f", effectiveDBRatio);
+//			paramVal[i++] = String.format("%.2f", srtTxnRate);
+//			insertBatchSet(paramVal);
+			throw new Exception("Batch set does not exist!:" + batchSetQuery);
 		}
 		return batchSetID;
 	}
@@ -2055,7 +2115,8 @@ Main._logger.outputDebug(batchSetQuery);
 	 * @throws Exception
 	 */
 	@Override
-	protected int stepC(int batchSetRunResID, int batchID, int numClients, int iterNum) throws Exception {
+	protected int stepC(int batchSetRunResID, int batchID, int numClients, double srtTxnRate, int iterNum) 
+			throws Exception{
 		// TimeoutTerminals terminalTimeOuter = new TimeoutTerminals(clients);
 		// Timer xactRunTimer = new Timer();
 		// xactRunTimer.scheduleAtFixedRate(terminalTimeOuter, duration*1000,
@@ -2065,7 +2126,10 @@ Main._logger.outputDebug(batchSetQuery);
 		// timeOut = false;
 		clients = new Client[numClients];
 		// initialize transaction run stat
-		_clientRunStats = new XactRunStatPerClient[numClients+1];		
+		_clientRunStats = new XactRunStatPerClient[numClients+1];	
+		int numSrtTxnCounts = (int)(numClients*srtTxnRate);
+		Main._logger.outputDebug("# of short xacts: " + numSrtTxnCounts + " ("+srtTxnRate+"/"+numClients+")");
+		//boolean flag = Constants.SHORT;
 		for (int i = 0; i < numClients; i++) {
 			// assign client number
 			int clientNum = i + 1;
@@ -2084,10 +2148,12 @@ Main._logger.outputDebug(batchSetQuery);
 			clients[i].setClientID(batchID, clientNum);
 			// set up client (i+1)
 			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
-			// configure this client
-			clients[i].setTransaction();
+			if(i < numSrtTxnCounts)
+				clients[i].setTransaction(Constants.SHORT);
+			else
+				clients[i].setTransaction(Constants.LONG);
 		}
-
+		//if(iterNum == 1) return iterNum;
 		// flush caches
 		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");

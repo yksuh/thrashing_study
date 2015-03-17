@@ -730,6 +730,12 @@ public abstract class Scenario extends Plugin{
 	protected double mxActRowPlSz;
 	protected double actRwPlSzIncr;
 	/**
+	 * short txn rate minimum, maximum, increments
+	 */
+	protected double mnSrtTxnRate;
+	protected double mxSrtTxnRate;
+	protected double srtTxnRateIncr;
+	/**
 	 * batch run time
 	 */
 	protected int batchRunTime;
@@ -761,7 +767,10 @@ public abstract class Scenario extends Plugin{
 		int mlIncr,
 		double edbMin,
 		double edbMax,
-		double edbIncr){
+		double edbIncr,
+		double strMin,
+		double strMax,
+		double strIncr){
 		/***
 		 * DBMS Buffer Cache Size
 		 */
@@ -800,5 +809,13 @@ public abstract class Scenario extends Plugin{
 		mnActRwPlSz = edbMin;
 		mxActRowPlSz = edbMax;
 		actRwPlSzIncr = edbIncr;
+		
+		/***
+		 * Short Txn Rate
+		 */
+		mnSrtTxnRate = strMin;
+		mxSrtTxnRate = strMax;
+		srtTxnRateIncr = strIncr;
+		
 	}
 }

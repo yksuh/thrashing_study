@@ -595,7 +595,12 @@ _logger.outputLog(line);
 		double minActiveRowPool = 0;
 		double maxActiveRowPool = 0;
 		double incrActiveRowPool = 0;
-		
+		/***
+		 * short xact rate
+		 */
+		double minStr = 0;
+		double maxStr = 0;
+		double strIncr = 0;
 		// LabShelf.getShelf().printTableSchema();
 		Experiment experiment = User.getUser(lab_user_name).getNotebook(
 				lab_notebook_name).getExperiment(lab_experiment_name);
@@ -640,6 +645,9 @@ _logger.outputLog(line);
 		minActiveRowPool = experiment.getEffectiveDBMin();
 		maxActiveRowPool = experiment.getEffectiveDBMax();
 		incrActiveRowPool  = experiment.getEffectiveDBIncr();	
+		minStr = experiment.getShortXactRateMin();
+		maxStr = experiment.getShortXactRateMax();
+		strIncr  = experiment.getShortXactRateIncr();	
 		/*
 		 * Logging information containing user name, notebook name, experiment
 		 * name, scenario, logging time
@@ -667,20 +675,18 @@ _logger.outputLog(line);
 		_logger.outputLog(str);
 		str = String.format("Batch Run Time: %d", sessionDuration);
 		_logger.outputLog(str);
-		str = String.format("Transaction Size: %.2f%%, x%d, %.2f%%", minNumRowsFromSELECT*100, incrNumRowsFromSELECT, maxNumRowsFromSELECT*100);
+		//str = String.format("Transaction Size: %.2f%%, x%d, %.2f%%", minNumRowsFromSELECT*100, incrNumRowsFromSELECT, maxNumRowsFromSELECT*100);
+		str = String.format("Read Selectivity Factor: %.2f%%, x%d, %.2f%%", minNumRowsFromSELECT*100, incrNumRowsFromSELECT, maxNumRowsFromSELECT*100);
 		_logger.outputLog(str);
-		str = String.format("Exclusive Lock Pct: %d%%, %d%%, %d%%", (int)(minNumRowsFromUPDATE*100), (int)(incrNumRowsFromUPDATE*100), (int)(maxNumRowsFromUPDATE*100));
+		//str = String.format("Exclusive Lock Pct: %d%%, %d%%, %d%%", (int)(minNumRowsFromUPDATE*100), (int)(incrNumRowsFromUPDATE*100), (int)(maxNumRowsFromUPDATE*100));
+		str = String.format("Update Selectivity Factor: %.2f%%, x%d, %.2f%%", minNumRowsFromUPDATE*100, (int)incrNumRowsFromUPDATE, maxNumRowsFromUPDATE*100);
 		_logger.outputLog(str);
 		str = String.format("Multiprogramming Level: %d, %d, %d", minMPL, incrMPL, maxMPL);
 		_logger.outputLog(str);
 		str = String.format("Effective DB: %d%%, %d%%, %d%%", (int)(minActiveRowPool*100), (int)(incrActiveRowPool*100), (int)(maxActiveRowPool*100));
 		_logger.outputLog(str);
-		minMPL = experiment.getMPLMin();
-		maxMPL = experiment.getMPLMax();
-		incrMPL  = experiment.getMPLIncr();
-		minActiveRowPool = experiment.getEffectiveDBMin();
-		maxActiveRowPool = experiment.getEffectiveDBMax();
-		incrActiveRowPool  = experiment.getEffectiveDBIncr();
+		str = String.format("Short Txn Rate: %d%%, %d%%, %d%%", (int)(minStr*100), (int)(maxStr*100), (int)(strIncr*100));
+		_logger.outputLog(str);
 		_logger.outputLog("connectString: " + connectString);
 		_logger.outputLog("logging time: [" + transactionTime2 + "]");
 		_logger
@@ -865,7 +871,9 @@ _logger.outputLog(line);
 					minNumRowsFromSELECT, maxNumRowsFromSELECT, incrNumRowsFromSELECT,
 					minNumRowsFromUPDATE,  maxNumRowsFromUPDATE, incrNumRowsFromUPDATE,
 					minMPL, maxMPL, incrMPL,
-					minActiveRowPool, maxActiveRowPool, incrActiveRowPool);
+					minActiveRowPool, maxActiveRowPool, incrActiveRowPool, 
+					minStr, maxStr, strIncr
+					);
 			scen.executeExperiment();
 			
 		} catch (InvalidExperimentRunException e) {

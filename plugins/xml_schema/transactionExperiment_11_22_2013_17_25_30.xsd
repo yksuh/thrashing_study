@@ -121,6 +121,13 @@
 						<xsd:attribute name="ratio" type="xsd:string" use="required" />
 					</xsd:complexType>
 				</xsd:element>
+				<xsd:element name="srtTxnRate" minOccurs="0" maxOccurs="1">
+					<xsd:complexType>
+						<xsd:attribute name="min" type="xsd:string" use="required" />
+						<xsd:attribute name="max" type="xsd:string" use="required" />
+						<xsd:attribute name="increment" type="xsd:string" use="required" />
+					</xsd:complexType>
+				</xsd:element>
 			</xsd:sequence>
 			<xsd:attribute name="name" type="xsd:string" use="required" />
 			<xsd:attribute name="scenario" type="xsd:string" use="required" />

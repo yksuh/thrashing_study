@@ -1,3 +1,40 @@
+library(car)
+out.fit <- lm(MAXMPL ~ PK + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
+#out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
+outlierTest(out.fit)
+#pdf("new_normal_res_qqplot.pdf")
+qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
+#dev.off()
+#pdf("new_normal_res_hist.pdf")
+h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,200))
+xfit<-seq(min(out.fit$res),max(out.fit$res),length=40) 
+yfit<-dnorm(xfit,mean=mean(out.fit$res),sd=sd(out.fit$res)) 
+yfit <- yfit*diff(h$mids[1:2])*length(out.fit$res) 
+lines(xfit, yfit, col="blue")
+#dev.off()
+cd = cooks.distance(out.fit)
+plot(cd, main="(CD shouldn't be greater than 1)", ylab="Cook's Distances (CDs)", xlab="Observeration Number")
+ncvTest(out.fit)
+	Non-constant Variance Score Test 
+	Variance formula: ~ fitted.values 
+	Chisquare = 1.833295    Df = 1     p = 0.1757389
+# Evaluate Collinearity
+vif(out.fit) # variance inflation factors 
+sqrt(vif(out.fit)) > 2 # problem?
+
+# Evaluate Nonlinearity
+# component + residual plot 
+pdf("linearity_assumption_test_result.pdf")
+crPlots(out.fit, main = "",)
+dev.off()
+
+# Test for Autocorrelated Errors
+durbinWatsonTest(out.fit)
+
+
+######
+
+
 out.fit <- lm(MAXMPL ~ PCTREAD + PCTUPDATE + ACTROWPOOL + ATP + NUMPROCESSORS + PK, data = x)
 
 > library(car)

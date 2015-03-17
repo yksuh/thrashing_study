@@ -1,6 +1,7 @@
 package plugins;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -924,6 +925,8 @@ Main._logger.writeIntoLog(updateSQL);
 //		public long _clientRunTime = 0;
 //		private long _clientRealRunTime = 0;
 		
+		/*** isolation level ***/
+		public int isolation_level = 0;
 
 		/****
 		 * Map of statement number to its runtime vector
@@ -1054,7 +1057,7 @@ Main._logger.writeIntoLog(updateSQL);
 		// }
 		
 		public void init(String drvName, String strConnStr, String strUserName,
-				String strPassword) throws Exception {
+				String strPassword, int isoLevel) throws Exception {
 			try {
 				_connStr = strConnStr;
 				_userName = strUserName;
@@ -1065,12 +1068,61 @@ Main._logger.writeIntoLog(updateSQL);
 				while(true){
 					_conn = DriverManager.getConnection(strConnStr, strUserName, strPassword);
 					if(_conn != null) break;
-					_conn.setAutoCommit(false);
+					//_conn.setAutoCommit(false);
 					if(j++ % 10 == 0){
 						throw new Exception("Client " + _clientNum + " cannot have a connection!");
 					}
 					Thread.sleep(10000);
 					Main._logger.outputLog(j+"th connection trial...");
+				}
+				_conn.setAutoCommit(false);
+				System.out.println("auto commit set to be false");
+				isolation_level = isoLevel;
+				DatabaseMetaData dbmd = _conn.getMetaData();
+				
+				if(dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED)){
+					System.out.println("READ_UNCOMMITTED supported");
+				}
+				if(dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_READ_COMMITTED)){
+					System.out.println("READ_COMMITTED supported");
+				}
+				if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ)){ 
+					System.out.println("REPEATABLE READ supported");
+				}
+				if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_SERIALIZABLE)){ 
+					System.out.println("SERIALIZABLE supported");
+				}
+				
+				if(isoLevel == Connection.TRANSACTION_READ_UNCOMMITTED){
+					if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED)){ 
+						_conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED); 
+						System.out.println("READ UNCOMMITTED supported");
+					}else{
+						throw new Exception(experimentSubject.getDBMSName() + ": Does not support READ UNCOMMITTED property!");
+					}
+				}else if(isoLevel == Connection.TRANSACTION_READ_COMMITTED){
+					if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_READ_COMMITTED)){ 
+						_conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED); 
+						System.out.println("READ COMMITTED supported");
+					}else{
+						throw new Exception(experimentSubject.getDBMSName() + ": Does not support READ COMMITTED property!");
+					}
+				}else if(isoLevel == Connection.TRANSACTION_REPEATABLE_READ){
+					if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ)){ 
+						_conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ); 
+						System.out.println("REPEATABLE READ supported");
+					}else{
+						throw new Exception(experimentSubject.getDBMSName() + ": Does not support REPEATABLE_READ property!");
+					}
+				}else if(isoLevel == Connection.TRANSACTION_SERIALIZABLE){
+					if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_SERIALIZABLE)){ 
+						_conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE); 
+						System.out.println("SERIALIZABLE supported");
+					}else{
+						throw new Exception(experimentSubject.getDBMSName() + ": Does not support SERIALIZABLE property!");
+					}
+				}else{
+					throw new Exception("Not set isolation level!");
 				}
 //				_stmt = _conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
 //						ResultSet.CONCUR_UPDATABLE);
@@ -1301,6 +1353,24 @@ Main._logger.writeIntoLog(updateSQL);
 								_conn = DriverManager.getConnection(_connStr,
 										_userName, _password);
 								_conn.setAutoCommit(false);
+								DatabaseMetaData dbmd = _conn.getMetaData();
+								if(isolation_level == Connection.TRANSACTION_READ_UNCOMMITTED){
+									if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED)){ 
+										_conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED); 
+									}
+								}else if(isolation_level == Connection.TRANSACTION_READ_COMMITTED){
+									if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_READ_COMMITTED)){ 
+										_conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED); 
+									}
+								}else if(isolation_level == Connection.TRANSACTION_REPEATABLE_READ){
+									if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ)){ 
+										_conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ); 
+									}
+								}else if(isolation_level == Connection.TRANSACTION_SERIALIZABLE){
+									if (dbmd.supportsTransactionIsolationLevel(Connection.TRANSACTION_SERIALIZABLE)){ 
+										_conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE); 
+									}
+								}
 							} catch (SQLException e) {
 								//Main._logger.reportErrorNotOnConsole("new conn-#"+_clientNum+"=>"+e.getMessage());
 								continue;
@@ -1731,7 +1801,7 @@ Main._logger.writeIntoLog(updateSQL);
 	protected void studyBatchSet(
 			int runID, 
 			int nCores,
-			double buffCacheSz,
+			double buffCacheSz,	// deprecated, but will be used for isolation level
 			int duration,
 			double nRwsFrmSLCT,
 			double nRwsFrmUPT, 
@@ -1745,46 +1815,55 @@ Main._logger.writeIntoLog(updateSQL);
 				batchSetID, runID, (int)(srtTxnRate*100), nRwsFrmSLCT*100, nRwsFrmUPT*100,
 				(int)(actvRwPlSz*100)));
 
-		// make a batchset run result
-		int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, nCores, buffCacheSz, duration);
-		
-		// prepare for transaction generation
-		stepB(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz);
-				
-		// initialize and run this batch set atomically
-		// run as many clients as specified in MPL
-		// have each client run its own transaction repeatedly
-		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
-			int batchID = insertBatch(batchSetID, MPL);
-
-			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
-				Main._logger.outputLog(String.format("MPL: %d <<<<<< %d(/%d) iteration start!", MPL, k, Constants.MAX_ITERS));
-				
-				// run this batch for X times
-				int retry = stepC(batchSetRunResID, batchID, MPL, srtTxnRate, k);
-				if(retry == Constants.FAILED_ITER){
-					continue;
-				}
-
-				Main._logger.outputLog(String.format("<<<<<<<<<< Done!\n"));
-				
-				// wait for a minute to clean up any remaining transactions
-				try{
-					Thread.sleep(Constants.THINK_TIME);
-				}catch(Exception ex){
-					ex.printStackTrace();
-				}	
-				//k++;
-			}
+		// set isolation level
+		for (int islv = 1; islv <= Constants.SERIALIZABLE; islv*=2) { // isolation level
+			Main._logger.outputLog(String.format(
+					"Isolation Level: #%d!", islv));
 			
-			// close this batch
-			stepD();
-		}
-		Main._logger.outputLog(String.format(
-				"Update the batchset #%d(runID:%d) analysis!", batchSetID,
-				runID));
-		// Analyze if this batchset thrashes...
-		computeMaximumMPL(batchSetRunResID);
+			// make a batchset run result
+			// borrow the buffer cache attribute for isolation level encoded with 2, 4, 8, and 16 for each level
+			int batchSetRunResID = insertBatchSetRunResult(runID, batchSetID, nCores, (islv*2), duration); 
+			
+			// prepare for transaction generation
+			stepB(nRwsFrmSLCT, nRwsFrmUPT, actvRwPlSz);
+					
+			// initialize and run this batch set atomically
+			// run as many clients as specified in MPL
+			// have each client run its own transaction repeatedly
+			for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
+				int batchID = insertBatch(batchSetID, MPL);
+	
+				for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
+					Main._logger.outputLog(String.format("MPL: %d <<<<<< %d(/%d) iteration start!", MPL, k, Constants.MAX_ITERS));
+					
+					// run this batch for X times
+					int retry = stepC(batchSetRunResID, batchID, MPL, srtTxnRate, islv, k);
+					if(retry == Constants.FAILED_ITER){
+						continue;
+					}
+	
+					Main._logger.outputLog(String.format("<<<<<<<<<< Done!\n"));
+					
+//					// wait for a minute to clean up any remaining transactions
+//					try{
+//						Thread.sleep(Constants.THINK_TIME);
+//					}catch(Exception ex){
+//						ex.printStackTrace();
+//					}	
+					if(k == 1) break;
+				}
+				
+				// close this batch
+//				stepD();
+				if(MPL == smallestMPL) break;
+			}	// for 
+			
+			Main._logger.outputLog(String.format(
+					"Update the batchset #%d(runID:%d) analysis!", batchSetID,
+					runID));
+			// Analyze if this batchset thrashes...
+			computeMaximumMPL(batchSetRunResID);
+		} // for isolation level 
 	}
 
 	@Override
@@ -2115,7 +2194,7 @@ Main._logger.outputDebug(batchSetQuery);
 	 * @throws Exception
 	 */
 	@Override
-	protected int stepC(int batchSetRunResID, int batchID, int numClients, double srtTxnRate, int iterNum) 
+	protected int stepC(int batchSetRunResID, int batchID, int numClients, double srtTxnRate, int isoLevel, int iterNum) 
 			throws Exception{
 		// TimeoutTerminals terminalTimeOuter = new TimeoutTerminals(clients);
 		// Timer xactRunTimer = new Timer();
@@ -2147,13 +2226,14 @@ Main._logger.outputDebug(batchSetQuery);
 			// set client ID
 			clients[i].setClientID(batchID, clientNum);
 			// set up client (i+1)
-			clients[i].init(strDrvName, strConnStr, strUserName, strPassword);
+			clients[i].init(strDrvName, strConnStr, strUserName, strPassword, isoLevel);
 			if(i < numSrtTxnCounts)
 				clients[i].setTransaction(Constants.SHORT);
 			else
 				clients[i].setTransaction(Constants.LONG);
+if(i == 0) break;
 		}
-		//if(iterNum == 1) return iterNum;
+if(iterNum == 1) return iterNum;
 		// flush caches
 		experimentSubject.flushDiskDriveCache(Constants.LINUX_DUMMY_FILE);
 		Main._logger.outputLog("Finish Flushing Disk Drive Cache");

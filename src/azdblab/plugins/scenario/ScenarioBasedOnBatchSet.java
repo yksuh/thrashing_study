@@ -640,7 +640,7 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 	 * Runs transactions per client in a batch
 	 * @throws Exception
 	 */
-	protected abstract int stepC(int batchSetRunResID, int batchID, int numClients, double srtTxnRate, int iterNum) 
+	protected abstract int stepC(int batchSetRunResID, int batchID, int numClients, double srtTxnRate, int isoLevel, int iterNum) 
 			throws Exception;
 	
 	/***
@@ -741,12 +741,17 @@ public abstract class ScenarioBasedOnBatchSet extends Scenario {
 							// analyze this batch set
 							studyBatchSet(runID,
 										numCores,
-										dbmsBuffCacheSizeMin, // min buffer cache
+										dbmsBuffCacheSizeMin, // min buffer cache, deprecate, but will be used for isolation level
 										batchRunTime,
 										dNmRwsFrmSLCT,
 										dNmRwsFrmUPT,
 										dActRowPlSz,
 										dShtTxnRate);
+							
+							if(batchSetNumToRun == 1) {
+								System.out.println("IL testing done!");
+								return;
+							}
 							
 							// insert a completed task associated with the query number
 							Main._logger.outputLog("before the insertion of the next task number");

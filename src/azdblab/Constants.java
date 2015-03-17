@@ -13,6 +13,7 @@
 package azdblab;
 
 import java.io.File;
+import java.sql.Connection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Vector;
@@ -867,6 +868,14 @@ public class Constants {
 	public static int FAILED_ITER = -1;
 	public static boolean SHORT = true;
 	public static boolean LONG = false;
+	public static int ISOLATION_LEVEL = 0;
+	
+	/*** Isolation level ***/
+	public static int READ_UNCOMMITTED = Connection.TRANSACTION_READ_UNCOMMITTED;
+	public static int READ_COMMITTED = Connection.TRANSACTION_READ_COMMITTED;
+	public static int REPEATABLE_READ = Connection.TRANSACTION_REPEATABLE_READ;
+	public static int SERIALIZABLE = Connection.TRANSACTION_SERIALIZABLE;
+	
 	public static final String TABLE_TPSRESULT_NAME = "AZDBLAB_XACTRUNSTAT";
 	public static final long MAX_EXECUTIONTIME = 9999999;
 	public static final String FIGURE_DIR = "work_docs/";

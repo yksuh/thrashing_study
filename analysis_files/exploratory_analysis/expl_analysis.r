@@ -249,6 +249,7 @@ cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	0.1303858 
 
 	#### only thrashing samples
+#out.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 med.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
 summary(med.fit)
 	Call:
@@ -266,6 +267,29 @@ summary(med.fit)
 	PCTREAD        0.02265    0.05008   0.452   0.6516    
 	ACTROWPOOL    -0.16748    0.08072  -2.075   0.0395 *  
 	ATP            0.12564    0.07040   1.785   0.0761 .  
+	NUMPROCESSORS  0.03008    0.07034   0.428   0.6695    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	Residual standard error: 0.2916 on 168 degrees of freedom
+	Multiple R-squared:  0.1383,	Adjusted R-squared:  0.1127 
+	F-statistic: 5.393 on 5 and 168 DF,  p-value: 0.000126
+
+Call:
+	lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
+	    data = x)
+
+	Residuals:
+	     Min       1Q   Median       3Q      Max 
+	-0.54022 -0.24221 -0.02016  0.23209  0.58479 
+
+	Coefficients:
+		      Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)    0.32029    0.07919   4.045 7.97e-05 ***
+	PK             0.24987    0.05367   4.656 6.53e-06 ***
+	PCTREAD        0.02265    0.05008   0.452   0.6516    
+	ACTROWPOOL    -0.16748    0.08072  -2.075   0.0395 *  
+	ATP           -0.12564    0.07040   1.785   0.0761 .  
 	NUMPROCESSORS  0.03008    0.07034   0.428   0.6695    
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
@@ -440,8 +464,9 @@ out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = db2)
 
 ### assumption testing #####
 library(car)
-out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-outlierTest(out.fit)
+out.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
+#out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
+#outlierTest(out.fit)
 #pdf("new_normales_qqplot.pdf")
 qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
 #dev.off()
@@ -459,12 +484,6 @@ pdf("read_cd.pdf")
 cd = cooks.distance(out.fit)
 plot(cd, ylim=c(0, 0.08), main="(CD shouldn't be greater than 1)", ylab="Cook's Distances (CDs)", xlab="Observeration Number")
 dev.off()
-
-ncvTest(out.fit)
-
-	Non-constant Variance Score Test 
-	Variance formula: ~ fitted.values 
-	Chisquare = 2.859574    Df = 1     p = 0.008315594 
 
 # Evaluate Collinearity
 vif(out.fit) # variance inflation factors 

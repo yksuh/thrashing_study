@@ -1,4 +1,4 @@
-# Overall: 33.4% (close to suboptimal)
+### read-only: 188
 library(aod)
 library(ggplot2)
 #x = read.csv(file="ext_expl.dat",head=TRUE,sep="\t")
@@ -64,7 +64,7 @@ x <- subset(x, x$MAXMPL < 1)
 #nrow(x)
 #[1] 174
 > cor.test(x$NUMPROCESSORS, x$ATP)
-	##### all  samples
+	##### all  samples: x <- subset(x, x$ATP < 120000) included
 
 		Pearson's product-moment correlation
 
@@ -106,14 +106,14 @@ x <- subset(x, x$MAXMPL < 1)
 
 	Pearson's product-moment correlation
 
-	data:  x$PCTREAD and x$ATP
-	t = -0.579, df = 388, p-value = 0.5629
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 -0.12830956  0.07012511
-	sample estimates:
-		cor 
-	-0.0293817
+data:  x$PCTREAD and x$ATP
+t = -0.579, df = 388, p-value = 0.5629
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.12830956  0.07012511
+sample estimates:
+	cor 
+-0.0293817
 
 	Pearson's product-moment correlation
 
@@ -180,44 +180,55 @@ summary(med.fit)
 	Multiple R-squared:   0.15,	Adjusted R-squared:  0.1194 
 	F-statistic: 4.911 on 6 and 167 DF,  p-value: 0.000119
 
-		#### only thrashing samples
-		med.fit <- lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
-		summary(med.fit)
-	
-		Call:
-		lm(formula = ATP ~ NUMPROCESSORS + PK, data = x)
+### without filtering out normalized thrashing point = 1
+	Call:
+	lm(formula = ATP ~ PK:PCTREAD + PK + PCTREAD + ACTROWPOOL + NUMPROCESSORS + 
+	    NUMPROCESSORS:ACTROWPOOL, data = x)
 
-		Residuals:
-		     Min       1Q   Median       3Q      Max 
-		-0.52009 -0.21736  0.05116  0.16370  0.76693 
+	Residuals:
+	    Min      1Q  Median      3Q     Max 
+	-0.5136 -0.2134 -0.0012  0.1673  0.7812 
 
-		Coefficients:
-			      Estimate Std. Error t value Pr(>|t|)    
-		(Intercept)    0.53511    0.04369  12.248  < 2e-16 ***
-		NUMPROCESSORS -0.11716    0.07534  -1.555    0.122    
-		PK            -0.28739    0.05394  -5.328  3.1e-07 ***
-		---
-		Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+	Coefficients:
+		                  Estimate Std. Error t value Pr(>|t|)    
+	(Intercept)               0.486296   0.102009   4.767 3.83e-06 ***
+	PK                       -0.272541   0.068194  -3.997 9.34e-05 ***
+	PCTREAD                   0.019834   0.064091   0.309    0.757    
+	ACTROWPOOL                0.022754   0.143867   0.158    0.875    
+	NUMPROCESSORS            -0.067998   0.177441  -0.383    0.702    
+	PK:PCTREAD               -0.007637   0.116602  -0.065    0.948    
+	ACTROWPOOL:NUMPROCESSORS -0.050501   0.271066  -0.186    0.852    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-		Residual standard error: 0.317 on 171 degrees of freedom
-		Multiple R-squared:  0.1479,	Adjusted R-squared:  0.1379 
-		F-statistic: 14.84 on 2 and 171 DF,  p-value: 1.142e-06
+	Residual standard error: 0.3231 on 181 degrees of freedom
+	Multiple R-squared:  0.1362,	Adjusted R-squared:  0.1076 
+	F-statistic: 4.757 on 6 and 181 DF,  p-value: 0.0001585
 
 > cor.test(x$PK, x$MAXMPL)
 	#### all samples
 	Pearson's product-moment correlation
 
-	data:  x$PK and x$MAXMPL
-	t = 8.6669, df = 388, p-value < 2.2e-16
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 0.3160736 0.4827318
-	sample estimates:
-	      cor 
-	0.4027353 
+data:  x$PK and x$MAXMPL
+t = 8.6669, df = 388, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.3160736 0.4827318
+sample estimates:
+      cor 
+0.4027353 
 
 	#### only thrashing samples
+	Pearson's product-moment correlation
 
+data:  x$PK and x$MAXMPL
+t = 4.3004, df = 186, p-value = 2.749e-05
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.1647033 0.4255223
+sample estimates:
+      cor 
+0.3007252
 
 > cor.test(x$ATP, x$MAXMPL)
 	#### all samples
@@ -234,6 +245,17 @@ summary(med.fit)
 
 	#### only thrashing samples
 	
+> cor.test(x$PCTREAD, x$MAXMPL)
+	Pearson's product-moment correlation
+
+data:  x$PCTREAD and x$MAXMPL
+t = 0.4452, df = 186, p-value = 0.6567
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.1110048  0.1749173
+sample estimates:
+       cor 
+0.03262371
 
 cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	#### all samples
@@ -248,130 +270,143 @@ cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	      cor 
 	0.1303858 
 
-	#### only thrashing samples
-#out.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
-med.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
-summary(med.fit)
+> cor.test(x$ACTROWPOOL, x$MAXMPL)
+	Pearson's product-moment correlation
+
+data:  x$ACTROWPOOL and x$MAXMPL
+t = -1.8674, df = 186, p-value = 0.06341
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.273462770  0.007596024
+sample estimates:
+       cor 
+-0.1356617
+
+out.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
+summary(out.fit)
+Call:
+lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
+    data = x)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.54022 -0.24221 -0.02016  0.23209  0.58479 
+
+Coefficients:
+	      Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    0.32029    0.07919   4.045 7.97e-05 ***
+PK             0.24987    0.05367   4.656 6.53e-06 ***
+PCTREAD        0.02265    0.05008   0.452   0.6516    
+ACTROWPOOL    -0.16748    0.08072  -2.075   0.0395 *  
+ATP            0.12564    0.07040   1.785   0.0761 .  
+NUMPROCESSORS  0.03008    0.07034   0.428   0.6695    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2916 on 168 degrees of freedom
+Multiple R-squared:  0.1383,	Adjusted R-squared:  0.1127 
+F-statistic: 5.393 on 5 and 168 DF,  p-value: 0.000126
+
+	### all samples
+	> summary(out.fit)
+
 	Call:
 	lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
 	    data = x)
 
 	Residuals:
-	     Min       1Q   Median       3Q      Max 
-	-0.54022 -0.24221 -0.02016  0.23209  0.58479 
+	    Min      1Q  Median      3Q     Max 
+	-0.9080 -0.2902  0.1030  0.2006  0.6792 
 
 	Coefficients:
 		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.32029    0.07919   4.045 7.97e-05 ***
-	PK             0.24987    0.05367   4.656 6.53e-06 ***
-	PCTREAD        0.02265    0.05008   0.452   0.6516    
-	ACTROWPOOL    -0.16748    0.08072  -2.075   0.0395 *  
-	ATP            0.12564    0.07040   1.785   0.0761 .  
-	NUMPROCESSORS  0.03008    0.07034   0.428   0.6695    
+	(Intercept)    0.59109    0.05849  10.106  < 2e-16 ***
+	PK             0.25938    0.03768   6.883 2.34e-11 ***
+	PCTREAD       -0.01772    0.04025  -0.440   0.6600    
+	ACTROWPOOL    -0.05835    0.06380  -0.915   0.3610    
+	ATP           -0.27612    0.06100  -4.527 7.97e-06 ***
+	NUMPROCESSORS  0.10762    0.05047   2.132   0.0336 *  
 	---
 	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-	Residual standard error: 0.2916 on 168 degrees of freedom
-	Multiple R-squared:  0.1383,	Adjusted R-squared:  0.1127 
-	F-statistic: 5.393 on 5 and 168 DF,  p-value: 0.000126
+	Residual standard error: 0.3516 on 390 degrees of freedom
+	Multiple R-squared:  0.2232,	Adjusted R-squared:  0.2132 
+	F-statistic: 22.41 on 5 and 390 DF,  p-value: < 2.2e-16
 
-Call:
-	lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, 
-	    data = x)
+## sens. analysis
+#med.fit <- lm(ATP ~ PK:PCTREAD + PK + PCTREAD + ACTROWPOOL + NUMPROCESSORS + NUMPROCESSORS:ACTROWPOOL, data = x)
+#out.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS")
+summary(med.out)
 
-	Residuals:
-	     Min       1Q   Median       3Q      Max 
-	-0.54022 -0.24221 -0.02016  0.23209  0.58479 
+Causal Mediation Analysis 
 
-	Coefficients:
-		      Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)    0.32029    0.07919   4.045 7.97e-05 ***
-	PK             0.24987    0.05367   4.656 6.53e-06 ***
-	PCTREAD        0.02265    0.05008   0.452   0.6516    
-	ACTROWPOOL    -0.16748    0.08072  -2.075   0.0395 *  
-	ATP           -0.12564    0.07040   1.785   0.0761 .  
-	NUMPROCESSORS  0.03008    0.07034   0.428   0.6695    
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Quasi-Bayesian Confidence Intervals
 
-	Residual standard error: 0.2916 on 168 degrees of freedom
-	Multiple R-squared:  0.1383,	Adjusted R-squared:  0.1127 
-	F-statistic: 5.393 on 5 and 168 DF,  p-value: 0.000126
+	       Estimate 95% CI Lower 95% CI Upper p-value
+ACME            0.02905      0.00632      0.05465       0
+ADE             0.12354      0.03126      0.21488       0
+Total Effect    0.15260      0.06459      0.24115       0
+Prop. Mediated  0.18564      0.03934      0.48834       0
 
-		## sens. analysis
-		med.fit <- lm(ATP ~ NUMPROCESSORS + PK, data = x)
-		out.fit <- lm(MAXMPL ~ PK + ATP + NUMPROCESSORS, data = x)
-		med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "NUMPROCESSORS",sims=100)
-		summary(med.out)
-
-		Causal Mediation Analysis 
-
-		Quasi-Bayesian Confidence Intervals
-
-			       Estimate 95% CI Lower 95% CI Upper p-value
-		ACME            0.02905      0.00632      0.05465       0
-		ADE             0.12354      0.03126      0.21488       0
-		Total Effect    0.15260      0.06459      0.24115       0
-		Prop. Mediated  0.18564      0.03934      0.48834       0
-
-		Sample Size Used: 396 
+Sample Size Used: 396 
 
 
-		Simulations: 100
+Simulations: 100
 
-		sens.out <-medsens(med.out)
-		summary(sens.out)
+sens.out <-medsens(med.out)
+summary(sens.out)
 
-		Mediation Sensitivity Analysis for Average Causal Mediation Effect
+Mediation Sensitivity Analysis for Average Causal Mediation Effect
 
-		Sensitivity Region
+Sensitivity Region
 
-		      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
-		[1,] -0.4 -0.0211      -0.0440       0.0019         0.16       0.1090
-		[2,] -0.3 -0.0072      -0.0204       0.0059         0.09       0.0613
-		[3,] -0.2  0.0053      -0.0070       0.0176         0.04       0.0273
-		[4,] -0.1  0.0171      -0.0026       0.0368         0.01       0.0068
-		[5,]  0.0  0.0285      -0.0008       0.0578         0.00       0.0000
+      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+[1,] -0.4 -0.0211      -0.0440       0.0019         0.16       0.1090
+[2,] -0.3 -0.0072      -0.0204       0.0059         0.09       0.0613
+[3,] -0.2  0.0053      -0.0070       0.0176         0.04       0.0273
+[4,] -0.1  0.0171      -0.0026       0.0368         0.01       0.0068
+[5,]  0.0  0.0285      -0.0008       0.0578         0.00       0.0000
 
-		Rho at which ACME = 0: -0.2
-		R^2_M*R^2_Y* at which ACME = 0: 0.04
-		R^2_M~R^2_Y~ at which ACME = 0: 0.0273
+Rho at which ACME = 0: -0.2
+R^2_M*R^2_Y* at which ACME = 0: 0.04
+R^2_M~R^2_Y~ at which ACME = 0: 0.0273
 
 
 pdf("read_sens_procs.pdf")
 plot(sens.out, main = "", xlab=expression("Sensitivity Parameter (Correlation Factor of Error Terms):" ~ rho), ylab="Average Mediation Effect with 95% Confidence Intervals", xlim=c(-0.6, 0.6), ylim=c(-0.3, 0.3))
 dev.off()
 
-			med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", sims=1000)
-			summary(med.out)
-			sens.out <- medsens(med.out)
+med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PK", sims=1000)
+summary(med.out)
+sens.out <- medsens(med.out)
 
-			Causal Mediation Analysis 
+Causal Mediation Analysis 
 
-			Quasi-Bayesian Confidence Intervals
+Quasi-Bayesian Confidence Intervals
 
-				       Estimate 95% CI Lower 95% CI Upper p-value
-			ACME             0.0710       0.0391       0.1071       0
-			ADE              0.2653       0.1848       0.3459       0
-			Total Effect     0.3363       0.2564       0.4150       0
-			Prop. Mediated   0.2106       0.1148       0.3285       0
+	       Estimate 95% CI Lower 95% CI Upper p-value
+ACME             0.0710       0.0391       0.1071       0
+ADE              0.2653       0.1848       0.3459       0
+Total Effect     0.3363       0.2564       0.4150       0
+Prop. Mediated   0.2106       0.1148       0.3285       0
 
-			Sample Size Used: 396 
+Sample Size Used: 396 
 
 
-			Simulations: 1000
+Simulations: 1000
 
-			Mediation Sensitivity Analysis for Average Causal Mediation Effect
+Mediation Sensitivity Analysis for Average Causal Mediation Effect
 
-			Sensitivity Region
+Sensitivity Region
 
-			      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
-			[1,] -0.3 -0.0191      -0.0489       0.0107         0.09       0.0607
-			[2,] -0.2  0.0136      -0.0161       0.0433         0.04       0.0270
+      Rho    ACME 95% CI Lower 95% CI Upper R^2_M*R^2_Y* R^2_M~R^2_Y~
+[1,] -0.3 -0.0191      -0.0489       0.0107         0.09       0.0607
+[2,] -0.2  0.0136      -0.0161       0.0433         0.04       0.0270
 
-			Rho at which ACME = 0: -0.2
-			R^2_M*R^2_Y* at which ACME = 0: 0.04
-			R^2_M~R^2_Y~ at which ACME = 0: 0.027
+Rho at which ACME = 0: -0.2
+R^2_M*R^2_Y* at which ACME = 0: 0.04
+R^2_M~R^2_Y~ at which ACME = 0: 0.027
 
 
 pdf("read_sens_pk.pdf")
@@ -462,6 +497,9 @@ out.fit <- lm(formula = MAXMPL ~ PK + ATP + NUMPROCESSORS, data = db2)
 
 	Simulations: 1000
 
+	med.out <- mediate(med.fit, out.fit, mediator = "ATP", treat = "PCTREAD")
+	summary(med.out)
+
 ### assumption testing #####
 library(car)
 out.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS, data = x)
@@ -469,11 +507,8 @@ out.fit <- lm(formula = MAXMPL ~ PK + PCTREAD + ACTROWPOOL + ATP + NUMPROCESSORS
 #outlierTest(out.fit)
 #pdf("new_normales_qqplot.pdf")
 qqnorm(out.fit$res,main="",ylim=c(-0.8,0.6)); qqline(out.fit$res);
-#dev.off()
-#pdf("read_normal_res.pdf")
-pdf("new_read_normal_res.pdf")
-#h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,50),xlim=c(-0.6,0.6))
-h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,50),xlim=c(-0.6,0.6))
+pdf("read_normal_res.pdf")
+h <- hist(out.fit$res,main="",xlab="Residuals",ylim=c(0,60),xlim=c(-1,1))
 xfit<-seq(min(out.fit$res),max(out.fit$res),length=40) 
 yfit<-dnorm(xfit,mean=mean(out.fit$res),sd=sd(out.fit$res)) 
 yfit <- yfit*diff(h$mids[1:2])*length(out.fit$res) 
@@ -482,17 +517,13 @@ dev.off()
 
 pdf("read_cd.pdf")
 cd = cooks.distance(out.fit)
-plot(cd, ylim=c(0, 0.08), main="(CD shouldn't be greater than 1)", ylab="Cook's Distances (CDs)", xlab="Observeration Number")
+plot(cd, xlim=c(0, 200), ylim=c(0, 0.04), main="(CD shouldn't be greater than 1)", ylab="Cook's Distances (CDs)", xlab="Observation Number")
 dev.off()
 
 # Evaluate Collinearity
-vif(out.fit) # variance inflation factors 
-           PK           ATP NUMPROCESSORS 
-     1.519995      1.535991      1.014853
-
 > sqrt(vif(out.fit)) > 2
-           PK           ATP NUMPROCESSORS 
-        FALSE         FALSE         FALSE
+           PK       PCTREAD    ACTROWPOOL           ATP NUMPROCESSORS 
+        FALSE         FALSE         FALSE         FALSE         FALSE
 
 # Evaluate Nonlinearity
 # component + residual plot 
@@ -612,7 +643,7 @@ summary(out.fit)
 1-out.fit$deviance/out.fit$null.deviance
 [1] 0.6227892
 
-### update-only
+### update-only: 199
 library(aod)
 library(ggplot2)
 #x = read.csv(file="ext_expl.dat",head=TRUE,sep="\t")
@@ -679,8 +710,28 @@ cor.test(x$NUMPROCESSORS, x$ATP)
 	-0.1957153
 	
 	#####  thrashing samples 
+	Pearson's product-moment correlation
 
+	data:  x$NUMPROCESSORS and x$ATP
+	t = -6.1616, df = 297, p-value = 2.34e-09
+	alternative hypothesis: true correlation is not equal to 0
+	95 percent confidence interval:
+	 -0.4335366 -0.2320949
+	sample estimates:
+	       cor 
+	-0.3366621
 
+cor.test(x$PCTUPDATE, x$ATP)
+	Pearson's product-moment correlation
+
+data:  x$PCTUPDATE and x$ATP
+t = -0.1649, df = 297, p-value = 0.8691
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.1228678  0.1039723
+sample estimates:
+         cor 
+-0.009570916
 
 cor.test(x$PK, x$ATP)
 	#####  all samples 
@@ -696,17 +747,6 @@ cor.test(x$PK, x$ATP)
 	-0.008475272 
 
 	#####  thrashing samples
-	Pearson's product-moment correlation
-
-	data:  x$PK and x$ATP
-	t = -0.2085, df = 605, p-value = 0.8349
-	alternative hypothesis: true correlation is not equal to 0
-	95 percent confidence interval:
-	 -0.08799708  0.07115388
-	sample estimates:
-		 cor 
-	-0.008475272
-
 	Pearson's product-moment correlation
 
 	data:  x$PK and x$ATP

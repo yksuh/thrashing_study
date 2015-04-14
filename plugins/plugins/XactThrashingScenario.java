@@ -1269,7 +1269,7 @@ Main._logger.writeIntoLog(updateSQL);
 			// Vector<Vector<Long>> stmtRunTimeVec = new Vector<Vector<Long>>();
 			// long minTime = -1;
 			long startTime = System.currentTimeMillis();
-			long runTime = 0;
+			long runTime = 0; 
 			// conn, stmt for quickly getting out of the loop
 			// timeout thread for getting number of transactions and sumElapsedTime
 			BatchRunTimeOut brt = new BatchRunTimeOut();
@@ -1338,7 +1338,16 @@ Main._logger.writeIntoLog(updateSQL);
 								else
 									break;
 							}
+							long start = System.currentTimeMillis();
 							_stmt.execute(sql); 	// for exploratory
+							long end = System.currentTimeMillis();
+							long etime = end - start;
+							if(etime > Constants.maxXactRunTime){
+								etime = Constants.maxXactRunTime;
+							}
+							if(etime < Constants.minXactRunTime){
+								etime = Constants.minXactRunTime;
+							}
 							// reset query timeout 
 							// before executing another transaction we will set the new timeout based on remaining time
 							//_stmt.setQueryTimeout((int)batchRunTime * 1000);
@@ -1754,10 +1763,12 @@ Main._logger.writeIntoLog(updateSQL);
 		// initialize and run this batch set atomically
 		// run as many clients as specified in MPL
 		// have each client run its own transaction repeatedly
+		long bsMinXactRunTime = Integer.MAX_VALUE; 
+		long bsMaxXactRunTime = Integer.MIN_VALUE;
 		for (int MPL = smallestMPL; MPL <= largestMPL; MPL += incrMPL) {
 			int batchID = insertBatch(batchSetID, MPL);
-
 			for (int k = 1; k <= Constants.MAX_ITERS; k++) {// MAX_ITERS: 5 as did in Jung's paper
+				Constants.minXactRunTime = Integer.MAX_VALUE; Constants.maxXactRunTime = Integer.MIN_VALUE;
 				Main._logger.outputLog(String.format("MPL: %d <<<<<< %d(/%d) iteration start!", MPL, k, Constants.MAX_ITERS));
 				
 				// run this batch for X times
@@ -1766,8 +1777,15 @@ Main._logger.writeIntoLog(updateSQL);
 					continue;
 				}
 
-				Main._logger.outputLog(String.format("<<<<<<<<<< Done!\n"));
+				Main._logger.outputLog(String.format("<<<<<<<<<< Done (min: %d (msec), max: %d (msec)!\n", 
+						Constants.minXactRunTime, Constants.maxXactRunTime));
 				
+				if(bsMaxXactRunTime < Constants.maxXactRunTime) {
+					bsMaxXactRunTime = Constants.maxXactRunTime;
+				}
+				if(bsMinXactRunTime > Constants.minXactRunTime){
+					bsMinXactRunTime = Constants.minXactRunTime;
+				}
 				// wait for a minute to clean up any remaining transactions
 				try{
 					Thread.sleep(Constants.THINK_TIME);
@@ -1776,13 +1794,12 @@ Main._logger.writeIntoLog(updateSQL);
 				}	
 				//k++;
 			}
-			
 			// close this batch
 			stepD();
 		}
 		Main._logger.outputLog(String.format(
-				"Update the batchset #%d(runID:%d) analysis!", batchSetID,
-				runID));
+				"Update the batchset #%d(runID:%d) analysis! (min: %d (msec), max: %d (msec)", batchSetID,
+				runID, bsMinXactRunTime, bsMaxXactRunTime));
 		// Analyze if this batchset thrashes...
 		computeMaximumMPL(batchSetRunResID);
 	}

@@ -84,6 +84,9 @@ public class Constants {
 	public static final String LINUX_DUMMY_FILE = "/scratch/data64";
 	public static final String PROC_MONITOR_NAME = "proc_monitor";
 	
+	public static long minXactRunTime = Integer.MAX_VALUE; 
+	public static long maxXactRunTime = Integer.MIN_VALUE;
+	
 	public static int EXP_TIME_OUT = 1200;
 	public static int EXP_TIME_OUT_MS = 1200000;
 //	public static int EXP_TIME_OUT = 900;
@@ -855,14 +858,15 @@ public class Constants {
 	}
 	
 	public static HashMap<String, String> hiddenDBMSes = new HashMap<String, String>();
-	public static long THINK_TIME = 60000;
+	//public static long THINK_TIME = 60000;
+	public static long THINK_TIME = 30000;
 	public static double BASE_SELECTIVITY = 0.01;
 	public static int NumIDs    = 5;
 	public static int NumValues = 2;
 	
-	public static int MAX_ITERS = 5;
+	//public static int MAX_ITERS = 5;
 //	public static int MAX_ITERS = 3;
-
+	public static int MAX_ITERS = 1;
 	public static double DEFAULT_UPT_ROWS = 0;
 	public static int FAILED_ITER = -1;
 	public static boolean SHORT = true;

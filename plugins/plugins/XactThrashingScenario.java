@@ -1343,10 +1343,10 @@ Main._logger.writeIntoLog(updateSQL);
 							long end = System.currentTimeMillis();
 							long etime = end - start;
 							if(etime > Constants.maxXactRunTime){
-								etime = Constants.maxXactRunTime;
+								Constants.maxXactRunTime = etime;
 							}
 							if(etime < Constants.minXactRunTime){
-								etime = Constants.minXactRunTime;
+								Constants.minXactRunTime = etime;
 							}
 							// reset query timeout 
 							// before executing another transaction we will set the new timeout based on remaining time

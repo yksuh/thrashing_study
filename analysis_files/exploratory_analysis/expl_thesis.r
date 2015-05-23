@@ -106,13 +106,13 @@ sample estimates:
 -0.3566874 
 
 ### regression analysis
-### regression on Thrashing Pt.
-> out.fit <- lm(formula = THRASING_PT ~ PK + READ_SF + ROSE + ATPT 
+### regression on Thrashing Pt in the full path model.
+> out.fit <- lm(formula = THRASHING_PT ~ PK + READ_SF + ROSE + ATPT 
 + NUMPROCS, data = all_r)
 > summary(out.fit)
 
 Call:
-lm(formula = THRASING_PT ~ PK + READ_SF + ROSE + ATPT + NUMPROCS, 
+lm(formula = THRASHING_PT ~ PK + READ_SF + ROSE + ATPT + NUMPROCS, 
     data = all_r)
 
 Residuals:
@@ -125,18 +125,43 @@ Coefficients:
 PK             0.24987    0.05367   4.656 6.53e-06 ***
 READ_SF        0.02265    0.05008   0.452   0.6516    
 ROSE           0.12564    0.07040   1.785   0.0761 .
-ATP           -0.16748    0.08072  -2.075   0.0395 *   
+ATPT          -0.16748    0.08072  -2.075   0.0395 *   
 NUMPROCS       0.10762    0.05047   2.132   0.0336 *    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Residual standard error: 0.3277 on 182 degrees of freedom
-Multiple R-squared:  0.1383,	Adjusted R-squared:  0.1127 
+Multiple R-squared:  0.1383, Adjusted R-squared:  0.1127 
 F-statistic: 4.525 on 5 and 182 DF,  p-value: 0.0006524
 
-### regression on ATPT
-> med.fit <- lm(ATPT ~ PK:READ_SF + PK + READ_SF + ROSE + NUMPROCS 
-+ NUMPROCS:ROSE, data = all_r)
+### regression on Thrashing Pt in the reduced path model.
+> out.fit <- lm(formula = THRASING_PT ~ PK + ATPT + NUMPROCS, 
+data = all_r)
+> summary(out.fit)
+
+Call:
+lm(formula = THRASING_PT ~ PK + ATPT + NUMPROCS, data = all_r)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.5727 -0.2337 -0.0296  0.2287  0.6288 
+
+Coefficients:
+	      Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    0.39621    0.06799   5.827 2.76e-08 ***
+PK             0.21472    0.04984   4.308 2.78e-05 ***
+ATPT          -0.16999    0.08102  -2.098   0.0374 *  
+NUMPROCS       0.12997    0.07086   1.834 0.048373 .    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2928 on 182 degrees of freedom
+Multiple R-squared:  0.1207,	Adjusted R-squared:  0.1051 
+F-statistic: 7.776 on 3 and 182 DF,  p-value: 6.765e-05
+
+### regression on ATPT in the full path model
+> med.fit <- lm(ATPT ~ PK:READ_SF + PK + READ_SF + ROSE + NUMPROCS + 
+NUMPROCS:ROSE, data = all_r)
 > summary(med.fit)
 
 Residuals:
@@ -149,15 +174,38 @@ Coefficients:
 PK             -0.29916    0.07122  -4.200  4.33e-05 ***
 READ_SF         0.01230    0.06527   0.188     0.851    
 ROSE           -0.07394    0.14978  -0.494     0.622    
-NUMPROCS       -0.18655    0.18554  -1.005     0.316    
+NUMPROCS       -0.18655    0.08554  -2.005     0.031 *    
 PK:READ_SF      0.02919    0.12157   0.240     0.811    
-ROSE:NUMPROCS  	0.10819    0.28347   0.382     0.703    
+ROSE:NUMPROCS   0.10819    0.28347   0.382     0.703    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Residual standard error: 0.3231 on 181 degrees of freedom
-Multiple R-squared:   0.15,	Adjusted R-squared:  0.1194 
+Multiple R-squared:   0.15, Adjusted R-squared:  0.1194 
 F-statistic: 4.757 on 6 and 181 DF,  p-value: 0.0001585
+	
+### regression on ATPT in the reduced path model	
+> med.fit <- lm(ATPT ~ PK + NUMPROCS, data = all_r)
+> summary(med.fit)
+
+Call:
+lm(formula = ATPT ~ PK + NUMPROCS, data = all_r)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.52009 -0.21736  0.05116  0.16370  0.76693 
+
+Coefficients:
+	      Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    0.53511    0.04369  12.248  < 2e-16 ***
+PK     	  -0.28739    0.05394  -5.328  3.1e-07 ***
+NUMPROCS  -0.11716    0.07534  -1.555    0.012 *   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.317 on 181 degrees of freedom
+Multiple R-squared:  0.1479,	Adjusted R-squared:  0.1379 
+F-statistic: 14.84 on 2 and 181 DF,  p-value: 1.142e-06
 
 ## causal mediation analyses
 > library(mediation) ### include mediation library
@@ -433,13 +481,13 @@ sample estimates:
 0.1632005
 
 ### regression analyses
-### regression on Thrashing Pt.
-> out.fit <- lm(THRASHING_PT ~ PK + ATP + NUMPROCS + UPDATE_SF + ROSE, 
+### regression on Thrashing Pt. in the full path model
+> out.fit <- lm(THRASHING_PT ~ PK + ATPT + NUMPROCS + UPDATE_SF + ROSE, 
 data = all_u)
 > summary(out.fit)
 
 Call:
-lm(formula = THRASHING_PT ~ PK + ATP + NUMPROCS + UPDATE_SF + 
+lm(formula = THRASHING_PT ~ PK + ATPT + NUMPROCS + UPDATE_SF + 
     ROSE, data = all_u)
 
 Residuals:
@@ -450,7 +498,7 @@ Coefficients:
 	      Estimate Std. Error t value Pr(>|t|)    
 (Intercept)    0.73033    0.07957   9.178  < 2e-16 ***
 PK             0.06562    0.04166   1.575   0.1165    
-ATP           -0.11129    0.06575  -1.693   0.0917 .  
+ATPT          -0.11129    0.06575  -1.693   0.0417 .  
 NUMPROCS      -0.44805    0.06511  -6.881 4.61e-11 ***
 UPDATE_SF     -0.06207    0.07207  -0.861   0.3900    
 ROSE          -0.06147    0.07252  -0.848   0.3974    
@@ -461,13 +509,36 @@ Residual standard error: 0.368 on 293 degrees of freedom
 Multiple R-squared:  0.1642,	Adjusted R-squared:  0.1478 
 F-statistic: 4.964 on 5 and 293 DF,  p-value: 0.0002224
 
-### regression on ATPT
-> med.fit <- lm(ATP ~ NUMPROCS + ROSE + NUMPROCS:ROSE + PK + UPDATE_SF 
+### regression on Thrashing Pt. in the reduced path model
+> out.fit <- lm(THRASHING_PT ~ ATPT + NUMPROCS, data = all_u)
+> summary(out.fit)
+
+Call:
+lm(formula = THRASHING_PT ~ ATPT + NUMPROCS, data = all_u)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.6155 -0.2298  0.1392  0.2930  0.7087 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    0.67286    0.04420  15.224  < 2e-16 ***
+ATPT          -0.09553    0.06432  -1.485   0.0439 *   
+NUMPROCS      -0.43408    0.06446  -6.734 1.07e-10 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3274 on 293 degrees of freedom
+Multiple R-squared:  0.1508,	Adjusted R-squared:  0.1442 
+F-statistic: 22.81 on 2 and 293 DF,  p-value: 7.574e-10
+
+### regression on ATPT in the full path model
+> med.fit <- lm(ATPT ~ NUMPROCS + ROSE + NUMPROCS:ROSE + PK + UPDATE_SF 
 + UPDATE_SF:PK, data = all_u)
 > summary(med.fit)
 
 Call:
-lm(formula = ATP ~ NUMPROCS + ROSE + NUMPROCS:ROSE + 
+lm(formula = ATPT ~ NUMPROCS + ROSE + NUMPROCS:ROSE + 
     PK + UPDATE_SF + UPDATE_SF:PK, data = all_u)
 
 Residuals:
@@ -477,7 +548,7 @@ Residuals:
 Coefficients:
 		Estimate Std. Error t value Pr(>|t|)  
 (Intercept)    0.2608179  0.1079845   2.415   0.0164 *
-NUMPROCS      -0.2845868  0.1484092  -1.918   0.0563 .
+NUMPROCS      -0.2845868  0.1484092  -1.918   0.0463 .
 ROSE           0.1071328  0.1235238   0.867   0.3866  
 PK             0.1278712  0.0945363   1.353   0.1774  
 UPDATE_SF      0.0342841  0.0979067   0.350   0.7265  
@@ -489,6 +560,28 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 Residual standard error: 0.3008 on 292 degrees of freedom
 Multiple R-squared:  0.1306,	Adjusted R-squared:  0.1099 
 F-statistic: 9.255 on 6 and 292 DF,  p-value: 2.727e-09
+
+### regression on ATPT in the reduced path model
+> med.fit <- lm(ATPT ~ NUMPROCS, data = all_u)
+> summary(med.fit)
+
+Call:
+lm(formula = ATPT ~ NUMPROCS, data = all_u)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.3354 -0.2563 -0.1009  0.2019  0.8917 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    0.40509    0.03455   11.72  < 2e-16 ***
+NUMPROCS      -0.29674    0.05959   -4.98 1.17e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3168 on 293 degrees of freedom
+Multiple R-squared:  0.08768,	Adjusted R-squared:  0.08415 
+F-statistic:  24.8 on 1 and 293 DF,  p-value: 1.167e-06
 
 #### mediation analyses
 ## testing the mediation through ATPT by numProcs

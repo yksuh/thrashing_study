@@ -598,10 +598,11 @@ sqlserver$ATP = (sqlserver$ATP-min(sqlserver$ATP))/(max(sqlserver$ATP)-min(sqlse
 sqlserver$MAXMPL = (sqlserver$MAXMPL-min(sqlserver$MAXMPL))/(max(sqlserver$MAXMPL)-min(sqlserver$MAXMPL))
 nrow(sqlserver)
 x = rbind(db2,mysql,oracle,pgsql,sqlserver)
-x <- subset(x, x$MAXMPL < 1)
+#x <- subset(x, x$MAXMPL < 1)
 #nrow(x)
 #[1] 289
 #[1] 321
+#cor.test(x$PK, x$MAXMPL)
 ## H1: numProcs vs. Thrashing Pt.
 > cor.test(x$NUMPROCESSORS, x$MAXMPL)
 	Pearson's product-moment correlation
@@ -644,7 +645,6 @@ sample estimates:
        cor 
 -0.1334774
 
-
 med.fit <- lm(ATP ~ NUMPROCESSORS, data = x)
 summary(med.fit)
 
@@ -666,7 +666,6 @@ summary(med.fit)
 	Residual standard error: 0.3535 on 332 degrees of freedom
 	Multiple R-squared:  0.08655,	Adjusted R-squared:  0.0838 
 	F-statistic: 31.46 on 1 and 332 DF,  p-value: 4.299e-08
-
 
 out.fit <- lm(MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 summary(out.fit)
@@ -755,8 +754,10 @@ pdf("update_sens_procs.pdf")
 plot(sens.out, main = "", xlab=expression("Sensitivity Parameter (Correlation Factor of Error Terms):" ~ rho), ylab="Average Mediation Effect with 95% Confidence Intervals", xlim=c(-0.6, 0.6), ylim=c(-0.3, 0.3))
 dev.off()
 
+
 ### assumption testing #####
 library(car)
+qqPlot(out.fit, main="QQ Plot")
 out.fit <- lm(formula = MAXMPL ~ ATP + NUMPROCESSORS, data = x)
 outlierTest(out.fit)
 No Studentized residuals with Bonferonni p < 0.05
@@ -905,3 +906,119 @@ out.fit <-  glm(MAXMPL ~ ATP + NUMPROCESSORS, data = sqlserver)
 summary(out.fit)
 1-out.fit$deviance/out.fit$null.deviance
 [1] 0.657579
+
+#### extra
+> out.fit <- lm(MAXMPL ~ ATP + PK + NUMPROCESSORS, data = x)
+> summary(out.fit)
+
+Call:
+lm(formula = MAXMPL ~ ATP + PK + NUMPROCESSORS, data = x)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.48454 -0.19942 -0.03579  0.17922  0.65651 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    0.64539    0.04510  14.309  < 2e-16 ***
+ATP           -0.15071    0.04439  -3.395 0.000784 ***
+PK            -0.06957    0.03195  -2.177 0.030277 *  
+NUMPROCESSORS -0.36392    0.05144  -7.074 1.16e-11 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2611 on 286 degrees of freedom
+Multiple R-squared:  0.1732,	Adjusted R-squared:  0.1646 
+F-statistic: 19.98 on 3 and 286 DF,  p-value: 8.765e-12
+
+> cor.test(db2$PK, db2$MAXMPL)
+
+	Pearson's product-moment correlation
+
+data:  db2$PK and db2$MAXMPL
+t = -1.0327, df = 158, p-value = 0.3033
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.2340667  0.0742200
+sample estimates:
+        cor 
+-0.08188168 
+
+> cor.test(oracle$PK, oracle$MAXMPL)
+
+	Pearson's product-moment correlation
+
+data:  oracle$PK and oracle$MAXMPL
+t = -6.5867, df = 158, p-value = 6.335e-10
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.5776998 -0.3329648
+sample estimates:
+       cor 
+-0.4641447
+
+> cor.test(mysql$PK, mysql$MAXMPL)
+
+	Pearson's product-moment correlation
+
+data:  mysql$PK and mysql$MAXMPL
+t = -6.4114, df = 158, p-value = 1.588e-09
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.5693881 -0.3219066
+sample estimates:
+      cor 
+-0.454371 
+
+> cor.test(pgsql$PK, pgsql$MAXMPL)
+
+	Pearson's product-moment correlation
+
+data:  pgsql$PK and pgsql$MAXMPL
+t = 0.1965, df = 158, p-value = 0.8445
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.1398699  0.1703736
+sample estimates:
+       cor 
+0.01562798 
+
+cor.test(sqlserver$PK, sqlserver$MAXMPL)
+> cor.test(sqlserver$PK, sqlserver$MAXMPL)
+
+	Pearson's product-moment correlation
+
+data:  sqlserver$PK and sqlserver$MAXMPL
+t = 3.4737, df = 158, p-value = 0.0006625
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.1160061 0.4047989
+sample estimates:
+      cor 
+0.2663703
+
+> cor.test(x$PK, x$MAXMPL)
+	Pearson's product-moment correlation
+
+data:  x$PK and x$MAXMPL
+t = -3.628, df = 798, p-value = 0.0003038
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.19497569 -0.05858618
+sample estimates:
+       cor 
+-0.1273831
+
+> 
+> cor.test(x$PK, x$ATP)
+
+	Pearson's product-moment correlation
+
+data:  x$PK and x$ATP
+t = -4.0693, df = 288, p-value = 6.096e-05
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.3392428 -0.1212511
+sample estimates:
+       cor 
+-0.2331743
